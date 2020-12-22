@@ -8,15 +8,19 @@ plugins {
   kotlin("plugin.jpa") version "1.4.21"
 }
 
-group = "com.appifyhub"
-version = "0.1.0"
+repositories {
+  jcenter()
+  mavenCentral()
+}
+
+fun prop(name: String) = properties[name] ?: error("Missing '$name' in gradle.properties")
+
+group = prop("group")
+version = prop("version")
+val artifact = prop("artifact")
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = JavaVersion.VERSION_11
-
-repositories {
-  mavenCentral()
-}
 
 dependencies {
   implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -34,6 +38,10 @@ dependencies {
 
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.postgresql:postgresql")
+}
+
+tasks.withType<Jar> {
+  archiveFileName.set("$artifact.jar")
 }
 
 tasks.withType<KotlinCompile> {
