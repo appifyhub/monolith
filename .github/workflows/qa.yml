@@ -2,14 +2,11 @@ name: Build QA
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      VERSION: $("$(scripts/prop.sh version).qa")
-      PR_NUMBER: ${{ github.event.number }}
     steps:
       - uses: actions/checkout@v2
 
@@ -46,16 +43,18 @@ jobs:
 
       - name: Tag Docker image
         env:
-          VERSION: $(scripts/prop.sh version)
+          PR_NUMBER: ${{ github.event.number }}
         run: |
+          VERSION="$(scripts/prop.sh version).qa"
           echo "Tagging images with version '$VERSION'..."
-          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:$(VERSION)_pr_$PR_NUMBER
+          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:"$VERSION"_pr_$PR_NUMBER
           docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_qa
 
       - name: Publish Docker images
         env:
-          VERSION: $(scripts/prop.sh version)
+          PR_NUMBER: ${{ github.event.number }}
         run: |
+          VERSION="$(scripts/prop.sh version).qa"
           echo "Publishing images with version '$VERSION'..."
-          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:$(VERSION)_pr_$PR_NUMBER
+          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:"$VERSION"_pr_$PR_NUMBER
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_qa

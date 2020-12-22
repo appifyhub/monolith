@@ -45,17 +45,15 @@ jobs:
         run: docker login docker.pkg.github.com -u $USER -p $TOKEN
 
       - name: Tag Docker image
-        env:
-          VERSION: $(scripts/prop.sh version)
         run: |
+          VERSION=$(scripts/prop.sh version)
           echo "Tagging images with version '$VERSION'..."
           docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
           docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest
 
       - name: Publish Docker images
-        env:
-          VERSION: $(scripts/prop.sh version)
         run: |
+          VERSION=$(scripts/prop.sh version)
           echo "Publishing images with version '$VERSION'..."
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest
