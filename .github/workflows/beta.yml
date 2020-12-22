@@ -1,0 +1,60 @@
+name: Build Beta
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      VERSION: $("$(scripts/prop.sh version).beta")
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Print build name
+        run: echo "$GITHUB_ACTOR is building '$GITHUB_REPOSITORY' (commit $GITHUB_SHA)"
+
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.m2/repository
+          key: ${{ runner.os }}-dependency-cache
+
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          server-id: github
+          settings-path: ${{ github.workspace }}
+
+      - name: Build and test service
+        run: ./gradlew build
+
+      - name: Build Docker image
+        run: docker build . --file Dockerfile --tag service
+
+      - name: Auth for GitHub's Docker repository
+        env:
+          USER: ${{ secrets.PACKAGES_USER }}
+          TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+        run: docker login docker.pkg.github.com -u $USER -p $TOKEN
+
+      - name: Tag Docker image
+        env:
+          VERSION: $(scripts/prop.sh version)
+        run: |
+          echo "Tagging images with version '$VERSION'..."
+          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
+          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_beta
+
+      - name: Publish Docker images
+        env:
+          VERSION: $(scripts/prop.sh version)
+        run: |
+          echo "Publishing images with version '$VERSION'..."
+          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
+          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_beta
