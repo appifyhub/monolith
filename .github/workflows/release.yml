@@ -57,3 +57,9 @@ jobs:
           echo "Publishing images with version '$VERSION'..."
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest
+
+      - name: Publish to GitHub Releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_QUALITY: "GA"
+        run: ./gradlew githubRelease
