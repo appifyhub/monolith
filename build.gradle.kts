@@ -1,3 +1,4 @@
+import com.github.breadmoirai.githubreleaseplugin.ChangeLogSupplier
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -122,12 +123,28 @@ githubRelease {
   targetCommitish(commitish)
   prerelease(quality != "GA")
 
+  val maxChanges = 5
   val bullet = "\n* "
-  val changes = changelog().call().trim().split("\n").map { it.trim() }
+  val changelogConfig = closureOf<ChangeLogSupplier> {
+    currentCommit("HEAD")
+    lastCommit("HEAD~$maxChanges")
+    options("--format=oneline", "--abbrev-commit", "--max-count=$maxChanges")
+  }
+  val changes = try {
+    changelog(changelogConfig).call()
+      .trim()
+      .split("\n")
+      .map { it.trim() }
+  } catch (t: Throwable) {
+    System.err.println("Failed to fetch history")
+    t.printStackTrace(System.err)
+    emptyList()
+  }
+
   body(
     when {
-      changes.isNotEmpty() -> "##Changelog$bullet${changes.joinToString(bullet)}"
-      else -> "See commit history for changelog."
+      changes.isNotEmpty() -> "## Last $maxChanges changes\n$bullet${changes.joinToString(bullet)}"
+      else -> "See commit history for latest changes."
     }
   )
 
