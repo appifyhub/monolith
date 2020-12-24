@@ -121,7 +121,15 @@ githubRelease {
   releaseName("Service [$quality]: $version")
   targetCommitish(commitish)
   prerelease(quality != "GA")
-  body("## Changelog\n* ${changelog().call().trim().split("\n").joinToString("\n* ")}")
+
+  val bullet = "\n* "
+  val changes = changelog().call().trim().split("\n").map { it.trim() }
+  body(
+    when {
+      changes.isNotEmpty() -> "##Changelog$bullet${changes.joinToString(bullet)}"
+      else -> "See commit history for changelog."
+    }
+  )
 
   releaseAssets(arrayOf(
     file("${project.buildDir}/libs/$artifact.jar")
