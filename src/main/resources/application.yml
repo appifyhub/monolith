@@ -1,0 +1,26 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  datasource:
+    url: "jdbc:${DB_TYPE:postgresql}://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:appifyhub}"
+    username: ${POSTGRES_USER:appifyhub}
+    password: ${POSTGRES_PASS:appifyhub}
+
+app:
+  security:
+    jwt:
+      keystore-location: ${KEYSTORE_FILE:keystore/debug.jks}
+      keystore-password: ${KEYSTORE_PASS:debug!}
+      key-alias: ${KEYSTORE_KEY:debug}
+      private-key-passphrase: ${KEYSTORE_KEY_PASS:debug!}
+      default-expiration-days: ${JWT_EXPIRATION_DAYS:90}
+  seed:
+    rootProject:
+      name: ${SEED_PROJECT_NAME:AppifyHub}
+      signature: ${SEED_PROJECT_SECRET:}
+      owner:
+        name: ${SEED_OWNER_NAME:Administrator}
+        signature: ${SEED_OWNER_SECRET:}
+        email: ${SEED_OWNER_EMAIL:admin@appifyhub.com}

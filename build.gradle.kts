@@ -18,9 +18,13 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version "1.4.21"
-  kotlin("plugin.spring") version "1.4.21"
-  kotlin("plugin.jpa") version "1.4.21"
+  val kotlinVersion = "1.4.21"
+  kotlin("jvm") version kotlinVersion
+  kotlin("plugin.spring") version kotlinVersion
+  kotlin("plugin.jpa") version kotlinVersion
+  kotlin("plugin.noarg") version kotlinVersion
+  kotlin("plugin.allopen") version kotlinVersion
+  kotlin("kapt") version kotlinVersion
 
   id("org.springframework.boot") version "2.4.1"
   id("io.spring.dependency-management") version "1.0.10.RELEASE"
@@ -33,19 +37,40 @@ repositories {
 }
 
 dependencies {
+  // language essentials
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
+  // web framework
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-web-services")
 
+  // auth
+  implementation("com.auth0:java-jwt:3+")
+  implementation("org.springframework.security:spring-security-core")
+  implementation("org.springframework.security:spring-security-web")
+  implementation("org.springframework.security:spring-security-config")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
+  // persistence
+  implementation("org.springframework.boot:spring-boot-starter-jdbc")
+  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-data-rest")
+  implementation("org.hibernate:hibernate-core")
+
+  // annotation processors
+  implementation("org.springframework.boot:spring-boot-configuration-processor")
+  annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+  kapt("org.springframework.boot:spring-boot-configuration-processor")
+
+  // tests
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("org.hibernate:hibernate-testing")
 
+  // runtime dependencies
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.postgresql:postgresql")
 }
@@ -63,7 +88,7 @@ java.targetCompatibility = JavaVersion.VERSION_11
 
 // endregion
 
-// Tasks configuration
+// region Tasks configuration
 
 tasks {
 
@@ -95,7 +120,13 @@ tasks {
 
 // endregion
 
-// Plugin configuration
+// region Plugin configuration
+
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
 
 githubRelease {
   val writeToken = Env.get("GITHUB_TOKEN")
@@ -157,7 +188,7 @@ apply(plugin = "com.github.breadmoirai.github-release")
 
 // endregion
 
-// Helpers
+// region Helpers
 
 object Env {
   const val INVALID = "<invalid>"
