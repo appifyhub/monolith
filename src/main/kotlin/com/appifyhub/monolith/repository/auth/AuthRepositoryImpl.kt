@@ -5,7 +5,7 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.jwt.JwtHelper
 import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.repository.mapper.toDomain
+import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory

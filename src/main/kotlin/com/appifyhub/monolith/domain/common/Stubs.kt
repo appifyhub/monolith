@@ -24,6 +24,7 @@ fun stubProject() = Project(
   name = "name",
   type = Project.Type.COMMERCIAL,
   status = Project.Status.REVIEW,
+  userIdType = Project.UserIdType.RANDOM,
   createdAt = Date(),
   updatedAt = Date(),
 )
@@ -43,7 +44,6 @@ fun stubOrganization() = Organization(
 
 fun stubUser() = User(
   userId = stubUserId(),
-  idType = User.IdType.RANDOM,
   signature = "signature",
   name = "name",
   type = User.Type.PERSONAL,

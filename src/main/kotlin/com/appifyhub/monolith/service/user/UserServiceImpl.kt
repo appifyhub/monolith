@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.service.user
 
 import com.appifyhub.monolith.domain.admin.Account
+import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -16,10 +17,10 @@ class UserServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addUser(creator: UserCreator): User {
+  override fun addUser(creator: UserCreator, project: Project): User {
     log.debug("Adding user $creator")
     // TODO MM validation missing + check blocked tokens and expiration?
-    return userRepository.addUser(creator)
+    return userRepository.addUser(creator, project)
   }
 
   override fun fetchUserByUserId(userId: UserId): User {
@@ -52,10 +53,10 @@ class UserServiceImpl(
     return userRepository.fetchAllUsersByAccount(account)
   }
 
-  override fun updateUser(updater: UserUpdater): User {
+  override fun updateUser(updater: UserUpdater, project: Project): User {
     log.debug("Updating user by $updater")
     // TODO MM validation missing + check blocked tokens and expiration?
-    return userRepository.updateUser(updater)
+    return userRepository.updateUser(updater, project)
   }
 
   override fun removeUserById(userId: UserId) {

@@ -8,7 +8,6 @@ import java.util.Date
 
 data class User(
   val userId: UserId,
-  val idType: IdType = IdType.CUSTOM,
   val signature: String,
   val name: String? = null,
   val type: Type = Type.PERSONAL,
@@ -24,15 +23,6 @@ data class User(
   val blockedTokens: List<BlockedToken> = emptyList(),
   val account: Account? = null,
 ) {
-
-  enum class IdType {
-    USERNAME, EMAIL, PHONE, RANDOM, CUSTOM;
-
-    companion object {
-      fun find(name: String, default: IdType) =
-        values().firstOrNull { it.name == name } ?: default
-    }
-  }
 
   enum class Type {
     PERSONAL, ORGANIZATION;
@@ -75,8 +65,6 @@ data class User(
     Authority.values().takeWhile { it.ordinal <= authority.ordinal }.toTypedArray()
 
   fun isAuthorizedFor(authority: Authority) = this.authority.ordinal >= authority.ordinal
-
-  fun ownsAccount(account: Account?) = this.account?.id != null && this.account.id == account?.id
 
   fun belongsTo(project: Project) = userId.projectId == project.id
 

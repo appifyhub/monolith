@@ -9,9 +9,19 @@ data class Project(
   val name: String,
   val type: Type = Type.COMMERCIAL,
   val status: Status = Status.REVIEW,
+  val userIdType: UserIdType = UserIdType.RANDOM,
   val createdAt: Date,
   val updatedAt: Date = createdAt,
 ) {
+
+  enum class UserIdType {
+    USERNAME, EMAIL, PHONE, RANDOM, CUSTOM;
+
+    companion object {
+      fun find(name: String, default: UserIdType) =
+        values().firstOrNull { it.name == name } ?: default
+    }
+  }
 
   enum class Type {
     OPENSOURCE, COMMERCIAL, FREE;

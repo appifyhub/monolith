@@ -1,17 +1,19 @@
 package com.appifyhub.monolith.repository.user
 
 import com.appifyhub.monolith.domain.admin.Account
+import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.common.stubProject
+import com.appifyhub.monolith.domain.mapper.applyTo
+import com.appifyhub.monolith.domain.mapper.toData
+import com.appifyhub.monolith.domain.mapper.toDomain
+import com.appifyhub.monolith.domain.mapper.toSecurityUser
+import com.appifyhub.monolith.domain.mapper.toUser
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
-import com.appifyhub.monolith.domain.user.User.IdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.mapper.applyTo
-import com.appifyhub.monolith.repository.mapper.toData
-import com.appifyhub.monolith.repository.mapper.toDomain
-import com.appifyhub.monolith.repository.mapper.toSecurityUser
-import com.appifyhub.monolith.repository.mapper.toUser
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -31,16 +33,16 @@ class UserRepositoryImpl(
 
   // region Domain-level
 
-  override fun addUser(creator: UserCreator): User {
+  override fun addUser(creator: UserCreator, project: Project): User {
     log.debug("Adding user by creator $creator")
-    if (creator.id == null && creator.idType != IdType.RANDOM)
+    if (creator.id == null && project.userIdType != UserIdType.RANDOM)
       throw IllegalArgumentException("Missing user ID for creator $creator")
 
     val user = creator.toUser(
       userId = creator.id ?: UserIdGenerator.nextId,
       timeProvider = timeProvider,
       passwordEncoder = passwordEncoder,
-    ).updateVerificationToken()
+    ).updateVerificationToken(project)
 
     return userDao.save(user.toData()).toDomain()
   }
@@ -71,14 +73,15 @@ class UserRepositoryImpl(
     return userDao.findAllByAccount(account.toData()).map(UserDbm::toDomain)
   }
 
-  override fun updateUser(updater: UserUpdater): User {
+  override fun updateUser(updater: UserUpdater, project: Project): User {
     log.debug("Updating user $updater")
     val fetchedUser = fetchUserByUserId(updater.id)
+
     val updatedUser = updater.applyTo(
       user = fetchedUser,
       timeProvider = timeProvider,
       passwordEncoder = passwordEncoder,
-    ).updateVerificationToken(oldUser = fetchedUser)
+    ).updateVerificationToken(project, oldUser = fetchedUser)
 
     return userDao.save(updatedUser.toData()).toDomain()
   }
@@ -105,7 +108,11 @@ class UserRepositoryImpl(
 
   override fun createUser(user: UserDetails?) {
     log.warn("Security: creating $user")
-    val domainUser = user!!.toDomain(timeProvider).updateVerificationToken()
+    val domainUser = user!!.toDomain(timeProvider).let {
+      it.updateVerificationToken(
+        project = stubProject().copy(id = it.userId.projectId)
+      )
+    }
     userDao.save(domainUser.toData())
   }
 
@@ -134,9 +141,10 @@ class UserRepositoryImpl(
     log.warn("Security: updating user $user")
     val domainUser = user!!.toDomain(timeProvider)
     val fetchedUser = fetchUserByUserId(domainUser.userId)
+    val project = stubProject().copy(id = fetchedUser.userId.projectId)
     val updatedUser = fetchedUser
       .updateFromSecurityUser(domainUser.toSecurityUser())
-      .updateVerificationToken(oldUser = fetchedUser)
+      .updateVerificationToken(project, oldUser = fetchedUser)
 
     userDao.save(updatedUser.toData())
   }
@@ -155,9 +163,10 @@ class UserRepositoryImpl(
     log.warn("Security: updating password $user")
     val domainUser = user!!.toDomain(timeProvider).copy(signature = newPassword!!)
     val fetchedUser = fetchUserByUserId(domainUser.userId)
+    val project = stubProject().copy(id = fetchedUser.userId.projectId)
     val updatedUser = fetchedUser
       .updateFromSecurityUser(domainUser.toSecurityUser())
-      .updateVerificationToken(oldUser = fetchedUser)
+      .updateVerificationToken(project, oldUser = fetchedUser)
 
     return userDao.save(updatedUser.toData()).toDomain().toSecurityUser()
   }
@@ -175,20 +184,20 @@ class UserRepositoryImpl(
     )
   }
 
-  private fun User.updateVerificationToken(oldUser: User? = null): User = when {
-    needsNewEmailToken(oldUser) -> copy(verificationToken = TokenGenerator.nextEmailToken)
-    needsNewPhoneToken(oldUser) -> copy(verificationToken = TokenGenerator.nextPhoneToken)
+  private fun User.updateVerificationToken(project: Project, oldUser: User? = null): User = when {
+    needsNewEmailToken(project, oldUser) -> copy(verificationToken = TokenGenerator.nextEmailToken)
+    needsNewPhoneToken(project, oldUser) -> copy(verificationToken = TokenGenerator.nextPhoneToken)
     else -> this
   }
 
-  private fun User.needsNewEmailToken(oldUser: User? = null): Boolean {
-    val hasEmailChanged = idType == IdType.EMAIL && oldUser?.userId?.id != userId.id
+  private fun User.needsNewEmailToken(project: Project, oldUser: User? = null): Boolean {
+    val hasEmailChanged = project.userIdType == UserIdType.EMAIL && oldUser?.userId?.id != userId.id
     val hasContactEmailChanged = contactType == ContactType.EMAIL && contact != null && oldUser?.contact != contact
     return hasEmailChanged || hasContactEmailChanged
   }
 
-  private fun User.needsNewPhoneToken(oldUser: User? = null): Boolean {
-    val hasPhoneChanged = idType == IdType.PHONE && oldUser?.userId?.id != userId.id
+  private fun User.needsNewPhoneToken(project: Project, oldUser: User? = null): Boolean {
+    val hasPhoneChanged = project.userIdType == UserIdType.PHONE && oldUser?.userId?.id != userId.id
     val hasContactPhoneChanged = contactType == ContactType.PHONE && contact != null && oldUser?.contact != contact
     return hasPhoneChanged || hasContactPhoneChanged
   }

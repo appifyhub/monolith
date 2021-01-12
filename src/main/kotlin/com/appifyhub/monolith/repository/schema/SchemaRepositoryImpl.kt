@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.repository.schema
 
 import com.appifyhub.monolith.domain.schema.Schema
-import com.appifyhub.monolith.repository.mapper.toData
-import com.appifyhub.monolith.repository.mapper.toDomain
+import com.appifyhub.monolith.domain.mapper.toData
+import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.storage.dao.SchemaDao
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository

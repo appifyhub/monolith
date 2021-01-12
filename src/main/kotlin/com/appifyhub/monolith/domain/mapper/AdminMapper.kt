@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.repository.mapper
+package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
@@ -52,6 +52,7 @@ fun ProjectCreator.toProjectData(
   name = name,
   type = type.name,
   status = status.name,
+  userIdType = userIdType.name,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
 )
@@ -76,6 +77,7 @@ fun ProjectDbm.toDomain(): Project = Project(
   name = name,
   type = Project.Type.find(type, default = Project.Type.COMMERCIAL),
   status = Project.Status.find(status, default = Project.Status.REVIEW),
+  userIdType = Project.UserIdType.find(status, default = Project.UserIdType.RANDOM),
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
@@ -87,6 +89,7 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   name = name,
   type = type.name,
   status = status.name,
+  userIdType = userIdType.name,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )

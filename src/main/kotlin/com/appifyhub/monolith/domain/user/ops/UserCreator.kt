@@ -1,17 +1,14 @@
 package com.appifyhub.monolith.domain.user.ops
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
-import com.appifyhub.monolith.domain.user.User.IdType
 import com.appifyhub.monolith.domain.user.User.Type
 import java.util.Date
 
 data class UserCreator(
-  val id: String?,
+  val id: String?, // some projects have pre-existing IDs
   val projectId: Long,
-  val idType: IdType = IdType.CUSTOM,
   val rawSignature: String,
   val name: String? = null,
   val type: Type = Type.PERSONAL,

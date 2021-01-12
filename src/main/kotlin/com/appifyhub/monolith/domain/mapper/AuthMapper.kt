@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.repository.mapper
+package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.auth.BlockedToken
 import com.appifyhub.monolith.domain.auth.Token

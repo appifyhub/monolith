@@ -26,36 +26,33 @@ class UserDbm(
   @ManyToOne(fetch = FetchType.EAGER)
   val project: ProjectDbm,
 
-  @Column(nullable = false, updatable = false, length = 16)
-  var idType: String = "CUSTOM",
-
   @Column(nullable = false, length = 1024)
   var signature: String,
 
   @Column(nullable = true, length = 64)
-  var name: String? = null,
+  var name: String?,
 
   @Column(nullable = false, length = 16)
-  var type: String = "PERSONAL",
+  var type: String,
 
   @Column(nullable = false, length = 16)
-  var authority: String = "DEFAULT",
+  var authority: String,
 
   @Column(nullable = false)
-  var allowsSpam: Boolean = false,
+  var allowsSpam: Boolean,
 
   @Column(nullable = true, length = 64)
-  var contact: String? = null,
+  var contact: String?,
 
   @Column(nullable = true, length = 16)
-  var contactType: String = "CUSTOM",
+  var contactType: String,
 
   @Column(nullable = true, length = 128)
-  var verificationToken: String? = null,
+  var verificationToken: String?,
 
   @Column(nullable = true)
   @Temporal(TemporalType.DATE)
-  var birthday: Date? = null,
+  var birthday: Date?,
 
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -66,9 +63,9 @@ class UserDbm(
   var updatedAt: Date = createdAt,
 
   @Embedded
-  var company: OrganizationDbm? = null,
+  var company: OrganizationDbm?,
 
   @ManyToOne(fetch = FetchType.EAGER, optional = true)
-  var account: AccountDbm? = null,
+  var account: AccountDbm?,
 
 ) : Serializable

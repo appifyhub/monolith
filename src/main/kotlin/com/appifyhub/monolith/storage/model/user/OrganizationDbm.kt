@@ -8,18 +8,18 @@ import javax.persistence.Embeddable
 class OrganizationDbm(
 
   @Column(name = "orga_name", nullable = true, length = 64)
-  var name: String? = null,
+  var name: String?,
 
   @Column(name = "orga_street", nullable = true, length = 128)
-  var street: String? = null,
+  var street: String?,
 
   @Column(name = "orga_postcode", nullable = true, length = 16)
-  var postcode: String? = null,
+  var postcode: String?,
 
   @Column(name = "orga_city", nullable = true, length = 128)
-  var city: String? = null,
+  var city: String?,
 
   @Column(name = "orga_country_code", nullable = true, length = 4)
-  var countryCode: String? = null,
+  var countryCode: String?,
 
 ) : Serializable

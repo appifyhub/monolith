@@ -16,7 +16,7 @@ class AccountDbm(
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(unique = true, nullable = false, updatable = false)
-  var accountId: Long? = null,
+  var accountId: Long?,
 
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)

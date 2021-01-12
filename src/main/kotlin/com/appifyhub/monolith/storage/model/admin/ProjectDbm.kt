@@ -18,7 +18,7 @@ class ProjectDbm(
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(unique = true, nullable = false, updatable = false)
-  var projectId: Long? = null,
+  var projectId: Long?,
 
   @ManyToOne(fetch = FetchType.EAGER)
   var account: AccountDbm,
@@ -35,6 +35,9 @@ class ProjectDbm(
   @Column(nullable = false, length = 16)
   var status: String,
 
+  @Column(nullable = false, updatable = false, length = 16)
+  var userIdType: String,
+
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   var createdAt: Date,
@@ -43,4 +46,4 @@ class ProjectDbm(
   @Temporal(TemporalType.TIMESTAMP)
   var updatedAt: Date = createdAt,
 
-  ) : Serializable
+) : Serializable

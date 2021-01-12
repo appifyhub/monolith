@@ -5,14 +5,14 @@ import com.appifyhub.monolith.controller.user.UserController.Endpoints.ONE_USER
 import com.appifyhub.monolith.controller.user.UserController.Endpoints.PROJECT_ONE_USER
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.repository.mapper.toSecurityUser
+import com.appifyhub.monolith.network.mapper.toNetwork
+import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.unauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestHeader
@@ -40,7 +40,7 @@ class UserController(
     authentication: Authentication,
     @PathVariable unifiedId: String,
     @RequestHeader(PROJECT_SIGNATURE) projectSignature: String,
-  ): User {
+  ): UserResponse {
     log.debug("[GET] one user ($unifiedId, $projectSignature)")
 
     val shallowAuthData = fetchShallowAuthData(authentication, projectSignature)
@@ -49,9 +49,8 @@ class UserController(
       if (!user.belongsTo(project)) unauthorized("Wrong project signature")
     }
 
-    // fetch non-shallow data
-    return userService.fetchUserByUserId(shallowAuthData.user.userId)
-    // TODO MM don't use UserDetails
+    // auth seems fine, fetch non-shallow data
+    return userService.fetchUserByUserId(shallowAuthData.user.userId).toNetwork()
   }
 
   @GetMapping(PROJECT_ONE_USER)
@@ -60,7 +59,7 @@ class UserController(
     @PathVariable projectId: Long,
     @PathVariable id: String,
     @RequestHeader(PROJECT_SIGNATURE) projectSignature: String,
-  ): User {
+  ): UserResponse {
     log.debug("[GET] one user ($projectId, $id, $projectSignature)")
 
     val shallowAuthData = fetchShallowAuthData(authentication, projectSignature)
@@ -69,12 +68,9 @@ class UserController(
       if (!user.belongsTo(project)) unauthorized("Wrong project signature")
     }
 
-    // fetch non-shallow data
-    return userService.fetchUserByUserId(shallowAuthData.user.userId)
-    // TODO MM don't use UserDetails
+    // auth seems fine, fetch non-shallow data
+    return userService.fetchUserByUserId(shallowAuthData.user.userId).toNetwork()
   }
-
-  // TODO MM use service.fetchAll by project
 
   // Helpers
 

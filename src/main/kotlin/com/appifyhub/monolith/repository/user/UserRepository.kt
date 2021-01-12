@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.repository.user
 
 import com.appifyhub.monolith.domain.admin.Account
+import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -16,7 +17,7 @@ interface UserRepository :
   UserDetailsManager,
   UserDetailsPasswordService {
 
-  @Throws fun addUser(creator: UserCreator): User
+  @Throws fun addUser(creator: UserCreator, project: Project): User
 
   @Throws fun fetchUserByUserId(userId: UserId): User
 
@@ -28,7 +29,7 @@ interface UserRepository :
 
   @Throws fun fetchAllUsersByAccount(account: Account): List<User>
 
-  @Throws fun updateUser(updater: UserUpdater): User
+  @Throws fun updateUser(updater: UserUpdater, project: Project): User
 
   @Throws fun removeUserById(userId: UserId)
 

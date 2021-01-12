@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.repository.mapper
+package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
