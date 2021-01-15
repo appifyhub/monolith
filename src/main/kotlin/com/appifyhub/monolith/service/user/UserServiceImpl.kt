@@ -23,16 +23,16 @@ class UserServiceImpl(
     return userRepository.addUser(creator, project)
   }
 
-  override fun fetchUserByUserId(userId: UserId): User {
+  override fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User {
     log.debug("Fetching user by $userId")
     // TODO MM validation missing + check blocked tokens and expiration?
-    return userRepository.fetchUserByUserId(userId)
+    return userRepository.fetchUserByUserId(userId, withTokens = withTokens)
   }
 
-  override fun fetchUserByUnifiedIdFormat(idHashProjectId: String): User {
+  override fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User {
     log.debug("Fetching user by $idHashProjectId")
     // TODO MM validation missing + check blocked tokens and expiration?
-    return userRepository.fetchUserByUnifiedIdFormat(idHashProjectId)
+    return userRepository.fetchUserByUnifiedIdFormat(idHashProjectId, withTokens = withTokens)
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {

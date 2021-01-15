@@ -23,11 +23,11 @@ class AuthServiceImpl(
   private val log = LoggerFactory.getLogger(this::class.java)
 
   override fun isAuthorized(
-    authentication: Authentication,
+    authData: Authentication,
     forAuthority: Authority,
   ): Boolean = try {
-    log.debug("Checking if authorized $authentication for $forAuthority")
-    val shallowUser = authRepository.fetchUserByIdentification(authentication, shallow = true)
+    log.debug("Checking if authorized $authData for $forAuthority")
+    val shallowUser = authRepository.fetchUserByAuthenticationData(authData, shallow = true)
     shallowUser.isAuthorizedFor(forAuthority)
   } catch (t: Throwable) {
     log.warn("Failed isAuthorized check", t)
@@ -35,27 +35,28 @@ class AuthServiceImpl(
   }
 
   override fun isProjectOwner(
-    authentication: Authentication,
+    authData: Authentication,
     projectSignature: String,
   ): Boolean = try {
-    log.debug("Checking if $authentication is project owner for $projectSignature")
+    log.debug("Checking if $authData is project owner for $projectSignature")
     val projectAccountId = adminService.fetchProjectBySignature(projectSignature).account.id
-    val userAccountId = authRepository.fetchUserByIdentification(authentication, shallow = true).account?.id ?: -1
+    val userAccountId = authRepository.fetchUserByAuthenticationData(authData, shallow = true).account?.id ?: -1
     projectAccountId == userAccountId
   } catch (t: Throwable) {
     log.warn("Failed isProjectOwner check", t)
     false
   }
 
-  override fun fetchUserByAuthenticating(authentication: Authentication, shallow: Boolean): User {
-    log.debug("Fetching user by authentication $authentication")
-    return authRepository.fetchUserByIdentification(authentication, shallow)
+  override fun fetchUserByAuthenticating(authData: Authentication, shallow: Boolean): User {
+    log.debug("Fetching user by authentication $authData")
+    return authRepository.fetchUserByAuthenticationData(authData, shallow)
   }
 
   override fun fetchUserByCredentials(
     projectSignature: String,
     identifier: String,
     signature: String,
+    withTokens: Boolean,
   ): User {
     log.debug("Fetching user by $projectSignature, id $identifier, signature $signature")
 
@@ -64,12 +65,13 @@ class AuthServiceImpl(
     signature.assertNotBlank(errorName = "Signature")
 
     val project = adminService.fetchProjectBySignature(projectSignature)
-    return fetchUser(project.id, identifier, signature)
+    return fetchUser(project.id, identifier, signature, withTokens)
   }
 
   override fun fetchAdminUserByCredentials(
     identifier: String,
     signature: String,
+    withTokens: Boolean,
   ): User {
     log.debug("Fetching account by id $identifier, signature $signature")
 
@@ -77,7 +79,7 @@ class AuthServiceImpl(
     signature.assertNotBlank(errorName = "Signature")
 
     val project = adminService.fetchAdminProject()
-    return fetchUser(project.id, identifier, signature)
+    return fetchUser(project.id, identifier, signature, withTokens)
   }
 
   override fun generateTokenFor(
@@ -89,6 +91,11 @@ class AuthServiceImpl(
     return authRepository.generateToken(user, origin)
   }
 
+  override fun unauthorizeAuthenticationData(authData: Authentication) {
+    log.debug("Unauthorizing user by authentication $authData")
+    return authRepository.unauthorizeAuthenticationData(authData)
+  }
+
   // Helpers
 
   @Throws
@@ -96,9 +103,10 @@ class AuthServiceImpl(
     projectId: Long,
     identifier: String,
     signature: String,
+    withTokens: Boolean,
   ): User {
     val userId = UserId(id = identifier, projectId = projectId)
-    val user = userService.fetchUserByUserId(userId)
+    val user = userService.fetchUserByUserId(userId, withTokens)
     if (!passwordEncoder.matches(signature, user.signature)) {
       log.warn("Password mismatch for $userId")
       throw IllegalArgumentException("Invalid credentials")

@@ -28,7 +28,7 @@ class UserController(
   object Endpoints {
     const val ONE_USER = "/v1/global-project/users/{unifiedId}"
     const val PROJECT_ONE_USER = "/v1/projects/{projectId}/users/{id}"
-    const val PROJECT_ALL_USERS = "/v1/projects/{projectId}/users"
+    const val PROJECT_ALL_USERS = "/v1/projects/{projectId}/users" // TODO MM to use as reference in admin endpoints?
   }
 
   private data class ShallowAuthData(val user: User, val project: Project)
@@ -50,7 +50,7 @@ class UserController(
     }
 
     // auth seems fine, fetch non-shallow data
-    return userService.fetchUserByUserId(shallowAuthData.user.userId).toNetwork()
+    return userService.fetchUserByUserId(shallowAuthData.user.userId, withTokens = true).toNetwork()
   }
 
   @GetMapping(PROJECT_ONE_USER)
@@ -69,7 +69,7 @@ class UserController(
     }
 
     // auth seems fine, fetch non-shallow data
-    return userService.fetchUserByUserId(shallowAuthData.user.userId).toNetwork()
+    return userService.fetchUserByUserId(shallowAuthData.user.userId, withTokens = true).toNetwork()
   }
 
   // Helpers

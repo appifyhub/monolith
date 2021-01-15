@@ -23,7 +23,7 @@ fun UserDbm.toDomain(): User = User(
   createdAt = createdAt,
   updatedAt = updatedAt,
   company = company?.toDomain(),
-  blockedTokens = emptyList(),
+  ownedTokens = emptyList(),
   account = account?.toDomain(),
 )
 

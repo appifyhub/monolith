@@ -11,9 +11,9 @@ interface UserService {
 
   @Throws fun addUser(creator: UserCreator, project: Project): User
 
-  @Throws fun fetchUserByUserId(userId: UserId): User
+  @Throws fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User
 
-  @Throws fun fetchUserByUnifiedIdFormat(idHashProjectId: String): User
+  @Throws fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User
 
   @Throws fun fetchAllUsersByContact(contact: String): List<User>
 

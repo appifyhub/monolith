@@ -2,7 +2,7 @@ package com.appifyhub.monolith.domain.common
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.auth.BlockedToken
+import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.auth.Token
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
@@ -56,16 +56,19 @@ fun stubUser() = User(
   createdAt = Date(),
   updatedAt = Date(),
   company = stubOrganization(),
-  blockedTokens = emptyList(),
+  ownedTokens = emptyList(),
   account = stubAccount(),
 )
 
 fun stubToken() = Token(
-  token = "token",
+  tokenLocator = "token",
 )
 
-fun stubBlockedToken() = BlockedToken(
+fun stubOwnedToken() = OwnedToken(
   token = stubToken(),
+  isBlocked = false,
+  origin = null,
+  createdAt = Date(),
   owner = stubUser(),
 )
 

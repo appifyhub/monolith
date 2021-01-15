@@ -14,6 +14,8 @@ import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.admin.AdminRepository
+import com.appifyhub.monolith.repository.auth.OwnedTokenRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -27,6 +29,8 @@ class UserRepositoryImpl(
   private val timeProvider: TimeProvider,
   private val userDao: UserDao,
   private val passwordEncoder: PasswordEncoder,
+  private val ownedTokenRepository: OwnedTokenRepository,
+  private val adminRepository: AdminRepository,
 ) : UserRepository {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -47,15 +51,15 @@ class UserRepositoryImpl(
     return userDao.save(user.toData()).toDomain()
   }
 
-  override fun fetchUserByUserId(userId: UserId): User {
+  override fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User {
     log.debug("Fetching user $userId")
-    return userDao.findById(userId.toData()).get().toDomain()
+    return fetchUser(userId, withTokens)
   }
 
-  override fun fetchUserByUnifiedIdFormat(idHashProjectId: String): User {
+  override fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User {
     log.debug("Fetching user $idHashProjectId")
     val userId = UserId.fromUnifiedFormat(idHashProjectId)
-    return userDao.findById(userId.toData()).get().toDomain()
+    return fetchUser(userId, withTokens)
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {
@@ -75,7 +79,7 @@ class UserRepositoryImpl(
 
   override fun updateUser(updater: UserUpdater, project: Project): User {
     log.debug("Updating user $updater")
-    val fetchedUser = fetchUserByUserId(updater.id)
+    val fetchedUser = fetchUser(updater.id, withTokens = false)
 
     val updatedUser = updater.applyTo(
       user = fetchedUser,
@@ -119,14 +123,14 @@ class UserRepositoryImpl(
   override fun loadUserByUsername(username: String?): UserDetails {
     log.debug("Security: loading $username")
     val id = UserId.fromUnifiedFormat(username!!)
-    return fetchUserByUserId(id).toSecurityUser()
+    return fetchUser(id, withTokens = false).toSecurityUser()
   }
 
   override fun userExists(username: String?): Boolean {
     log.debug("Security: checking if $username exists")
     return try {
       val id = UserId.fromUnifiedFormat(username!!)
-      fetchUserByUserId(id).let { true }
+      fetchUser(id, withTokens = false).let { true }
     } catch (t: Throwable) {
       log.warn("Couldn't check if $username exists", t)
       false
@@ -140,7 +144,7 @@ class UserRepositoryImpl(
   override fun updateUser(user: UserDetails?) {
     log.warn("Security: updating user $user")
     val domainUser = user!!.toDomain(timeProvider)
-    val fetchedUser = fetchUserByUserId(domainUser.userId)
+    val fetchedUser = fetchUser(domainUser.userId, withTokens = false)
     val project = stubProject().copy(id = fetchedUser.userId.projectId)
     val updatedUser = fetchedUser
       .updateFromSecurityUser(domainUser.toSecurityUser())
@@ -162,7 +166,7 @@ class UserRepositoryImpl(
   override fun updatePassword(user: UserDetails?, newPassword: String?): UserDetails {
     log.warn("Security: updating password $user")
     val domainUser = user!!.toDomain(timeProvider).copy(signature = newPassword!!)
-    val fetchedUser = fetchUserByUserId(domainUser.userId)
+    val fetchedUser = fetchUser(domainUser.userId, withTokens = false)
     val project = stubProject().copy(id = fetchedUser.userId.projectId)
     val updatedUser = fetchedUser
       .updateFromSecurityUser(domainUser.toSecurityUser())
@@ -174,6 +178,15 @@ class UserRepositoryImpl(
   // endregion
 
   // region Helpers
+
+  @Throws
+  private fun fetchUser(userId: UserId, withTokens: Boolean): User {
+    val user = userDao.findById(userId.toData()).get().toDomain()
+    if (!withTokens) return user
+    val project = adminRepository.fetchProjectById(userId.projectId)
+    val tokens = ownedTokenRepository.fetchAllTokens(user, project)
+    return user.copy(ownedTokens = tokens)
+  }
 
   private fun User.updateFromSecurityUser(user: UserDetails): User {
     val signatureChanged = user.password.isNotBlank() && user.password != signature

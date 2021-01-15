@@ -30,6 +30,6 @@ fun UserDetails.toDomain(timeProvider: TimeProvider): User = User(
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
   company = null,
-  blockedTokens = emptyList(),
+  ownedTokens = emptyList(),
   account = null,
 )

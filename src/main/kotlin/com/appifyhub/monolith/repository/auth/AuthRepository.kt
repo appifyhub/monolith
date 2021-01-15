@@ -5,11 +5,10 @@ import org.springframework.security.core.Authentication
 
 interface AuthRepository {
 
-  @Throws fun generateToken(user: User, origin: String? = null): String
+  @Throws fun generateToken(user: User, origin: String?): String
 
-  @Throws fun fetchUserByIdentification(
-    authentication: Authentication,
-    shallow: Boolean = false,
-  ): User
+  @Throws fun fetchUserByAuthenticationData(authData: Authentication, shallow: Boolean): User
+
+  @Throws fun unauthorizeAuthenticationData(authData: Authentication)
 
 }

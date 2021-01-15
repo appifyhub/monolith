@@ -1,24 +1,30 @@
 package com.appifyhub.monolith.domain.mapper
 
-import com.appifyhub.monolith.domain.auth.BlockedToken
+import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.auth.Token
-import com.appifyhub.monolith.storage.model.auth.BlockedTokenDbm
+import com.appifyhub.monolith.storage.model.auth.OwnedTokenDbm
 import com.appifyhub.monolith.storage.model.auth.TokenDbm
 
-fun BlockedTokenDbm.toDomain(): BlockedToken = BlockedToken(
-  token = Token(token),
+fun OwnedTokenDbm.toDomain(): OwnedToken = OwnedToken(
+  token = Token(tokenLocator),
+  isBlocked = isBlocked,
+  origin = origin,
+  createdAt = createdAt,
   owner = owner.toDomain(),
 )
 
-fun BlockedToken.toData(): BlockedTokenDbm = BlockedTokenDbm(
-  token = token.token,
+fun OwnedToken.toData(): OwnedTokenDbm = OwnedTokenDbm(
+  tokenLocator = token.tokenLocator,
+  isBlocked = isBlocked,
+  origin = origin,
+  createdAt = createdAt,
   owner = owner.toData(),
 )
 
 fun TokenDbm.toDomain(): Token = Token(
-  token = token,
+  tokenLocator = tokenLocator,
 )
 
 fun Token.toData(): TokenDbm = TokenDbm(
-  token = token,
+  tokenLocator = tokenLocator,
 )

@@ -56,5 +56,5 @@ fun UserCreator.toUser(
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
   company = company,
-  blockedTokens = emptyList(),
+  ownedTokens = emptyList(),
 )

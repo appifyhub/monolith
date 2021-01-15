@@ -2,7 +2,7 @@ package com.appifyhub.monolith.domain.user
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.auth.BlockedToken
+import com.appifyhub.monolith.domain.auth.OwnedToken
 import org.springframework.security.core.GrantedAuthority
 import java.util.Date
 
@@ -20,7 +20,7 @@ data class User(
   val createdAt: Date,
   val updatedAt: Date = createdAt,
   val company: Organization? = null,
-  val blockedTokens: List<BlockedToken> = emptyList(),
+  val ownedTokens: List<OwnedToken> = emptyList(),
   val account: Account? = null,
 ) {
 
