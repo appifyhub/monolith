@@ -32,8 +32,8 @@ fun AccountCreator.toAccountData(
 
 fun ProjectUpdater.applyTo(
   project: Project,
-  timeProvider: TimeProvider,
   passwordEncoder: PasswordEncoder,
+  timeProvider: TimeProvider,
 ): Project = project
   .applySettable(account) { copy(account = it) }
   .applySettable(rawSignature) { copy(signature = passwordEncoder.encode(it)) }

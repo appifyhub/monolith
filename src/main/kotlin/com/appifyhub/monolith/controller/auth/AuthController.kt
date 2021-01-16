@@ -22,10 +22,12 @@ class AuthController(
 
   object Endpoints {
     const val AUTH_USERS = "/v1/auth"
-    const val AUTH_ADMINS = "/v1/admin/auth"
     const val REFRESH_USERS = "/v1/refresh"
-    const val REFRESH_ADMINS = "/v1/admin/refresh"
     const val UNAUTH_USERS = "/v1/unauth"
+
+    // TODO MM to move to admin controller
+    const val AUTH_ADMINS = "/v1/admin/auth"
+    const val REFRESH_ADMINS = "/v1/admin/refresh"
     const val UNAUTH_ADMINS = "/v1/admin/unauth"
   }
 
@@ -36,14 +38,16 @@ class AuthController(
     @RequestBody creds: UserCredentialsRequest,
     @RequestHeader(Headers.PROJECT_SIGNATURE) projectSignature: String,
   ): TokenResponse {
+    log.debug("[POST] auth user with $creds for project $projectSignature")
+
     val user = try {
-      authService.fetchUserByCredentials(projectSignature, creds.identifier, creds.secret, withTokens = false)
+      authService.authenticateUser(projectSignature, creds.identifier, creds.secret)
     } catch (t: Throwable) {
       log.warn("Failed to find user identified by ${creds.identifier}", t)
       unauthorized("Invalid credentials")
     }
 
-    val token = authService.generateTokenFor(user, creds.origin)
+    val token = authService.createTokenFor(user, creds.origin)
     return TokenResponse(token)
   }
 
@@ -51,35 +55,47 @@ class AuthController(
   fun authAdmin(
     @RequestBody creds: AdminCredentialsRequest,
   ): TokenResponse {
+    log.debug("[POST] auth admin with $creds")
+
     val user = try {
-      authService.fetchAdminUserByCredentials(creds.identifier, creds.secret, withTokens = false)
+      authService.authenticateAdmin(creds.identifier, creds.secret)
     } catch (t: Throwable) {
       log.warn("Failed to find admin identified by ${creds.identifier}", t)
       unauthorized("Invalid credentials")
     }
 
-    val token = authService.generateTokenFor(user, creds.origin)
+    val token = authService.createTokenFor(user, creds.origin)
     return TokenResponse(token)
   }
 
   @GetMapping(Endpoints.UNAUTH_USERS)
+  // TODO MM add 'all=true/false' query param to unauth all tokens
   fun unauthUser(authentication: Authentication): MessageResponse {
     log.debug("[GET] unauth user with $authentication")
-
-    authService.unauthorizeAuthenticationData(authentication)
-
+    authService.unauthorizeAuthentication(authentication)
     return MessageResponse("Done")
   }
 
   @GetMapping(Endpoints.UNAUTH_ADMINS)
+  // TODO MM add 'all=true/false' query param to unauth all tokens
   fun unauthAdmin(authentication: Authentication): MessageResponse {
     log.debug("[GET] unauth admin with $authentication")
-
-    authService.unauthorizeAuthenticationData(authentication)
-
+    authService.unauthorizeAuthentication(authentication)
     return MessageResponse("Done")
   }
 
-  // TODO MM refreshing tokens missing
+  @GetMapping(Endpoints.REFRESH_USERS)
+  fun refreshUser(authentication: Authentication): TokenResponse {
+    log.debug("[POST] refresh user with $authentication")
+    val token = authService.refreshAuthentication(authentication)
+    return TokenResponse(token)
+  }
+
+  @GetMapping(Endpoints.REFRESH_ADMINS)
+  fun refreshAdmin(authentication: Authentication): TokenResponse {
+    log.debug("[POST] refresh admin with $authentication")
+    val token = authService.refreshAuthentication(authentication)
+    return TokenResponse(token)
+  }
 
 }

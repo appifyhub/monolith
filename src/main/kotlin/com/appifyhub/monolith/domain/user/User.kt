@@ -61,8 +61,7 @@ data class User(
 
   }
 
-  val allAuthorities: Array<Authority> =
-    Authority.values().takeWhile { it.ordinal <= authority.ordinal }.toTypedArray()
+  val allAuthorities = Authority.values().takeWhile { it.ordinal <= authority.ordinal }
 
   fun isAuthorizedFor(authority: Authority) = this.authority.ordinal >= authority.ordinal
 

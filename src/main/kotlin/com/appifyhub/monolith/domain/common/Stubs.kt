@@ -69,6 +69,7 @@ fun stubOwnedToken() = OwnedToken(
   isBlocked = false,
   origin = null,
   createdAt = Date(),
+  expiresAt = Date(),
   owner = stubUser(),
 )
 

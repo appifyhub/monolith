@@ -1,14 +1,25 @@
 package com.appifyhub.monolith.repository.auth
 
+import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.user.User
-import org.springframework.security.core.Authentication
+import com.appifyhub.monolith.domain.user.UserId
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 
 interface AuthRepository {
 
-  @Throws fun generateToken(user: User, origin: String?): String
+  @Throws fun createToken(userId: UserId, authorities: List<GrantedAuthority>, origin: String?): String
 
-  @Throws fun fetchUserByAuthenticationData(authData: Authentication, shallow: Boolean): User
+  @Throws fun resolveShallowUser(token: JwtAuthenticationToken): User
 
-  @Throws fun unauthorizeAuthenticationData(authData: Authentication)
+  @Throws fun fetchTokenDetails(token: JwtAuthenticationToken): OwnedToken
+
+  @Throws fun checkIsValid(token: JwtAuthenticationToken, shallow: Boolean): Boolean
+
+  @Throws fun requireValid(token: JwtAuthenticationToken, shallow: Boolean)
+
+  @Throws fun unauthorizeToken(token: JwtAuthenticationToken)
+
+  @Throws fun unauthorizeAllTokens(token: JwtAuthenticationToken)
 
 }

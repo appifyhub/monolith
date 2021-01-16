@@ -2,7 +2,6 @@ package com.appifyhub.monolith.controller.user
 
 import com.appifyhub.monolith.controller.common.Headers.PROJECT_SIGNATURE
 import com.appifyhub.monolith.controller.user.UserController.Endpoints.ONE_USER
-import com.appifyhub.monolith.controller.user.UserController.Endpoints.PROJECT_ONE_USER
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -25,13 +24,11 @@ class UserController(
   private val adminService: AdminService,
 ) {
 
-  object Endpoints {
-    const val ONE_USER = "/v1/global-project/users/{unifiedId}"
-    const val PROJECT_ONE_USER = "/v1/projects/{projectId}/users/{id}"
-    const val PROJECT_ALL_USERS = "/v1/projects/{projectId}/users" // TODO MM to use as reference in admin endpoints?
-  }
-
   private data class ShallowAuthData(val user: User, val project: Project)
+
+  object Endpoints {
+    const val ONE_USER = "/v1/universal/users/{unifiedId}"
+  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -45,7 +42,7 @@ class UserController(
 
     val shallowAuthData = fetchShallowAuthData(authentication, projectSignature)
     with(shallowAuthData) {
-      if (user.userId.toUnifiedFormat() != unifiedId) unauthorized("Wrong unified ID")
+      if (user.userId.toUnifiedFormat() != unifiedId) unauthorized(" ID")
       if (!user.belongsTo(project)) unauthorized("Wrong project signature")
     }
 
@@ -53,31 +50,32 @@ class UserController(
     return userService.fetchUserByUserId(shallowAuthData.user.userId, withTokens = true).toNetwork()
   }
 
-  @GetMapping(PROJECT_ONE_USER)
-  fun getUser(
-    authentication: Authentication,
-    @PathVariable projectId: Long,
-    @PathVariable id: String,
-    @RequestHeader(PROJECT_SIGNATURE) projectSignature: String,
-  ): UserResponse {
-    log.debug("[GET] one user ($projectId, $id, $projectSignature)")
-
-    val shallowAuthData = fetchShallowAuthData(authentication, projectSignature)
-    with(shallowAuthData) {
-      if (user.userId.id != id || user.userId.projectId != projectId) unauthorized("Wrong project/user ID")
-      if (!user.belongsTo(project)) unauthorized("Wrong project signature")
-    }
-
-    // auth seems fine, fetch non-shallow data
-    return userService.fetchUserByUserId(shallowAuthData.user.userId, withTokens = true).toNetwork()
-  }
+// MM TODO to move to admin "/v1/projects/{projectId}/users/{id}"
+//  @GetMapping(PROJECT_ONE_USER)
+//  fun getUser(
+//    authentication: Authentication,
+//    @PathVariable projectId: Long,
+//    @PathVariable id: String,
+//    @RequestHeader(PROJECT_SIGNATURE) projectSignature: String,
+//  ): UserResponse {
+//    log.debug("[GET] one user ($projectId, $id, $projectSignature)")
+//
+//    val shallowAuthData = fetchShallowAuthData(authentication, projectSignature)
+//    with(shallowAuthData) {
+//      if (user.userId.id != id || user.userId.projectId != projectId) unauthorized("Wrong project/user ID")
+//      if (!user.belongsTo(project)) unauthorized("Wrong project signature")
+//    }
+//
+//    // auth seems fine, fetch non-shallow data
+//    return userService.fetchUserByUserId(shallowAuthData.user.userId, withTokens = true).toNetwork()
+//  }
 
   // Helpers
 
   @Throws
   private fun fetchShallowAuthData(authentication: Authentication, projectSignature: String): ShallowAuthData {
     try {
-      val user = authService.fetchUserByAuthenticating(authentication, shallow = true)
+      val user = authService.resolveShallowUser(authentication)
       val project = adminService.fetchProjectBySignature(projectSignature)
       return ShallowAuthData(user, project)
     } catch (t: Throwable) {

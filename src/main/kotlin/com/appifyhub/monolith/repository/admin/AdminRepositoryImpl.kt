@@ -23,8 +23,8 @@ import org.springframework.stereotype.Repository
 class AdminRepositoryImpl(
   private val accountDao: AccountDao,
   private val projectDao: ProjectDao,
-  private val timeProvider: TimeProvider,
   private val passwordEncoder: PasswordEncoder,
+  private val timeProvider: TimeProvider,
 ) : AdminRepository {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -78,8 +78,8 @@ class AdminRepositoryImpl(
     val fetchedProject = fetchProjectById(updater.id)
     val updatedProject = updater.applyTo(
       project = fetchedProject,
+      passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
-      passwordEncoder = passwordEncoder
     )
     return projectDao.save(updatedProject.toData()).toDomain()
   }

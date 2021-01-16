@@ -30,7 +30,11 @@ class OwnedTokenDbm(
   @Temporal(TemporalType.TIMESTAMP)
   var createdAt: Date,
 
+  @Column(nullable = false, updatable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  var expiresAt: Date,
+
   @ManyToOne(fetch = FetchType.EAGER)
   var owner: UserDbm,
 
-  ) : Serializable
+) : Serializable

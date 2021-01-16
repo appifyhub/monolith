@@ -6,23 +6,22 @@ import org.springframework.security.core.Authentication
 
 interface AuthService {
 
-  fun isAuthorized(authData: Authentication, forAuthority: Authority): Boolean
+  fun isAuthorized(authData: Authentication, forAuthority: Authority, shallow: Boolean): Boolean
 
-  fun isProjectOwner(authData: Authentication, projectSignature: String): Boolean
+  fun isProjectOwner(authData: Authentication, projectSignature: String, shallow: Boolean): Boolean
 
-  @Throws fun fetchUserByAuthenticating(authData: Authentication, shallow: Boolean): User
+  @Throws fun resolveShallowUser(authData: Authentication): User
 
-  @Throws fun fetchUserByCredentials(
-    projectSignature: String,
-    identifier: String,
-    signature: String,
-    withTokens: Boolean,
-  ): User
+  @Throws fun authenticateUser(identifier: String, signature: String, projectSignature: String): User
 
-  @Throws fun fetchAdminUserByCredentials(identifier: String, signature: String, withTokens: Boolean): User
+  @Throws fun authenticateAdmin(identifier: String, signature: String): User
 
-  @Throws fun generateTokenFor(user: User, origin: String?): String
+  @Throws fun createTokenFor(user: User, origin: String?): String
 
-  @Throws fun unauthorizeAuthenticationData(authData: Authentication)
+  @Throws fun refreshAuthentication(authData: Authentication): String
+
+  @Throws fun unauthorizeAuthentication(authData: Authentication)
+
+  @Throws fun unauthorizeAllAuthentication(authData: Authentication)
 
 }

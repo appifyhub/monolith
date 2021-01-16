@@ -10,6 +10,7 @@ fun OwnedTokenDbm.toDomain(): OwnedToken = OwnedToken(
   isBlocked = isBlocked,
   origin = origin,
   createdAt = createdAt,
+  expiresAt = expiresAt,
   owner = owner.toDomain(),
 )
 
@@ -18,6 +19,7 @@ fun OwnedToken.toData(): OwnedTokenDbm = OwnedTokenDbm(
   isBlocked = isBlocked,
   origin = origin,
   createdAt = createdAt,
+  expiresAt = expiresAt,
   owner = owner.toData(),
 )
 

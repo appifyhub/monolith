@@ -10,7 +10,7 @@ fun User.toSecurityUser(): UserDetails =
   org.springframework.security.core.userdetails.User.builder()
     .username(userId.toUnifiedFormat())
     .password(signature)
-    .authorities(*allAuthorities)
+    .authorities(*allAuthorities.toTypedArray())
     .accountLocked(verificationToken != null)
     .disabled(verificationToken != null)
     .credentialsExpired(false)

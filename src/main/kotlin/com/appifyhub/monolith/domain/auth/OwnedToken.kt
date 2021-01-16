@@ -8,5 +8,6 @@ data class OwnedToken(
   val isBlocked: Boolean,
   val origin: String?,
   val createdAt: Date,
+  val expiresAt: Date,
   val owner: User,
 )

@@ -12,8 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 
 fun UserUpdater.applyTo(
   user: User,
-  timeProvider: TimeProvider,
   passwordEncoder: PasswordEncoder,
+  timeProvider: TimeProvider,
 ): User = user
   // non-null values
   .applySettable(rawSignature) { copy(signature = passwordEncoder.encode(it)) }
@@ -40,8 +40,8 @@ fun OrganizationUpdater.applyTo(organization: Organization?): Organization? =
 
 fun UserCreator.toUser(
   userId: String,
-  timeProvider: TimeProvider,
   passwordEncoder: PasswordEncoder,
+  timeProvider: TimeProvider,
 ): User = User(
   userId = UserId(id = userId, projectId = projectId),
   signature = passwordEncoder.encode(rawSignature),

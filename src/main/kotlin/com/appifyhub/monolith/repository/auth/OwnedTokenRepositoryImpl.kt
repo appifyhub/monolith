@@ -3,15 +3,18 @@ package com.appifyhub.monolith.repository.auth
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.auth.Token
+import com.appifyhub.monolith.domain.common.stubUser
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.storage.dao.OwnedTokenDao
 import com.appifyhub.monolith.storage.model.auth.OwnedTokenDbm
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 @Repository
 class OwnedTokenRepositoryImpl(
@@ -21,14 +24,21 @@ class OwnedTokenRepositoryImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addToken(user: User, token: Token, origin: String?): OwnedToken {
-    log.debug("Adding token $token to user $user")
+  override fun addToken(
+    userId: UserId,
+    token: Token,
+    createdAt: Date,
+    expiresAt: Date,
+    origin: String?,
+  ): OwnedToken {
+    log.debug("Adding token $token to user $userId")
     val owned = OwnedToken(
       token = token,
       isBlocked = false,
       origin = origin,
-      createdAt = Date(timeProvider.currentMillis),
-      owner = user,
+      createdAt = createdAt,
+      expiresAt = expiresAt,
+      owner = stubUser().copy(userId = userId),
     )
     return ownedTokenDao.save(owned.toData()).toDomain()
   }
@@ -59,9 +69,9 @@ class OwnedTokenRepositoryImpl(
     return ownedTokenDao.findAllByOwner(owner.toData(project)).map(OwnedTokenDbm::toDomain)
   }
 
-  override fun checkIsValid(token: Token): Boolean {
+  override fun checkIsExpired(token: Token): Boolean {
     log.debug("Checking if $token is a valid token")
-    return ownedTokenDao.findById(token.toData()).map { !it.toDomain().isBlocked }.orElse(false)
+    return ownedTokenDao.findById(token.toData()).map { it.toDomain().isExpired }.orElse(true)
   }
 
   override fun checkIsBlocked(token: Token): Boolean {
@@ -71,10 +81,30 @@ class OwnedTokenRepositoryImpl(
 
   override fun blockToken(token: Token): OwnedToken {
     log.debug("Blocking token $token")
-    val owned = ownedTokenDao.findById(token.toData()).get().toDomain()
-    if (owned.isBlocked) return owned
-    val blocked = owned.copy(isBlocked = true)
+    val ownedToken = ownedTokenDao.findById(token.toData()).get().toDomain()
+    if (ownedToken.isBlocked) return ownedToken
+    val blocked = ownedToken.copy(isBlocked = true)
     return ownedTokenDao.save(blocked.toData()).toDomain()
   }
+
+  override fun blockAllTokens(owner: User): List<OwnedToken> {
+    log.debug("Blocking tokens for $owner")
+
+    val valid = owner.ownedTokens.filter { !it.isExpired && !it.isBlocked }
+    val toBlock = valid.map { it.copy(isBlocked = true) }
+
+    return ownedTokenDao.saveAll(toBlock.map(OwnedToken::toData)).also {
+      val expired = owner.ownedTokens.filter { it.isExpired }
+      ownedTokenDao.deleteAll(expired.map(OwnedToken::toData)) // housekeeping
+    }.map(OwnedTokenDbm::toDomain)
+  }
+
+  // Helpers
+
+  private val OwnedToken.secondsUntilExpired: Long
+    get() = TimeUnit.MILLISECONDS.toSeconds(expiresAt.time - timeProvider.currentMillis)
+
+  private val OwnedToken.isExpired: Boolean
+    get() = secondsUntilExpired < 0
 
 }

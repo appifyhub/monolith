@@ -26,11 +26,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class UserRepositoryImpl(
-  private val timeProvider: TimeProvider,
   private val userDao: UserDao,
-  private val passwordEncoder: PasswordEncoder,
   private val ownedTokenRepository: OwnedTokenRepository,
   private val adminRepository: AdminRepository,
+  private val passwordEncoder: PasswordEncoder,
+  private val timeProvider: TimeProvider,
 ) : UserRepository {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -44,8 +44,8 @@ class UserRepositoryImpl(
 
     val user = creator.toUser(
       userId = creator.id ?: UserIdGenerator.nextId,
-      timeProvider = timeProvider,
       passwordEncoder = passwordEncoder,
+      timeProvider = timeProvider,
     ).updateVerificationToken(project)
 
     return userDao.save(user.toData()).toDomain()
@@ -83,8 +83,8 @@ class UserRepositoryImpl(
 
     val updatedUser = updater.applyTo(
       user = fetchedUser,
-      timeProvider = timeProvider,
       passwordEncoder = passwordEncoder,
+      timeProvider = timeProvider,
     ).updateVerificationToken(project, oldUser = fetchedUser)
 
     return userDao.save(updatedUser.toData()).toDomain()
