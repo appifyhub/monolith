@@ -23,8 +23,8 @@ import org.springframework.security.core.userdetails.User as SpringUser
 private const val CLAIM_USER_ID = "userId"
 private const val CLAIM_PROJECT_ID = "projectId"
 private const val CLAIM_UNIFIED_ID = "unifiedId"
-private const val CLAIM_ACCOUNT_ID = "accountId"
 private const val CLAIM_AUTHORITIES = "authorities"
+private const val CLAIM_ACCOUNT_ID = "accountId"
 private const val CLAIM_ORIGIN = "origin"
 private const val CLAIM_TOKEN_LOCATOR = "tokenLocator"
 private const val AUTHORITY_DELIMITER = ","
@@ -60,11 +60,10 @@ class AuthRepositoryImpl(
       CLAIM_TOKEN_LOCATOR to tokenLocatorEncoded,
     ).apply {
       // add account ID if user is from the admin project
-      adminRepository.fetchAdminProject()
-        .takeIf { it.id == userId.projectId }
-        ?.let {
-          put(CLAIM_ACCOUNT_ID, it.account.id.toString())
-        }
+      adminRepository.getAdminProject()
+        .takeIf { adminProject -> adminProject.id == userId.projectId }
+        ?.let { userRepository.fetchUserByUserId(userId, withTokens = false).account }
+        ?.let { account -> put(CLAIM_ACCOUNT_ID, account.id.toString()) }
 
       // put origin if available
       origin?.let { put(CLAIM_ORIGIN, it) }
@@ -145,7 +144,7 @@ class AuthRepositoryImpl(
     )
 
     // add admin project info here (user might be from admin project)
-    val adminProject = adminRepository.fetchAdminProject() // this fetch is instant
+    val adminProject = adminRepository.getAdminProject()
     val projectId = token.projectId.toLong()
     if (projectId != adminProject.id) return user
     val accountId = token.accountId.toLong()
@@ -170,7 +169,14 @@ class AuthRepositoryImpl(
   }
 
   override fun unauthorizeAllTokens(token: JwtAuthenticationToken) {
+    log.debug("Unauthorizing all tokens with $token")
     val userId = UserId.fromUnifiedFormat(token.name)
+    val user = userRepository.fetchUserByUserId(userId, withTokens = true)
+    ownedTokenRepository.blockAllTokens(user)
+  }
+
+  override fun unauthorizeAllTokensFor(userId: UserId) {
+    log.debug("Unauthorizing all tokens for $userId")
     val user = userRepository.fetchUserByUserId(userId, withTokens = true)
     ownedTokenRepository.blockAllTokens(user)
   }
@@ -178,13 +184,13 @@ class AuthRepositoryImpl(
   // Helpers
 
   private val JwtAuthenticationToken.projectId: String
-    get() = tokenAttributes[CLAIM_ACCOUNT_ID].toString()
-
-  private val JwtAuthenticationToken.accountId: String
-    get() = tokenAttributes[CLAIM_ACCOUNT_ID].toString()
+    get() = tokenAttributes[CLAIM_PROJECT_ID].toString()
 
   private val JwtAuthenticationToken.customAuthorities: String
     get() = tokenAttributes[CLAIM_AUTHORITIES].toString()
+
+  private val JwtAuthenticationToken.accountId: String
+    get() = tokenAttributes[CLAIM_ACCOUNT_ID].toString()
 
   private val JwtAuthenticationToken.locator: String
     get() = tokenAttributes[CLAIM_TOKEN_LOCATOR].toString()

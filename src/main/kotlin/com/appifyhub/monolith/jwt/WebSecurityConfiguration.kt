@@ -29,8 +29,8 @@ class WebSecurityConfiguration(
 
       .authorizeRequests {
         it.antMatchers(
-          AuthController.Endpoints.AUTH_USERS,
-          AuthController.Endpoints.AUTH_ADMINS,
+          AuthController.Endpoints.AUTH,
+          AuthController.Endpoints.ADMIN_AUTH,
           Endpoints.ERROR,
         )
           .permitAll()

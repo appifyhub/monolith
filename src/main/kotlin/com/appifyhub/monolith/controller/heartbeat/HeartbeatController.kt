@@ -20,7 +20,7 @@ class HeartbeatController(
 
   @GetMapping(HEARTBEAT)
   fun beat(): HeartbeatResponse {
-    log.debug("[GET] Heartbeat")
+    log.debug("[GET] heartbeat")
     return HeartbeatResponse(timeProvider.currentInstant)
   }
 

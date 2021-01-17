@@ -19,7 +19,7 @@ interface AdminRepository {
 
   @Throws fun fetchProjectBySignature(signature: String): Project
 
-  @Throws fun fetchAdminProject(): Project
+  @Throws fun getAdminProject(): Project
 
   @Throws fun fetchAllProjectsByAccount(account: Account): List<Project>
 

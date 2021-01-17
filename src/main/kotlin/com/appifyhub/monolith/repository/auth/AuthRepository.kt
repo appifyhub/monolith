@@ -22,4 +22,6 @@ interface AuthRepository {
 
   @Throws fun unauthorizeAllTokens(token: JwtAuthenticationToken)
 
+  @Throws fun unauthorizeAllTokensFor(userId: UserId)
+
 }

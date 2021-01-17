@@ -51,7 +51,7 @@ class AdminServiceImpl(
 
   override fun fetchAdminProject(): Project {
     log.debug("Fetching admin project")
-    return adminRepository.fetchAdminProject()
+    return adminRepository.getAdminProject()
   }
 
   override fun fetchAllProjectsByAccount(account: Account): List<Project> {

@@ -8,4 +8,12 @@ import java.io.Serializable
 @JsonInclude(Include.NON_NULL)
 data class MessageResponse(
   @JsonProperty("message") val message: String,
-) : Serializable
+) : Serializable {
+
+  companion object {
+
+    val DONE = MessageResponse("Done")
+
+  }
+
+}

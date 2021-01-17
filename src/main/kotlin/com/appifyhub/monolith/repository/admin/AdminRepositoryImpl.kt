@@ -53,7 +53,7 @@ class AdminRepositoryImpl(
     return accountDao.findById(id).get().toDomain()
   }
 
-  override fun fetchAdminProject(): Project {
+  override fun getAdminProject(): Project {
     log.debug("Fetching admin project")
     return adminProject
   }

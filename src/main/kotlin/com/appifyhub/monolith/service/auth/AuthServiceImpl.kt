@@ -8,6 +8,7 @@ import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.requireNotBlank
 import com.appifyhub.monolith.util.requireNullOrNotBlank
+import com.appifyhub.monolith.util.requireValidFormat
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -30,6 +31,7 @@ class AuthServiceImpl(
     shallow: Boolean,
   ): Boolean = try {
     log.debug("Checking if authorized $authData for $forAuthority")
+    // MM validation missing (DEFAULT always ok)
     val token = authData.requireValidJwt(shallow)
     val shallowUser = authRepository.resolveShallowUser(token)
     shallowUser.isAuthorizedFor(forAuthority)
@@ -44,6 +46,7 @@ class AuthServiceImpl(
     shallow: Boolean,
   ): Boolean = try {
     log.debug("Checking if $authData is project owner for $projectSignature")
+    // MM validation missing
     val token = authData.requireValidJwt(shallow)
     val projectAccountId = adminService.fetchProjectBySignature(projectSignature).account.id
     val userAccountId = authRepository.resolveShallowUser(token).account?.id ?: -1
@@ -59,7 +62,7 @@ class AuthServiceImpl(
     return authRepository.resolveShallowUser(token)
   }
 
-  override fun authenticateUser(identifier: String, signature: String, projectSignature: String): User {
+  override fun authUser(identifier: String, signature: String, projectSignature: String): User {
     log.debug("Fetching user by $projectSignature, id $identifier, signature $signature")
 
     projectSignature.requireNotBlank { "Project signature" }
@@ -70,7 +73,7 @@ class AuthServiceImpl(
     return fetchUserByCredentials(project.id, identifier, signature)
   }
 
-  override fun authenticateAdmin(identifier: String, signature: String): User {
+  override fun authAdmin(identifier: String, signature: String): User {
     log.debug("Fetching account by id $identifier, signature $signature")
 
     identifier.requireNotBlank { "ID" }
@@ -95,7 +98,7 @@ class AuthServiceImpl(
     )
   }
 
-  override fun refreshAuthentication(authData: Authentication): String {
+  override fun refreshAuth(authData: Authentication): String {
     log.debug("Refreshing authentication $authData")
     val token = authData.requireValidJwt(shallow = false)
 
@@ -111,16 +114,25 @@ class AuthServiceImpl(
     )
   }
 
-  override fun unauthorizeAuthentication(authData: Authentication) {
+  override fun unauthorize(authData: Authentication) {
     log.debug("Unauthorizing user by authentication $authData")
     val token = authData.requireValidJwt(shallow = true)
-    return authRepository.unauthorizeToken(token)
+    authRepository.unauthorizeToken(token)
   }
 
-  override fun unauthorizeAllAuthentication(authData: Authentication) {
+  override fun unauthorizeAll(authData: Authentication) {
     log.debug("Unauthorizing all access for authentication $authData")
     val token = authData.requireValidJwt(shallow = false)
-    return authRepository.unauthorizeAllTokens(token)
+    authRepository.unauthorizeAllTokens(token)
+  }
+
+  override fun unauthorizeAllFor(authData: Authentication, userId: UserId) {
+    log.debug("Unauthorizing all access for $userId")
+
+    userId.requireValidFormat()
+    authData.requireValidJwt(shallow = false)
+
+    authRepository.unauthorizeAllTokensFor(userId)
   }
 
   // Helpers

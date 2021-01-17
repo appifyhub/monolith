@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.domain.user
 
 import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.auth.OwnedToken
 import org.springframework.security.core.GrantedAuthority
 import java.util.Date
@@ -59,12 +58,17 @@ data class User(
 
     override fun getAuthority() = name
 
+    // ADMIN -> admins
+    val groupName = name.toLowerCase().plus("s")
+
+    // DEFAULT -> moderators
+    // OWNER -> gods
+    val nextGroupName = values().getOrNull(ordinal + 1) ?: "gods"
+
   }
 
   val allAuthorities = Authority.values().takeWhile { it.ordinal <= authority.ordinal }
 
   fun isAuthorizedFor(authority: Authority) = this.authority.ordinal >= authority.ordinal
-
-  fun belongsTo(project: Project) = userId.projectId == project.id
 
 }

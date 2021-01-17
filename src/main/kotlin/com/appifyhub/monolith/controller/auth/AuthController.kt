@@ -1,18 +1,17 @@
 package com.appifyhub.monolith.controller.auth
 
 import com.appifyhub.monolith.controller.common.Headers
-import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.util.unauthorized
+import com.appifyhub.monolith.util.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -21,19 +20,20 @@ class AuthController(
 ) {
 
   object Endpoints {
-    const val AUTH_USERS = "/v1/auth"
-    const val REFRESH_USERS = "/v1/refresh"
-    const val UNAUTH_USERS = "/v1/unauth"
+    const val AUTH = "/v1/universal/auth"
+    const val REFRESH = "/v1/universal/refresh"
+    const val UNAUTH = "/v1/universal/unauth"
 
-    // TODO MM to move to admin controller
-    const val AUTH_ADMINS = "/v1/admin/auth"
-    const val REFRESH_ADMINS = "/v1/admin/refresh"
-    const val UNAUTH_ADMINS = "/v1/admin/unauth"
+    const val ADMIN_AUTH = "/v1/admin/auth"
+    const val ADMIN_REFRESH = "/v1/admin/refresh"
+    const val ADMIN_UNAUTH = "/v1/admin/unauth"
+
+    const val ANY_USER_UNAUTH = "/v1/projects/{projectId}/users/{id}/unauth"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @PostMapping(Endpoints.AUTH_USERS)
+  @PostMapping(Endpoints.AUTH)
   fun authUser(
     @RequestBody creds: UserCredentialsRequest,
     @RequestHeader(Headers.PROJECT_SIGNATURE) projectSignature: String,
@@ -41,60 +41,31 @@ class AuthController(
     log.debug("[POST] auth user with $creds for project $projectSignature")
 
     val user = try {
-      authService.authenticateUser(projectSignature, creds.identifier, creds.secret)
+      authService.authUser(projectSignature, creds.identifier, creds.secret)
     } catch (t: Throwable) {
       log.warn("Failed to find user identified by ${creds.identifier}", t)
-      unauthorized("Invalid credentials")
+      throwUnauthorized { "Invalid credentials" }
     }
 
     val token = authService.createTokenFor(user, creds.origin)
     return TokenResponse(token)
   }
 
-  @PostMapping(Endpoints.AUTH_ADMINS)
-  fun authAdmin(
-    @RequestBody creds: AdminCredentialsRequest,
-  ): TokenResponse {
-    log.debug("[POST] auth admin with $creds")
-
-    val user = try {
-      authService.authenticateAdmin(creds.identifier, creds.secret)
-    } catch (t: Throwable) {
-      log.warn("Failed to find admin identified by ${creds.identifier}", t)
-      unauthorized("Invalid credentials")
+  @PostMapping(Endpoints.UNAUTH)
+  fun unauthUser(authentication: Authentication, @RequestParam all: Boolean): MessageResponse {
+    log.debug("[POST] unauth user with $authentication, [all $all]")
+    if (all) {
+      authService.unauthorizeAll(authentication)
+    } else {
+      authService.unauthorize(authentication)
     }
-
-    val token = authService.createTokenFor(user, creds.origin)
-    return TokenResponse(token)
+    return MessageResponse.DONE
   }
 
-  @GetMapping(Endpoints.UNAUTH_USERS)
-  // TODO MM add 'all=true/false' query param to unauth all tokens
-  fun unauthUser(authentication: Authentication): MessageResponse {
-    log.debug("[GET] unauth user with $authentication")
-    authService.unauthorizeAuthentication(authentication)
-    return MessageResponse("Done")
-  }
-
-  @GetMapping(Endpoints.UNAUTH_ADMINS)
-  // TODO MM add 'all=true/false' query param to unauth all tokens
-  fun unauthAdmin(authentication: Authentication): MessageResponse {
-    log.debug("[GET] unauth admin with $authentication")
-    authService.unauthorizeAuthentication(authentication)
-    return MessageResponse("Done")
-  }
-
-  @GetMapping(Endpoints.REFRESH_USERS)
+  @PostMapping(Endpoints.REFRESH)
   fun refreshUser(authentication: Authentication): TokenResponse {
     log.debug("[POST] refresh user with $authentication")
-    val token = authService.refreshAuthentication(authentication)
-    return TokenResponse(token)
-  }
-
-  @GetMapping(Endpoints.REFRESH_ADMINS)
-  fun refreshAdmin(authentication: Authentication): TokenResponse {
-    log.debug("[POST] refresh admin with $authentication")
-    val token = authService.refreshAuthentication(authentication)
+    val token = authService.refreshAuth(authentication)
     return TokenResponse(token)
   }
 

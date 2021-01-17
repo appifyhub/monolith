@@ -15,24 +15,26 @@ import java.util.TimeZone
 object TimeProviderFake : TimeProvider {
 
   private var fakeTime = 0L
+  private var controlledTime: Long? = 0L
 
-  fun set(newTime: Long) {
-    fakeTime = newTime
+  @Synchronized
+  fun set(newTime: Long?) {
+    controlledTime = newTime
   }
 
   override val currentMillis: Long
-    get() = fakeTime
+    @Synchronized get() = controlledTime ?: fakeTime++
 
   override val currentCalendar: Calendar
-    get() = Calendar.getInstance().apply {
+    @Synchronized get() = Calendar.getInstance().apply {
       timeInMillis = currentMillis
       timeZone = TimeZone.getTimeZone("UTC")
     }
 
   override val currentInstant: Instant
-    get() = Instant.ofEpochMilli(currentMillis)
+    @Synchronized get() = Instant.ofEpochMilli(currentMillis)
 
   override val currentDate: Date
-    get() = Date(currentMillis)
+    @Synchronized get() = Date(currentMillis)
 
 }
