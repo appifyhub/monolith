@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
 val String.Companion.empty: String get() = ""
+val String.Companion.space: String get() = " "
 
 fun String.takeIfNotBlank(): String? = takeIf { it.isNotBlank() }
 
@@ -14,7 +15,9 @@ inline fun String?.requireNotBlank(
 
 inline fun String?.requireNullOrNotBlank(
   propName: () -> Any = { "Property" },
-) = if (this?.isBlank() == true) throw IllegalArgumentException("${propName()} is blank") else Unit
+) = if (!isNullOrNotBlank()) throw IllegalArgumentException("${propName()} is blank") else Unit
+
+fun String?.isNullOrNotBlank(): Boolean = this?.isBlank() != true
 
 fun throwUnauthorized(
   message: () -> Any = { "Not authorized to perform this action" },
@@ -28,3 +31,7 @@ fun requireForAuth(
 fun UserId.requireValidFormat(
   message: () -> Any = { "Invalid UserId format: $this" },
 ) = require(id.isNotBlank() && projectId > 0, message)
+
+fun String.hasSpaces() = contains(String.space)
+
+fun String.hasNoSpaces() = !hasSpaces()
