@@ -1,14 +1,16 @@
 package com.appifyhub.monolith.service.auth
 
+import com.appifyhub.monolith.domain.auth.OwnedToken
+import com.appifyhub.monolith.domain.auth.Token
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.requireNotBlank
-import com.appifyhub.monolith.util.requireNullOrNotBlank
-import com.appifyhub.monolith.util.requireValidFormat
+import com.appifyhub.monolith.service.user.UserServiceImpl.UserPrivilege
+import com.appifyhub.monolith.service.validation.Normalizers
+import com.appifyhub.monolith.util.requireValid
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -29,15 +31,19 @@ class AuthServiceImpl(
     authData: Authentication,
     forAuthority: Authority,
     shallow: Boolean,
-  ): Boolean = try {
-    log.debug("Checking if authorized $authData for $forAuthority")
-    // MM validation missing (DEFAULT always ok)
-    val token = authData.requireValidJwt(shallow)
-    val shallowUser = authRepository.resolveShallowUser(token)
-    shallowUser.isAuthorizedFor(forAuthority)
-  } catch (t: Throwable) {
-    log.warn("Failed isAuthorized check", t)
-    false
+  ): Boolean {
+    try {
+      log.debug("Checking if authorized $authData for $forAuthority")
+
+      if (forAuthority == Authority.DEFAULT) return true // basic authority is always ok
+      val token = authData.requireValidJwt(shallow)
+
+      val shallowUser = authRepository.resolveShallowUser(token)
+      return shallowUser.isAuthorizedFor(forAuthority)
+    } catch (t: Throwable) {
+      log.warn("Failed isAuthorized check", t)
+      return false
+    }
   }
 
   override fun isProjectOwner(
@@ -46,9 +52,11 @@ class AuthServiceImpl(
     shallow: Boolean,
   ): Boolean = try {
     log.debug("Checking if $authData is project owner for $projectSignature")
-    // MM validation missing
+
+    val normalizedSignature = Normalizers.Dense.run(projectSignature).requireValid { "Project Signature" }
     val token = authData.requireValidJwt(shallow)
-    val projectAccountId = adminService.fetchProjectBySignature(projectSignature).account.id
+
+    val projectAccountId = adminService.fetchProjectBySignature(normalizedSignature).account.id
     val userAccountId = authRepository.resolveShallowUser(token).account?.id ?: -1
     projectAccountId == userAccountId
   } catch (t: Throwable) {
@@ -65,22 +73,22 @@ class AuthServiceImpl(
   override fun authUser(identifier: String, signature: String, projectSignature: String): User {
     log.debug("Fetching user by $projectSignature, id $identifier, signature $signature")
 
-    projectSignature.requireNotBlank { "Project signature" }
-    identifier.requireNotBlank { "ID" }
-    signature.requireNotBlank { "Signature" }
+    val normalizedIdentifier = Normalizers.CustomUserId.run(identifier).requireValid { "Identifier" }
+    val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
+    val normalizedProjectSignature = Normalizers.Dense.run(projectSignature).requireValid { "Signature" }
 
-    val project = adminService.fetchProjectBySignature(projectSignature)
-    return fetchUserByCredentials(project.id, identifier, signature)
+    val project = adminService.fetchProjectBySignature(normalizedProjectSignature)
+    return fetchUserByCredentials(project.id, normalizedIdentifier, normalizedRawSignature)
   }
 
   override fun authAdmin(identifier: String, signature: String): User {
     log.debug("Fetching account by id $identifier, signature $signature")
 
-    identifier.requireNotBlank { "ID" }
-    signature.requireNotBlank { "Signature" }
+    val normalizedIdentifier = Normalizers.CustomUserId.run(identifier).requireValid { "Identifier" }
+    val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
 
     val project = adminService.fetchAdminProject()
-    return fetchUserByCredentials(project.id, identifier, signature)
+    return fetchUserByCredentials(project.id, normalizedIdentifier, normalizedRawSignature)
   }
 
   override fun createTokenFor(
@@ -89,12 +97,12 @@ class AuthServiceImpl(
   ): String {
     log.debug("Generating token for $user, origin $origin")
 
-    origin.requireNullOrNotBlank { "Origin" }
+    val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
 
     return authRepository.createToken(
       userId = user.userId,
       authorities = user.allAuthorities,
-      origin = origin,
+      origin = normalizedOrigin,
     )
   }
 
@@ -114,6 +122,27 @@ class AuthServiceImpl(
     )
   }
 
+  override fun fetchTokenDetails(authData: Authentication): OwnedToken {
+    log.debug("Fetching token details for authentication $authData")
+    val token = authData.requireValidJwt(shallow = false)
+    return authRepository.fetchTokenDetails(token)
+  }
+
+  override fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<OwnedToken> {
+    log.debug("Fetching all token details for authentication $authData [valid $valid]")
+    val token = authData.requireValidJwt(shallow = false)
+    return authRepository.fetchAllTokenDetails(token, valid)
+  }
+
+  override fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<OwnedToken> {
+    log.debug("Fetching all token details for user $userId [valid $valid]")
+
+    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+    authData.requireValidJwt(shallow = false)
+
+    return authRepository.fetchAllTokenDetailsFor(normalizedUserId, valid)
+  }
+
   override fun unauthorize(authData: Authentication) {
     log.debug("Unauthorizing user by authentication $authData")
     val token = authData.requireValidJwt(shallow = true)
@@ -129,10 +158,51 @@ class AuthServiceImpl(
   override fun unauthorizeAllFor(authData: Authentication, userId: UserId) {
     log.debug("Unauthorizing all access for $userId")
 
-    userId.requireValidFormat()
+    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
     authData.requireValidJwt(shallow = false)
 
-    authRepository.unauthorizeAllTokensFor(userId)
+    authRepository.unauthorizeAllTokensFor(normalizedUserId)
+  }
+
+  override fun unauthorizeTokens(authData: Authentication, tokenLocators: List<String>) {
+    log.debug("Unauthorizing all access $tokenLocators")
+
+    val normalizedTokens = tokenLocators.map {
+      Normalizers.Dense.run(it).requireValid { "Token ID" }
+    }
+    authData.requireValidJwt(shallow = false)
+
+    val tokens = normalizedTokens.map(::Token)
+    authRepository.unauthorizeAllTokens(tokens)
+  }
+
+  override fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User {
+    log.debug("Authentication $authData requesting '${privilege.name}' access to $targetUserId")
+    adminService.fetchProjectById(targetUserId.projectId) // sanity check
+
+    val normalizedUserId = Normalizers.UserId.run(targetUserId).requireValid { "User ID" }
+    val token = authData.requireValidJwt(shallow = false)
+
+    // quick check to prevent unnecessary queries
+    val shallowRequester = authRepository.resolveShallowUser(token)
+    val isSelf = shallowRequester.userId == normalizedUserId
+    val isPrivilegedShallow = shallowRequester.isAuthorizedFor(privilege.level)
+    require(isSelf || isPrivilegedShallow) { "Only ${privilege.level.groupName} are authorized" }
+
+    // fetch non-shallow data for requester
+    val requester = userService.fetchUserByUserId(shallowRequester.userId, withTokens = false)
+    if (isSelf) return requester
+
+    // check minimum authorization level, as creds might have changed
+    val isPrivileged = requester.isAuthorizedFor(privilege.level)
+    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+
+    // check if authorization level is enough (mods can't access other mods)
+    val target = userService.fetchUserByUserId(normalizedUserId, withTokens = false)
+    val isHigherAuthority = requester.authority.ordinal > target.authority.ordinal
+    require(isHigherAuthority) { "Only ${target.authority.nextGroupName} are authorized" }
+
+    return target
   }
 
   // Helpers
@@ -152,17 +222,18 @@ class AuthServiceImpl(
     return user
   }
 
-  private fun Authentication.requireValidJwt(shallow: Boolean) = try {
-    (this as JwtAuthenticationToken).apply {
-      try {
-        authRepository.requireValid(this, shallow)
-      } catch (t: Throwable) {
-        throw IllegalAccessException(t.message)
+  private fun Authentication.requireValidJwt(shallow: Boolean): JwtAuthenticationToken =
+    try {
+      (this as JwtAuthenticationToken).apply {
+        try {
+          authRepository.requireValid(this, shallow)
+        } catch (t: Throwable) {
+          throw IllegalAccessException(t.message).initCause(t)
+        }
       }
+    } catch (t: Throwable) {
+      log.warn("Wrong token type $this")
+      if (t is TypeCastException) throw IllegalAccessException(t.message) else throw t
     }
-  } catch (t: Throwable) {
-    log.warn("Wrong token type $this")
-    throw IllegalAccessException("Wrong token type")
-  }
 
 }

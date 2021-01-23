@@ -24,3 +24,7 @@ app:
         name: ${SEED_OWNER_NAME:Administrator}
         signature: ${SEED_OWNER_SECRET:}
         email: ${SEED_OWNER_EMAIL:admin@appifyhub.com}
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL:INFO}

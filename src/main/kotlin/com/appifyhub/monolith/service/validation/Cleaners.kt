@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.service.validation
 
 import com.appifyhub.monolith.domain.user.Organization
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.empty
 
 object Cleaners {
@@ -19,11 +20,12 @@ object Cleaners {
   val AccountId = MakeCardinalLong
   val ProjectName = Trim
 
-  // ID cleaners
+  // ID domain cleaners
 
   val CustomUserId = RemoveSpaces
   val Username = RemoveSpaces
   val RawSignature = Trim
+  val UserId = cleansToNonNull<UserId> { UserId(RemoveSpaces.clean(it?.id), MakeCardinalLong.clean(it?.projectId)) }
 
   // Contact cleaners
 
@@ -64,6 +66,6 @@ object Cleaners {
 
   val Origin = cleansToNullable<String> { it?.trim() }
 
-  val Birthday = cleansToNullable<BDay> { it }
+  val BDay = cleansToNullable<BDay> { it }
 
 }

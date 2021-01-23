@@ -17,8 +17,8 @@ fun User.toNetwork(): UserResponse = UserResponse(
   contactType = contactType.name.toLowerCase(),
   birthday = birthday?.let { DateTimeMapper.formatAsDate(it) },
   company = company?.toNetwork(),
-  createdAt = DateTimeMapper.formatAsDate(createdAt),
-  updatedAt = DateTimeMapper.formatAsDate(updatedAt),
+  createdAt = DateTimeMapper.formatAsDateTime(createdAt),
+  updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
 )
 
 fun OrganizationDto.toDomain(): Organization = Organization(

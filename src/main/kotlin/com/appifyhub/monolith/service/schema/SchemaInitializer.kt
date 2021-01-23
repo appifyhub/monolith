@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.service.schema
 
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
@@ -49,6 +48,8 @@ class SchemaInitializer(
         schemaService.update(updatedSchema)
       }
     }
+
+    log.info("Schema initialization done")
   }
 
   /**
@@ -58,12 +59,11 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // create empty account for the root owner
-    val account = adminService.addAccount(AccountCreator(id = null))
+    val account = adminService.addAccount()
 
     // create the root project
     var project = adminService.addProject(
       ProjectCreator(
-        id = null,
         account = account,
         name = rootConfig.rootProjectName.takeIfNotBlank()!!,
         type = Project.Type.FREE,
@@ -123,9 +123,9 @@ class SchemaInitializer(
         (see below)
         [[ THIS WILL BE PRINTED ONLY ONCE ]]
         
-        Your project '${project.name}' is now set up. Your secret signature for it: '$projectSignature'.
+        Admin project '${project.name}' is now set up. Your secret signature for it: '$projectSignature'.
         Account owner '${owner.name} <${owner.contact}>' with ID '${owner.userId.id}' uses
-        this password to authenticate: '$ownerSignature'.
+        this secret signature to authenticate: '$ownerSignature'.
         
         [[ END OF TRANSMISSION ]]
       """.trimIndent()

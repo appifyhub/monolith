@@ -2,17 +2,16 @@ package com.appifyhub.monolith.repository.admin
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountCreator
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.mapper.applyTo
-import com.appifyhub.monolith.domain.mapper.toAccountData
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.mapper.toProjectData
 import com.appifyhub.monolith.storage.dao.AccountDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
+import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
@@ -29,9 +28,11 @@ class AdminRepositoryImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  private var adminProject = projectDao.findAll()
-    .map { it.toDomain() }
-    .minByOrNull { it.id }!!
+  private val lazyAdminProject: Project by lazy {
+    projectDao.findAll()
+      .map { it.toDomain() }
+      .minByOrNull { it.id }!!
+  }
 
   override fun addProject(creator: ProjectCreator): Project {
     log.debug("Adding project by creator $creator")
@@ -42,9 +43,14 @@ class AdminRepositoryImpl(
     return projectDao.save(projectData).toDomain()
   }
 
-  override fun addAccount(creator: AccountCreator): Account {
-    log.debug("Adding account by creator $creator")
-    val accountData = creator.toAccountData(timeProvider = timeProvider)
+  override fun addAccount(): Account {
+    log.debug("Adding account by creator")
+
+    val accountData = AccountDbm(
+      accountId = null,
+      createdAt = timeProvider.currentDate,
+      updatedAt = timeProvider.currentDate,
+    )
     return accountDao.save(accountData).toDomain()
   }
 
@@ -55,7 +61,7 @@ class AdminRepositoryImpl(
 
   override fun getAdminProject(): Project {
     log.debug("Fetching admin project")
-    return adminProject
+    return lazyAdminProject
   }
 
   override fun fetchProjectById(id: Long): Project {
@@ -113,5 +119,4 @@ class AdminRepositoryImpl(
     log.debug("Removing account $accountId")
     accountDao.deleteById(accountId)
   }
-
 }

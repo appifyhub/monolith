@@ -3,6 +3,7 @@ package com.appifyhub.monolith.repository.auth
 import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.auth.Token
 import com.appifyhub.monolith.domain.common.stubAccount
+import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -14,9 +15,11 @@ import com.appifyhub.monolith.repository.auth.locator.TokenLocatorEncoder
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Repository
+import java.util.Calendar
 import java.util.Date
 import org.springframework.security.core.userdetails.User as SpringUser
 
@@ -39,6 +42,9 @@ class AuthRepositoryImpl(
   private val tokenLocatorDecoder: TokenLocatorDecoder,
   private val timeProvider: TimeProvider,
 ) : AuthRepository {
+
+  @Value("\${app.security.jwt.default-expiration-days}")
+  private var defaultExpirationDays: Int = 1
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -70,11 +76,14 @@ class AuthRepositoryImpl(
     }
 
     val now = timeProvider.currentCalendar.time
+    val expiration = timeProvider.currentCalendar.apply {
+      add(Calendar.DAY_OF_MONTH, defaultExpirationDays)
+    }.time
     ownedTokenRepository.addToken(
       userId = userId,
       token = Token(tokenLocatorEncoded),
       createdAt = now,
-      expiresAt = now,
+      expiresAt = expiration,
       origin = origin,
     )
     return jwtHelper.createJwtForClaims(subject = username, claims = claims)
@@ -95,13 +104,13 @@ class AuthRepositoryImpl(
   override fun requireValid(token: JwtAuthenticationToken, shallow: Boolean) {
     log.debug("Requiring valid token $token [shallow $shallow]")
 
-    require(shallow && token.isExpired) { "Token expired ${token.secondsUntilExpired} seconds ago" }
+    if (shallow) require(!token.isExpired) { "Token expired ${token.secondsUntilExpired} seconds ago" }
 
     val isBlocked = ownedTokenRepository.checkIsBlocked(Token(token.locator))
-    require(isBlocked) { "Token is blocked" }
+    require(!isBlocked) { "Token is blocked" }
 
     val isExpired = ownedTokenRepository.checkIsExpired(Token(token.locator))
-    require(isExpired) { "Token expired ${token.secondsUntilExpired} seconds ago" }
+    require(!isExpired) { "Token expired ${token.secondsUntilExpired} seconds ago" }
   }
 
   override fun resolveShallowUser(token: JwtAuthenticationToken): User {
@@ -163,6 +172,29 @@ class AuthRepositoryImpl(
     return ownedTokenRepository.fetchTokenDetails(Token(token.locator))
   }
 
+  override fun fetchAllTokenDetails(token: JwtAuthenticationToken, valid: Boolean?): List<OwnedToken> {
+    log.debug("Fetching all token details for $token [valid $valid]")
+    val userId = UserId.fromUnifiedFormat(token.name)
+    val user = userRepository.fetchUserByUserId(userId, withTokens = false)
+    val project = stubProject().copy(id = userId.projectId)
+    return when (valid) {
+      true -> ownedTokenRepository.fetchAllValidTokens(user, project)
+      false -> ownedTokenRepository.fetchAllBlockedTokens(user, project)
+      null -> ownedTokenRepository.fetchAllTokens(user, project)
+    }
+  }
+
+  override fun fetchAllTokenDetailsFor(userId: UserId, valid: Boolean?): List<OwnedToken> {
+    log.debug("Fetching all token details for $userId [valid $valid]")
+    val user = userRepository.fetchUserByUserId(userId, withTokens = false)
+    val project = stubProject().copy(id = userId.projectId)
+    return when (valid) {
+      true -> ownedTokenRepository.fetchAllTokens(user, project)
+      false -> ownedTokenRepository.fetchAllBlockedTokens(user, project)
+      null -> ownedTokenRepository.fetchAllValidTokens(user, project)
+    }
+  }
+
   override fun unauthorizeToken(token: JwtAuthenticationToken) {
     log.debug("Unauthorizing token $token")
     ownedTokenRepository.blockToken(Token(token.locator))
@@ -172,13 +204,18 @@ class AuthRepositoryImpl(
     log.debug("Unauthorizing all tokens with $token")
     val userId = UserId.fromUnifiedFormat(token.name)
     val user = userRepository.fetchUserByUserId(userId, withTokens = true)
-    ownedTokenRepository.blockAllTokens(user)
+    ownedTokenRepository.blockAllTokensFrom(user)
   }
 
   override fun unauthorizeAllTokensFor(userId: UserId) {
     log.debug("Unauthorizing all tokens for $userId")
     val user = userRepository.fetchUserByUserId(userId, withTokens = true)
-    ownedTokenRepository.blockAllTokens(user)
+    ownedTokenRepository.blockAllTokensFrom(user)
+  }
+
+  override fun unauthorizeAllTokens(tokens: List<Token>) {
+    log.debug("Unauthorizing all tokens $tokens")
+    ownedTokenRepository.blockAllTokens(tokens)
   }
 
   // Helpers

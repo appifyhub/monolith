@@ -7,7 +7,7 @@ import com.appifyhub.monolith.storage.model.auth.TokenDbm
 
 fun OwnedTokenDbm.toDomain(): OwnedToken = OwnedToken(
   token = Token(tokenLocator),
-  isBlocked = isBlocked,
+  isBlocked = blocked,
   origin = origin,
   createdAt = createdAt,
   expiresAt = expiresAt,
@@ -16,7 +16,7 @@ fun OwnedTokenDbm.toDomain(): OwnedToken = OwnedToken(
 
 fun OwnedToken.toData(): OwnedTokenDbm = OwnedTokenDbm(
   tokenLocator = token.tokenLocator,
-  isBlocked = isBlocked,
+  blocked = isBlocked,
   origin = origin,
   createdAt = createdAt,
   expiresAt = expiresAt,
@@ -24,9 +24,5 @@ fun OwnedToken.toData(): OwnedTokenDbm = OwnedTokenDbm(
 )
 
 fun TokenDbm.toDomain(): Token = Token(
-  tokenLocator = tokenLocator,
-)
-
-fun Token.toData(): TokenDbm = TokenDbm(
   tokenLocator = tokenLocator,
 )

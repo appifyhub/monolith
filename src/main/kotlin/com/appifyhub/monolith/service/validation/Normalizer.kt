@@ -11,7 +11,7 @@ interface Normalizer<T : Any?> {
     }
   }
 
-  fun normalize(argument: T?): Result<T>
+  fun run(argument: T?): Result<T>
 
 }
 
@@ -19,7 +19,7 @@ fun <T> normalizesNullable(
   validator: Validator<T>,
   cleaner: Cleaner<T, T?>,
 ): Normalizer<T?> = object : Normalizer<T?> {
-  override fun normalize(argument: T?): Normalizer.Result<T?> {
+  override fun run(argument: T?): Normalizer.Result<T?> {
     val cleaned = cleaner.clean(argument)
     return Normalizer.Result(
       value = cleaned,
@@ -32,7 +32,7 @@ fun <T> normalizesNonNull(
   validator: Validator<T>,
   cleaner: Cleaner<T, T>,
 ): Normalizer<T> = object : Normalizer<T> {
-  override fun normalize(argument: T?): Normalizer.Result<T> {
+  override fun run(argument: T?): Normalizer.Result<T> {
     val cleaned = cleaner.clean(argument)
     return Normalizer.Result(
       value = cleaned,

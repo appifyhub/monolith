@@ -7,13 +7,13 @@ import org.slf4j.LoggerFactory
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
-@RestController("/")
+@RestController
 class HeartbeatController(
   private val timeProvider: TimeProvider,
 ) {
 
   object Endpoints {
-    const val HEARTBEAT = "heartbeat"
+    const val HEARTBEAT = "/heartbeat"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)

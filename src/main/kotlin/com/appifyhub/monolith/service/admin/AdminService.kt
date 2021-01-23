@@ -2,7 +2,6 @@ package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountCreator
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
@@ -11,7 +10,7 @@ interface AdminService {
 
   @Throws fun addProject(creator: ProjectCreator): Project
 
-  @Throws fun addAccount(creator: AccountCreator): Account
+  @Throws fun addAccount(): Account
 
   @Throws fun fetchAccountById(id: Long): Account
 

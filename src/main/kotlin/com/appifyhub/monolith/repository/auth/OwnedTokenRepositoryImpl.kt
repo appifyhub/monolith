@@ -45,12 +45,17 @@ class OwnedTokenRepositoryImpl(
 
   override fun fetchTokenDetails(token: Token): OwnedToken {
     log.debug("Finding token details for $token")
-    return ownedTokenDao.findById(token.toData()).get().toDomain()
+    return ownedTokenDao.findById(token.tokenLocator).get().toDomain()
+  }
+
+  override fun fetchAllTokenDetails(tokens: List<Token>): List<OwnedToken> {
+    log.debug("Finding all token details for $tokens")
+    return ownedTokenDao.findAllById(tokens.map(Token::tokenLocator)).map(OwnedTokenDbm::toDomain)
   }
 
   override fun fetchAllBlockedTokens(owner: User, project: Project): List<OwnedToken> {
     log.debug("Finding all blocked tokens for user $owner")
-    return ownedTokenDao.findAllByOwnerIsAndBlocked(
+    return ownedTokenDao.findAllByOwnerAndBlocked(
       owner = owner.toData(project),
       blocked = true,
     ).map(OwnedTokenDbm::toDomain)
@@ -58,7 +63,7 @@ class OwnedTokenRepositoryImpl(
 
   override fun fetchAllValidTokens(owner: User, project: Project): List<OwnedToken> {
     log.debug("Finding all valid tokens for user $owner")
-    return ownedTokenDao.findAllByOwnerIsAndBlocked(
+    return ownedTokenDao.findAllByOwnerAndBlocked(
       owner = owner.toData(project),
       blocked = false,
     ).map(OwnedTokenDbm::toDomain)
@@ -71,23 +76,35 @@ class OwnedTokenRepositoryImpl(
 
   override fun checkIsExpired(token: Token): Boolean {
     log.debug("Checking if $token is a valid token")
-    return ownedTokenDao.findById(token.toData()).map { it.toDomain().isExpired }.orElse(true)
+    return ownedTokenDao.findById(token.tokenLocator).map { it.toDomain().isExpired }.orElse(true)
   }
 
   override fun checkIsBlocked(token: Token): Boolean {
     log.debug("Checking if $token is a blocked token")
-    return ownedTokenDao.findById(token.toData()).map { it.toDomain().isBlocked }.orElse(true)
+    return ownedTokenDao.findById(token.tokenLocator).map { it.toDomain().isBlocked }.orElse(true)
   }
 
   override fun blockToken(token: Token): OwnedToken {
     log.debug("Blocking token $token")
-    val ownedToken = ownedTokenDao.findById(token.toData()).get().toDomain()
+    val ownedToken = ownedTokenDao.findById(token.tokenLocator).get().toDomain()
     if (ownedToken.isBlocked) return ownedToken
     val blocked = ownedToken.copy(isBlocked = true)
     return ownedTokenDao.save(blocked.toData()).toDomain()
   }
 
-  override fun blockAllTokens(owner: User): List<OwnedToken> {
+  override fun blockAllTokens(tokens: List<Token>): List<OwnedToken> {
+    log.debug("Blocking tokens $tokens")
+    val tokensData = tokens.map(Token::tokenLocator)
+    val ownedTokens = ownedTokenDao.findAllById(tokensData).map(OwnedTokenDbm::toDomain)
+    if (ownedTokens.isEmpty()) return ownedTokens
+
+    val valid = ownedTokens.filter { !it.isExpired && !it.isBlocked }
+    val toBlock = valid.map { it.copy(isBlocked = true) }
+
+    return ownedTokenDao.saveAll(toBlock.map(OwnedToken::toData)).map(OwnedTokenDbm::toDomain)
+  }
+
+  override fun blockAllTokensFrom(owner: User): List<OwnedToken> {
     log.debug("Blocking tokens for $owner")
 
     val valid = owner.ownedTokens.filter { !it.isExpired && !it.isBlocked }

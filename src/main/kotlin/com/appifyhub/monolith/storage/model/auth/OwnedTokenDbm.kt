@@ -7,12 +7,10 @@ import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
 import javax.persistence.Id
-import javax.persistence.IdClass
 import javax.persistence.ManyToOne
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
-@IdClass(TokenDbm::class)
 @Entity(name = "owned_token")
 class OwnedTokenDbm(
 
@@ -21,7 +19,7 @@ class OwnedTokenDbm(
   var tokenLocator: String,
 
   @Column(nullable = false)
-  var isBlocked: Boolean,
+  var blocked: Boolean,
 
   @Column(nullable = true, updatable = false, length = 256)
   var origin: String?,

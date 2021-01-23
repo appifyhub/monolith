@@ -19,6 +19,8 @@ interface OwnedTokenRepository {
 
   @Throws fun fetchTokenDetails(token: Token): OwnedToken
 
+  @Throws fun fetchAllTokenDetails(tokens: List<Token>): List<OwnedToken>
+
   @Throws fun fetchAllBlockedTokens(owner: User, project: Project): List<OwnedToken>
 
   @Throws fun fetchAllValidTokens(owner: User, project: Project): List<OwnedToken>
@@ -31,6 +33,8 @@ interface OwnedTokenRepository {
 
   @Throws fun blockToken(token: Token): OwnedToken
 
-  @Throws fun blockAllTokens(owner: User): List<OwnedToken>
+  @Throws fun blockAllTokens(tokens: List<Token>): List<OwnedToken>
+
+  @Throws fun blockAllTokensFrom(owner: User): List<OwnedToken>
 
 }

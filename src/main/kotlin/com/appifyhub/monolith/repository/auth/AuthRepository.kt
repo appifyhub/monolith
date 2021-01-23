@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.repository.auth
 
 import com.appifyhub.monolith.domain.auth.OwnedToken
+import com.appifyhub.monolith.domain.auth.Token
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import org.springframework.security.core.GrantedAuthority
@@ -14,6 +15,10 @@ interface AuthRepository {
 
   @Throws fun fetchTokenDetails(token: JwtAuthenticationToken): OwnedToken
 
+  @Throws fun fetchAllTokenDetails(token: JwtAuthenticationToken, valid: Boolean?): List<OwnedToken>
+
+  @Throws fun fetchAllTokenDetailsFor(userId: UserId, valid: Boolean?): List<OwnedToken>
+
   @Throws fun checkIsValid(token: JwtAuthenticationToken, shallow: Boolean): Boolean
 
   @Throws fun requireValid(token: JwtAuthenticationToken, shallow: Boolean)
@@ -23,5 +28,7 @@ interface AuthRepository {
   @Throws fun unauthorizeAllTokens(token: JwtAuthenticationToken)
 
   @Throws fun unauthorizeAllTokensFor(userId: UserId)
+
+  @Throws fun unauthorizeAllTokens(tokens: List<Token>)
 
 }

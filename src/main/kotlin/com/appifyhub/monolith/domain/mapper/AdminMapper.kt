@@ -2,7 +2,6 @@ package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountCreator
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
@@ -22,14 +21,6 @@ fun AccountUpdater.applyTo(
   }
   .copy(updatedAt = timeProvider.currentDate)
 
-fun AccountCreator.toAccountData(
-  timeProvider: TimeProvider,
-): AccountDbm = AccountDbm(
-  accountId = id,
-  createdAt = timeProvider.currentDate,
-  updatedAt = timeProvider.currentDate,
-)
-
 fun ProjectUpdater.applyTo(
   project: Project,
   passwordEncoder: PasswordEncoder,
@@ -46,7 +37,7 @@ fun ProjectCreator.toProjectData(
   signature: String,
   timeProvider: TimeProvider,
 ): ProjectDbm = ProjectDbm(
-  projectId = id,
+  projectId = null,
   account = account.toData(),
   signature = signature,
   name = name,

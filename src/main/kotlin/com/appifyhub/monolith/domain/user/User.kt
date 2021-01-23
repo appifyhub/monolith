@@ -59,11 +59,11 @@ data class User(
     override fun getAuthority() = name
 
     // ADMIN -> admins
-    val groupName = name.toLowerCase().plus("s")
+    val groupName: String by lazy { name.toLowerCase().plus("s") }
 
     // DEFAULT -> moderators
     // OWNER -> gods
-    val nextGroupName = values().getOrNull(ordinal + 1) ?: "gods"
+    val nextGroupName: String by lazy { values().getOrNull(ordinal + 1)?.groupName ?: "gods" }
 
   }
 

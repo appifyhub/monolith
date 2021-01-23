@@ -1,7 +1,8 @@
 package com.appifyhub.monolith.jwt
 
-import com.appifyhub.monolith.controller.auth.AuthController
+import com.appifyhub.monolith.controller.auth.UserAuthController
 import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.controller.heartbeat.HeartbeatController
 import com.appifyhub.monolith.repository.user.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -29,9 +30,10 @@ class WebSecurityConfiguration(
 
       .authorizeRequests {
         it.antMatchers(
-          AuthController.Endpoints.AUTH,
-          AuthController.Endpoints.ADMIN_AUTH,
+          UserAuthController.Endpoints.AUTH,
+          UserAuthController.Endpoints.ADMIN_AUTH,
           Endpoints.ERROR,
+          HeartbeatController.Endpoints.HEARTBEAT,
         )
           .permitAll()
           .anyRequest()

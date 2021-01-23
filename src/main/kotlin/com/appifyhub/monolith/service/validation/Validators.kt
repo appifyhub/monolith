@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.service.validation
 
 import com.appifyhub.monolith.domain.user.Organization
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.hasNoSpaces
 import com.appifyhub.monolith.util.isNullOrNotBlank
 import com.google.i18n.phonenumbers.PhoneNumberUtil
@@ -40,6 +41,7 @@ object Validators {
   val CustomUserId = NoSpaces
   val Username = NoSpaces
   val RawSignature = NotBlank
+  val UserId = validatesAs<UserId> { NoSpaces.isValid(it?.id) && PositiveLong.isValid(it?.projectId) }
 
   // Contact validators
 
@@ -82,7 +84,7 @@ object Validators {
 
   val Origin = NotBlankNullable
 
-  val Birthday = validatesAs<BDay> validator@{
+  val BDay = validatesAs<BDay> validator@{
     val rawBirthday = it?.first ?: return@validator true
     val birthday = Timestamp(rawBirthday.time).toLocalDateTime()
     val today = Timestamp(it.second.currentMillis).toLocalDateTime()
