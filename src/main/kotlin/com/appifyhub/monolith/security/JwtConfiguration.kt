@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.jwt
+package com.appifyhub.monolith.security
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

@@ -1,7 +1,6 @@
-package com.appifyhub.monolith.jwt
+package com.appifyhub.monolith.security
 
 import com.appifyhub.monolith.controller.auth.UserAuthController
-import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.heartbeat.HeartbeatController
 import com.appifyhub.monolith.repository.user.UserRepository
 import org.springframework.context.annotation.Bean
@@ -10,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
+
+import com.appifyhub.monolith.controller.common.Endpoints as CommonEndpoints
 
 @Component
 class WebSecurityConfiguration(
@@ -27,13 +28,14 @@ class WebSecurityConfiguration(
       .sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       .and()
-
       .authorizeRequests {
         it.antMatchers(
           UserAuthController.Endpoints.AUTH,
           UserAuthController.Endpoints.ADMIN_AUTH,
-          Endpoints.ERROR,
           HeartbeatController.Endpoints.HEARTBEAT,
+          CommonEndpoints.ERROR,
+          CommonEndpoints.H2_CONSOLE,
+          CommonEndpoints.FAVICON,
         )
           .permitAll()
           .anyRequest()
@@ -41,6 +43,11 @@ class WebSecurityConfiguration(
       }
       .exceptionHandling()
       .disable()
+
+      .headers()
+      .frameOptions()
+      .sameOrigin()
+      .and()
 
       .oauth2ResourceServer { it.jwt() }
   }

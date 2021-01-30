@@ -1,19 +1,12 @@
 package com.appifyhub.monolith.repository.auth
 
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.network.auth.UserCredentialsRequest
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.storage.model.user.UserDbm
-import com.appifyhub.monolith.util.TimeProviderFake
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
-// FIXME/MM This is placeholder code - it's most likely all wrong
+// FIXME/MM This is placeholder code -- to be removed
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])

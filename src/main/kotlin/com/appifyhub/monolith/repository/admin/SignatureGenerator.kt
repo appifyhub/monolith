@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.repository.admin
 
-import com.appifyhub.monolith.util.empty
+import com.appifyhub.monolith.util.ext.empty
 import java.util.UUID
 
 object SignatureGenerator {

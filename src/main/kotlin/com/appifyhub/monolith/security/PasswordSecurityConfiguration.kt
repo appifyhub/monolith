@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.jwt
+package com.appifyhub.monolith.security
 
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

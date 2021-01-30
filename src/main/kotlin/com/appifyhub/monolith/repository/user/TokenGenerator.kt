@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.repository.user
 
-import com.appifyhub.monolith.util.empty
+import com.appifyhub.monolith.util.ext.empty
 import java.util.UUID
 import kotlin.math.pow
 

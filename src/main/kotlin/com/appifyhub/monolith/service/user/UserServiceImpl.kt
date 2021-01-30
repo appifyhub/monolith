@@ -16,7 +16,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.TimeProvider
-import com.appifyhub.monolith.util.requireValid
+import com.appifyhub.monolith.util.ext.requireValid
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

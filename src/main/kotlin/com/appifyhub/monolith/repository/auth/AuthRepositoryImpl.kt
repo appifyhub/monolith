@@ -7,7 +7,7 @@ import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.jwt.JwtHelper
+import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.auth.locator.TokenLocator
 import com.appifyhub.monolith.repository.auth.locator.TokenLocatorDecoder

@@ -13,7 +13,7 @@ import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.schema.SchemaInitializer.SupportedVersions.INITIAL
 import com.appifyhub.monolith.service.schema.SchemaInitializer.SupportedVersions.values
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.takeIfNotBlank
+import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -123,9 +123,11 @@ class SchemaInitializer(
         (see below)
         [[ THIS WILL BE PRINTED ONLY ONCE ]]
         
-        Admin project '${project.name}' is now set up. Your secret signature for it: '$projectSignature'.
-        Account owner '${owner.name} <${owner.contact}>' with ID '${owner.userId.id}' uses
-        this secret signature to authenticate: '$ownerSignature'.
+        Admin project '${project.name}' (ID = ${project.id}) is now set up. 
+        Your project's secret signature: '$projectSignature'.
+        
+        Account owner '${owner.name} <${owner.contact}>' (ID = ${owner.userId.id}) is now set up.
+        Your account's secret signature: '$ownerSignature'.
         
         [[ END OF TRANSMISSION ]]
       """.trimIndent()

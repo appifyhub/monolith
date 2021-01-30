@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.repository.auth.locator
 
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.util.takeIfNotBlank
+import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import org.springframework.stereotype.Component
 import java.util.Base64
 

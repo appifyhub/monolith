@@ -37,6 +37,7 @@ repositories {
 }
 
 dependencies {
+
   // language essentials
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
@@ -66,14 +67,22 @@ dependencies {
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
   kapt("org.springframework.boot:spring-boot-configuration-processor")
 
+  // runtime dependencies
+  runtimeOnly("com.h2database:h2")
+  runtimeOnly("org.postgresql:postgresql")
+
+  // test annotation processors
+  testImplementation("org.springframework.boot:spring-boot-configuration-processor")
+  testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
   // tests
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.hibernate:hibernate-testing")
+  testImplementation("com.h2database:h2")
+  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
+  testImplementation("org.mockito:mockito-core:3.+")
 
-  // runtime dependencies
-  runtimeOnly("com.h2database:h2")
-  runtimeOnly("org.postgresql:postgresql")
 }
 
 // endregion

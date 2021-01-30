@@ -3,7 +3,7 @@ package com.appifyhub.monolith.domain.mapper
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.TimeProvider
-import com.appifyhub.monolith.util.empty
+import com.appifyhub.monolith.util.ext.empty
 import org.springframework.security.core.userdetails.UserDetails
 
 fun User.toSecurityUser(): UserDetails =

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.config
+package com.appifyhub.monolith.errors
 
 import com.appifyhub.monolith.network.common.MessageResponse
 import org.slf4j.LoggerFactory
@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 
 @ControllerAdvice
@@ -37,6 +38,13 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
         MessageResponse("Expired Access : ${t.message}"),
         HttpHeaders(),
         HttpStatus.UNAUTHORIZED,
+      )
+
+    t is ResponseStatusException ->
+      ResponseEntity(
+        MessageResponse(t.reason ?: "Response Error : ${t.message}"),
+        HttpHeaders(),
+        t.status,
       )
 
     else ->

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.jwt
+package com.appifyhub.monolith.security
 
 import com.appifyhub.monolith.util.TimeProvider
 import com.auth0.jwt.JWT

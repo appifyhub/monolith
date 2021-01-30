@@ -9,7 +9,7 @@ import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.service.validation.Normalizers
-import com.appifyhub.monolith.util.requireValid
+import com.appifyhub.monolith.util.ext.requireValid
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

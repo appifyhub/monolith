@@ -9,8 +9,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-class AppifyHubApplicationTests {
+class AppifyHubApplicationTest {
 
-  @Test fun `context loads`() = println("Context loaded")
+  @Test fun `context loads`() = Unit
 
 }

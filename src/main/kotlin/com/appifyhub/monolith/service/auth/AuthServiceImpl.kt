@@ -10,7 +10,7 @@ import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.service.user.UserServiceImpl.UserPrivilege
 import com.appifyhub.monolith.service.validation.Normalizers
-import com.appifyhub.monolith.util.requireValid
+import com.appifyhub.monolith.util.ext.requireValid
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder

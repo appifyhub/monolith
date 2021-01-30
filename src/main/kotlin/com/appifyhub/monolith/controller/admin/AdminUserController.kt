@@ -6,7 +6,7 @@ import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserServiceImpl.UserPrivilege
-import com.appifyhub.monolith.util.throwUnauthorized
+import com.appifyhub.monolith.util.ext.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping

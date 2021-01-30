@@ -2,7 +2,7 @@ package com.appifyhub.monolith.service.validation
 
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.util.empty
+import com.appifyhub.monolith.util.ext.empty
 
 object Cleaners {
 
