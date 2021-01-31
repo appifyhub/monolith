@@ -76,12 +76,15 @@ dependencies {
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   // tests
+  testImplementation(platform("org.junit:junit-bom:5+"))
+  testImplementation("org.junit.jupiter:junit-jupiter")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.hibernate:hibernate-testing")
   testImplementation("com.h2database:h2")
   testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
   testImplementation("org.mockito:mockito-core:3.+")
+  testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2+")
 
 }
 
