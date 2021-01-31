@@ -17,45 +17,46 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
   private val log = LoggerFactory.getLogger(this::class.java)
 
   @ExceptionHandler(Throwable::class)
-  fun handleThrowable(t: Throwable) = when {
+  fun handleThrowable(t: Throwable): ResponseEntity<MessageResponse> =
+    when {
 
-    t is AccessDeniedException || t.message?.toLowerCase()?.contains("access is denied") == true ->
-      ResponseEntity(
-        MessageResponse("Unauthorized Access : ${t.message}"),
-        HttpHeaders(),
-        HttpStatus.UNAUTHORIZED,
-      )
+      t is AccessDeniedException || t.message?.toLowerCase()?.contains("access is denied") == true ->
+        ResponseEntity(
+          MessageResponse("Unauthorized Access : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.UNAUTHORIZED,
+        )
 
-    t.message?.toLowerCase()?.contains("token is blocked") == true ->
-      ResponseEntity(
-        MessageResponse("Blocked Access : ${t.message}"),
-        HttpHeaders(),
-        HttpStatus.UNAUTHORIZED,
-      )
+      t.message?.toLowerCase()?.contains("token is blocked") == true ->
+        ResponseEntity(
+          MessageResponse("Blocked Access : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.UNAUTHORIZED,
+        )
 
-    t.message?.toLowerCase()?.contains("token expired") == true ->
-      ResponseEntity(
-        MessageResponse("Expired Access : ${t.message}"),
-        HttpHeaders(),
-        HttpStatus.UNAUTHORIZED,
-      )
+      t.message?.toLowerCase()?.contains("token expired") == true ->
+        ResponseEntity(
+          MessageResponse("Expired Access : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.UNAUTHORIZED,
+        )
 
-    t is ResponseStatusException ->
-      ResponseEntity(
-        MessageResponse(t.reason ?: "Response Error : ${t.message}"),
-        HttpHeaders(),
-        t.status,
-      )
+      t is ResponseStatusException ->
+        ResponseEntity(
+          MessageResponse(t.reason ?: "Response Error : ${t.message}"),
+          HttpHeaders(),
+          t.status,
+        )
 
-    else ->
-      ResponseEntity(
-        MessageResponse("Internal Failure : ${t.message}"),
-        HttpHeaders(),
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      )
+      else ->
+        ResponseEntity(
+          MessageResponse("Internal Failure : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        )
 
-  }.also {
-    log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}", t)
-  }
+    }.also {
+      log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}", t)
+    }
 
 }
