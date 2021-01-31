@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.domain.mapper
 
+import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.auth.Token
 import com.appifyhub.monolith.storage.model.auth.OwnedTokenDbm
@@ -14,13 +15,15 @@ fun OwnedTokenDbm.toDomain(): OwnedToken = OwnedToken(
   owner = owner.toDomain(),
 )
 
-fun OwnedToken.toData(): OwnedTokenDbm = OwnedTokenDbm(
+fun OwnedToken.toData(
+  project: Project? = null,
+): OwnedTokenDbm = OwnedTokenDbm(
   tokenLocator = token.tokenLocator,
   blocked = isBlocked,
   origin = origin,
   createdAt = createdAt,
   expiresAt = expiresAt,
-  owner = owner.toData(),
+  owner = owner.toData(project),
 )
 
 fun TokenDbm.toDomain(): Token = Token(

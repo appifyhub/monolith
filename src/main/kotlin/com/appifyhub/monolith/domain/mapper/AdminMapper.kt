@@ -17,7 +17,7 @@ fun AccountUpdater.applyTo(
 ): Account = account
   .applySettable(addedOwners) { copy(owners = owners + it) }
   .applySettable(removedOwners) { removedList ->
-    copy(owners = owners.filter { it in removedList })
+    copy(owners = owners.filter { it !in removedList })
   }
   .copy(updatedAt = timeProvider.currentDate)
 
@@ -68,7 +68,7 @@ fun ProjectDbm.toDomain(): Project = Project(
   name = name,
   type = Project.Type.find(type, default = Project.Type.COMMERCIAL),
   status = Project.Status.find(status, default = Project.Status.REVIEW),
-  userIdType = Project.UserIdType.find(status, default = Project.UserIdType.RANDOM),
+  userIdType = Project.UserIdType.find(userIdType, default = Project.UserIdType.RANDOM),
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
