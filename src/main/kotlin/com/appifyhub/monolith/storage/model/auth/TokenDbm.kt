@@ -25,4 +25,10 @@ class TokenDbm(
     return tokenLocator.hashCode()
   }
 
+  override fun toString(): String {
+    return "TokenDbm(" +
+      "tokenLocator='$tokenLocator'" +
+      ")"
+  }
+
 }

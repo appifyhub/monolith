@@ -46,4 +46,51 @@ class ProjectDbm(
   @Temporal(TemporalType.TIMESTAMP)
   var updatedAt: Date = createdAt,
 
-) : Serializable
+) : Serializable {
+
+  @Suppress("DuplicatedCode")
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ProjectDbm) return false
+
+    if (projectId != other.projectId) return false
+    if (account != other.account) return false
+    if (signature != other.signature) return false
+    if (name != other.name) return false
+    if (type != other.type) return false
+    if (status != other.status) return false
+    if (userIdType != other.userIdType) return false
+    if (createdAt != other.createdAt) return false
+    if (updatedAt != other.updatedAt) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = projectId?.hashCode() ?: 0
+    result = 31 * result + account.hashCode()
+    result = 31 * result + signature.hashCode()
+    result = 31 * result + name.hashCode()
+    result = 31 * result + type.hashCode()
+    result = 31 * result + status.hashCode()
+    result = 31 * result + userIdType.hashCode()
+    result = 31 * result + createdAt.hashCode()
+    result = 31 * result + updatedAt.hashCode()
+    return result
+  }
+
+  override fun toString(): String {
+    return "ProjectDbm(" +
+      "projectId=$projectId, " +
+      "account=$account, " +
+      "signature='$signature', " +
+      "name='$name', " +
+      "type='$type', " +
+      "status='$status', " +
+      "userIdType='$userIdType', " +
+      "createdAt=$createdAt, " +
+      "updatedAt=$updatedAt" +
+      ")"
+  }
+
+}

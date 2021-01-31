@@ -68,4 +68,69 @@ class UserDbm(
   @ManyToOne(fetch = FetchType.EAGER, optional = true)
   var account: AccountDbm?,
 
-) : Serializable
+) : Serializable {
+
+  @Suppress("DuplicatedCode")
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is UserDbm) return false
+
+    if (userId != other.userId) return false
+    if (project != other.project) return false
+    if (signature != other.signature) return false
+    if (name != other.name) return false
+    if (type != other.type) return false
+    if (authority != other.authority) return false
+    if (allowsSpam != other.allowsSpam) return false
+    if (contact != other.contact) return false
+    if (contactType != other.contactType) return false
+    if (verificationToken != other.verificationToken) return false
+    if (birthday != other.birthday) return false
+    if (createdAt != other.createdAt) return false
+    if (updatedAt != other.updatedAt) return false
+    if (company != other.company) return false
+    if (account != other.account) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = userId.hashCode()
+    result = 31 * result + project.hashCode()
+    result = 31 * result + signature.hashCode()
+    result = 31 * result + (name?.hashCode() ?: 0)
+    result = 31 * result + type.hashCode()
+    result = 31 * result + authority.hashCode()
+    result = 31 * result + allowsSpam.hashCode()
+    result = 31 * result + (contact?.hashCode() ?: 0)
+    result = 31 * result + contactType.hashCode()
+    result = 31 * result + (verificationToken?.hashCode() ?: 0)
+    result = 31 * result + (birthday?.hashCode() ?: 0)
+    result = 31 * result + createdAt.hashCode()
+    result = 31 * result + updatedAt.hashCode()
+    result = 31 * result + (company?.hashCode() ?: 0)
+    result = 31 * result + (account?.hashCode() ?: 0)
+    return result
+  }
+
+  override fun toString(): String {
+    return "UserDbm(" +
+      "userId=$userId, " +
+      "project=$project, " +
+      "signature='$signature', " +
+      "name=$name, " +
+      "type='$type', " +
+      "authority='$authority', " +
+      "allowsSpam=$allowsSpam, " +
+      "contact=$contact, " +
+      "contactType='$contactType', " +
+      "verificationToken=$verificationToken, " +
+      "birthday=$birthday, " +
+      "createdAt=$createdAt, " +
+      "updatedAt=$updatedAt, " +
+      "company=$company, " +
+      "account=$account" +
+      ")"
+  }
+
+}

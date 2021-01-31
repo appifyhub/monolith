@@ -35,4 +35,41 @@ class OwnedTokenDbm(
   @ManyToOne(fetch = FetchType.EAGER)
   var owner: UserDbm,
 
-) : Serializable
+) : Serializable {
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is OwnedTokenDbm) return false
+
+    if (tokenLocator != other.tokenLocator) return false
+    if (blocked != other.blocked) return false
+    if (origin != other.origin) return false
+    if (createdAt != other.createdAt) return false
+    if (expiresAt != other.expiresAt) return false
+    if (owner != other.owner) return false
+
+    return true
+  }
+
+  override fun hashCode(): Int {
+    var result = tokenLocator.hashCode()
+    result = 31 * result + blocked.hashCode()
+    result = 31 * result + (origin?.hashCode() ?: 0)
+    result = 31 * result + createdAt.hashCode()
+    result = 31 * result + expiresAt.hashCode()
+    result = 31 * result + owner.hashCode()
+    return result
+  }
+
+  override fun toString(): String {
+    return "OwnedTokenDbm(" +
+      "tokenLocator='$tokenLocator', " +
+      "blocked=$blocked, " +
+      "origin=$origin, " +
+      "createdAt=$createdAt, " +
+      "expiresAt=$expiresAt, " +
+      "owner=$owner" +
+      ")"
+  }
+
+}

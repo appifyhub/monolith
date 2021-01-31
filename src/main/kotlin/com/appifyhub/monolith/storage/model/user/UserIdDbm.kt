@@ -31,4 +31,11 @@ class UserIdDbm(
     return result
   }
 
+  override fun toString(): String {
+    return "UserIdDbm(" +
+      "identifier='$identifier', " +
+      "projectId=$projectId" +
+      ")"
+  }
+
 }
