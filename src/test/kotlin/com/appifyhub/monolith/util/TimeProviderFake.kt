@@ -12,10 +12,11 @@ import java.util.TimeZone
 @Primary
 @Component
 @Profile(TestAppifyHubApplication.PROFILE)
-object TimeProviderFake : TimeProvider {
-
-  private var fakeTime = 0L
-  private var controlledTime: Long? = 0L
+class TimeProviderFake(
+  val timeIncrement: Long = 100L,
+  private var controlledTime: Long? = null,
+  private var fakeTime: Long = 0L,
+) : TimeProvider {
 
   @Synchronized
   fun set(newTime: Long?) {
@@ -23,7 +24,7 @@ object TimeProviderFake : TimeProvider {
   }
 
   override val currentMillis: Long
-    @Synchronized get() = controlledTime ?: fakeTime++
+    @Synchronized get() = controlledTime ?: incrementedTime()
 
   override val currentCalendar: Calendar
     @Synchronized get() = Calendar.getInstance().apply {
@@ -36,5 +37,11 @@ object TimeProviderFake : TimeProvider {
 
   override val currentDate: Date
     @Synchronized get() = Date(currentMillis)
+
+  private fun incrementedTime(): Long {
+    val result = fakeTime
+    fakeTime += timeIncrement
+    return result
+  }
 
 }
