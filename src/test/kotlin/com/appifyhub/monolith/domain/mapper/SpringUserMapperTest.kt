@@ -42,7 +42,7 @@ class SpringUserMapperTest {
       on { authorities } doReturn listOf(GrantedAuthority { "ADMIN" })
       on { isAccountNonLocked } doReturn true
     }
-    val timeProvider = TimeProviderFake(controlledTime = 10L)
+    val timeProvider = TimeProviderFake(staticTime = 10L)
 
     assertThat(springUser.toDomain(timeProvider)).isDataClassEqualTo(
       Stubs.user.copy(

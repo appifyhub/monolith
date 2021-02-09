@@ -17,7 +17,7 @@ class WebSecurityConfiguration(
   private val userRepository: UserRepository,
 ) : WebSecurityConfigurerAdapter() {
 
-  override fun configure(httpSecurityConfigurator: HttpSecurity) {
+  public override fun configure(httpSecurityConfigurator: HttpSecurity) {
     httpSecurityConfigurator
       .cors()
       .and()
@@ -53,6 +53,6 @@ class WebSecurityConfiguration(
   }
 
   @Bean
-  override fun userDetailsService(): UserDetailsService = userRepository
+  public override fun userDetailsService(): UserDetailsService = userRepository
 
 }

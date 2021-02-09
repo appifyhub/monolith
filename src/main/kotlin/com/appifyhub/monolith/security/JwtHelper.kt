@@ -27,13 +27,13 @@ class JwtHelper(
     .apply {
       claims.forEach { withClaim(it.key, it.value) }
     }
-    .withNotBefore(timeProvider.currentCalendar.time)
-    .withIssuedAt(timeProvider.currentCalendar.time)
     .withExpiresAt(
       timeProvider.currentCalendar.apply {
         add(Calendar.DAY_OF_MONTH, defaultExpirationDays)
       }.time
     )
+    .withNotBefore(timeProvider.currentCalendar.time)
+    .withIssuedAt(timeProvider.currentCalendar.time)
     .sign(Algorithm.RSA256(publicKey, privateKey))
 
 }

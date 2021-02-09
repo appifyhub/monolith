@@ -13,18 +13,13 @@ import java.util.TimeZone
 @Component
 @Profile(TestAppifyHubApplication.PROFILE)
 class TimeProviderFake(
-  val timeIncrement: Long = 100L,
-  private var controlledTime: Long? = null,
-  private var fakeTime: Long = 0L,
+  var timeIncrement: Long = 100L,
+  var incrementalTime: Long = 0L,
+  var staticTime: Long? = null,
 ) : TimeProvider {
 
-  @Synchronized
-  fun set(newTime: Long?) {
-    controlledTime = newTime
-  }
-
   override val currentMillis: Long
-    @Synchronized get() = controlledTime ?: incrementedTime()
+    @Synchronized get() = staticTime ?: timeIncrement()
 
   override val currentCalendar: Calendar
     @Synchronized get() = Calendar.getInstance().apply {
@@ -38,9 +33,9 @@ class TimeProviderFake(
   override val currentDate: Date
     @Synchronized get() = Date(currentMillis)
 
-  private fun incrementedTime(): Long {
-    val result = fakeTime
-    fakeTime += timeIncrement
+  private fun timeIncrement(): Long {
+    val result = incrementalTime
+    incrementalTime += timeIncrement
     return result
   }
 

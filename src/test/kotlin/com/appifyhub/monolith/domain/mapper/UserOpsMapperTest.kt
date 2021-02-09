@@ -35,7 +35,7 @@ class UserOpsMapperTest {
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(controlledTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L)
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -72,7 +72,7 @@ class UserOpsMapperTest {
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(controlledTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L)
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -113,7 +113,7 @@ class UserOpsMapperTest {
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(controlledTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L)
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -146,7 +146,7 @@ class UserOpsMapperTest {
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(controlledTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L)
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -218,7 +218,7 @@ class UserOpsMapperTest {
       userCreator.toUser(
         userId = "username",
         passwordEncoder = PasswordEncoderFake(),
-        timeProvider = TimeProviderFake(controlledTime = 10L),
+        timeProvider = TimeProviderFake(staticTime = 10L),
       )
     ).isDataClassEqualTo(
       Stubs.user.copy(
@@ -250,7 +250,7 @@ class UserOpsMapperTest {
       userCreator.toUser(
         userId = userCreator.id!!,
         passwordEncoder = PasswordEncoderFake(),
-        timeProvider = TimeProviderFake(controlledTime = 10L),
+        timeProvider = TimeProviderFake(staticTime = 10L),
       )
     ).isDataClassEqualTo(
       Stubs.user.copy(

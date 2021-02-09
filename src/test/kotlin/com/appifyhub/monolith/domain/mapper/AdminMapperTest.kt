@@ -158,7 +158,7 @@ class AdminMapperTest {
     // based on stub data
     val startTime = Stubs.projectDbm.createdAt.time
     val timeIncrement = Stubs.projectDbm.updatedAt.time - startTime
-    val timeProvider = TimeProviderFake(fakeTime = startTime, timeIncrement = timeIncrement)
+    val timeProvider = TimeProviderFake(incrementalTime = startTime, timeIncrement = timeIncrement)
     val projectCreator = ProjectCreator(
       account = Stubs.account,
       name = "Project's Name",
