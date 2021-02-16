@@ -26,11 +26,11 @@ class JwtHelperTest {
   private lateinit var timeProvider: TimeProviderFake
 
   @BeforeEach fun setup() {
-    timeProvider.staticTime = TimeUnit.DAYS.toMillis(10L)
+    timeProvider.staticTime = { TimeUnit.DAYS.toMillis(10L) }
   }
 
   @BeforeEach fun teardown() {
-    timeProvider.staticTime = null
+    timeProvider.staticTime = { null }
   }
 
   @Test fun `jwt contains given data`() {
@@ -41,8 +41,8 @@ class JwtHelperTest {
     val type = decoder.decode(parts[0]).decodeToString()
     val content = decoder.decode(parts[1]).decodeToString()
 
-    val issuedTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime!!)
-    val expirationTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime!!) + TimeUnit.DAYS.toSeconds(90)
+    val issuedTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime()!!)
+    val expirationTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime()!!) + TimeUnit.DAYS.toSeconds(90)
 
     assertThat(type).isEqualTo("{\"typ\":\"JWT\",\"alg\":\"RS256\"}")
     assertThat(content).isEqualTo(

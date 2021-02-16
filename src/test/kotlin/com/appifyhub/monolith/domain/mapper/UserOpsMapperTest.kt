@@ -218,7 +218,7 @@ class UserOpsMapperTest {
       userCreator.toUser(
         userId = "username",
         passwordEncoder = PasswordEncoderFake(),
-        timeProvider = TimeProviderFake(staticTime = 10L),
+        timeProvider = TimeProviderFake(staticTime = { 10L }),
       )
     ).isDataClassEqualTo(
       Stubs.user.copy(
@@ -250,7 +250,7 @@ class UserOpsMapperTest {
       userCreator.toUser(
         userId = userCreator.id!!,
         passwordEncoder = PasswordEncoderFake(),
-        timeProvider = TimeProviderFake(staticTime = 10L),
+        timeProvider = TimeProviderFake(staticTime = { 10L }),
       )
     ).isDataClassEqualTo(
       Stubs.user.copy(

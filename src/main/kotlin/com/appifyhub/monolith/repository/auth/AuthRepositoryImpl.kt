@@ -7,12 +7,12 @@ import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.auth.locator.TokenLocator
 import com.appifyhub.monolith.repository.auth.locator.TokenLocatorDecoder
 import com.appifyhub.monolith.repository.auth.locator.TokenLocatorEncoder
 import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -51,10 +51,13 @@ class AuthRepositoryImpl(
   override fun createToken(userId: UserId, authorities: List<GrantedAuthority>, origin: String?): String {
     log.debug("Generating token for user $userId, origin $origin")
 
-    // prepare claim data
+    // prepare token data
     val authoritiesEncoded = authorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
     val username = userId.toUnifiedFormat()
-    val tokenLocator = TokenLocator(userId = userId, origin = origin, timestamp = timeProvider.currentMillis)
+    val currentMillis = timeProvider.currentMillis
+    val currentCalendar = timeProvider.currentCalendar.apply { timeInMillis = currentMillis }
+    val expirationCalendar = currentCalendar.apply { add(Calendar.DAY_OF_MONTH, defaultExpirationDays) }
+    val tokenLocator = TokenLocator(userId = userId, origin = origin, timestamp = currentMillis)
     val tokenLocatorEncoded = tokenLocatorEncoder.encode(tokenLocator)
 
     // create claims
@@ -75,15 +78,11 @@ class AuthRepositoryImpl(
       origin?.let { put(CLAIM_ORIGIN, it) }
     }
 
-    val now = timeProvider.currentCalendar.time
-    val expiration = timeProvider.currentCalendar.apply {
-      add(Calendar.DAY_OF_MONTH, defaultExpirationDays)
-    }.time
     ownedTokenRepository.addToken(
       userId = userId,
       token = Token(tokenLocatorEncoded),
-      createdAt = now,
-      expiresAt = expiration,
+      createdAt = currentCalendar.time,
+      expiresAt = expirationCalendar.time,
       origin = origin,
     )
     return jwtHelper.createJwtForClaims(subject = username, claims = claims)

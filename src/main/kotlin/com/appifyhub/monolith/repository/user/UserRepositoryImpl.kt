@@ -41,6 +41,8 @@ class UserRepositoryImpl(
     log.debug("Adding user by creator $creator")
     if (creator.id == null && project.userIdType != UserIdType.RANDOM)
       throw IllegalArgumentException("Missing user ID for creator $creator")
+    if (creator.id != null && project.userIdType == UserIdType.RANDOM)
+      throw IllegalArgumentException("Provided user ID instead of keeping random for creator $creator")
 
     val user = creator.toUser(
       userId = creator.id ?: UserIdGenerator.nextId,
@@ -203,16 +205,26 @@ class UserRepositoryImpl(
     else -> this
   }
 
+  private fun User.hasEmailIdChanged(project: Project, oldUser: User? = null): Boolean =
+    project.userIdType == UserIdType.EMAIL && oldUser?.userId?.id != userId.id
+
+  private fun User.hasPhoneIdChanged(project: Project, oldUser: User? = null): Boolean =
+    project.userIdType == UserIdType.PHONE && oldUser?.userId?.id != userId.id
+
   private fun User.needsNewEmailToken(project: Project, oldUser: User? = null): Boolean {
-    val hasEmailChanged = project.userIdType == UserIdType.EMAIL && oldUser?.userId?.id != userId.id
+    // check if contact ID changed
+    if (hasEmailIdChanged(project, oldUser)) return true
+    // only one verification code exists: if Phone ID changed, assume that Contact Email hasn't
     val hasContactEmailChanged = contactType == ContactType.EMAIL && contact != null && oldUser?.contact != contact
-    return hasEmailChanged || hasContactEmailChanged
+    return hasContactEmailChanged && !hasPhoneIdChanged(project, oldUser)
   }
 
   private fun User.needsNewPhoneToken(project: Project, oldUser: User? = null): Boolean {
-    val hasPhoneChanged = project.userIdType == UserIdType.PHONE && oldUser?.userId?.id != userId.id
+    // check if contact ID changed
+    if (hasPhoneIdChanged(project, oldUser)) return true
+    // only one verification code exists: if Email ID changed, assume that Contact Phone hasn't
     val hasContactPhoneChanged = contactType == ContactType.PHONE && contact != null && oldUser?.contact != contact
-    return hasPhoneChanged || hasContactPhoneChanged
+    return hasContactPhoneChanged && !hasEmailIdChanged(project, oldUser)
   }
 
   // endregion

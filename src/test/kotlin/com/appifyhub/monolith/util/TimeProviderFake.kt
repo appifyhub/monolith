@@ -15,11 +15,11 @@ import java.util.TimeZone
 class TimeProviderFake(
   var timeIncrement: Long = 100L,
   var incrementalTime: Long = 0L,
-  var staticTime: Long? = null,
+  var staticTime: () -> Long? = { null },
 ) : TimeProvider {
 
   override val currentMillis: Long
-    @Synchronized get() = staticTime ?: timeIncrement()
+    @Synchronized get() = staticTime() ?: timeIncrement()
 
   override val currentCalendar: Calendar
     @Synchronized get() = Calendar.getInstance().apply {
