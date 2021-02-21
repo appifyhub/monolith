@@ -3,11 +3,9 @@ package com.appifyhub.monolith.repository.user
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
-import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.domain.mapper.toSecurityUser
 import com.appifyhub.monolith.domain.mapper.toUser
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
@@ -20,7 +18,6 @@ import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Repository
 
@@ -31,11 +28,11 @@ class UserRepositoryImpl(
   private val adminRepository: AdminRepository,
   private val passwordEncoder: PasswordEncoder,
   private val timeProvider: TimeProvider,
-) : UserRepository {
+  private val springSecurityUserManager: SpringSecurityUserManager,
+) : UserRepository,
+  SpringSecurityUserManager by springSecurityUserManager {
 
   private val log = LoggerFactory.getLogger(this::class.java)
-
-  // region Domain-level
 
   override fun addUser(creator: UserCreator, project: Project): User {
     log.debug("Adding user by creator $creator")
@@ -108,78 +105,7 @@ class UserRepositoryImpl(
     return userDao.deleteAllByProject_ProjectId(projectId)
   }
 
-  // endregion
-
-  // region Spring Security
-
-  override fun createUser(user: UserDetails?) {
-    log.warn("Security: creating $user")
-    val domainUser = user!!.toDomain(timeProvider).let {
-      it.updateVerificationToken(
-        project = stubProject().copy(id = it.userId.projectId)
-      )
-    }
-    userDao.save(domainUser.toData())
-  }
-
-  override fun loadUserByUsername(username: String?): UserDetails {
-    log.debug("Security: loading $username")
-    val id = UserId.fromUnifiedFormat(username!!)
-    return fetchUser(id, withTokens = false).toSecurityUser()
-  }
-
-  override fun userExists(username: String?): Boolean {
-    log.debug("Security: checking if $username exists")
-    return try {
-      val id = UserId.fromUnifiedFormat(username!!)
-      fetchUser(id, withTokens = false).let { true }
-    } catch (t: Throwable) {
-      log.warn("Couldn't check if $username exists", t)
-      false
-    }
-  }
-
-  override fun check(toCheck: UserDetails?) {
-    log.warn("Security: checking user $toCheck")
-  }
-
-  override fun updateUser(user: UserDetails?) {
-    log.warn("Security: updating user $user")
-    val domainUser = user!!.toDomain(timeProvider)
-    val fetchedUser = fetchUser(domainUser.userId, withTokens = false)
-    val project = stubProject().copy(id = fetchedUser.userId.projectId)
-    val updatedUser = fetchedUser
-      .updateFromSecurityUser(domainUser.toSecurityUser())
-      .updateVerificationToken(project, oldUser = fetchedUser)
-
-    userDao.save(updatedUser.toData())
-  }
-
-  override fun deleteUser(username: String?) {
-    log.warn("Security: deleting user $username")
-    val id = UserId.fromUnifiedFormat(username!!)
-    removeUserById(id)
-  }
-
-  override fun changePassword(oldPassword: String?, newPassword: String?) {
-    log.warn("Security: change password")
-  }
-
-  override fun updatePassword(user: UserDetails?, newPassword: String?): UserDetails {
-    log.warn("Security: updating password $user")
-    val domainUser = user!!.toDomain(timeProvider).copy(signature = newPassword!!)
-    val fetchedUser = fetchUser(domainUser.userId, withTokens = false)
-    val project = stubProject().copy(id = fetchedUser.userId.projectId)
-    val updatedUser = fetchedUser
-      .updateFromSecurityUser(domainUser.toSecurityUser())
-      .updateVerificationToken(project, oldUser = fetchedUser)
-
-    return userDao.save(updatedUser.toData()).toDomain().toSecurityUser()
-  }
-
-  // endregion
-
-  // region Helpers
+  // Helpers
 
   @Throws
   private fun fetchUser(userId: UserId, withTokens: Boolean): User {
@@ -188,15 +114,6 @@ class UserRepositoryImpl(
     val project = adminRepository.fetchProjectById(userId.projectId)
     val tokens = ownedTokenRepository.fetchAllTokens(user, project)
     return user.copy(ownedTokens = tokens)
-  }
-
-  private fun User.updateFromSecurityUser(user: UserDetails): User {
-    val signatureChanged = user.password.isNotBlank() && user.password != signature
-    return copy(
-      signature = user.password.let { if (signatureChanged) passwordEncoder.encode(it) else it },
-      authority = user.toDomain(timeProvider).authority,
-      updatedAt = timeProvider.currentDate,
-    )
   }
 
   private fun User.updateVerificationToken(project: Project, oldUser: User? = null): User = when {
@@ -226,7 +143,5 @@ class UserRepositoryImpl(
     val hasContactPhoneChanged = contactType == ContactType.PHONE && contact != null && oldUser?.contact != contact
     return hasContactPhoneChanged && !hasEmailIdChanged(project, oldUser)
   }
-
-  // endregion
 
 }

@@ -6,16 +6,8 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import org.springframework.security.core.userdetails.UserDetailsChecker
-import org.springframework.security.core.userdetails.UserDetailsPasswordService
-import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.provisioning.UserDetailsManager
 
-interface UserRepository :
-  UserDetailsService,
-  UserDetailsChecker,
-  UserDetailsManager,
-  UserDetailsPasswordService {
+interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun addUser(creator: UserCreator, project: Project): User
 

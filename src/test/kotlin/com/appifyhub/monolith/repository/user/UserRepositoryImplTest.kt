@@ -38,6 +38,7 @@ class UserRepositoryImplTest {
   private val userDao = mock<UserDao>()
   private val ownedTokenRepo = mock<OwnedTokenRepository>()
   private val adminRepo = mock<AdminRepository>()
+  private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
 
@@ -47,6 +48,7 @@ class UserRepositoryImplTest {
     adminRepository = adminRepo,
     passwordEncoder = passwordEncoder,
     timeProvider = timeProvider,
+    springSecurityUserManager = springUserManager,
   )
 
   @BeforeEach fun setup() {
@@ -446,18 +448,5 @@ class UserRepositoryImplTest {
   }
 
   // endregion
-
-  //  removeUserById(userId: UserId)
-  //  removeUserByUnifiedFormat(idHashProjectId: String)
-  //  removeAllUsersByProjectId(projectId: Long)
-
-  // 	UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
-  // 	void check(UserDetails toCheck);
-  // 	void createUser(UserDetails user);
-  //	void updateUser(UserDetails user);
-  //	void deleteUser(String username);
-  //	void changePassword(String oldPassword, String newPassword);
-  //	boolean userExists(String username);
-  // 	UserDetails updatePassword(UserDetails user, String newPassword);
 
 }
