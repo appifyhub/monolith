@@ -2,7 +2,7 @@ package com.appifyhub.monolith.repository.auth.locator
 
 import assertk.assertThat
 import assertk.assertions.hasClass
-import assertk.assertions.isEqualTo
+import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import com.appifyhub.monolith.domain.user.UserId
@@ -39,7 +39,7 @@ class TokenLocatorCoderImplTest {
 
     val encoded = encoder.encode(locator)
     assertThat(decoder.decode(encoded))
-      .isEqualTo(locator)
+      .isDataClassEqualTo(locator)
   }
 
   @Test fun `coding with empty origin works`() {
@@ -54,7 +54,7 @@ class TokenLocatorCoderImplTest {
 
     val encoded = encoder.encode(locator)
     assertThat(decoder.decode(encoded))
-      .isEqualTo(locator.copy(origin = null))
+      .isDataClassEqualTo(locator.copy(origin = null))
   }
 
   @Test fun `coding with all properties works`() {
@@ -69,7 +69,7 @@ class TokenLocatorCoderImplTest {
 
     val encoded = encoder.encode(locator)
     assertThat(decoder.decode(encoded))
-      .isEqualTo(locator)
+      .isDataClassEqualTo(locator)
   }
 
   @Test fun `decoding with empty user ID throws`() {
