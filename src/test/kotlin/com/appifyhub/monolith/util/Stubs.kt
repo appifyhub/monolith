@@ -110,7 +110,7 @@ object Stubs {
   val project = Project(
     id = userId.projectId,
     account = account,
-    signature = "signature",
+    signature = "erutangis",
     name = "Project's Name",
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
@@ -142,7 +142,7 @@ object Stubs {
   val projectDbm = ProjectDbm(
     projectId = userIdDbm.projectId,
     account = accountDbm,
-    signature = "signature",
+    signature = "erutangis",
     name = "Project's Name",
     type = "OPENSOURCE",
     status = "ACTIVE",
@@ -246,7 +246,6 @@ object Stubs {
   )
 
   val accountUpdated = account.copy(
-    id = 2,
     updatedAt = Date(0xA10001),
   ).let { account ->
     // amazing hacks! again!
@@ -259,7 +258,7 @@ object Stubs {
   }
 
   val accountUpdatedDbm = AccountDbm(
-    accountId = 2,
+    accountId = account.id,
     createdAt = accountDbm.createdAt,
     updatedAt = Date(0xA10001),
   )
@@ -282,13 +281,37 @@ object Stubs {
     account = accountUpdatedDbm,
   )
 
+  val projectUpdated = Project(
+    id = project.id,
+    account = accountUpdated,
+    signature = "erutangis",
+    name = "Project's Name 1",
+    type = Project.Type.FREE,
+    status = Project.Status.SUSPENDED,
+    userIdType = project.userIdType,
+    createdAt = project.createdAt,
+    updatedAt = Date(0xA20001),
+  )
+
+  val projectUpdatedDbm = ProjectDbm(
+    projectId = project.id,
+    account = accountUpdatedDbm,
+    signature = "erutangis",
+    name = "Project's Name 1",
+    type = "FREE",
+    status = "SUSPENDED",
+    userIdType = projectDbm.userIdType,
+    createdAt = projectDbm.createdAt,
+    updatedAt = Date(0xA20001),
+  )
+
   // endregion
 
   // region Ops Domain Models
 
   val userCreator = UserCreator(
     id = "username1",
-    projectId = 2,
+    projectId = project.id,
     rawSignature = "password",
     name = "User's Name",
     type = User.Type.ORGANIZATION,
@@ -332,16 +355,15 @@ object Stubs {
   )
 
   val projectUpdater = ProjectUpdater(
-    id = 3,
+    id = project.id,
     account = Settable(accountUpdated),
-    rawSignature = Settable("signature1"),
     name = Settable("Project's Name 1"),
     type = Settable(Project.Type.FREE),
     status = Settable(Project.Status.SUSPENDED),
   )
 
   val accountUpdater = AccountUpdater(
-    id = 2,
+    id = account.id,
     addedOwners = Settable(emptyList()),
     removedOwners = Settable(emptyList()),
   )

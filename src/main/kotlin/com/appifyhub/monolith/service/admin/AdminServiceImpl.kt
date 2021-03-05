@@ -81,9 +81,6 @@ class AdminServiceImpl(
     updater.account?.value?.let {
       Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
     }
-    val normalizedRawSignature = updater.rawSignature?.mapValueNonNull {
-      Normalizers.Dense.run(it).requireValid { "Signature" }
-    }
     val normalizedName = updater.name?.mapValueNonNull {
       Normalizers.ProjectName.run(it).requireValid { "Project Name" }
     }
@@ -91,7 +88,6 @@ class AdminServiceImpl(
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,
       account = updater.account,
-      rawSignature = normalizedRawSignature,
       name = normalizedName,
       type = updater.type,
       status = updater.status,

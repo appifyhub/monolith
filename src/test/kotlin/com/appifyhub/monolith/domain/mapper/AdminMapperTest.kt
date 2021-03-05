@@ -105,7 +105,6 @@ class AdminMapperTest {
     val projectUpdater = ProjectUpdater(
       id = Stubs.project.id,
       account = null,
-      rawSignature = null,
       name = null,
       type = null,
       status = null,
@@ -113,7 +112,6 @@ class AdminMapperTest {
 
     val result = projectUpdater.applyTo(
       project = Stubs.project,
-      passwordEncoder = PasswordEncoderFake(),
       timeProvider = TimeProviderFake(),
     )
 
@@ -129,23 +127,19 @@ class AdminMapperTest {
     val projectUpdater = ProjectUpdater(
       id = Stubs.project.id,
       account = Settable(newAccount),
-      rawSignature = Settable("signature2"),
       name = Settable("Project's Name 2"),
       type = Settable(Project.Type.COMMERCIAL),
       status = Settable(Project.Status.SUSPENDED),
     )
 
-    val passwordEncoder = PasswordEncoderFake()
     val result = projectUpdater.applyTo(
       project = Stubs.project,
-      passwordEncoder = passwordEncoder,
       timeProvider = TimeProviderFake(),
     )
 
     assertThat(result).isDataClassEqualTo(
       Stubs.project.copy(
         account = newAccount,
-        signature = passwordEncoder.encode("signature2"),
         name = "Project's Name 2",
         type = Project.Type.COMMERCIAL,
         status = Project.Status.SUSPENDED,
@@ -159,6 +153,8 @@ class AdminMapperTest {
     val startTime = Stubs.projectDbm.createdAt.time
     val timeIncrement = Stubs.projectDbm.updatedAt.time - startTime
     val timeProvider = TimeProviderFake(incrementalTime = startTime, timeIncrement = timeIncrement)
+    val passwordEncoder = PasswordEncoderFake()
+
     val projectCreator = ProjectCreator(
       account = Stubs.account,
       name = "Project's Name",
@@ -168,7 +164,8 @@ class AdminMapperTest {
     )
 
     val projectDbm = projectCreator.toProjectData(
-      signature = "signature",
+      rawSignature = "signature",
+      passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
     ).apply {
       // no info about IDs from this conversion

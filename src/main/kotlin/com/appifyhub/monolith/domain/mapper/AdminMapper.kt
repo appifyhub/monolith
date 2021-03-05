@@ -23,23 +23,22 @@ fun AccountUpdater.applyTo(
 
 fun ProjectUpdater.applyTo(
   project: Project,
-  passwordEncoder: PasswordEncoder,
   timeProvider: TimeProvider,
 ): Project = project
   .applySettable(account) { copy(account = it) }
-  .applySettable(rawSignature) { copy(signature = passwordEncoder.encode(it)) }
   .applySettable(name) { copy(name = it) }
   .applySettable(type) { copy(type = it) }
   .applySettable(status) { copy(status = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun ProjectCreator.toProjectData(
-  signature: String,
+  rawSignature: String,
+  passwordEncoder: PasswordEncoder,
   timeProvider: TimeProvider,
 ): ProjectDbm = ProjectDbm(
   projectId = null,
   account = account.toData(),
-  signature = signature,
+  signature = passwordEncoder.encode(rawSignature),
   name = name,
   type = type.name,
   status = status.name,

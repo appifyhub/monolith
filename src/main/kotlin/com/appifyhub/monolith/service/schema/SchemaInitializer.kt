@@ -2,7 +2,6 @@ package com.appifyhub.monolith.service.schema
 
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
-import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
@@ -62,7 +61,7 @@ class SchemaInitializer(
     val account = adminService.addAccount()
 
     // create the root project
-    var project = adminService.addProject(
+    val rawProject = adminService.addProject(
       ProjectCreator(
         account = account,
         name = rootConfig.rootProjectName.takeIfNotBlank()!!,
@@ -70,24 +69,17 @@ class SchemaInitializer(
         status = Project.Status.ACTIVE,
       )
     )
-    if (rootConfig.rootProjectSignature.isNotBlank()) {
-      project = adminService.updateProject(
-        ProjectUpdater(
-          id = project.id,
-          rawSignature = Settable(rootConfig.rootProjectSignature),
-        )
-      )
-    }
 
     // prepare the owner signature
-    val rawOwnerSignature = rootConfig.rootOwnerSignature.takeIfNotBlank() ?: SignatureGenerator.nextSignature
+    val rawOwnerSignature = rootConfig.rootOwnerSignature.takeIfNotBlank()
+      ?: SignatureGenerator.nextSignature
 
     // create the owner's user in the root project
     var owner = userService.addUser(
-      project = project,
+      project = rawProject,
       creator = UserCreator(
         id = null,
-        projectId = project.id,
+        projectId = rawProject.id,
         rawSignature = rawOwnerSignature,
         name = rootConfig.rootOwnerName,
         type = User.Type.ORGANIZATION,
@@ -102,7 +94,7 @@ class SchemaInitializer(
 
     // make root user own the root account
     owner = userService.updateUser(
-      project = project,
+      project = rawProject,
       updater = UserUpdater(
         id = owner.userId,
         account = Settable(account)
@@ -110,9 +102,6 @@ class SchemaInitializer(
     )
 
     // prepare printable credentials
-    val projectSignature = rootConfig.rootProjectSignature.takeIfNotBlank()
-      ?.let { "<see env.\$SEED_PROJECT_SECRET>" }
-      ?: project.signature
     val ownerSignature = rootConfig.rootOwnerSignature.takeIfNotBlank()
       ?.let { "<see env.\$SEED_OWNER_SECRET>" }
       ?: rawOwnerSignature
@@ -123,8 +112,8 @@ class SchemaInitializer(
         (see below)
         [[ THIS WILL BE PRINTED ONLY ONCE ]]
         
-        Admin project '${project.name}' (ID = ${project.id}) is now set up. 
-        Your project's secret signature: '$projectSignature'.
+        Admin project '${rawProject.name}' (ID = ${rawProject.id}) is now set up. 
+        Your project's secret signature: '${rawProject.signature}'.
         
         Account owner '${owner.name} <${owner.contact}>' (ID = ${owner.userId.id}) is now set up.
         Your account's secret signature: '$ownerSignature'.

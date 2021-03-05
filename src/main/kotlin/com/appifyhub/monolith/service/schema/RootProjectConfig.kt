@@ -9,9 +9,6 @@ class RootProjectConfig {
   @Value("\${app.seed.rootProject.name}")
   lateinit var rootProjectName: String
 
-  @Value("\${app.seed.rootProject.signature}")
-  lateinit var rootProjectSignature: String
-
   @Value("\${app.seed.rootProject.owner.name}")
   lateinit var rootOwnerName: String
 
