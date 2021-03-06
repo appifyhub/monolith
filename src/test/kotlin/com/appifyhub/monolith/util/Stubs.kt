@@ -16,6 +16,16 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
+import com.appifyhub.monolith.network.auth.TokenDetailsResponse
+import com.appifyhub.monolith.network.auth.TokenResponse
+import com.appifyhub.monolith.network.auth.UserCredentialsRequest
+import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.network.user.OrganizationDto
+import com.appifyhub.monolith.network.user.UserResponse
+import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
+import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 import com.appifyhub.monolith.repository.auth.locator.TokenLocator
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
@@ -366,6 +376,110 @@ object Stubs {
     id = account.id,
     addedOwners = Settable(emptyList()),
     removedOwners = Settable(emptyList()),
+  )
+
+  // endregion
+
+  // region Network Models
+
+  val companyDto = OrganizationDto(
+    name = "Company",
+    street = "Street Name 1",
+    postcode = "12345",
+    city = "City",
+    countryCode = "DE",
+  )
+
+  val userResponse = UserResponse(
+    userId = userId.id,
+    projectId = userId.projectId,
+    unifiedId = unifiedUserId,
+    name = "User's Name",
+    type = "ORGANIZATION",
+    authority = "ADMIN",
+    allowsSpam = true,
+    contact = "user@example.com",
+    contactType = "EMAIL",
+    birthday = "1970-05-15",
+    company = companyDto,
+    createdAt = "1970-05-14",
+    updatedAt = "1970-05-15",
+  )
+
+  val tokenResponse = TokenResponse(
+    token = token.tokenLocator,
+  )
+
+  val tokenDetailsResponse = TokenDetailsResponse(
+    ownerId = userId.id,
+    ownerProjectId = userId.projectId,
+    ownerUnifiedId = unifiedUserId,
+    tokenId = token.tokenLocator,
+    isBlocked = true,
+    origin = "Token Origin",
+    createdAt = "1970-05-28",
+    expiresAt = "1970-06-19",
+  )
+
+  val userCredentialsRequest = UserCredentialsRequest(
+    userId = "username",
+    secret = "password",
+    origin = "Token Origin",
+  )
+
+  val adminCredentialsRequest = AdminCredentialsRequest(
+    userId = "username",
+    secret = "password",
+    origin = "Token Origin",
+  )
+
+  // endregion
+
+  // region Network Ops Models
+
+  val userCreatorRequest = UserCreatorRequest(
+    id = "username",
+    rawSignature = "password",
+    name = "User's Name",
+    type = "ORGANIZATION",
+    authority = "ADMIN",
+    allowsSpam = true,
+    contact = "user@example.com",
+    contactType = "EMAIL",
+    birthday = "1970-05-14",
+    company = companyDto,
+  )
+
+  val companyUpdaterDto = OrganizationUpdaterDto(
+    name = SettableRequest("Company 1"),
+    street = SettableRequest("Street Name 11"),
+    postcode = SettableRequest("123451"),
+    city = SettableRequest("City 1"),
+    countryCode = SettableRequest("DF"),
+  )
+
+  val userUpdaterRequest = UserUpdaterRequest(
+    rawSignature = SettableRequest("password1"),
+    type = SettableRequest("PERSONAL"),
+    authority = SettableRequest("MODERATOR"),
+    contactType = SettableRequest("PHONE"),
+    allowsSpam = SettableRequest(false),
+    name = SettableRequest("User's Name 1"),
+    contact = SettableRequest("+1234567890"),
+    birthday = SettableRequest("1970-05-15"),
+    company = SettableRequest(companyUpdaterDto),
+  )
+
+  // endregion
+
+  // region Network Models Updated
+
+  val companyDtoUpdated = companyDto.copy(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
   )
 
   // endregion

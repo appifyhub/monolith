@@ -6,7 +6,8 @@ import com.appifyhub.monolith.network.user.DateTimeMapper
 
 fun OwnedToken.toNetwork() = TokenDetailsResponse(
   ownerId = owner.userId.id,
-  ownerProjectID = owner.userId.projectId,
+  ownerProjectId = owner.userId.projectId,
+  ownerUnifiedId = owner.userId.toUnifiedFormat(),
   tokenId = token.tokenLocator,
   isBlocked = isBlocked,
   origin = origin,

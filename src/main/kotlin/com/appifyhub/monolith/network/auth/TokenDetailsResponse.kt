@@ -7,7 +7,8 @@ import java.io.Serializable
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class TokenDetailsResponse(
   @JsonProperty("user_id") val ownerId: String,
-  @JsonProperty("project_id") val ownerProjectID: Long,
+  @JsonProperty("project_id") val ownerProjectId: Long,
+  @JsonProperty("unified_id") val ownerUnifiedId: String,
   @JsonProperty("token_id") val tokenId: String,
   @JsonProperty("is_blocked") val isBlocked: Boolean,
   @JsonProperty("origin") val origin: String?,

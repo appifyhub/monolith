@@ -5,11 +5,10 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
-import java.util.Date
 
 @JsonInclude(Include.NON_NULL)
 data class UserCreatorRequest(
-  @JsonProperty("id") val id: String?,
+  @JsonProperty("user_id") val id: String?,
   @JsonProperty("raw_signature") val rawSignature: String,
   @JsonProperty("name") val name: String?,
   @JsonProperty("type") val type: String?,
@@ -17,6 +16,6 @@ data class UserCreatorRequest(
   @JsonProperty("allows_spam") val allowsSpam: Boolean?,
   @JsonProperty("contact") val contact: String?,
   @JsonProperty("contact_type") val contactType: String?,
-  @JsonProperty("birthday") val birthday: Date?,
+  @JsonProperty("birthday") val birthday: String?,
   @JsonProperty("company") val company: OrganizationDto?,
 ) : Serializable

@@ -15,9 +15,9 @@ interface AuthService {
 
   @Throws fun resolveShallowUser(authData: Authentication): User
 
-  @Throws fun authUser(identifier: String, signature: String, projectSignature: String): User
+  @Throws fun authUser(userId: String, signature: String, projectSignature: String): User
 
-  @Throws fun authAdmin(identifier: String, signature: String): User
+  @Throws fun authAdmin(userId: String, signature: String): User
 
   @Throws fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User
 

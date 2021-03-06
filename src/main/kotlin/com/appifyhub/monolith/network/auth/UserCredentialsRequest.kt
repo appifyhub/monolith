@@ -7,7 +7,7 @@ import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class UserCredentialsRequest(
-  @JsonProperty("identifier") val identifier: String,
+  @JsonProperty("user_id") val userId: String,
   @JsonProperty("secret") val secret: String,
   @JsonProperty("origin") val origin: String? = null,
 ) : Serializable

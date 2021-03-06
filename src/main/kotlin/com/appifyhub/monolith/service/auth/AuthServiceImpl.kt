@@ -70,25 +70,25 @@ class AuthServiceImpl(
     return authRepository.resolveShallowUser(token)
   }
 
-  override fun authUser(identifier: String, signature: String, projectSignature: String): User {
-    log.debug("Fetching user by $projectSignature, id $identifier, signature $signature")
+  override fun authUser(userId: String, signature: String, projectSignature: String): User {
+    log.debug("Fetching user by $projectSignature, id $userId, signature $signature")
 
-    val normalizedIdentifier = Normalizers.CustomUserId.run(identifier).requireValid { "Identifier" }
+    val normalizedId = Normalizers.CustomUserId.run(userId).requireValid { "User ID" }
     val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
     val normalizedProjectSignature = Normalizers.Dense.run(projectSignature).requireValid { "Signature" }
 
     val project = adminService.fetchProjectBySignature(normalizedProjectSignature)
-    return fetchUserByCredentials(project.id, normalizedIdentifier, normalizedRawSignature)
+    return fetchUserByCredentials(project.id, normalizedId, normalizedRawSignature)
   }
 
-  override fun authAdmin(identifier: String, signature: String): User {
-    log.debug("Fetching account by id $identifier, signature $signature")
+  override fun authAdmin(userId: String, signature: String): User {
+    log.debug("Fetching account by id $userId, signature $signature")
 
-    val normalizedIdentifier = Normalizers.CustomUserId.run(identifier).requireValid { "Identifier" }
+    val normalizedId = Normalizers.CustomUserId.run(userId).requireValid { "User ID" }
     val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
 
     val project = adminService.fetchAdminProject()
-    return fetchUserByCredentials(project.id, normalizedIdentifier, normalizedRawSignature)
+    return fetchUserByCredentials(project.id, normalizedId, normalizedRawSignature)
   }
 
   override fun createTokenFor(
@@ -210,13 +210,13 @@ class AuthServiceImpl(
   @Throws
   private fun fetchUserByCredentials(
     projectId: Long,
-    identifier: String,
+    userId: String,
     signature: String,
   ): User {
-    val userId = UserId(id = identifier, projectId = projectId)
-    val user = userService.fetchUserByUserId(userId, withTokens = false)
+    val id = UserId(id = userId, projectId = projectId)
+    val user = userService.fetchUserByUserId(id, withTokens = false)
     if (!passwordEncoder.matches(signature, user.signature)) {
-      log.warn("Password mismatch for $userId")
+      log.warn("Password mismatch for $id")
       throw IllegalArgumentException("Invalid credentials")
     }
     return user

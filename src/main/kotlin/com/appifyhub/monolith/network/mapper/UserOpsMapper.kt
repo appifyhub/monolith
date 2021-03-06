@@ -16,12 +16,10 @@ import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 
 fun UserUpdaterRequest.toDomain(
+  userId: String,
   projectId: Long,
 ): UserUpdater = UserUpdater(
-  id = UserId(
-    id = userId,
-    projectId = projectId
-  ),
+  id = UserId(userId, projectId),
   rawSignature = rawSignature.toDomainNonNull(),
   type = type.mapToDomainNonNull { User.Type.find(it, default = PERSONAL) },
   authority = authority.mapToDomainNonNull { User.Authority.find(it, default = DEFAULT) },
@@ -55,7 +53,7 @@ fun UserCreatorRequest.toDomain(
   allowsSpam = allowsSpam ?: false,
   contact = contact,
   contactType = User.ContactType.find(contactType.orEmpty(), default = CUSTOM),
-  birthday = birthday,
+  birthday = birthday?.let { DateTimeMapper.parseAsDate(it) },
   company = company?.toDomain(),
 )
 

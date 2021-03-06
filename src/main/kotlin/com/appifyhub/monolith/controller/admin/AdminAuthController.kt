@@ -43,9 +43,9 @@ class AdminAuthController(
     log.debug("[POST] auth admin with $creds")
 
     val user = try {
-      authService.authAdmin(creds.identifier, creds.secret)
+      authService.authAdmin(creds.userId, creds.secret)
     } catch (t: Throwable) {
-      log.warn("Failed to find admin identified by ${creds.identifier}", t)
+      log.warn("Failed to find admin identified by ${creds.userId}", t)
       throwUnauthorized { "Invalid credentials" }
     }
 

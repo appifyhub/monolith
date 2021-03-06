@@ -8,8 +8,6 @@ import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class UserUpdaterRequest(
-  @JsonProperty("user_id") val userId: String,
-
   // cannot be set to null (can be skipped)
   @JsonProperty("raw_signature") val rawSignature: SettableRequest<String>?,
   @JsonProperty("type") val type: SettableRequest<String>?,
