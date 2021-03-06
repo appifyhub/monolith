@@ -8,5 +8,5 @@ import java.time.Instant
 
 @JsonInclude(Include.NON_NULL)
 data class HeartbeatResponse(
-  @JsonProperty("request_processed_time") val requestProcessedTime: Instant,
+  @JsonProperty("request_processed_time") val beat: Instant,
 ) : Serializable
