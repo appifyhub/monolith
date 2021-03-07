@@ -27,7 +27,6 @@ class DateTimeMapperTest {
   private val dateTimeCalendar = (dateCalendar.clone() as Calendar).apply {
     set(Calendar.HOUR_OF_DAY, 7)
     set(Calendar.MINUTE, 8)
-    set(Calendar.SECOND, 9)
   }
 
   @Test fun `formatting as simple date works`() {
@@ -49,6 +48,17 @@ class DateTimeMapperTest {
   @Test fun `parsing a simple date works`() {
     assertThat(DateTimeMapper.parseAsDate(dateString))
       .isEqualTo(dateCalendar.time)
+  }
+
+  @Test fun `parsing invalid datetime throws`() {
+    assertThat { DateTimeMapper.parseAsDateTime("invalid") }
+      .isFailure()
+      .hasClass(ParseException::class)
+  }
+
+  @Test fun `parsing a simple datetime works`() {
+    assertThat(DateTimeMapper.parseAsDateTime(dateTimeString))
+      .isEqualTo(dateTimeCalendar.time)
   }
 
 }

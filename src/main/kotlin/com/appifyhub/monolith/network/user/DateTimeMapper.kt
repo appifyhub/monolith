@@ -29,4 +29,7 @@ object DateTimeMapper {
   @Throws
   fun parseAsDate(source: String): Date = simpleDateFormat.parse(source)
 
+  @Throws
+  fun parseAsDateTime(source: String): Date = simpleDateTimeFormat.parse(source)
+
 }

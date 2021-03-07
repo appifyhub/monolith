@@ -16,10 +16,9 @@ import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 
 fun UserUpdaterRequest.toDomain(
-  userId: String,
-  projectId: Long,
+  userId: UserId,
 ): UserUpdater = UserUpdater(
-  id = UserId(userId, projectId),
+  id = userId,
   rawSignature = rawSignature.toDomainNonNull(),
   type = type.mapToDomainNonNull { User.Type.find(it, default = PERSONAL) },
   authority = authority.mapToDomainNonNull { User.Authority.find(it, default = DEFAULT) },
@@ -36,9 +35,9 @@ fun UserUpdaterRequest.toDomain(
 fun OrganizationUpdaterDto.toDomain(): OrganizationUpdater = OrganizationUpdater(
   name = name.toDomainNullable(),
   street = street.toDomainNullable(),
-  postcode = street.toDomainNullable(),
-  city = street.toDomainNullable(),
-  countryCode = street.toDomainNullable(),
+  postcode = postcode.toDomainNullable(),
+  city = city.toDomainNullable(),
+  countryCode = countryCode.toDomainNullable(),
 )
 
 fun UserCreatorRequest.toDomain(

@@ -320,7 +320,7 @@ object Stubs {
   // region Ops Domain Models
 
   val userCreator = UserCreator(
-    id = "username1",
+    id = "username",
     projectId = project.id,
     rawSignature = "password",
     name = "User's Name",
@@ -402,8 +402,8 @@ object Stubs {
     contactType = "EMAIL",
     birthday = "1970-05-15",
     company = companyDto,
-    createdAt = "1970-05-14",
-    updatedAt = "1970-05-15",
+    createdAt = "1970-05-14 03:04",
+    updatedAt = "1970-05-15 05:06",
   )
 
   val tokenResponse = TokenResponse(
@@ -417,8 +417,8 @@ object Stubs {
     tokenId = token.tokenLocator,
     isBlocked = true,
     origin = "Token Origin",
-    createdAt = "1970-05-28",
-    expiresAt = "1970-06-19",
+    createdAt = "1970-05-28 00:00",
+    expiresAt = "1970-06-19 00:00",
   )
 
   val userCredentialsRequest = UserCredentialsRequest(
