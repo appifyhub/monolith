@@ -16,13 +16,13 @@ class SchemaServiceImpl(
 
   override fun update(schema: Schema) {
     log.debug("Updating schema $schema")
-    Normalizers.PositiveLong.run(schema.version).requireValid { "Schema Version" }
+    Normalizers.Cardinal.run(schema.version).requireValid { "Schema Version" }
     schemaRepository.update(schema)
   }
 
   override fun isInitialized(version: Long): Boolean {
     log.debug("Checking if schema initialized v$version")
-    Normalizers.PositiveLong.run(version).requireValid { "Schema Version" }
+    Normalizers.Cardinal.run(version).requireValid { "Schema Version" }
     return schemaRepository.isInitialized(version)
   }
 

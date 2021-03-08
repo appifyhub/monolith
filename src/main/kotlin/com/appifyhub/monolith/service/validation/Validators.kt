@@ -28,12 +28,12 @@ object Validators {
   val NotBlankNullable = validatesAs<String> { it.isNullOrNotBlank() }
   val NoSpaces = validatesAs<String> { it != null && it.hasNoSpaces() }
   val NoSpacesNullable = validatesAs<String> { it == null || it.hasNoSpaces() }
-  val PositiveLong = validatesAs<Long> { it != null && it > 0L }
+  val Cardinal = validatesAs<Long> { it != null && it > 0L }
 
   // Top level domain validators
 
-  val ProjectId = PositiveLong
-  val AccountId = PositiveLong
+  val ProjectId = Cardinal
+  val AccountId = Cardinal
   val ProjectName = NotBlank
 
   // ID validators
@@ -41,7 +41,7 @@ object Validators {
   val CustomUserId = NoSpaces
   val Username = NoSpaces
   val RawSignature = NotBlank
-  val UserId = validatesAs<UserId> { NoSpaces.isValid(it?.id) && PositiveLong.isValid(it?.projectId) }
+  val UserId = validatesAs<UserId> { NoSpaces.isValid(it?.id) && Cardinal.isValid(it?.projectId) }
 
   // Contact validators
 
