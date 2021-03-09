@@ -13,7 +13,7 @@ object Normalizers {
   val TrimmedNullable = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullable)
   val Dense = normalizesNonNull(Validators.NoSpaces, Cleaners.RemoveSpaces)
   val DenseNullable = normalizesNullable(Validators.NoSpacesNullable, Cleaners.RemoveSpacesNullable)
-  val Cardinal = normalizesNonNull(Validators.Cardinal, Cleaners.LongToCardinal)
+  val Cardinal = normalizesNonNull(Validators.PositiveLong, Cleaners.LongToCardinal)
 
   // Top level normalizers
 

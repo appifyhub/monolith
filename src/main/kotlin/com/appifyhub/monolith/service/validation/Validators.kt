@@ -8,6 +8,7 @@ import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN
 import org.slf4j.LoggerFactory
 import java.sql.Timestamp
+import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.regex.Pattern
 import java.util.regex.Pattern.CASE_INSENSITIVE
@@ -28,12 +29,12 @@ object Validators {
   val NotBlankNullable = validatesAs<String> { it.isNullOrNotBlank() }
   val NoSpaces = validatesAs<String> { it != null && it.hasNoSpaces() }
   val NoSpacesNullable = validatesAs<String> { it == null || it.hasNoSpaces() }
-  val Cardinal = validatesAs<Long> { it != null && it > 0L }
+  val PositiveLong = validatesAs<Long> { it != null && it > 0L }
 
   // Top level domain validators
 
-  val ProjectId = Cardinal
-  val AccountId = Cardinal
+  val ProjectId = PositiveLong
+  val AccountId = PositiveLong
   val ProjectName = NotBlank
 
   // ID validators
@@ -41,7 +42,7 @@ object Validators {
   val CustomUserId = NoSpaces
   val Username = NoSpaces
   val RawSignature = NotBlank
-  val UserId = validatesAs<UserId> { NoSpaces.isValid(it?.id) && Cardinal.isValid(it?.projectId) }
+  val UserId = validatesAs<UserId> { NoSpaces.isValid(it?.id) && PositiveLong.isValid(it?.projectId) }
 
   // Contact validators
 
@@ -68,7 +69,7 @@ object Validators {
   val OrganizationCountryCode = validatesAs<String> validator@{ code ->
     if (code == null) return@validator true
     if (code.length != 2) return@validator false
-    code.all { it.isLetter() }
+    code.all { it.isLetter() && it.isUpperCase() }
   }
   val Organization = validatesAs<Organization> validator@{
     if (it == null) return@validator true
@@ -86,10 +87,11 @@ object Validators {
 
   val BDay = validatesAs<BDay> validator@{
     val rawBirthday = it?.first ?: return@validator true
-    val birthday = Timestamp(rawBirthday.time).toLocalDateTime()
-    val today = Timestamp(it.second.currentMillis).toLocalDateTime()
+    val birthday = Timestamp(rawBirthday.time).toLocalDateTime().atZone(ZoneId.of("UTC"))
+    val today = Timestamp(it.second.currentMillis).toLocalDateTime().atZone(ZoneId.of("UTC"))
     if (!today.isAfter(birthday)) return@validator false
-    ChronoUnit.YEARS.between(birthday, today) in AGE_MIN..AGE_MAX
+    val age = ChronoUnit.YEARS.between(birthday, today)
+    return@validator age in AGE_MIN..AGE_MAX
   }
 
 }
