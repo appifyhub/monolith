@@ -25,11 +25,11 @@ object Validators {
 
   // Generic validators
 
-  val NotBlank = validatesAs<String> { !it.isNullOrBlank() }
-  val NotBlankNullable = validatesAs<String> { it.isNullOrNotBlank() }
-  val NoSpaces = validatesAs<String> { it != null && it.hasNoSpaces() }
-  val NoSpacesNullable = validatesAs<String> { it == null || it.hasNoSpaces() }
-  val PositiveLong = validatesAs<Long> { it != null && it > 0L }
+  val NotBlank = validatesAs<String>("NotBlank") { !it.isNullOrBlank() }
+  val NotBlankNullable = validatesAs<String>("NotBlankNullable") { it.isNullOrNotBlank() }
+  val NoSpaces = validatesAs<String>("NoSpaces") { it != null && it.hasNoSpaces() }
+  val NoSpacesNullable = validatesAs<String>("NoSpacesNullable") { it == null || it.hasNoSpaces() }
+  val PositiveLong = validatesAs<Long>("PositiveLong") { it != null && it > 0L }
 
   // Top level domain validators
 
@@ -42,14 +42,14 @@ object Validators {
   val CustomUserId = NoSpaces
   val Username = NoSpaces
   val RawSignature = NotBlank
-  val UserId = validatesAs<UserId> { NoSpaces.isValid(it?.id) && PositiveLong.isValid(it?.projectId) }
+  val UserId = validatesAs<UserId>("UserId") { NoSpaces.isValid(it?.id) && PositiveLong.isValid(it?.projectId) }
 
   // Contact validators
 
   val Name = NotBlankNullable
   val CustomContact = NotBlankNullable
-  val Email = validatesAs<String> { NotBlank.isValid(it) && REGEX_EMAIL.matcher(it!!).matches() }
-  val Phone = validatesAs<String> validator@{
+  val Email = validatesAs<String>("Email") { NotBlank.isValid(it) && REGEX_EMAIL.matcher(it!!).matches() }
+  val Phone = validatesAs<String>("Phone") validator@{
     if (!NoSpaces.isValid(it)) return@validator false
     try {
       val number = phoneNumberUtil.parse(it, FROM_NUMBER_WITH_PLUS_SIGN.name)
@@ -66,12 +66,12 @@ object Validators {
   val OrganizationStreet = NotBlankNullable
   val OrganizationPostcode = NotBlankNullable
   val OrganizationCity = NotBlankNullable
-  val OrganizationCountryCode = validatesAs<String> validator@{ code ->
+  val OrganizationCountryCode = validatesAs<String>("OrganizationCountryCode") validator@{ code ->
     if (code == null) return@validator true
     if (code.length != 2) return@validator false
     code.all { it.isLetter() && it.isUpperCase() }
   }
-  val Organization = validatesAs<Organization> validator@{
+  val Organization = validatesAs<Organization>("Organization") validator@{
     if (it == null) return@validator true
     if (!OrganizationName.isValid(it.name)) return@validator false
     if (!OrganizationStreet.isValid(it.street)) return@validator false
@@ -85,7 +85,7 @@ object Validators {
 
   val Origin = NotBlankNullable
 
-  val BDay = validatesAs<BDay> validator@{
+  val BDay = validatesAs<BDay>("BDay") validator@{
     val rawBirthday = it?.first ?: return@validator true
     val birthday = Timestamp(rawBirthday.time).toLocalDateTime().atZone(ZoneId.of("UTC"))
     val today = Timestamp(it.second.currentMillis).toLocalDateTime().atZone(ZoneId.of("UTC"))

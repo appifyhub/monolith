@@ -9,11 +9,15 @@ object Cleaners {
 
   // Generic cleaners
 
-  val Trim = cleansToNonNull<String> { it?.trim().orEmpty() }
-  val TrimNullable = cleansToNullable<String> { it?.trim() }
-  val RemoveSpaces = cleansToNonNull<String> { it?.filter { char -> !char.isWhitespace() }.orEmpty() }
-  val RemoveSpacesNullable = cleansToNullable<String> { it?.filter { char -> !char.isWhitespace() } }
-  val LongToCardinal = cleansToNonNull<Long> { it?.takeIf { num -> num > 0L } ?: 0L }
+  val Trim = cleansToNonNull<String>("Trim") { it?.trim().orEmpty() }
+  val TrimNullable = cleansToNullable<String>("TrimNullable") { it?.trim() }
+  val RemoveSpaces = cleansToNonNull<String>("RemoveSpaces") {
+    it?.filter { char -> !char.isWhitespace() }.orEmpty()
+  }
+  val RemoveSpacesNullable = cleansToNullable<String>("RemoveSpacesNullable") {
+    it?.filter { char -> !char.isWhitespace() }
+  }
+  val LongToCardinal = cleansToNonNull<Long>("LongToCardinal") { it?.takeIf { num -> num > 0L } ?: 0L }
 
   // Top level cleaners
 
@@ -26,14 +30,19 @@ object Cleaners {
   val CustomUserId = RemoveSpaces
   val Username = RemoveSpaces
   val RawSignature = Trim
-  val UserId = cleansToNonNull<UserId> { UserId(RemoveSpaces.clean(it?.id), LongToCardinal.clean(it?.projectId)) }
+  val UserId = cleansToNonNull<UserId>("UserId") {
+    UserId(
+      id = RemoveSpaces.clean(it?.id),
+      projectId = LongToCardinal.clean(it?.projectId),
+    )
+  }
 
   // Contact cleaners
 
   val Name = TrimNullable
   val CustomContact = TrimNullable
   val Email = RemoveSpaces
-  val Phone = cleansToNonNull<String> cleaner@{ phone ->
+  val Phone = cleansToNonNull<String>("Phone") cleaner@{ phone ->
     var result = phone?.trim()
     if (result.isNullOrBlank()) return@cleaner String.empty
     // remove non-numeric chars
@@ -52,8 +61,10 @@ object Cleaners {
   val OrganizationStreet = TrimNullable
   val OrganizationPostcode = TrimNullable
   val OrganizationCity = TrimNullable
-  val OrganizationCountryCode = cleansToNullable<String> { it?.trim()?.takeIfNotBlank()?.take(2)?.toUpperCase() }
-  val Organization = cleansToNullable<Organization> {
+  val OrganizationCountryCode = cleansToNullable<String>("OrganizationCountryCode") {
+    it?.trim()?.takeIfNotBlank()?.take(2)?.toUpperCase()
+  }
+  val Organization = cleansToNullable<Organization>("Organization") {
     it?.copy(
       name = OrganizationName.clean(it.name),
       street = OrganizationStreet.clean(it.street),
@@ -74,6 +85,6 @@ object Cleaners {
 
   val Origin = TrimNullable
 
-  val BDay = cleansToNullable<BDay> { it }
+  val BDay = cleansToNullable<BDay>("BDay") { it }
 
 }
