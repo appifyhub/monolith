@@ -13,4 +13,4 @@ spring:
 
 logging:
   level:
-    root: ${LOGGING_LEVEL:DEBUG}
+    root: ${LOGGING_LEVEL:ERROR}
