@@ -26,6 +26,7 @@ object Normalizers {
   val CustomUserId = normalizesNonNull(Validators.CustomUserId, Cleaners.CustomUserId)
   val Username = normalizesNonNull(Validators.Username, Cleaners.Username)
   val RawSignature = normalizesNonNull(Validators.RawSignature, Cleaners.RawSignature)
+  val RawSignatureNullified = normalizesNullable(Validators.RawSignatureNullable, Cleaners.RawSignatureNullified)
   val UserId = normalizesNonNull(Validators.UserId, Cleaners.UserId)
 
   // Contact validators

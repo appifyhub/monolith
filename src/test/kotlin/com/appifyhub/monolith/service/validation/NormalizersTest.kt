@@ -68,6 +68,11 @@ class NormalizersTest {
       .consistsOf(Validators.RawSignature, Cleaners.RawSignature)
   }
 
+  @Test fun `raw signature nullable = raw signature nullable + raw signature nullable`() {
+    assertThat(Normalizers.RawSignatureNullified)
+      .consistsOf(Validators.RawSignatureNullable, Cleaners.RawSignatureNullified)
+  }
+
   @Test fun `user ID = user ID + user ID`() {
     assertThat(Normalizers.UserId)
       .consistsOf(Validators.UserId, Cleaners.UserId)

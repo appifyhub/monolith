@@ -9,10 +9,10 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.SignatureGenerator
 import com.appifyhub.monolith.service.admin.AdminService
-import com.appifyhub.monolith.service.schema.SchemaInitializer.SupportedVersions.INITIAL
-import com.appifyhub.monolith.service.schema.SchemaInitializer.SupportedVersions.values
+import com.appifyhub.monolith.service.schema.SchemaInitializer.Seed.INITIAL
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.ext.takeIfNotBlank
+import com.appifyhub.monolith.service.validation.Normalizers
+import com.appifyhub.monolith.util.ext.requireValid
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -26,25 +26,22 @@ class SchemaInitializer(
   private val rootConfig: RootProjectConfig,
 ) : ApplicationRunner {
 
-  private enum class SupportedVersions { INITIAL }
+  private enum class Seed(val version: Long) { INITIAL(1L) }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   override fun run(args: ApplicationArguments?) {
     log.debug("Running schema initializer")
 
-    for (supportedVersion in values()) {
-      val version = supportedVersion.ordinal + 1L
-      val isInitialized = schemaService.isInitialized(version)
-      log.debug("Checking schema '${supportedVersion.name}' (v$version)")
-
-      if (!isInitialized) {
-        when (supportedVersion) {
+    Seed.values().forEach { seed ->
+      log.debug("Checking schema '${seed.name}' (v${seed.version})")
+      if (!schemaService.isInitialized(seed.version)) {
+        when (seed) {
           INITIAL -> seedInitial()
         }
 
-        val updatedSchema = Schema(version = version, isInitialized = true)
-        schemaService.update(updatedSchema)
+        val initializedSchema = Schema(version = seed.version, isInitialized = true)
+        schemaService.update(initializedSchema)
       }
     }
 
@@ -54,8 +51,20 @@ class SchemaInitializer(
   /**
    * Seeds the database with initial account, project, owner, etc.
    */
+  @Throws
   private fun seedInitial() {
     log.debug("Seeding initial database")
+
+    // validate configuration
+    val rootProjectName = Normalizers.ProjectName.run(rootConfig.rootProjectName)
+      .requireValid { "Project Name" }
+    val configuredSignature = Normalizers.RawSignatureNullified.run(rootConfig.rootOwnerSignature)
+      .requireValid { "Owner Signature" }
+    val ownerName = Normalizers.Name.run(rootConfig.rootOwnerName)
+      .requireValid { "Owner Name" }
+    val ownerEmail = Normalizers.Email.run(rootConfig.rootOwnerEmail)
+      .requireValid { "Owner Email" }
+    val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
 
     // create empty account for the root owner
     val account = adminService.addAccount()
@@ -64,15 +73,11 @@ class SchemaInitializer(
     val rawProject = adminService.addProject(
       ProjectCreator(
         account = account,
-        name = rootConfig.rootProjectName.takeIfNotBlank()!!,
+        name = rootProjectName,
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
       )
     )
-
-    // prepare the owner signature
-    val rawOwnerSignature = rootConfig.rootOwnerSignature.takeIfNotBlank()
-      ?: SignatureGenerator.nextSignature
 
     // create the owner's user in the root project
     var owner = userService.addUser(
@@ -81,11 +86,11 @@ class SchemaInitializer(
         id = null,
         projectId = rawProject.id,
         rawSignature = rawOwnerSignature,
-        name = rootConfig.rootOwnerName,
+        name = ownerName,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
         allowsSpam = true,
-        contact = rootConfig.rootOwnerEmail,
+        contact = ownerEmail,
         contactType = User.ContactType.EMAIL,
         birthday = null,
         company = null,
@@ -97,12 +102,12 @@ class SchemaInitializer(
       project = rawProject,
       updater = UserUpdater(
         id = owner.userId,
-        account = Settable(account)
+        account = Settable(account),
       )
     )
 
     // prepare printable credentials
-    val ownerSignature = rootConfig.rootOwnerSignature.takeIfNotBlank()
+    val printableOwnerSignature = configuredSignature
       ?.let { "<see env.\$SEED_OWNER_SECRET>" }
       ?: rawOwnerSignature
 
@@ -116,7 +121,7 @@ class SchemaInitializer(
         Your project's secret signature: '${rawProject.signature}'.
         
         Account owner '${owner.name} <${owner.contact}>' (ID = ${owner.userId.id}) is now set up.
-        Your account's secret signature: '$ownerSignature'.
+        Your account's secret signature: '$printableOwnerSignature'.
         
         [[ END OF TRANSMISSION ]]
       """.trimIndent()

@@ -37,6 +37,21 @@ class CleanersTest {
       .isEqualTo("a")
   }
 
+  @Test fun `nullified trim with null is null`() {
+    assertThat(Cleaners.TrimNullified.clean(null))
+      .isNull()
+  }
+
+  @Test fun `nullified trim with blank is null`() {
+    assertThat(Cleaners.TrimNullified.clean(" \n\t "))
+      .isNull()
+  }
+
+  @Test fun `nullified trim with non-null works`() {
+    assertThat(Cleaners.TrimNullified.clean(" \na\t "))
+      .isEqualTo("a")
+  }
+
   @Test fun `removing spaces with null is empty`() {
     assertThat(Cleaners.RemoveSpaces.clean(null))
       .isEmpty()
@@ -104,6 +119,11 @@ class CleanersTest {
   @Test fun `raw signature is trimming`() {
     assertThat(Cleaners.RawSignature)
       .isEqualTo(Cleaners.Trim)
+  }
+
+  @Test fun `nullable raw signature is trimming nullable`() {
+    assertThat(Cleaners.RawSignatureNullified)
+      .isEqualTo(Cleaners.TrimNullified)
   }
 
   @Test fun `user ID with space and negative is empty and zero`() {

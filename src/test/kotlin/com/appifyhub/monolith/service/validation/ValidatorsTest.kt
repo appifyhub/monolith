@@ -135,6 +135,11 @@ class ValidatorsTest {
       .isEqualTo(Validators.NotBlank)
   }
 
+  @Test fun `nullable raw signature is non blank nullable`() {
+    assertThat(Validators.RawSignatureNullable)
+      .isEqualTo(Validators.NotBlankNullable)
+  }
+
   @Test fun `user ID fails with spaces identifier`() {
     assertThat(Validators.UserId.isValid(UserId(" ", 1)))
       .isFalse()

@@ -5,10 +5,11 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.repository.admin.RawProject
 
 interface AdminService {
 
-  @Throws fun addProject(creator: ProjectCreator): Project
+  @Throws fun addProject(creator: ProjectCreator): RawProject
 
   @Throws fun addAccount(): Account
 

@@ -19,7 +19,6 @@ app:
   seed:
     rootProject:
       name: ${SEED_PROJECT_NAME:AppifyHub}
-      signature: ${SEED_PROJECT_SECRET:}
       owner:
         name: ${SEED_OWNER_NAME:Administrator}
         signature: ${SEED_OWNER_SECRET:}

@@ -7,6 +7,7 @@ import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.repository.admin.AdminRepository
+import com.appifyhub.monolith.repository.admin.RawProject
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.ext.requireValid
@@ -21,7 +22,7 @@ class AdminServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addProject(creator: ProjectCreator): Project {
+  override fun addProject(creator: ProjectCreator): RawProject {
     log.debug("Adding project $creator")
 
     val normalizeAccount = Normalizers.AccountId.run(creator.account.id).requireValid { "Account ID" }

@@ -11,6 +11,7 @@ object Cleaners {
 
   val Trim = cleansToNonNull<String>("Trim") { it?.trim().orEmpty() }
   val TrimNullable = cleansToNullable<String>("TrimNullable") { it?.trim() }
+  val TrimNullified = cleansToNullable<String>("TrimNullified") { it?.trim()?.takeIfNotBlank() }
   val RemoveSpaces = cleansToNonNull<String>("RemoveSpaces") {
     it?.filter { char -> !char.isWhitespace() }.orEmpty()
   }
@@ -30,6 +31,7 @@ object Cleaners {
   val CustomUserId = RemoveSpaces
   val Username = RemoveSpaces
   val RawSignature = Trim
+  val RawSignatureNullified = TrimNullified
   val UserId = cleansToNonNull<UserId>("UserId") {
     UserId(
       id = RemoveSpaces.clean(it?.id),
