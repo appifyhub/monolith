@@ -23,7 +23,7 @@ class ProjectDbm(
   @ManyToOne(fetch = FetchType.EAGER)
   var account: AccountDbm,
 
-  @Column(unique = true, nullable = false, length = 32)
+  @Column(unique = true, nullable = false, length = 1024)
   var signature: String,
 
   @Column(nullable = false, length = 32)
