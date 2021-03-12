@@ -51,8 +51,9 @@ class UserServiceImpl(
       ContactType.PHONE -> Normalizers.Phone.run(creator.contact).requireValid { "Contact Phone" }
       ContactType.CUSTOM -> Normalizers.CustomContact.run(creator.contact).requireValid { "Contact" }
     }
+    val normalizedContactType = if (normalizedContact == null) ContactType.CUSTOM else creator.contactType
+    val normalizedCompany = Normalizers.Organization.run(creator.company).requireValid { "Company" }
     val normalizedBirthday = Normalizers.BDay.run(creator.birthday to timeProvider).requireValid { "Birthday" }?.first
-    val normalizedCompany = Normalizers.Organization.run(creator.company).requireValid { "Organization" }
 
     val normalizedCreator = UserCreator(
       id = normalizedId,
@@ -63,7 +64,7 @@ class UserServiceImpl(
       authority = creator.authority,
       allowsSpam = creator.allowsSpam,
       contact = normalizedContact,
-      contactType = creator.contactType,
+      contactType = normalizedContactType,
       birthday = normalizedBirthday,
       company = normalizedCompany,
     )
@@ -148,9 +149,6 @@ class UserServiceImpl(
     val normalizedVerificationToken = updater.verificationToken?.mapValueNullable {
       Normalizers.DenseNullable.run(it).requireValid { "Verification Token" }
     }
-    val normalizedBirthday = updater.birthday?.mapValueNullable {
-      Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
-    }
     // each component needs to be validated manually (see OrganizationUpdater)
     val normalizedCompany = updater.company?.mapValueNullable { company ->
       OrganizationUpdater(
@@ -170,6 +168,9 @@ class UserServiceImpl(
           Normalizers.OrganizationCountryCode.run(it).requireValid { "Company Country Code" }
         },
       )
+    }
+    val normalizedBirthday = updater.birthday?.mapValueNullable {
+      Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
     }
     updater.account?.value?.let {
       Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
