@@ -12,8 +12,7 @@ class AuthMapperTest {
     assertThat(Stubs.ownedTokenDbm.toDomain()).isDataClassEqualTo(
       Stubs.ownedToken.copy(
         owner = Stubs.user.copy(
-          // no info about this on data layer
-          ownedTokens = emptyList(),
+          ownedTokens = emptyList(), // no info about this on data layer
         ),
       )
     )

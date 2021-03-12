@@ -159,8 +159,13 @@ class CleanersTest {
   }
 
   @Test fun `phone with no chars is empty`() {
-    assertThat(Cleaners.Phone.clean(""))
+    assertThat(Cleaners.Phone.clean(String.empty))
       .isEmpty()
+  }
+
+  @Test fun `phone with alpha chars only is empty`() {
+    assertThat(Cleaners.Phone.clean("invalid"))
+      .isEqualTo(String.empty)
   }
 
   @Test fun `phone with alpha chars keeps only digits`() {
@@ -267,9 +272,9 @@ class CleanersTest {
       )
     ).isEqualTo(
       Organization(
-        name = "",
+        name = String.empty,
         street = "street",
-        postcode = "",
+        postcode = String.empty,
         city = null,
         countryCode = null,
       )

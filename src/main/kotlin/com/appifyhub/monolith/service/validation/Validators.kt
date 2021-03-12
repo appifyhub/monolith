@@ -27,8 +27,8 @@ object Validators {
 
   val NotBlank = validatesAs<String>("NotBlank") { !it.isNullOrBlank() }
   val NotBlankNullable = validatesAs<String>("NotBlankNullable") { it.isNullOrNotBlank() }
-  val NoSpaces = validatesAs<String>("NoSpaces") { it != null && it.hasNoSpaces() }
-  val NoSpacesNullable = validatesAs<String>("NoSpacesNullable") { it == null || it.hasNoSpaces() }
+  val NoSpaces = validatesAs<String>("NoSpaces") { !it.isNullOrEmpty() && it.hasNoSpaces() }
+  val NoSpacesNullable = validatesAs<String>("NoSpacesNullable") { it == null || it.isNotBlank() || it.hasNoSpaces() }
   val PositiveLong = validatesAs<Long>("PositiveLong") { it != null && it > 0L }
 
   // Top level domain validators

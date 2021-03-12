@@ -6,6 +6,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.util.ext.empty
 import org.junit.jupiter.api.Test
 
 class TokenLocatorCoderImplTest {
@@ -16,7 +17,7 @@ class TokenLocatorCoderImplTest {
   @Test fun `encoding with empty ID works`() {
     val locator = TokenLocator(
       userId = UserId(
-        id = "",
+        id = String.empty,
         projectId = 2,
       ),
       origin = "origin",
@@ -48,7 +49,7 @@ class TokenLocatorCoderImplTest {
         id = "username",
         projectId = 2,
       ),
-      origin = "",
+      origin = String.empty,
       timestamp = 10,
     )
 
@@ -75,7 +76,7 @@ class TokenLocatorCoderImplTest {
   @Test fun `decoding with empty user ID throws`() {
     val locator = TokenLocator(
       userId = UserId(
-        id = "",
+        id = String.empty,
         projectId = 2,
       ),
       origin = "origin",

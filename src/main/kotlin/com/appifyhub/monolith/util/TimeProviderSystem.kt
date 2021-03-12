@@ -24,4 +24,6 @@ class TimeProviderSystem : TimeProvider {
   override val currentDate: Date
     get() = Date(currentMillis)
 
+  override fun toString() = "System Time [$currentDate]"
+
 }

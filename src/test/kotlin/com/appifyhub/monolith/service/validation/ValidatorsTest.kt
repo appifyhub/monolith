@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
+import com.appifyhub.monolith.util.ext.empty
 import org.junit.jupiter.api.Test
 import java.time.temporal.ChronoUnit
 import java.util.Date
@@ -51,6 +52,11 @@ class ValidatorsTest {
       .isFalse()
   }
 
+  @Test fun `no spaces fails with empty`() {
+    assertThat(Validators.NoSpaces.isValid(String.empty))
+      .isFalse()
+  }
+
   @Test fun `no spaces fails with spaces`() {
     assertThat(Validators.NoSpaces.isValid(" "))
       .isFalse()
@@ -68,6 +74,11 @@ class ValidatorsTest {
 
   @Test fun `nullable no spaces fails with null`() {
     assertThat(Validators.NoSpacesNullable.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `nullable no spaces fails with empty`() {
+    assertThat(Validators.NoSpacesNullable.isValid(String.empty))
       .isTrue()
   }
 
@@ -376,8 +387,8 @@ class ValidatorsTest {
   }
 
   @Test fun `birthday succeeds with age between 10 and 100`() {
-    val twentyYearsMillis = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
-    val timeProvider = TimeProviderFake { twentyYearsMillis }
+    val fiftyYearsMillis = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
+    val timeProvider = TimeProviderFake { fiftyYearsMillis }
     val birthday: BDay = Date(0) to timeProvider
 
     assertThat(Validators.BDay.isValid(birthday))

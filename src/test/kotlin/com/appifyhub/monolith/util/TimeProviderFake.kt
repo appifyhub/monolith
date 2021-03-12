@@ -33,6 +33,12 @@ class TimeProviderFake(
   override val currentDate: Date
     @Synchronized get() = Date(currentMillis)
 
+  override fun toString(): String {
+    // make sure not to increment for printing purposes
+    val timestamp = staticTime() ?: incrementalTime
+    return "Fake Time [${Date(timestamp)}]"
+  }
+
   private fun timeIncrement(): Long {
     val result = incrementalTime
     incrementalTime += timeIncrement

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test
 class StringExtensionsTest {
 
   @Test fun `takeIfNotBlank with empty string gives null`() {
-    assertThat("".takeIfNotBlank()).isEqualTo(null)
+    assertThat(String.empty.takeIfNotBlank()).isEqualTo(null)
   }
 
   @Test fun `takeIfNotBlank with space gives null`() {
@@ -19,11 +19,11 @@ class StringExtensionsTest {
   }
 
   @Test fun `isNullOrNotBlank with empty string gives false`() {
-    assertThat("".isNullOrNotBlank()).isEqualTo(false) // it's blank
+    assertThat(String.empty.isNullOrNotBlank()).isEqualTo(false) // it's blank
   }
 
   @Test fun `isNullOrNotBlank with space gives false`() {
-    assertThat("".isNullOrNotBlank()).isEqualTo(false) // it's blank
+    assertThat(String.empty.isNullOrNotBlank()).isEqualTo(false) // it's blank
   }
 
   @Test fun `isNullOrNotBlank with null gives true`() {
