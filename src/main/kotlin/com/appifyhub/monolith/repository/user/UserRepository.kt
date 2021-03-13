@@ -9,7 +9,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 
 interface UserRepository : SpringSecurityUserManager {
 
-  @Throws fun addUser(creator: UserCreator, project: Project): User
+  @Throws fun addUser(creator: UserCreator, userIdType: Project.UserIdType): User
 
   @Throws fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User
 
@@ -21,7 +21,7 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun fetchAllUsersByAccount(account: Account): List<User>
 
-  @Throws fun updateUser(updater: UserUpdater, project: Project): User
+  @Throws fun updateUser(updater: UserUpdater, userIdType: Project.UserIdType): User
 
   @Throws fun removeUserById(userId: UserId)
 

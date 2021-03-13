@@ -9,7 +9,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.UserId
@@ -74,9 +74,8 @@ class UserRepositoryImplTest {
 
   @Test fun `adding user fails with null ID and non-random ID type`() {
     val creator = Stubs.userCreator.copy(id = null)
-    val project = Stubs.project.copy(userIdType = Project.UserIdType.USERNAME)
 
-    assertThat { repository.addUser(creator, project) }
+    assertThat { repository.addUser(creator, UserIdType.USERNAME) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -86,9 +85,8 @@ class UserRepositoryImplTest {
 
   @Test fun `adding user fails with existing ID and random ID type`() {
     val creator = Stubs.userCreator.copy(id = "non-null")
-    val project = Stubs.project.copy(userIdType = Project.UserIdType.RANDOM)
 
-    assertThat { repository.addUser(creator, project) }
+    assertThat { repository.addUser(creator, UserIdType.RANDOM) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -98,7 +96,6 @@ class UserRepositoryImplTest {
 
   @Test fun `adding user generates new ID for random ID type`() {
     val creator = Stubs.userCreator.copy(id = null)
-    val project = Stubs.project.copy(userIdType = Project.UserIdType.RANDOM)
 
     // create & update times from the stub
     val times = listOf(0xC00000, 0xA00000).iterator()
@@ -106,10 +103,10 @@ class UserRepositoryImplTest {
     UserIdGenerator.interceptor = { "randomUserId" }
     TokenGenerator.emailInterceptor = { "abcd1234" }
 
-    assertThat(repository.addUser(creator, project))
+    assertThat(repository.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = UserId("randomUserId", project.id),
+          userId = UserId("randomUserId", creator.projectId),
           account = null,
           ownedTokens = emptyList(),
         )
@@ -118,14 +115,13 @@ class UserRepositoryImplTest {
 
   @Test fun `adding user saves existing ID for non-random ID type`() {
     val creator = Stubs.userCreator.copy(id = "username")
-    val project = Stubs.project
 
     // create & update times from the stub
     val times = listOf(0xC00000, 0xA00000).iterator()
     timeProvider.staticTime = { times.next().toLong() }
     TokenGenerator.emailInterceptor = { "abcd1234" }
 
-    assertThat(repository.addUser(creator, project))
+    assertThat(repository.addUser(creator, Stubs.project.userIdType))
       .isDataClassEqualTo(
         Stubs.user.copy(
           account = null,
@@ -136,17 +132,16 @@ class UserRepositoryImplTest {
 
   @Test fun `adding user with phone ID generates a phone-friendly verification token`() {
     val creator = Stubs.userCreator.copy(id = "+1234567890")
-    val project = Stubs.project.copy(userIdType = Project.UserIdType.PHONE)
 
     // create & update times from the stub
     val times = listOf(0xC00000, 0xA00000).iterator()
     timeProvider.staticTime = { times.next().toLong() }
     TokenGenerator.phoneInterceptor = { "123456" }
 
-    assertThat(repository.addUser(creator, project))
+    assertThat(repository.addUser(creator, UserIdType.PHONE))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = UserId(creator.id!!, project.id),
+          userId = UserId(creator.id!!, creator.projectId),
           account = null,
           ownedTokens = emptyList(),
           verificationToken = "123456"
@@ -329,7 +324,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.updateUser(Stubs.userUpdater, Stubs.project) }
+    assertThat { repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -344,7 +339,7 @@ class UserRepositoryImplTest {
     timeProvider.staticTime = { 0xA00001 }
     TokenGenerator.phoneInterceptor = { "abcd12341" }
 
-    assertThat(repository.updateUser(Stubs.userUpdater, Stubs.project))
+    assertThat(repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType))
       .isDataClassEqualTo(
         Stubs.userUpdated.copy(
           ownedTokens = emptyList(), // tokens are not pulled for updates
@@ -361,7 +356,7 @@ class UserRepositoryImplTest {
     TokenGenerator.emailInterceptor = { "abcd12341" }
 
     val updater = UserUpdater(id = Stubs.userId, contact = Settable("new@email.com"))
-    assertThat(repository.updateUser(updater, Stubs.project))
+    assertThat(repository.updateUser(updater, Stubs.project.userIdType))
       .isDataClassEqualTo(
         Stubs.user.copy(
           contact = updater.contact!!.value,
@@ -382,7 +377,7 @@ class UserRepositoryImplTest {
     TokenGenerator.phoneInterceptor = { "abcd12342" }
 
     val updater = UserUpdater(id = Stubs.userId, contact = Settable("+9876543210"))
-    assertThat(repository.updateUser(updater, Stubs.project)) // just changes the phone
+    assertThat(repository.updateUser(updater, Stubs.project.userIdType)) // just changes the phone
       .isDataClassEqualTo(
         Stubs.userUpdated.copy(
           contact = updater.contact!!.value,

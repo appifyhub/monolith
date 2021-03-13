@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.repository.user
 
 import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
@@ -34,18 +33,18 @@ class UserRepositoryImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addUser(creator: UserCreator, project: Project): User {
+  override fun addUser(creator: UserCreator, userIdType: UserIdType): User {
     log.debug("Adding user by creator $creator")
-    if (creator.id == null && project.userIdType != UserIdType.RANDOM)
+    if (creator.id == null && userIdType != UserIdType.RANDOM)
       throw IllegalArgumentException("Missing user ID for creator $creator")
-    if (creator.id != null && project.userIdType == UserIdType.RANDOM)
+    if (creator.id != null && userIdType == UserIdType.RANDOM)
       throw IllegalArgumentException("Provided user ID instead of keeping random for creator $creator")
 
     val user = creator.toUser(
       userId = creator.id ?: UserIdGenerator.nextId,
       passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
-    ).updateVerificationToken(project)
+    ).updateVerificationToken(userIdType)
 
     return userDao.save(user.toData()).toDomain()
   }
@@ -76,7 +75,7 @@ class UserRepositoryImpl(
     return userDao.findAllByAccount(account.toData()).map(UserDbm::toDomain)
   }
 
-  override fun updateUser(updater: UserUpdater, project: Project): User {
+  override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
     log.debug("Updating user $updater")
     val fetchedUser = fetchUser(updater.id, withTokens = false)
 
@@ -84,7 +83,7 @@ class UserRepositoryImpl(
       user = fetchedUser,
       passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
-    ).updateVerificationToken(project, oldUser = fetchedUser)
+    ).updateVerificationToken(userIdType, oldUser = fetchedUser)
 
     return userDao.save(updatedUser.toData()).toDomain()
   }
@@ -116,32 +115,32 @@ class UserRepositoryImpl(
     return user.copy(ownedTokens = tokens)
   }
 
-  private fun User.updateVerificationToken(project: Project, oldUser: User? = null): User = when {
-    needsNewEmailToken(project, oldUser) -> copy(verificationToken = TokenGenerator.nextEmailToken)
-    needsNewPhoneToken(project, oldUser) -> copy(verificationToken = TokenGenerator.nextPhoneToken)
+  private fun User.updateVerificationToken(userIdType: UserIdType, oldUser: User? = null): User = when {
+    needsNewEmailToken(userIdType, oldUser) -> copy(verificationToken = TokenGenerator.nextEmailToken)
+    needsNewPhoneToken(userIdType, oldUser) -> copy(verificationToken = TokenGenerator.nextPhoneToken)
     else -> this
   }
 
-  private fun User.hasEmailIdChanged(project: Project, oldUser: User? = null): Boolean =
-    project.userIdType == UserIdType.EMAIL && oldUser?.userId?.id != userId.id
+  private fun User.hasEmailIdChanged(userIdType: UserIdType, oldUser: User? = null): Boolean =
+    userIdType == UserIdType.EMAIL && oldUser?.userId?.id != userId.id
 
-  private fun User.hasPhoneIdChanged(project: Project, oldUser: User? = null): Boolean =
-    project.userIdType == UserIdType.PHONE && oldUser?.userId?.id != userId.id
+  private fun User.hasPhoneIdChanged(userIdType: UserIdType, oldUser: User? = null): Boolean =
+    userIdType == UserIdType.PHONE && oldUser?.userId?.id != userId.id
 
-  private fun User.needsNewEmailToken(project: Project, oldUser: User? = null): Boolean {
+  private fun User.needsNewEmailToken(userIdType: UserIdType, oldUser: User? = null): Boolean {
     // check if contact ID changed
-    if (hasEmailIdChanged(project, oldUser)) return true
+    if (hasEmailIdChanged(userIdType, oldUser)) return true
     // only one verification code exists: if Phone ID changed, assume that Contact Email hasn't
     val hasContactEmailChanged = contactType == ContactType.EMAIL && contact != null && oldUser?.contact != contact
-    return hasContactEmailChanged && !hasPhoneIdChanged(project, oldUser)
+    return hasContactEmailChanged && !hasPhoneIdChanged(userIdType, oldUser)
   }
 
-  private fun User.needsNewPhoneToken(project: Project, oldUser: User? = null): Boolean {
+  private fun User.needsNewPhoneToken(userIdType: UserIdType, oldUser: User? = null): Boolean {
     // check if contact ID changed
-    if (hasPhoneIdChanged(project, oldUser)) return true
+    if (hasPhoneIdChanged(userIdType, oldUser)) return true
     // only one verification code exists: if Email ID changed, assume that Contact Phone hasn't
     val hasContactPhoneChanged = contactType == ContactType.PHONE && contact != null && oldUser?.contact != contact
-    return hasContactPhoneChanged && !hasEmailIdChanged(project, oldUser)
+    return hasContactPhoneChanged && !hasEmailIdChanged(userIdType, oldUser)
   }
 
 }

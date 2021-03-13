@@ -107,7 +107,7 @@ class SchemaInitializerTest {
       )
     )
     verify(userService).addUser(
-      project = Stubs.project,
+      userIdType = Stubs.project.userIdType,
       creator = UserCreator(
         id = null,
         projectId = Stubs.project.id,
@@ -123,7 +123,7 @@ class SchemaInitializerTest {
       )
     )
     verify(userService).updateUser(
-      project = Stubs.project,
+      userIdType = Stubs.project.userIdType,
       updater = UserUpdater(
         id = Stubs.userId,
         account = Settable(Stubs.account),
@@ -156,7 +156,7 @@ class SchemaInitializerTest {
       )
     )
     verify(userService).addUser(
-      project = Stubs.project,
+      userIdType = Stubs.project.userIdType,
       creator = UserCreator(
         id = null,
         projectId = Stubs.project.id,
@@ -172,7 +172,7 @@ class SchemaInitializerTest {
       )
     )
     verify(userService).updateUser(
-      project = Stubs.project,
+      userIdType = Stubs.project.userIdType,
       updater = UserUpdater(
         id = Stubs.userId,
         account = Settable(Stubs.account),

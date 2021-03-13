@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.service.user
 
 import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
@@ -34,10 +33,10 @@ class UserServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addUser(creator: UserCreator, project: Project): User {
+  override fun addUser(creator: UserCreator, userIdType: UserIdType): User {
     log.debug("Adding user $creator")
 
-    val normalizedId = when (project.userIdType) {
+    val normalizedId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(creator.id).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(creator.id).requireValid { "Email ID" }
       UserIdType.PHONE -> Normalizers.Phone.run(creator.id).requireValid { "Phone ID" }
@@ -57,7 +56,7 @@ class UserServiceImpl(
 
     val normalizedCreator = UserCreator(
       id = normalizedId,
-      projectId = project.id,
+      projectId = creator.projectId,
       rawSignature = normalizedRawSignature,
       name = normalizedName,
       type = creator.type,
@@ -69,7 +68,7 @@ class UserServiceImpl(
       company = normalizedCompany,
     )
 
-    return userRepository.addUser(normalizedCreator, project)
+    return userRepository.addUser(normalizedCreator, userIdType)
   }
 
   override fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User {
@@ -102,20 +101,20 @@ class UserServiceImpl(
     return userRepository.fetchAllUsersByAccount(account)
   }
 
-  override fun updateUser(updater: UserUpdater, project: Project): User {
+  override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
     log.debug("Updating user by $updater")
 
     // non-nullable properties
 
     Normalizers.UserId.run(updater.id).requireValid { "User ID" }
-    val normalizedUserId = when (project.userIdType) {
+    val normalizedUserId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(updater.id.id).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(updater.id.id).requireValid { "Email ID" }
       UserIdType.PHONE -> Normalizers.Phone.run(updater.id.id).requireValid { "Phone ID" }
       UserIdType.CUSTOM -> Normalizers.CustomUserId.run(updater.id.id).requireValid { "User ID" }
       UserIdType.RANDOM -> Normalizers.CustomUserId.run(updater.id.id).requireValid { "User ID" }
     }
-    val normalizedId = UserId(normalizedUserId, project.id)
+    val normalizedId = UserId(normalizedUserId, updater.id.projectId)
     val normalizedRawSignature = updater.rawSignature?.mapValueNonNull {
       Normalizers.RawSignature.run(it).requireValid { "Signature" }
     }
@@ -191,7 +190,7 @@ class UserServiceImpl(
       account = updater.account,
     )
 
-    return userRepository.updateUser(normalizedUpdater, project)
+    return userRepository.updateUser(normalizedUpdater, userIdType)
   }
 
   override fun removeUserById(userId: UserId) {

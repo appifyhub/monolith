@@ -41,13 +41,12 @@ class UserServiceImplTest {
     TokenGenerator.phoneInterceptor = { null }
   }
 
-  // Adding user
+  // Adding
 
   @Test fun `adding user fails with invalid username`() {
     val creator = Stubs.userCreator.copy(id = " ")
-    val project = Stubs.project.copy(userIdType = UserIdType.USERNAME)
 
-    assertThat { service.addUser(creator, project) }
+    assertThat { service.addUser(creator, UserIdType.USERNAME) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -57,9 +56,8 @@ class UserServiceImplTest {
 
   @Test fun `adding user fails with invalid email`() {
     val creator = Stubs.userCreator.copy(id = "invalid")
-    val project = Stubs.project.copy(userIdType = UserIdType.EMAIL)
 
-    assertThat { service.addUser(creator, project) }
+    assertThat { service.addUser(creator, UserIdType.EMAIL) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -69,9 +67,8 @@ class UserServiceImplTest {
 
   @Test fun `adding user fails with invalid phone`() {
     val creator = Stubs.userCreator.copy(id = "invalid")
-    val project = Stubs.project.copy(userIdType = UserIdType.PHONE)
 
-    assertThat { service.addUser(creator, project) }
+    assertThat { service.addUser(creator, UserIdType.PHONE) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -81,9 +78,8 @@ class UserServiceImplTest {
 
   @Test fun `adding user fails with invalid custom user ID`() {
     val creator = Stubs.userCreator.copy(id = " ")
-    val project = Stubs.project.copy(userIdType = UserIdType.CUSTOM)
 
-    assertThat { service.addUser(creator, project) }
+    assertThat { service.addUser(creator, UserIdType.CUSTOM) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -94,7 +90,7 @@ class UserServiceImplTest {
   @Test fun `adding user fails with invalid raw signature`() {
     val creator = Stubs.userCreator.copy(rawSignature = " ")
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -105,7 +101,7 @@ class UserServiceImplTest {
   @Test fun `adding user fails with invalid name`() {
     val creator = Stubs.userCreator.copy(name = " ")
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -116,7 +112,7 @@ class UserServiceImplTest {
   @Test fun `adding user fails with invalid contact email`() {
     val creator = Stubs.userCreator.copy(contactType = ContactType.EMAIL, contact = "invalid")
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -127,7 +123,7 @@ class UserServiceImplTest {
   @Test fun `adding user fails with invalid contact phone`() {
     val creator = Stubs.userCreator.copy(contactType = ContactType.PHONE, contact = "invalid")
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -138,7 +134,7 @@ class UserServiceImplTest {
   @Test fun `adding user fails with invalid custom contact`() {
     val creator = Stubs.userCreator.copy(contactType = ContactType.CUSTOM, contact = " ")
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -150,7 +146,7 @@ class UserServiceImplTest {
     val creator = Stubs.userCreator.copy(birthday = Date(System.currentTimeMillis()))
     timeProvider.staticTime = { 0 }
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -161,7 +157,7 @@ class UserServiceImplTest {
   @Test fun `adding user fails with invalid organization`() {
     val creator = Stubs.userCreator.copy(company = Stubs.company.copy(countryCode = "D"))
 
-    assertThat { service.addUser(creator, Stubs.project) }
+    assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -172,12 +168,11 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with random ID`() {
     val creator = Stubs.userCreator.copy(id = null)
-    val project = Stubs.project.copy(userIdType = UserIdType.RANDOM)
     val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
     timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
-    assertThat(service.addUser(creator, project))
+    assertThat(service.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
         Stubs.user.copy(
           userId = Stubs.userId.copy(id = UserIdGenerator.nextId),
@@ -193,12 +188,11 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with username ID`() {
     val creator = Stubs.userCreator.copy(id = "username")
-    val project = Stubs.project.copy(userIdType = UserIdType.USERNAME)
     val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
     timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
-    assertThat(service.addUser(creator, project))
+    assertThat(service.addUser(creator, UserIdType.USERNAME))
       .isDataClassEqualTo(
         Stubs.user.copy(
           userId = Stubs.userId.copy(id = "username"),
@@ -214,12 +208,11 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with email ID`() {
     val creator = Stubs.userCreator.copy(id = "email@domain.com")
-    val project = Stubs.project.copy(userIdType = UserIdType.EMAIL)
     val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
     timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
-    assertThat(service.addUser(creator, project))
+    assertThat(service.addUser(creator, UserIdType.EMAIL))
       .isDataClassEqualTo(
         Stubs.user.copy(
           userId = Stubs.userId.copy(id = "email@domain.com"),
@@ -239,12 +232,11 @@ class UserServiceImplTest {
       contactType = ContactType.PHONE,
       contact = "+491760000000",
     )
-    val project = Stubs.project.copy(userIdType = UserIdType.PHONE)
     val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
     timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
-    assertThat(service.addUser(creator, project))
+    assertThat(service.addUser(creator, UserIdType.PHONE))
       .isDataClassEqualTo(
         Stubs.user.copy(
           userId = Stubs.userId.copy(id = "+491760000000"),
@@ -262,12 +254,11 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with custom ID (and no contact)`() {
     val creator = Stubs.userCreator.copy(id = "custom_id", contactType = ContactType.CUSTOM, contact = null)
-    val project = Stubs.project.copy(userIdType = UserIdType.CUSTOM)
     val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
     timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
-    assertThat(service.addUser(creator, project))
+    assertThat(service.addUser(creator, UserIdType.CUSTOM))
       .isDataClassEqualTo(
         Stubs.user.copy(
           userId = Stubs.userId.copy(id = "custom_id"),
@@ -280,6 +271,17 @@ class UserServiceImplTest {
           updatedAt = timeProvider.currentDate,
         )
       )
+  }
+
+  // Fetching
+
+  @Test fun `fetching user fails with invalid user ID`() {
+    assertThat { service.fetchUserByUserId(Stubs.userId.copy(id = " "), withTokens = false) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
   }
 
   /*

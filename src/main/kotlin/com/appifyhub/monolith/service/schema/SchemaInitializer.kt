@@ -81,7 +81,7 @@ class SchemaInitializer(
 
     // create the owner's user in the root project
     var owner = userService.addUser(
-      project = rawProject,
+      userIdType = rawProject.userIdType,
       creator = UserCreator(
         id = null,
         projectId = rawProject.id,
@@ -99,7 +99,7 @@ class SchemaInitializer(
 
     // make root user own the root account
     owner = userService.updateUser(
-      project = rawProject,
+      userIdType = rawProject.userIdType,
       updater = UserUpdater(
         id = owner.userId,
         account = Settable(account),
