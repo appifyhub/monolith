@@ -54,9 +54,9 @@ class UserRepositoryImpl(
     return fetchUser(userId, withTokens)
   }
 
-  override fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User {
-    log.debug("Fetching user $idHashProjectId")
-    val userId = UserId.fromUnifiedFormat(idHashProjectId)
+  override fun fetchUserByUnifiedId(unifiedId: String, withTokens: Boolean): User {
+    log.debug("Fetching user $unifiedId")
+    val userId = UserId.fromUnifiedFormat(unifiedId)
     return fetchUser(userId, withTokens)
   }
 

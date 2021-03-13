@@ -189,7 +189,7 @@ class UserRepositoryImplTest {
   // region Fetch by unified ID
 
   @Test fun `fetching user by malformed unified ID throws`() {
-    assertThat { repository.fetchUserByUnifiedIdFormat("malformed", withTokens = false) }
+    assertThat { repository.fetchUserByUnifiedId("malformed", withTokens = false) }
       .isFailure()
       .hasClass(NumberFormatException::class)
   }
@@ -199,7 +199,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUnifiedIdFormat(Stubs.unifiedUserId, withTokens = false) }
+    assertThat { repository.fetchUserByUnifiedId(Stubs.unifiedUserId, withTokens = false) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -212,7 +212,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
     }
 
-    assertThat(repository.fetchUserByUnifiedIdFormat(Stubs.unifiedUserId, withTokens = false))
+    assertThat(repository.fetchUserByUnifiedId(Stubs.unifiedUserId, withTokens = false))
       .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
   }
 
@@ -221,7 +221,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
     }
 
-    assertThat(repository.fetchUserByUnifiedIdFormat(Stubs.unifiedUserId, withTokens = true))
+    assertThat(repository.fetchUserByUnifiedId(Stubs.unifiedUserId, withTokens = true))
       .isDataClassEqualTo(Stubs.user)
   }
 

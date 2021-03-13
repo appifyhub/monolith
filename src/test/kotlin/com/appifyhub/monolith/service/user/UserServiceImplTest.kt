@@ -3,17 +3,23 @@ package com.appifyhub.monolith.service.user
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.hasClass
+import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
+import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
+import com.appifyhub.monolith.util.ext.truncateTo
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -26,6 +32,8 @@ import org.springframework.web.server.ResponseStatusException
 import java.time.temporal.ChronoUnit
 import java.util.Date
 
+private const val ROOT_OWNER_NAME = "Administrator"
+
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
@@ -33,6 +41,13 @@ class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
   @Autowired lateinit var timeProvider: TimeProviderFake
+  @Autowired lateinit var adminRepo: AdminRepository
+
+  @BeforeEach fun setup() {
+    // ensure valid birthday from the stub
+    val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
+    timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis }
+  }
 
   @AfterEach fun teardown() {
     timeProvider.staticTime = { null }
@@ -143,8 +158,8 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid birthday`() {
-    val creator = Stubs.userCreator.copy(birthday = Date(System.currentTimeMillis()))
-    timeProvider.staticTime = { 0 }
+    val fiveYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(5).toMillis()
+    val creator = Stubs.userCreator.copy(birthday = Date(timeProvider.currentMillis - fiveYearsMillis))
 
     assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
@@ -168,8 +183,6 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with random ID`() {
     val creator = Stubs.userCreator.copy(id = null)
-    val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
-    timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.RANDOM))
@@ -188,8 +201,6 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with username ID`() {
     val creator = Stubs.userCreator.copy(id = "username")
-    val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
-    timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.USERNAME))
@@ -208,8 +219,6 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with email ID`() {
     val creator = Stubs.userCreator.copy(id = "email@domain.com")
-    val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
-    timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.EMAIL))
@@ -232,8 +241,6 @@ class UserServiceImplTest {
       contactType = ContactType.PHONE,
       contact = "+491760000000",
     )
-    val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
-    timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.PHONE))
@@ -254,8 +261,6 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with custom ID (and no contact)`() {
     val creator = Stubs.userCreator.copy(id = "custom_id", contactType = ContactType.CUSTOM, contact = null)
-    val fiftyYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(50).toMillis()
-    timeProvider.staticTime = { Stubs.userCreator.birthday!!.time + fiftyYearsMillis } // ensure valid birthday
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.CUSTOM))
@@ -276,7 +281,7 @@ class UserServiceImplTest {
   // Fetching
 
   @Test fun `fetching user fails with invalid user ID`() {
-    assertThat { service.fetchUserByUserId(Stubs.userId.copy(id = " "), withTokens = false) }
+    assertThat { service.fetchUserByUserId(Stubs.userId.copy(id = " "), withTokens = true) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -284,37 +289,95 @@ class UserServiceImplTest {
       }
   }
 
+  @Test fun `fetching user works with a user ID`() {
+    val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
+    val fetchedUser = service.fetchUserByUserId(storedUser.userId, withTokens = true).cleanDates()
+
+    assertThat(fetchedUser)
+      .isDataClassEqualTo(storedUser)
+  }
+
+  @Test fun `fetching user fails with invalid unified ID`() {
+    assertThat { service.fetchUserByUnifiedId(" ", withTokens = true) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `fetching user works with a unified ID`() {
+    val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
+    val fetchedUser = service.fetchUserByUnifiedId(storedUser.userId.toUnifiedFormat(), withTokens = true).cleanDates()
+
+    assertThat(fetchedUser)
+      .isDataClassEqualTo(storedUser)
+  }
+
+  @Test fun `fetching users fails with invalid contact`() {
+    assertThat { service.fetchAllUsersByContact(" ") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Contact")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `fetching users works with a contact`() {
+    val creator = Stubs.userCreator.copy(contact = "contact@email.com")
+    val storedUser = service.addUser(creator, UserIdType.RANDOM).cleanDates()
+    val fetchedUsers = service.fetchAllUsersByContact(creator.contact!!).map { it.cleanDates() }
+
+    assertThat(fetchedUsers)
+      .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `fetching users fails with invalid project ID`() {
+    assertThat { service.fetchAllUsersByProjectId(-1) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `fetching users works with a project ID`() {
+    val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
+    val fetchedUsers = service.fetchAllUsersByProjectId(Stubs.userCreator.projectId)
+      .map { it.cleanDates() }
+      .filter { it.name != ROOT_OWNER_NAME } // root user is ignored
+
+    assertThat(fetchedUsers)
+      .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `fetching users fails with invalid account ID`() {
+    assertThat { service.fetchAllUsersByAccount(Stubs.account.copy(id = -1)) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Account ID")
+      }
+  }
+
+  @Test fun `fetching users works with an admin ID`() {
+    val adminAccount = adminRepo.getAdminProject().account
+    val fetchedUsers = service.fetchAllUsersByAccount(adminAccount)
+      .map { it.cleanDates() }
+
+    assertThat(fetchedUsers)
+      .all {
+        hasSize(1)
+        transform { it.first().name }
+          .isEqualTo(ROOT_OWNER_NAME)
+      }
+  }
+
+  // Updating
+
   /*
-
-    override fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User {
-      log.debug("Fetching user by $userId")
-      val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
-      return userRepository.fetchUserByUserId(normalizedUserId, withTokens = withTokens)
-    }
-
-    override fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User {
-      log.debug("Fetching user by $idHashProjectId")
-      val normalizedIdHashProjectId = Normalizers.Dense.run(idHashProjectId).requireValid { "User ID" }
-      return userRepository.fetchUserByUnifiedIdFormat(normalizedIdHashProjectId, withTokens = withTokens)
-    }
-
-    override fun fetchAllUsersByContact(contact: String): List<User> {
-      log.debug("Fetching user by $contact")
-      val normalizedContact = Normalizers.Trimmed.run(contact).requireValid { "Contact" }
-      return userRepository.fetchAllUsersByContact(normalizedContact)
-    }
-
-    override fun fetchAllUsersByProjectId(projectId: Long): List<User> {
-      log.debug("Fetching all users by project $projectId")
-      val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
-      return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
-    }
-
-    override fun fetchAllUsersByAccount(account: Account): List<User> {
-      log.debug("Fetching all users for account $account")
-      Normalizers.AccountId.run(account.id).requireValid { "Account ID" }
-      return userRepository.fetchAllUsersByAccount(account)
-    }
 
     override fun updateUser(updater: UserUpdater, project: Project): User {
       log.debug("Updating user by $updater")
@@ -435,5 +498,11 @@ class UserServiceImplTest {
     TokenGenerator.emailInterceptor = { "email_token" }
     TokenGenerator.phoneInterceptor = { "phone_token" }
   }
+
+  private fun User.cleanDates() = copy(
+    birthday = birthday?.truncateTo(ChronoUnit.DAYS),
+    createdAt = createdAt.truncateTo(ChronoUnit.SECONDS),
+    updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS),
+  )
 
 }

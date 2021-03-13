@@ -13,7 +13,7 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User
 
-  @Throws fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User
+  @Throws fun fetchUserByUnifiedId(unifiedId: String, withTokens: Boolean): User
 
   @Throws fun fetchAllUsersByContact(contact: String): List<User>
 

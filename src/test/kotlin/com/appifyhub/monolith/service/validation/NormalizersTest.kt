@@ -10,12 +10,12 @@ class NormalizersTest {
   // Generic normalizers
 
   @Test fun `trimmed = not blank + trim`() {
-    assertThat(Normalizers.Trimmed)
+    assertThat(Normalizers.NotBlank)
       .consistsOf(Validators.NotBlank, Cleaners.Trim)
   }
 
   @Test fun `trimmed nullable = not blank nullable + trim nullable`() {
-    assertThat(Normalizers.TrimmedNullable)
+    assertThat(Normalizers.NotBlankNullable)
       .consistsOf(Validators.NotBlankNullable, Cleaners.TrimNullable)
   }
 

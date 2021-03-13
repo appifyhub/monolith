@@ -9,8 +9,8 @@ object Normalizers {
 
   // Generic normalizers
 
-  val Trimmed = normalizesNonNull(Validators.NotBlank, Cleaners.Trim)
-  val TrimmedNullable = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullable)
+  val NotBlank = normalizesNonNull(Validators.NotBlank, Cleaners.Trim)
+  val NotBlankNullable = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullable)
   val Dense = normalizesNonNull(Validators.NoSpaces, Cleaners.RemoveSpaces)
   val DenseNullable = normalizesNullable(Validators.NoSpacesNullable, Cleaners.RemoveSpacesNullable)
   val Cardinal = normalizesNonNull(Validators.PositiveLong, Cleaners.LongToCardinal)

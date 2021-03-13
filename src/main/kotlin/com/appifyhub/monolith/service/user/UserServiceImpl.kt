@@ -77,15 +77,15 @@ class UserServiceImpl(
     return userRepository.fetchUserByUserId(normalizedUserId, withTokens = withTokens)
   }
 
-  override fun fetchUserByUnifiedIdFormat(idHashProjectId: String, withTokens: Boolean): User {
-    log.debug("Fetching user by $idHashProjectId")
-    val normalizedIdHashProjectId = Normalizers.Dense.run(idHashProjectId).requireValid { "User ID" }
-    return userRepository.fetchUserByUnifiedIdFormat(normalizedIdHashProjectId, withTokens = withTokens)
+  override fun fetchUserByUnifiedId(unifiedId: String, withTokens: Boolean): User {
+    log.debug("Fetching user by $unifiedId")
+    val normalizedUnifiedId = Normalizers.Dense.run(unifiedId).requireValid { "User ID" }
+    return userRepository.fetchUserByUnifiedId(normalizedUnifiedId, withTokens = withTokens)
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {
     log.debug("Fetching user by $contact")
-    val normalizedContact = Normalizers.Trimmed.run(contact).requireValid { "Contact" }
+    val normalizedContact = Normalizers.NotBlank.run(contact).requireValid { "Contact" }
     return userRepository.fetchAllUsersByContact(normalizedContact)
   }
 

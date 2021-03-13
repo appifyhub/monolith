@@ -51,7 +51,7 @@ class UserDbm(
   var verificationToken: String?,
 
   @Column(nullable = true)
-  @Temporal(TemporalType.DATE)
+  @Temporal(TemporalType.TIMESTAMP)
   var birthday: Date?,
 
   @Column(nullable = false, updatable = false)
