@@ -415,7 +415,7 @@ class UserRepositoryImplTest {
   }
 
   @Test fun `removing user by malformed unified ID throws`() {
-    assertThat { repository.removeUserByUnifiedFormat("malformed") }
+    assertThat { repository.removeUserByUnifiedId("malformed") }
       .isFailure()
       .hasClass(NumberFormatException::class)
   }
@@ -425,7 +425,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeUserByUnifiedFormat(Stubs.unifiedUserId) }
+    assertThat { repository.removeUserByUnifiedId(Stubs.unifiedUserId) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -438,7 +438,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
-    assertThat { repository.removeUserByUnifiedFormat(Stubs.unifiedUserId) }
+    assertThat { repository.removeUserByUnifiedId(Stubs.unifiedUserId) }
       .isSuccess()
   }
 

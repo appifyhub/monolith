@@ -25,7 +25,7 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun removeUserById(userId: UserId)
 
-  @Throws fun removeUserByUnifiedFormat(idHashProjectId: String)
+  @Throws fun removeUserByUnifiedId(unifiedId: String)
 
   @Throws fun removeAllUsersByProjectId(projectId: Long)
 

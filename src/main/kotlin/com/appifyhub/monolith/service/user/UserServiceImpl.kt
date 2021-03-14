@@ -202,10 +202,10 @@ class UserServiceImpl(
     return userRepository.removeUserById(normalizedUserId)
   }
 
-  override fun removeUserByUnifiedFormat(idHashProjectId: String) {
-    log.debug("Removing user by $idHashProjectId")
-    val normalizedIdHashProjectId = Normalizers.Dense.run(idHashProjectId).requireValid { "User ID" }
-    return userRepository.removeUserByUnifiedFormat(normalizedIdHashProjectId)
+  override fun removeUserByUnifiedId(unifiedId: String) {
+    log.debug("Removing user by $unifiedId")
+    val normalizedIdHashProjectId = Normalizers.Dense.run(unifiedId).requireValid { "User ID" }
+    return userRepository.removeUserByUnifiedId(normalizedIdHashProjectId)
   }
 
   override fun removeAllUsersByProjectId(projectId: Long) {

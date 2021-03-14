@@ -93,9 +93,9 @@ class UserRepositoryImpl(
     userDao.deleteById(userId.toData())
   }
 
-  override fun removeUserByUnifiedFormat(idHashProjectId: String) {
-    log.debug("Removing user $idHashProjectId")
-    val userId = UserId.fromUnifiedFormat(idHashProjectId)
+  override fun removeUserByUnifiedId(unifiedId: String) {
+    log.debug("Removing user $unifiedId")
+    val userId = UserId.fromUnifiedFormat(unifiedId)
     userDao.deleteById(userId.toData())
   }
 

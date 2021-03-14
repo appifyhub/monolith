@@ -1,12 +1,16 @@
 package com.appifyhub.monolith.service.user
 
 import assertk.all
+import assertk.assertAll
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
+import assertk.assertions.isGreaterThan
+import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
@@ -700,27 +704,73 @@ class UserServiceImplTest {
       )
   }
 
-  /*
+  // Removing
 
-  override fun removeUserById(userId: UserId) {
-    log.debug("Removing user by $userId")
-    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
-    return userRepository.removeUserById(normalizedUserId)
+  @Test fun `removing user fails with invalid user ID`() {
+    assertThat { service.removeUserById(Stubs.userId.copy(projectId = -1)) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
   }
 
-  override fun removeUserByUnifiedFormat(idHashProjectId: String) {
-    log.debug("Removing user by $idHashProjectId")
-    val normalizedIdHashProjectId = Normalizers.Dense.run(idHashProjectId).requireValid { "User ID" }
-    return userRepository.removeUserByUnifiedFormat(normalizedIdHashProjectId)
+  @Test fun `removing user works with a user ID`() {
+    val creator = Stubs.userCreator.copy(id = null)
+    val storedUser = service.addUser(creator, UserIdType.RANDOM)
+
+    assertAll {
+      assertThat { service.fetchUserByUserId(storedUser.userId, withTokens = false) }
+        .isSuccess() // user is there
+      assertThat { service.removeUserById(storedUser.userId) }
+        .isSuccess()
+      assertThat { service.fetchUserByUserId(storedUser.userId, withTokens = false) }
+        .isFailure() // user is not there anymore
+    }
   }
 
-  override fun removeAllUsersByProjectId(projectId: Long) {
-    log.debug("Removing all users from project $projectId")
-    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
-    return userRepository.removeAllUsersByProjectId(normalizedProjectId)
+  @Test fun `removing user fails with invalid unified user ID`() {
+    assertThat { service.removeUserByUnifiedId("invalid") }
+      .isFailure()
   }
 
-   */
+  @Test fun `removing user works with a unified user ID`() {
+    val creator = Stubs.userCreator.copy(id = null)
+    val storedUser = service.addUser(creator, UserIdType.RANDOM)
+
+    assertAll {
+      assertThat { service.fetchUserByUnifiedId(storedUser.userId.toUnifiedFormat(), withTokens = false) }
+        .isSuccess() // user is there
+      assertThat { service.removeUserByUnifiedId(storedUser.userId.toUnifiedFormat()) }
+        .isSuccess()
+      assertThat { service.fetchUserByUnifiedId(storedUser.userId.toUnifiedFormat(), withTokens = false) }
+        .isFailure() // user is not there anymore
+    }
+  }
+
+  @Test fun `removing users fails with invalid project ID`() {
+    assertThat { service.removeAllUsersByProjectId(-1) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
+  @Test fun `removing users works with a project ID`() {
+    val creator = Stubs.userCreator.copy(id = null)
+    val storedUser = service.addUser(creator, UserIdType.RANDOM)
+
+    assertAll {
+      assertThat(service.fetchAllUsersByProjectId(storedUser.userId.projectId).size)
+        .isGreaterThan(1) // at least admin and new users from this and other tests
+      assertThat { service.removeAllUsersByProjectId(storedUser.userId.projectId) }
+        .isSuccess()
+      assertThat(service.fetchAllUsersByProjectId(storedUser.userId.projectId))
+        .isEmpty()
+    }
+  }
 
   // Helpers
 
