@@ -79,7 +79,7 @@ class ValidatorsTest {
 
   @Test fun `nullable no spaces fails with empty`() {
     assertThat(Validators.NoSpacesNullable.isValid(String.empty))
-      .isTrue()
+      .isFalse()
   }
 
   @Test fun `nullable no spaces fails with spaces`() {

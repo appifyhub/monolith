@@ -49,7 +49,7 @@ object Cleaners {
     if (result.isNullOrBlank()) return@cleaner String.empty
     // remove non-numeric chars
     result = result.filter { it.isDigit() }
-    if (result.isEmpty()) return@cleaner String.empty
+    if (result.length < 3) return@cleaner String.empty
     // 0123456789 (local) -> make it international
     if (result[0] == '0' && result[1] != '0') result = "0$result"
     // 00123456789 (international) -> convert to plus format

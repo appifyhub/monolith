@@ -10,8 +10,10 @@ import assertk.assertions.isFailure
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
+import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
@@ -377,117 +379,346 @@ class UserServiceImplTest {
 
   // Updating
 
+  @Test fun `updating user fails with invalid project ID`() {
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(projectId = -1))
+
+    assertThat { service.updateUser(updater, UserIdType.CUSTOM) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `updating user fails with invalid username`() {
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = " "))
+
+    assertThat { service.updateUser(updater, UserIdType.USERNAME) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `updating user fails with invalid email`() {
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = "invalid"))
+
+    assertThat { service.updateUser(updater, UserIdType.EMAIL) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Email ID")
+      }
+  }
+
+  @Test fun `updating user fails with invalid phone`() {
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = "invalid"))
+
+    assertThat { service.updateUser(updater, UserIdType.PHONE) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Phone ID")
+      }
+  }
+
+  @Test fun `updating user fails with invalid custom user ID`() {
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = " "))
+
+    assertThat { service.updateUser(updater, UserIdType.CUSTOM) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `updating user fails with invalid random user ID`() {
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = " "))
+
+    assertThat { service.updateUser(updater, UserIdType.RANDOM) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `updating user fails with invalid raw signature`() {
+    val updater = Stubs.userUpdater.copy(rawSignature = Settable(" "))
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Signature")
+      }
+  }
+
+  @Test fun `updating user fails with invalid contact email`() {
+    val updater = Stubs.userUpdater.copy(
+      contactType = Settable(ContactType.EMAIL),
+      contact = Settable("invalid"),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Contact Email")
+      }
+  }
+
+  @Test fun `updating user fails with invalid contact phone`() {
+    val updater = Stubs.userUpdater.copy(
+      contactType = Settable(ContactType.PHONE),
+      contact = Settable("invalid"),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Contact Phone")
+      }
+  }
+
+  @Test fun `updating user fails with invalid custom contact`() {
+    val updater = Stubs.userUpdater.copy(
+      contactType = Settable(ContactType.CUSTOM),
+      contact = Settable(" "),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Contact")
+      }
+  }
+
+  @Test fun `updating user fails with invalid name`() {
+    val updater = Stubs.userUpdater.copy(name = Settable(" "))
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Name")
+      }
+  }
+
+  @Test fun `updating user fails with invalid token`() {
+    val updater = Stubs.userUpdater.copy(verificationToken = Settable(" "))
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Verification Token")
+      }
+  }
+
+  @Test fun `updating user fails with invalid company name`() {
+    val updater = Stubs.userUpdater.copy(
+      company = Settable(
+        Stubs.companyUpdater.copy(
+          name = Settable(" "),
+        )
+      ),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Company Name")
+      }
+  }
+
+  @Test fun `updating user fails with invalid company street`() {
+    val updater = Stubs.userUpdater.copy(
+      company = Settable(
+        Stubs.companyUpdater.copy(
+          street = Settable(" "),
+        )
+      ),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Company Street")
+      }
+  }
+
+  @Test fun `updating user fails with invalid company postcode`() {
+    val updater = Stubs.userUpdater.copy(
+      company = Settable(
+        Stubs.companyUpdater.copy(
+          postcode = Settable(" "),
+        )
+      ),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Company Postcode")
+      }
+  }
+
+  @Test fun `updating user fails with invalid company city`() {
+    val updater = Stubs.userUpdater.copy(
+      company = Settable(
+        Stubs.companyUpdater.copy(
+          city = Settable(" "),
+        )
+      ),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Company City")
+      }
+  }
+
+  @Test fun `updating user fails with invalid company country code`() {
+    val updater = Stubs.userUpdater.copy(
+      company = Settable(
+        Stubs.companyUpdater.copy(
+          countryCode = Settable("d"),
+        )
+      ),
+    )
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Company Country Code")
+      }
+  }
+
+  @Test fun `updating user fails with invalid birthday`() {
+    val fiveYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(5).toMillis()
+    val tooYoungDate = Date(timeProvider.currentMillis - fiveYearsMillis)
+    val updater = Stubs.userUpdater.copy(birthday = Settable(tooYoungDate))
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Birthday")
+      }
+  }
+
+  @Test fun `updating user fails with invalid account`() {
+    val updater = Stubs.userUpdater.copy(account = Settable(Stubs.account.copy(id = -1)))
+
+    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Account ID")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `updating user works with changed data`() {
+    stubGenerators()
+    val creator = Stubs.userCreator.copy(
+      contactType = ContactType.EMAIL,
+      contact = "email@domain.com",
+    )
+    val storedUser = service.addUser(creator, UserIdType.RANDOM).cleanDates()
+
+    val updater = Stubs.userUpdater.copy(
+      id = storedUser.userId,
+      account = null,
+    )
+    val updatedUser = service.updateUser(updater, UserIdType.RANDOM).cleanDates()
+
+    assertThat(updatedUser)
+      .isDataClassEqualTo(
+        Stubs.userUpdated.copy(
+          userId = storedUser.userId,
+          verificationToken = TokenGenerator.nextPhoneToken,
+          ownedTokens = emptyList(),
+          account = null,
+          createdAt = storedUser.createdAt,
+          updatedAt = timeProvider.currentDate,
+        ).cleanDates()
+      )
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `updating user works with erased data (with username ID)`() {
+    stubGenerators()
+    val creator = Stubs.userCreator.copy(
+      contactType = ContactType.EMAIL,
+      contact = "email@domain.com",
+    )
+    val storedUser = service.addUser(creator, UserIdType.USERNAME).cleanDates()
+
+    val updater = UserUpdater(
+      id = storedUser.userId,
+      rawSignature = null,
+      type = null,
+      authority = null,
+      contactType = null,
+      allowsSpam = null,
+      name = Settable(null),
+      contact = Settable(null),
+      verificationToken = Settable(null),
+      birthday = Settable(null),
+      company = Settable(null),
+      account = Settable(null),
+    )
+    val updatedUser = service.updateUser(updater, UserIdType.USERNAME).cleanDates()
+
+    assertThat(updatedUser)
+      .isDataClassEqualTo(
+        storedUser.copy(
+          userId = storedUser.userId,
+          ownedTokens = emptyList(),
+          name = null,
+          contactType = ContactType.CUSTOM,
+          contact = null,
+          verificationToken = null,
+          birthday = null,
+          company = null,
+          account = null,
+          createdAt = storedUser.createdAt,
+          updatedAt = timeProvider.currentDate,
+        ).cleanDates()
+      )
+  }
+
   /*
 
-    override fun updateUser(updater: UserUpdater, project: Project): User {
-      log.debug("Updating user by $updater")
+  override fun removeUserById(userId: UserId) {
+    log.debug("Removing user by $userId")
+    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+    return userRepository.removeUserById(normalizedUserId)
+  }
 
-      // non-nullable properties
+  override fun removeUserByUnifiedFormat(idHashProjectId: String) {
+    log.debug("Removing user by $idHashProjectId")
+    val normalizedIdHashProjectId = Normalizers.Dense.run(idHashProjectId).requireValid { "User ID" }
+    return userRepository.removeUserByUnifiedFormat(normalizedIdHashProjectId)
+  }
 
-      Normalizers.UserId.run(updater.id).requireValid { "User ID" }
-      val normalizedUserId = when (project.userIdType) {
-        UserIdType.USERNAME -> Normalizers.Username.run(updater.id.id).requireValid { "Username ID" }
-        UserIdType.EMAIL -> Normalizers.Email.run(updater.id.id).requireValid { "Email ID" }
-        UserIdType.PHONE -> Normalizers.Phone.run(updater.id.id).requireValid { "Phone ID" }
-        UserIdType.CUSTOM -> Normalizers.CustomUserId.run(updater.id.id).requireValid { "User ID" }
-        UserIdType.RANDOM -> Normalizers.CustomUserId.run(updater.id.id).requireValid { "User ID" }
-      }
-      val normalizedId = UserId(normalizedUserId, project.id)
-      val normalizedRawSignature = updater.rawSignature?.mapValueNonNull {
-        Normalizers.RawSignature.run(it).requireValid { "Signature" }
-      }
-
-      // nullable properties
-
-      val normalizedContactType: Settable<ContactType>?
-      val normalizedContact: Settable<String?>?
-      if (updater.contactType == null) {
-        // contact type is required to change contact data
-        normalizedContactType = null
-        normalizedContact = null
-      } else {
-        if (updater.contact == null) {
-          normalizedContactType = Settable(ContactType.CUSTOM)
-          normalizedContact = null
-        } else {
-          normalizedContactType = updater.contactType
-          normalizedContact = updater.contact.mapValueNullable {
-            when (normalizedContactType.value) {
-              ContactType.EMAIL -> Normalizers.Email.run(it).requireValid { "Contact Email" }
-              ContactType.PHONE -> Normalizers.Phone.run(it).requireValid { "Contact Phone" }
-              ContactType.CUSTOM -> Normalizers.CustomContact.run(it).requireValid { "Contact" }
-            }
-          }
-        }
-      }
-      val normalizedName = updater.name?.mapValueNullable {
-        Normalizers.Name.run(it).requireValid { "Name" }
-      }
-      val normalizedVerificationToken = updater.verificationToken?.mapValueNullable {
-        Normalizers.DenseNullable.run(it).requireValid { "Verification Token" }
-      }
-      val normalizedBirthday = updater.birthday?.mapValueNullable {
-        Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
-      }
-      // each component needs to be validated manually (see OrganizationUpdater)
-      val normalizedCompany = updater.company?.mapValueNullable { company ->
-        OrganizationUpdater(
-          name = company.name?.mapValueNullable {
-            Normalizers.OrganizationName.run(it).requireValid { "Company Name" }
-          },
-          street = company.street?.mapValueNullable {
-            Normalizers.OrganizationStreet.run(it).requireValid { "Company Street" }
-          },
-          postcode = company.postcode?.mapValueNullable {
-            Normalizers.OrganizationPostcode.run(it).requireValid { "Company Postcode" }
-          },
-          city = company.city?.mapValueNullable {
-            Normalizers.OrganizationCity.run(it).requireValid { "Company City" }
-          },
-          countryCode = company.countryCode?.mapValueNullable {
-            Normalizers.OrganizationCountryCode.run(it).requireValid { "Company Country Code" }
-          },
-        )
-      }
-      updater.account?.value?.let {
-        Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
-      }
-
-      val normalizedUpdater = UserUpdater(
-        id = normalizedId,
-        rawSignature = normalizedRawSignature,
-        type = updater.type,
-        authority = updater.authority,
-        contactType = normalizedContactType,
-        allowsSpam = updater.allowsSpam,
-        name = normalizedName,
-        contact = normalizedContact,
-        verificationToken = normalizedVerificationToken,
-        birthday = normalizedBirthday,
-        company = normalizedCompany,
-        account = updater.account,
-      )
-
-      return userRepository.updateUser(normalizedUpdater, project)
-    }
-
-    override fun removeUserById(userId: UserId) {
-      log.debug("Removing user by $userId")
-      val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
-      return userRepository.removeUserById(normalizedUserId)
-    }
-
-    override fun removeUserByUnifiedFormat(idHashProjectId: String) {
-      log.debug("Removing user by $idHashProjectId")
-      val normalizedIdHashProjectId = Normalizers.Dense.run(idHashProjectId).requireValid { "User ID" }
-      return userRepository.removeUserByUnifiedFormat(normalizedIdHashProjectId)
-    }
-
-    override fun removeAllUsersByProjectId(projectId: Long) {
-      log.debug("Removing all users from project $projectId")
-      val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
-      return userRepository.removeAllUsersByProjectId(normalizedProjectId)
-    }
+  override fun removeAllUsersByProjectId(projectId: Long) {
+    log.debug("Removing all users from project $projectId")
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+    return userRepository.removeAllUsersByProjectId(normalizedProjectId)
+  }
 
    */
 

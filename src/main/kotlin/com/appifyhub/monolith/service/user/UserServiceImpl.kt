@@ -123,15 +123,18 @@ class UserServiceImpl(
 
     val normalizedContactType: Settable<ContactType>?
     val normalizedContact: Settable<String?>?
-    if (updater.contactType == null) {
-      // contact type is required to change contact data
-      normalizedContactType = null
-      normalizedContact = null
-    } else {
-      if (updater.contact == null) {
+    when {
+      // contact is being erased, we force contact type to 'custom'
+      updater.contact != null && updater.contact.value == null -> {
         normalizedContactType = Settable(ContactType.CUSTOM)
+        normalizedContact = Settable(null)
+      }
+      // contact type is not set at all, we ignore the request
+      updater.contactType?.value == null || updater.contact == null -> {
+        normalizedContactType = null
         normalizedContact = null
-      } else {
+      }
+      else -> {
         normalizedContactType = updater.contactType
         normalizedContact = updater.contact.mapValueNullable {
           when (normalizedContactType.value) {
