@@ -13,7 +13,7 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User
 
-  @Throws fun fetchUserByUnifiedId(unifiedId: String, withTokens: Boolean): User
+  @Throws fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User
 
   @Throws fun fetchAllUsersByContact(contact: String): List<User>
 
@@ -25,7 +25,7 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun removeUserById(userId: UserId)
 
-  @Throws fun removeUserByUnifiedId(unifiedId: String)
+  @Throws fun removeUserByUniversalId(universalId: String)
 
   @Throws fun removeAllUsersByProjectId(projectId: Long)
 

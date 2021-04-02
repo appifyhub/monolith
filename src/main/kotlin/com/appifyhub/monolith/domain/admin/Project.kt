@@ -5,7 +5,6 @@ import java.util.Date
 data class Project(
   val id: Long,
   val account: Account,
-  val signature: String,
   val name: String,
   val type: Type = Type.COMMERCIAL,
   val status: Status = Status.REVIEW,
@@ -42,6 +41,3 @@ data class Project(
   }
 
 }
-
-
-

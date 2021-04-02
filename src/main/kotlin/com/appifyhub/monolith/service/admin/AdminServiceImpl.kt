@@ -7,7 +7,6 @@ import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.repository.admin.RawProject
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.ext.requireValid
@@ -22,7 +21,7 @@ class AdminServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addProject(creator: ProjectCreator): RawProject {
+  override fun addProject(creator: ProjectCreator): Project {
     log.debug("Adding project $creator")
 
     val normalizeAccount = Normalizers.AccountId.run(creator.account.id).requireValid { "Account ID" }
@@ -45,6 +44,11 @@ class AdminServiceImpl(
     return adminRepository.addAccount()
   }
 
+  override fun getAdminProject(): Project {
+    log.debug("Fetching admin project")
+    return adminRepository.getAdminProject()
+  }
+
   override fun fetchAccountById(id: Long): Account {
     log.debug("Fetching account by id $id")
     val normalizedAccountId = Normalizers.AccountId.run(id).requireValid { "Account ID" }
@@ -55,17 +59,6 @@ class AdminServiceImpl(
     log.debug("Fetching project by id $id")
     val normalizedProjectId = Normalizers.ProjectId.run(id).requireValid { "Project ID" }
     return adminRepository.fetchProjectById(normalizedProjectId)
-  }
-
-  override fun fetchProjectBySignature(signature: String): Project {
-    log.debug("Fetching project by signature $signature")
-    val normalizedProjectSignature = Normalizers.Dense.run(signature).requireValid { "Project Signature" }
-    return adminRepository.fetchProjectBySignature(normalizedProjectSignature)
-  }
-
-  override fun fetchAdminProject(): Project {
-    log.debug("Fetching admin project")
-    return adminRepository.getAdminProject()
   }
 
   override fun fetchAllProjectsByAccount(account: Account): List<Project> {
@@ -115,17 +108,6 @@ class AdminServiceImpl(
     // cascade manually for now
     userRepository.removeAllUsersByProjectId(normalizedProjectId)
     return adminRepository.removeProjectById(normalizedProjectId)
-  }
-
-  override fun removeProjectBySignature(signature: String) {
-    log.debug("Removing project with signature $signature")
-
-    val normalizedSignature = Normalizers.Dense.run(signature).requireValid { "Signature" }
-
-    // cascade manually for now
-    val project = adminRepository.fetchProjectBySignature(normalizedSignature)
-    userRepository.removeAllUsersByProjectId(project.id)
-    return adminRepository.removeProjectBySignature(normalizedSignature)
   }
 
   override fun removeAccountById(accountId: Long) {

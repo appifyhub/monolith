@@ -9,7 +9,7 @@ import java.io.Serializable
 data class UserResponse(
   @JsonProperty("user_id") val userId: String,
   @JsonProperty("project_id") val projectId: Long,
-  @JsonProperty("unified_id") val unifiedId: String,
+  @JsonProperty("universal_id") val universalId: String,
   @JsonProperty("name") val name: String?,
   @JsonProperty("type") val type: String,
   @JsonProperty("authority") val authority: String,

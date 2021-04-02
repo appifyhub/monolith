@@ -39,14 +39,14 @@ class SpringSecurityUserManagerImpl(
 
   override fun loadUserByUsername(username: String?): UserDetails {
     log.debug("Security: loading $username")
-    val id = UserId.fromUnifiedFormat(username!!)
+    val id = UserId.fromUniversalFormat(username!!)
     return userDao.findById(id.toData()).get().toDomain().toSecurityUser()
   }
 
   override fun userExists(username: String?): Boolean {
     log.debug("Security: checking if $username exists")
     return try {
-      val id = UserId.fromUnifiedFormat(username!!)
+      val id = UserId.fromUniversalFormat(username!!)
       userDao.findById(id.toData()).get().toDomain().let { true }
     } catch (t: Throwable) {
       log.warn("Couldn't check if $username exists", t)
@@ -72,7 +72,7 @@ class SpringSecurityUserManagerImpl(
 
   override fun deleteUser(username: String?) {
     log.warn("Security: deleting user $username")
-    val id = UserId.fromUnifiedFormat(username!!)
+    val id = UserId.fromUniversalFormat(username!!)
     userDao.deleteById(id.toData())
   }
 

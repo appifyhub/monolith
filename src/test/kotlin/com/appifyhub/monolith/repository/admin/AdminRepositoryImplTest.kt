@@ -10,7 +10,6 @@ import com.appifyhub.monolith.storage.dao.AccountDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
-import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.nhaarman.mockitokotlin2.any
@@ -28,13 +27,11 @@ class AdminRepositoryImplTest {
 
   private val accountDao = mock<AccountDao>()
   private val projectDao = mock<ProjectDao>()
-  private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
 
   private val repository = AdminRepositoryImpl(
     accountDao = accountDao,
     projectDao = projectDao,
-    passwordEncoder = passwordEncoder,
     timeProvider = timeProvider,
   )
 
@@ -63,7 +60,7 @@ class AdminRepositoryImplTest {
 
   // Creating
 
-  @Test fun `adding a project generates a signature`() {
+  @Test fun `adding a project works`() {
     // create & update times from the stub
     val timesIterator = listOf(Date(0xC20000), Date(0xA20000)).iterator()
     timeProvider.staticTime = { timesIterator.next().time }
@@ -73,7 +70,6 @@ class AdminRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.project.copy(
           account = Stubs.account.copy(owners = emptyList()), // not available in admin DAOs
-          signature = "signature", // creation returns a RawProject
         )
       )
   }
@@ -128,19 +124,6 @@ class AdminRepositoryImplTest {
       )
   }
 
-  @Test fun `fetching project by signature works`() {
-    projectDao.stub {
-      onGeneric { findBySignature("signature") } doReturn Optional.of(Stubs.projectDbm)
-    }
-
-    assertThat(repository.fetchProjectBySignature(Stubs.project.signature))
-      .isDataClassEqualTo(
-        Stubs.project.copy(
-          account = Stubs.account.copy(owners = emptyList()), // not available in admin DAOs
-        )
-      )
-  }
-
   @Test fun `fetching all projects by account works`() {
     projectDao.stub {
       onGeneric { findAllByAccount(Stubs.accountDbm) } doReturn listOf(Stubs.projectDbm)
@@ -157,23 +140,6 @@ class AdminRepositoryImplTest {
   }
 
   // Updating
-
-  @Test fun `regenerating project signature works`() {
-    projectDao.stub {
-      onGeneric { findById(Stubs.project.id) } doReturn Optional.of(Stubs.projectDbm)
-    }
-    timeProvider.staticTime = { 0xA20001 }
-    SignatureGenerator.interceptor = { "signature1" }
-
-    assertThat(repository.regenerateProjectSignature(Stubs.project.id))
-      .isDataClassEqualTo(
-        Stubs.project.copy(
-          account = Stubs.account.copy(owners = emptyList()), // not available in admin DAOs
-          signature = "signature1", // regeneration returns a RawProject
-          updatedAt = Date(0xA20001),
-        )
-      )
-  }
 
   @Test fun `updating project with no changes changes nothing`() {
     projectDao.stub {
@@ -243,15 +209,6 @@ class AdminRepositoryImplTest {
     }
 
     assertThat { repository.removeProjectById(Stubs.project.id) }
-      .isSuccess()
-  }
-
-  @Test fun `removing project by signature works`() {
-    projectDao.stub {
-      onGeneric { deleteBySignature(Stubs.project.signature) } doAnswer { }
-    }
-
-    assertThat { repository.removeProjectBySignature("signature") }
       .isSuccess()
   }
 

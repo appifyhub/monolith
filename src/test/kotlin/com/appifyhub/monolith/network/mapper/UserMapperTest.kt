@@ -29,23 +29,4 @@ class UserMapperTest {
       .isDataClassEqualTo(Stubs.companyDto)
   }
 
-  /*
-fun User.toNetwork(): UserResponse = UserResponse(
-  userId = userId.id,
-  projectId = userId.projectId,
-  unifiedId = userId.toUnifiedFormat(),
-  name = name,
-  type = type.name.toLowerCase(),
-  authority = authority.name.toLowerCase(),
-  allowsSpam = allowsSpam,
-  contact = contact,
-  contactType = contactType.name.toLowerCase(),
-  birthday = birthday?.let { DateTimeMapper.formatAsDate(it) },
-  company = company?.toNetwork(),
-  createdAt = DateTimeMapper.formatAsDateTime(createdAt),
-  updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
-)
-
-   */
-
 }

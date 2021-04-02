@@ -20,7 +20,6 @@ fun stubAccount() = Account(
 fun stubProject() = Project(
   id = -1,
   account = stubAccount(),
-  signature = "signature",
   name = "name",
   type = Project.Type.COMMERCIAL,
   status = Project.Status.REVIEW,

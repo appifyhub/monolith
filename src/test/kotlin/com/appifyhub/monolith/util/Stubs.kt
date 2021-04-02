@@ -60,7 +60,7 @@ object Stubs {
 
   // region Domain Models
 
-  val unifiedUserId = "username$2"
+  val universalUserId = "username$2"
 
   val userId = UserId(
     id = "username",
@@ -120,7 +120,6 @@ object Stubs {
   val project = Project(
     id = userId.projectId,
     account = account,
-    signature = "erutangis",
     name = "Project's Name",
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
@@ -152,7 +151,6 @@ object Stubs {
   val projectDbm = ProjectDbm(
     projectId = userIdDbm.projectId,
     account = accountDbm,
-    signature = "erutangis",
     name = "Project's Name",
     type = "OPENSOURCE",
     status = "ACTIVE",
@@ -294,7 +292,6 @@ object Stubs {
   val projectUpdated = Project(
     id = project.id,
     account = accountUpdated,
-    signature = "erutangis",
     name = "Project's Name 1",
     type = Project.Type.FREE,
     status = Project.Status.SUSPENDED,
@@ -306,7 +303,6 @@ object Stubs {
   val projectUpdatedDbm = ProjectDbm(
     projectId = project.id,
     account = accountUpdatedDbm,
-    signature = "erutangis",
     name = "Project's Name 1",
     type = "FREE",
     status = "SUSPENDED",
@@ -393,7 +389,7 @@ object Stubs {
   val userResponse = UserResponse(
     userId = userId.id,
     projectId = userId.projectId,
-    unifiedId = unifiedUserId,
+    universalId = universalUserId,
     name = "User's Name",
     type = "ORGANIZATION",
     authority = "ADMIN",
@@ -413,7 +409,7 @@ object Stubs {
   val tokenDetailsResponse = TokenDetailsResponse(
     ownerId = userId.id,
     ownerProjectId = userId.projectId,
-    ownerUnifiedId = unifiedUserId,
+    ownerUniversalId = universalUserId,
     tokenId = token.tokenLocator,
     isBlocked = true,
     origin = "Token Origin",
@@ -422,13 +418,13 @@ object Stubs {
   )
 
   val userCredentialsRequest = UserCredentialsRequest(
-    userId = "username",
+    universalId = universalUserId,
     secret = "password",
     origin = "Token Origin",
   )
 
   val adminCredentialsRequest = AdminCredentialsRequest(
-    userId = "username",
+    universalId = universalUserId,
     secret = "password",
     origin = "Token Origin",
   )

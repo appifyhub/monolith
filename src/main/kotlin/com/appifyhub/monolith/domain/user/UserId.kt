@@ -6,16 +6,16 @@ data class UserId(
 ) {
 
   companion object {
-    private const val UNIFIED_DELIMITER = "$"
+    private const val UNIVERSAL_DELIMITER = "$"
 
     @Throws(IllegalArgumentException::class, NumberFormatException::class, NoSuchElementException::class)
-    fun fromUnifiedFormat(idHashProjectId: String): UserId {
-      val (id, projectId) = idHashProjectId.split(UNIFIED_DELIMITER).let { it.first() to it.last() }
-      if (id.isBlank() || projectId.isBlank()) throw IllegalArgumentException("ID and Project ID can't be blank")
-      return UserId(id = id.trim(), projectId = projectId.trim().toLong())
+    fun fromUniversalFormat(universalId: String): UserId {
+      val (userId, projectId) = universalId.split(UNIVERSAL_DELIMITER).let { it.first() to it.last() }
+      if (userId.isBlank() || projectId.isBlank()) throw IllegalArgumentException("ID and Project ID can't be blank")
+      return UserId(id = userId.trim(), projectId = projectId.trim().toLong())
     }
   }
 
-  fun toUnifiedFormat() = "$id$UNIFIED_DELIMITER$projectId"
+  fun toUniversalFormat() = "$id$UNIVERSAL_DELIMITER$projectId"
 
 }

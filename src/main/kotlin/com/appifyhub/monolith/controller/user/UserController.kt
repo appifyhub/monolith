@@ -19,7 +19,7 @@ class UserController(
 ) {
 
   object Endpoints {
-    const val ONE_USER = "/v1/universal/users/{unifiedId}"
+    const val ONE_USER = "/v1/universal/users/{universalId}"
 
     const val ANY_USER = "/v1/projects/{projectId}/users/{id}"
   }
@@ -29,9 +29,9 @@ class UserController(
   @GetMapping(ONE_USER)
   fun getUser(
     authentication: Authentication,
-    @PathVariable unifiedId: String,
+    @PathVariable universalId: String,
   ): UserResponse {
-    log.debug("[GET] universal user $unifiedId")
+    log.debug("[GET] universal user $universalId")
 
     // get auth data
     val userId = try {

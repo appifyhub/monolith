@@ -186,20 +186,20 @@ class UserRepositoryImplTest {
 
   // endregion
 
-  // region Fetch by unified ID
+  // region Fetch by universal ID
 
-  @Test fun `fetching user by malformed unified ID throws`() {
-    assertThat { repository.fetchUserByUnifiedId("malformed", withTokens = false) }
+  @Test fun `fetching user by malformed universal ID throws`() {
+    assertThat { repository.fetchUserByUniversalId("malformed", withTokens = false) }
       .isFailure()
       .hasClass(NumberFormatException::class)
   }
 
-  @Test fun `fetching user by invalid unified ID throws`() {
+  @Test fun `fetching user by invalid universal ID throws`() {
     userDao.stub {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUnifiedId(Stubs.unifiedUserId, withTokens = false) }
+    assertThat { repository.fetchUserByUniversalId(Stubs.universalUserId, withTokens = false) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -207,21 +207,21 @@ class UserRepositoryImplTest {
       }
   }
 
-  @Test fun `fetching user by unified ID with no tokens works`() {
+  @Test fun `fetching user by universal ID with no tokens works`() {
     userDao.stub {
       onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
     }
 
-    assertThat(repository.fetchUserByUnifiedId(Stubs.unifiedUserId, withTokens = false))
+    assertThat(repository.fetchUserByUniversalId(Stubs.universalUserId, withTokens = false))
       .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
   }
 
-  @Test fun `fetching user by unified ID with tokens works`() {
+  @Test fun `fetching user by universal ID with tokens works`() {
     userDao.stub {
       onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
     }
 
-    assertThat(repository.fetchUserByUnifiedId(Stubs.unifiedUserId, withTokens = true))
+    assertThat(repository.fetchUserByUniversalId(Stubs.universalUserId, withTokens = true))
       .isDataClassEqualTo(Stubs.user)
   }
 
@@ -414,18 +414,18 @@ class UserRepositoryImplTest {
       .isSuccess()
   }
 
-  @Test fun `removing user by malformed unified ID throws`() {
-    assertThat { repository.removeUserByUnifiedId("malformed") }
+  @Test fun `removing user by malformed universal ID throws`() {
+    assertThat { repository.removeUserByUniversalId("malformed") }
       .isFailure()
       .hasClass(NumberFormatException::class)
   }
 
-  @Test fun `removing user by invalid unified ID throws`() {
+  @Test fun `removing user by invalid universal ID throws`() {
     userDao.stub {
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeUserByUnifiedId(Stubs.unifiedUserId) }
+    assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -433,12 +433,12 @@ class UserRepositoryImplTest {
       }
   }
 
-  @Test fun `removing user by unified ID with tokens works`() {
+  @Test fun `removing user by universal ID with tokens works`() {
     userDao.stub {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
-    assertThat { repository.removeUserByUnifiedId(Stubs.unifiedUserId) }
+    assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
       .isSuccess()
   }
 

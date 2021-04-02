@@ -8,7 +8,6 @@ import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import org.junit.jupiter.api.Test
@@ -153,7 +152,6 @@ class AdminMapperTest {
     val startTime = Stubs.projectDbm.createdAt.time
     val timeIncrement = Stubs.projectDbm.updatedAt.time - startTime
     val timeProvider = TimeProviderFake(incrementalTime = startTime, timeIncrement = timeIncrement)
-    val passwordEncoder = PasswordEncoderFake()
 
     val projectCreator = ProjectCreator(
       account = Stubs.account,
@@ -164,8 +162,6 @@ class AdminMapperTest {
     )
 
     val projectDbm = projectCreator.toProjectData(
-      rawSignature = "signature",
-      passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
     ).apply {
       // no info about IDs from this conversion

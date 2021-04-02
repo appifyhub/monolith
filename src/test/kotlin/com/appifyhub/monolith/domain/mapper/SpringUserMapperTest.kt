@@ -21,7 +21,7 @@ class SpringUserMapperTest {
   @Test fun `user domain to spring`() {
     assertThat(Stubs.user.toSecurityUser()).all {
       prop("username") { it.username }
-        .isEqualTo(Stubs.userId.toUnifiedFormat())
+        .isEqualTo(Stubs.userId.toUniversalFormat())
       prop("password") { it.password }
         .isEqualTo(Stubs.user.signature)
       prop("authorities") { it.authorities.toSet() }
@@ -37,7 +37,7 @@ class SpringUserMapperTest {
 
   @Test fun `user spring to domain`() {
     val springUser = mock<UserDetails> {
-      on { username } doReturn Stubs.userId.toUnifiedFormat()
+      on { username } doReturn Stubs.userId.toUniversalFormat()
       on { password } doReturn "drowssap"
       on { authorities } doReturn listOf(GrantedAuthority { "ADMIN" })
       on { isAccountNonLocked } doReturn true

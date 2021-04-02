@@ -7,7 +7,7 @@ import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class AdminCredentialsRequest(
-  @JsonProperty("user_id") val userId: String,
+  @JsonProperty("universal_id") val universalId: String,
   @JsonProperty("secret") val secret: String,
   @JsonProperty("origin") val origin: String? = null,
 ) : Serializable

@@ -303,8 +303,8 @@ class UserServiceImplTest {
       .isDataClassEqualTo(storedUser)
   }
 
-  @Test fun `fetching user fails with invalid unified ID`() {
-    assertThat { service.fetchUserByUnifiedId(" ", withTokens = true) }
+  @Test fun `fetching user fails with invalid universal ID`() {
+    assertThat { service.fetchUserByUniversalId(" ", withTokens = true) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -312,9 +312,10 @@ class UserServiceImplTest {
       }
   }
 
-  @Test fun `fetching user works with a unified ID`() {
+  @Test fun `fetching user works with a universal ID`() {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
-    val fetchedUser = service.fetchUserByUnifiedId(storedUser.userId.toUnifiedFormat(), withTokens = true).cleanDates()
+    val fetchedUser = service.fetchUserByUniversalId(storedUser.userId.toUniversalFormat(), withTokens = true)
+      .cleanDates()
 
     assertThat(fetchedUser)
       .isDataClassEqualTo(storedUser)
@@ -729,21 +730,21 @@ class UserServiceImplTest {
     }
   }
 
-  @Test fun `removing user fails with invalid unified user ID`() {
-    assertThat { service.removeUserByUnifiedId("invalid") }
+  @Test fun `removing user fails with invalid universal user ID`() {
+    assertThat { service.removeUserByUniversalId("invalid") }
       .isFailure()
   }
 
-  @Test fun `removing user works with a unified user ID`() {
+  @Test fun `removing user works with a universal user ID`() {
     val creator = Stubs.userCreator.copy(id = null)
     val storedUser = service.addUser(creator, UserIdType.RANDOM)
 
     assertAll {
-      assertThat { service.fetchUserByUnifiedId(storedUser.userId.toUnifiedFormat(), withTokens = false) }
+      assertThat { service.fetchUserByUniversalId(storedUser.userId.toUniversalFormat(), withTokens = false) }
         .isSuccess() // user is there
-      assertThat { service.removeUserByUnifiedId(storedUser.userId.toUnifiedFormat()) }
+      assertThat { service.removeUserByUniversalId(storedUser.userId.toUniversalFormat()) }
         .isSuccess()
-      assertThat { service.fetchUserByUnifiedId(storedUser.userId.toUnifiedFormat(), withTokens = false) }
+      assertThat { service.fetchUserByUniversalId(storedUser.userId.toUniversalFormat(), withTokens = false) }
         .isFailure() // user is not there anymore
     }
   }

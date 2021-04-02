@@ -8,7 +8,7 @@ import java.io.Serializable
 data class TokenDetailsResponse(
   @JsonProperty("user_id") val ownerId: String,
   @JsonProperty("project_id") val ownerProjectId: Long,
-  @JsonProperty("unified_id") val ownerUnifiedId: String,
+  @JsonProperty("universal_id") val ownerUniversalId: String,
   @JsonProperty("token_id") val tokenId: String,
   @JsonProperty("is_blocked") val isBlocked: Boolean,
   @JsonProperty("origin") val origin: String?,

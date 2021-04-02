@@ -115,15 +115,17 @@ class SchemaInitializer(
     log.info(
       """
         (see below)
-        [[ THIS WILL BE PRINTED ONLY ONCE ]]
+        [[ SECRET SECTION START: PRINTED ONLY ONCE ]]
         
-        Admin project '${rawProject.name}' (ID = ${rawProject.id}) is now set up. 
-        Your project's secret signature: '${rawProject.signature}'.
+        Admin project '${rawProject.name}' is now set up. 
+        Project owner is '${owner.name} <${owner.contact}>'.
         
-        Account owner '${owner.name} <${owner.contact}>' (ID = ${owner.userId.id}) is now set up.
-        Your account's secret signature: '$printableOwnerSignature'.
+        Project ID     = ${rawProject.id}
+        User ID        = '${owner.userId.id}'
+        Universal ID   = '${owner.userId.toUniversalFormat()}'
+        User Signature = '$printableOwnerSignature'
         
-        [[ END OF TRANSMISSION ]]
+        [[ SECRET SECTION END ]]
       """.trimIndent()
     )
   }

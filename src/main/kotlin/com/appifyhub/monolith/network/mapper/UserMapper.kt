@@ -9,7 +9,7 @@ import com.appifyhub.monolith.network.user.UserResponse
 fun User.toNetwork(): UserResponse = UserResponse(
   userId = userId.id,
   projectId = userId.projectId,
-  unifiedId = userId.toUnifiedFormat(),
+  universalId = userId.toUniversalFormat(),
   name = name,
   type = type.name,
   authority = authority.name,

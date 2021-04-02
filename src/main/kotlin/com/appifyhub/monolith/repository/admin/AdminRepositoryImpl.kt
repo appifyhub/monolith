@@ -15,14 +15,12 @@ import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Repository
 
 @Repository
 class AdminRepositoryImpl(
   private val accountDao: AccountDao,
   private val projectDao: ProjectDao,
-  private val passwordEncoder: PasswordEncoder,
   private val timeProvider: TimeProvider,
 ) : AdminRepository {
 
@@ -34,16 +32,10 @@ class AdminRepositoryImpl(
       .minByOrNull { it.id }!!
   }
 
-  override fun addProject(creator: ProjectCreator): RawProject {
+  override fun addProject(creator: ProjectCreator): Project {
     log.debug("Adding project by creator $creator")
-    val rawSignature = SignatureGenerator.nextSignature
-    val projectData = creator.toProjectData(
-      rawSignature = rawSignature,
-      passwordEncoder = passwordEncoder,
-      timeProvider = timeProvider,
-    )
-    val saved = projectDao.save(projectData).toDomain()
-    return saved.copy(signature = rawSignature)
+    val projectData = creator.toProjectData(timeProvider = timeProvider)
+    return projectDao.save(projectData).toDomain()
   }
 
   override fun addAccount(): Account {
@@ -72,27 +64,9 @@ class AdminRepositoryImpl(
     return projectDao.findById(id).get().toDomain()
   }
 
-  override fun fetchProjectBySignature(rawSignature: String): Project {
-    log.debug("Fetching project by signature $rawSignature")
-    val encoded = passwordEncoder.encode(rawSignature)
-    return projectDao.findBySignature(encoded).get().toDomain()
-  }
-
   override fun fetchAllProjectsByAccount(account: Account): List<Project> {
     log.debug("Fetching all projects by account $account")
     return projectDao.findAllByAccount(account.toData()).map(ProjectDbm::toDomain)
-  }
-
-  override fun regenerateProjectSignature(id: Long): RawProject {
-    log.debug("Regenerating project signature by id $id")
-    val fetchedProject = fetchProjectById(id)
-    val rawSignature = SignatureGenerator.nextSignature
-    val updatedProject = fetchedProject.copy(
-      signature = passwordEncoder.encode(rawSignature),
-      updatedAt = timeProvider.currentDate,
-    )
-    val saved = projectDao.save(updatedProject.toData()).toDomain()
-    return saved.copy(signature = rawSignature)
   }
 
   override fun updateProject(updater: ProjectUpdater): Project {
@@ -118,12 +92,6 @@ class AdminRepositoryImpl(
   override fun removeProjectById(projectId: Long) {
     log.debug("Removing project $projectId")
     projectDao.deleteById(projectId)
-  }
-
-  override fun removeProjectBySignature(rawSignature: String) {
-    log.debug("Removing project with signature $rawSignature")
-    val encoded = passwordEncoder.encode(rawSignature)
-    projectDao.deleteBySignature(encoded)
   }
 
   override fun removeAllProjectsByAccount(account: Account) {

@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.controller.auth
 
-import com.appifyhub.monolith.controller.common.Headers
 import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -39,14 +37,13 @@ class UserAuthController(
   @PostMapping(Endpoints.AUTH)
   fun authUser(
     @RequestBody creds: UserCredentialsRequest,
-    @RequestHeader(Headers.PROJECT_SIGNATURE) projectSignature: String,
   ): TokenResponse {
-    log.debug("[POST] auth user with $creds for project $projectSignature")
+    log.debug("[POST] auth user with $creds")
 
     val user = try {
-      authService.authUser(creds.userId, creds.secret, projectSignature)
+      authService.authUser(creds.universalId, creds.secret)
     } catch (t: Throwable) {
-      log.warn("Failed to find user identified by ${creds.userId}", t)
+      log.warn("Failed to find user identified by ${creds.universalId}", t)
       throwUnauthorized { "Invalid credentials" }
     }
 

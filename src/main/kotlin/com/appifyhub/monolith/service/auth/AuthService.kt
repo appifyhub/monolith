@@ -11,13 +11,13 @@ interface AuthService {
 
   fun isAuthorized(authData: Authentication, forAuthority: Authority, shallow: Boolean): Boolean
 
-  fun isProjectOwner(authData: Authentication, projectSignature: String, shallow: Boolean): Boolean
+  fun isProjectOwner(authData: Authentication, shallow: Boolean): Boolean
 
   @Throws fun resolveShallowUser(authData: Authentication): User
 
-  @Throws fun authUser(userId: String, signature: String, projectSignature: String): User
+  @Throws fun authUser(universalId: String, signature: String): User
 
-  @Throws fun authAdmin(userId: String, signature: String): User
+  @Throws fun authAdmin(universalId: String, signature: String): User
 
   @Throws fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User
 

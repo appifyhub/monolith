@@ -54,9 +54,9 @@ class UserRepositoryImpl(
     return fetchUser(userId, withTokens)
   }
 
-  override fun fetchUserByUnifiedId(unifiedId: String, withTokens: Boolean): User {
-    log.debug("Fetching user $unifiedId")
-    val userId = UserId.fromUnifiedFormat(unifiedId)
+  override fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User {
+    log.debug("Fetching user $universalId")
+    val userId = UserId.fromUniversalFormat(universalId)
     return fetchUser(userId, withTokens)
   }
 
@@ -93,9 +93,9 @@ class UserRepositoryImpl(
     userDao.deleteById(userId.toData())
   }
 
-  override fun removeUserByUnifiedId(unifiedId: String) {
-    log.debug("Removing user $unifiedId")
-    val userId = UserId.fromUnifiedFormat(unifiedId)
+  override fun removeUserByUniversalId(universalId: String) {
+    log.debug("Removing user $universalId")
+    val userId = UserId.fromUniversalFormat(universalId)
     userDao.deleteById(userId.toData())
   }
 

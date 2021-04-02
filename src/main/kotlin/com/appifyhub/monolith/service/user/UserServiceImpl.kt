@@ -77,10 +77,10 @@ class UserServiceImpl(
     return userRepository.fetchUserByUserId(normalizedUserId, withTokens = withTokens)
   }
 
-  override fun fetchUserByUnifiedId(unifiedId: String, withTokens: Boolean): User {
-    log.debug("Fetching user by $unifiedId")
-    val normalizedUnifiedId = Normalizers.Dense.run(unifiedId).requireValid { "User ID" }
-    return userRepository.fetchUserByUnifiedId(normalizedUnifiedId, withTokens = withTokens)
+  override fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User {
+    log.debug("Fetching user by $universalId")
+    val normalizedUniversalId = Normalizers.Dense.run(universalId).requireValid { "User ID" }
+    return userRepository.fetchUserByUniversalId(normalizedUniversalId, withTokens = withTokens)
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {
@@ -202,10 +202,10 @@ class UserServiceImpl(
     return userRepository.removeUserById(normalizedUserId)
   }
 
-  override fun removeUserByUnifiedId(unifiedId: String) {
-    log.debug("Removing user by $unifiedId")
-    val normalizedIdHashProjectId = Normalizers.Dense.run(unifiedId).requireValid { "User ID" }
-    return userRepository.removeUserByUnifiedId(normalizedIdHashProjectId)
+  override fun removeUserByUniversalId(universalId: String) {
+    log.debug("Removing user by $universalId")
+    val normalizedIdHashProjectId = Normalizers.Dense.run(universalId).requireValid { "User ID" }
+    return userRepository.removeUserByUniversalId(normalizedIdHashProjectId)
   }
 
   override fun removeAllUsersByProjectId(projectId: Long) {

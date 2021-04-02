@@ -9,7 +9,6 @@ import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
 import com.appifyhub.monolith.util.TimeProvider
-import org.springframework.security.crypto.password.PasswordEncoder
 
 fun AccountUpdater.applyTo(
   account: Account,
@@ -32,13 +31,10 @@ fun ProjectUpdater.applyTo(
   .copy(updatedAt = timeProvider.currentDate)
 
 fun ProjectCreator.toProjectData(
-  rawSignature: String,
-  passwordEncoder: PasswordEncoder,
   timeProvider: TimeProvider,
 ): ProjectDbm = ProjectDbm(
   projectId = null,
   account = account.toData(),
-  signature = passwordEncoder.encode(rawSignature),
   name = name,
   type = type.name,
   status = status.name,
@@ -63,7 +59,6 @@ fun Account.toData(): AccountDbm = AccountDbm(
 fun ProjectDbm.toDomain(): Project = Project(
   id = projectId!!,
   account = account.toDomain(),
-  signature = signature,
   name = name,
   type = Project.Type.find(type, default = Project.Type.COMMERCIAL),
   status = Project.Status.find(status, default = Project.Status.REVIEW),
@@ -75,7 +70,6 @@ fun ProjectDbm.toDomain(): Project = Project(
 fun Project.toData(): ProjectDbm = ProjectDbm(
   projectId = id,
   account = account.toData(),
-  signature = signature,
   name = name,
   type = type.name,
   status = status.name,

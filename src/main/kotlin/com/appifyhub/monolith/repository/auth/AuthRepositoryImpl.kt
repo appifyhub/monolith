@@ -25,7 +25,7 @@ import org.springframework.security.core.userdetails.User as SpringUser
 
 private const val CLAIM_USER_ID = "userId"
 private const val CLAIM_PROJECT_ID = "projectId"
-private const val CLAIM_UNIFIED_ID = "unifiedId"
+private const val CLAIM_UNIVERSAL_ID = "universalId"
 private const val CLAIM_AUTHORITIES = "authorities"
 private const val CLAIM_ACCOUNT_ID = "accountId"
 private const val CLAIM_ORIGIN = "origin"
@@ -53,7 +53,7 @@ class AuthRepositoryImpl(
 
     // prepare token data
     val authoritiesEncoded = authorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
-    val username = userId.toUnifiedFormat()
+    val username = userId.toUniversalFormat()
     val currentMillis = timeProvider.currentMillis
     val currentCalendar = timeProvider.currentCalendar.apply { timeInMillis = currentMillis }
     val expirationCalendar = currentCalendar.apply { add(Calendar.DAY_OF_MONTH, defaultExpirationDays) }
@@ -64,7 +64,7 @@ class AuthRepositoryImpl(
     val claims = mutableMapOf(
       CLAIM_USER_ID to userId.id,
       CLAIM_PROJECT_ID to userId.projectId.toString(),
-      CLAIM_UNIFIED_ID to username,
+      CLAIM_UNIVERSAL_ID to username,
       CLAIM_AUTHORITIES to authoritiesEncoded,
       CLAIM_TOKEN_LOCATOR to tokenLocatorEncoded,
     ).apply {
@@ -173,7 +173,7 @@ class AuthRepositoryImpl(
 
   override fun fetchAllTokenDetails(token: JwtAuthenticationToken, valid: Boolean?): List<OwnedToken> {
     log.debug("Fetching all token details for $token [valid $valid]")
-    val userId = UserId.fromUnifiedFormat(token.name)
+    val userId = UserId.fromUniversalFormat(token.name)
     val user = userRepository.fetchUserByUserId(userId, withTokens = false)
     val project = stubProject().copy(id = userId.projectId)
     return when (valid) {
@@ -201,7 +201,7 @@ class AuthRepositoryImpl(
 
   override fun unauthorizeAllTokens(token: JwtAuthenticationToken) {
     log.debug("Unauthorizing all tokens with $token")
-    val userId = UserId.fromUnifiedFormat(token.name)
+    val userId = UserId.fromUniversalFormat(token.name)
     val user = userRepository.fetchUserByUserId(userId, withTokens = true)
     ownedTokenRepository.blockAllTokensFrom(user)
   }
