@@ -1,9 +1,11 @@
 package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
+import com.appifyhub.monolith.network.user.DateTimeMapper
 import org.springframework.context.annotation.Primary
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.Instant
 import java.util.Calendar
 import java.util.Date
@@ -36,7 +38,23 @@ class TimeProviderFake(
   override fun toString(): String {
     // make sure not to increment for printing purposes
     val timestamp = staticTime() ?: incrementalTime
-    return "Fake Time [${Date(timestamp)}]"
+    val dateTime = DateTimeMapper.formatAsDateTime(Date(timestamp))
+    return "Fake Time [$dateTime]. " +
+      "Time = $incrementalTime, " +
+      "Increment = $timeIncrement, " +
+      "Static = ${staticTime()}"
+  }
+
+  fun advanceBy(amount: Duration) = staticTime()?.let {
+    staticTime = { it + amount.toMillis() }
+  } ?: run {
+    incrementalTime += amount.toMillis()
+  }
+
+  fun reverseBy(amount: Duration) = staticTime()?.let {
+    staticTime = { it - amount.toMillis() }
+  } ?: run {
+    incrementalTime -= amount.toMillis()
   }
 
   private fun timeIncrement(): Long {

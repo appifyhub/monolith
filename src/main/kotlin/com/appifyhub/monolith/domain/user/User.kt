@@ -49,10 +49,11 @@ data class User(
       fun find(name: String, default: Authority) =
         values().firstOrNull { it.name == name } ?: default
 
-      fun find(granted: Collection<GrantedAuthority>) = ArrayList(granted)
-        .map { find(it.authority, default = DEFAULT) }
-        .maxByOrNull { it.ordinal }
-        ?: DEFAULT
+      fun find(granted: Collection<GrantedAuthority>, default: Authority) =
+        ArrayList(granted)
+          .map { find(it.authority, default = DEFAULT) }
+          .maxByOrNull { it.ordinal }
+          ?: default
 
     }
 

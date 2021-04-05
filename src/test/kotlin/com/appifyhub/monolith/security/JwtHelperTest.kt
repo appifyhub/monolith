@@ -34,7 +34,11 @@ class JwtHelperTest {
   }
 
   @Test fun `jwt contains given data`() {
-    val token = helper.createJwtForClaims("subject", mapOf("claim1" to "val1", "claim2" to "val2"))
+    val token = helper.createJwtForClaims(
+      subject = "subject",
+      claims = mapOf("claim1" to "val1", "claim2" to "val2"),
+      expirationDaysDelta = 1,
+    )
 
     val parts = token.split(".")
     val decoder = Base64.getDecoder()
@@ -42,7 +46,7 @@ class JwtHelperTest {
     val content = decoder.decode(parts[1]).decodeToString()
 
     val issuedTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime()!!)
-    val expirationTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime()!!) + TimeUnit.DAYS.toSeconds(90)
+    val expirationTime = TimeUnit.MILLISECONDS.toSeconds(timeProvider.staticTime()!!) + TimeUnit.DAYS.toSeconds(1)
 
     assertThat(type).isEqualTo("{\"typ\":\"JWT\",\"alg\":\"RS256\"}")
     assertThat(content).isEqualTo(

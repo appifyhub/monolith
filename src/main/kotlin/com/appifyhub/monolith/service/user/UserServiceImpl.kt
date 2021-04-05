@@ -6,7 +6,6 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
 import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
@@ -24,12 +23,6 @@ class UserServiceImpl(
   private val userRepository: UserRepository,
   private val timeProvider: TimeProvider,
 ) : UserService {
-
-  enum class UserPrivilege(val level: Authority) {
-    READ(Authority.MODERATOR),
-    WRITE(Authority.ADMIN),
-    ;
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

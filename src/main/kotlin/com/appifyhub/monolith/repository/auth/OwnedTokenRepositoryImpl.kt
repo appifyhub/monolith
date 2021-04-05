@@ -118,10 +118,10 @@ class OwnedTokenRepositoryImpl(
 
   // Helpers
 
-  private val OwnedToken.secondsUntilExpired: Long
-    get() = TimeUnit.MILLISECONDS.toSeconds(expiresAt.time - timeProvider.currentMillis)
-
   private val OwnedToken.isExpired: Boolean
-    get() = secondsUntilExpired < 0
+    get() {
+      val secondsUntilExpired = TimeUnit.MILLISECONDS.toSeconds(expiresAt.time - timeProvider.currentMillis)
+      return secondsUntilExpired < 0
+    }
 
 }

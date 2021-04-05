@@ -22,6 +22,7 @@ class JwtHelper(
   fun createJwtForClaims(
     subject: String,
     claims: Map<String, String>,
+    expirationDaysDelta: Int = defaultExpirationDays,
   ): String = JWT.create()
     .withSubject(subject)
     .apply {
@@ -29,7 +30,7 @@ class JwtHelper(
     }
     .withExpiresAt(
       timeProvider.currentCalendar.apply {
-        add(Calendar.DAY_OF_MONTH, defaultExpirationDays)
+        add(Calendar.DAY_OF_MONTH, expirationDaysDelta)
       }.time
     )
     .withNotBefore(timeProvider.currentCalendar.time)

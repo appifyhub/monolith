@@ -9,7 +9,7 @@ import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.service.user.UserServiceImpl.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.UserPrivilege
 import com.appifyhub.monolith.util.ext.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -43,7 +43,7 @@ class AdminAuthController(
     log.debug("[POST] auth admin with $creds")
 
     val user = try {
-      authService.authAdmin(creds.universalId, creds.secret)
+      authService.resolveAdmin(creds.universalId, creds.secret)
     } catch (t: Throwable) {
       log.warn("Failed to find admin identified by ${creds.universalId}", t)
       throwUnauthorized { "Invalid credentials" }

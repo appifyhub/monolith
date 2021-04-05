@@ -9,6 +9,12 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 
 interface UserService {
 
+  enum class UserPrivilege(val level: User.Authority) {
+    READ(User.Authority.MODERATOR),
+    WRITE(User.Authority.ADMIN),
+    ;
+  }
+
   @Throws fun addUser(creator: UserCreator, userIdType: Project.UserIdType): User
 
   @Throws fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User

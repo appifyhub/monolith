@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Repository
 import java.util.Calendar
 import java.util.Date
+import kotlin.math.absoluteValue
 import org.springframework.security.core.userdetails.User as SpringUser
 
 private const val CLAIM_USER_ID = "userId"
@@ -53,7 +54,7 @@ class AuthRepositoryImpl(
 
     // prepare token data
     val authoritiesEncoded = authorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
-    val username = userId.toUniversalFormat()
+    val universalId = userId.toUniversalFormat()
     val currentMillis = timeProvider.currentMillis
     val currentCalendar = timeProvider.currentCalendar.apply { timeInMillis = currentMillis }
     val expirationCalendar = currentCalendar.apply { add(Calendar.DAY_OF_MONTH, defaultExpirationDays) }
@@ -64,7 +65,7 @@ class AuthRepositoryImpl(
     val claims = mutableMapOf(
       CLAIM_USER_ID to userId.id,
       CLAIM_PROJECT_ID to userId.projectId.toString(),
-      CLAIM_UNIVERSAL_ID to username,
+      CLAIM_UNIVERSAL_ID to universalId,
       CLAIM_AUTHORITIES to authoritiesEncoded,
       CLAIM_TOKEN_LOCATOR to tokenLocatorEncoded,
     ).apply {
@@ -85,7 +86,8 @@ class AuthRepositoryImpl(
       expiresAt = expirationCalendar.time,
       origin = origin,
     )
-    return jwtHelper.createJwtForClaims(subject = username, claims = claims)
+
+    return jwtHelper.createJwtForClaims(subject = universalId, claims = claims)
   }
 
   override fun checkIsValid(token: JwtAuthenticationToken, shallow: Boolean): Boolean {
@@ -103,13 +105,16 @@ class AuthRepositoryImpl(
   override fun requireValid(token: JwtAuthenticationToken, shallow: Boolean) {
     log.debug("Requiring valid token $token [shallow $shallow]")
 
-    if (shallow) require(!token.isExpired) { "Token expired ${token.secondsUntilExpired} seconds ago" }
+    if (shallow) {
+      require(!token.isExpired) { "Token expired ${token.secondsUntilExpired.absoluteValue} seconds ago" }
+      return
+    }
 
     val isBlocked = ownedTokenRepository.checkIsBlocked(Token(token.locator))
     require(!isBlocked) { "Token is blocked" }
 
     val isExpired = ownedTokenRepository.checkIsExpired(Token(token.locator))
-    require(!isExpired) { "Token expired ${token.secondsUntilExpired} seconds ago" }
+    require(!isExpired) { "Token expired ${token.secondsUntilExpired.absoluteValue} seconds ago" }
   }
 
   override fun resolveShallowUser(token: JwtAuthenticationToken): User {
@@ -154,12 +159,15 @@ class AuthRepositoryImpl(
     // add admin project info here (user might be from admin project)
     val adminProject = adminRepository.getAdminProject()
     val projectId = token.projectId.toLong()
-    if (projectId != adminProject.id) return user
-    val accountId = token.accountId.toLong()
+    val accountId = token.accountId?.toLong()
+
+    if (projectId != adminProject.id || accountId == null) return user
+
     user = user.copy(
       account = stubAccount().copy(
         id = accountId,
         createdAt = timeProvider.currentDate,
+        updatedAt = timeProvider.currentDate,
       ),
     )
 
@@ -225,8 +233,8 @@ class AuthRepositoryImpl(
   private val JwtAuthenticationToken.customAuthorities: String
     get() = tokenAttributes[CLAIM_AUTHORITIES].toString()
 
-  private val JwtAuthenticationToken.accountId: String
-    get() = tokenAttributes[CLAIM_ACCOUNT_ID].toString()
+  private val JwtAuthenticationToken.accountId: String?
+    get() = tokenAttributes[CLAIM_ACCOUNT_ID]?.toString()
 
   private val JwtAuthenticationToken.locator: String
     get() = tokenAttributes[CLAIM_TOKEN_LOCATOR].toString()

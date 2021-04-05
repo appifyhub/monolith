@@ -41,7 +41,7 @@ class UserAuthController(
     log.debug("[POST] auth user with $creds")
 
     val user = try {
-      authService.authUser(creds.universalId, creds.secret)
+      authService.resolveUser(creds.universalId, creds.secret)
     } catch (t: Throwable) {
       log.warn("Failed to find user identified by ${creds.universalId}", t)
       throwUnauthorized { "Invalid credentials" }

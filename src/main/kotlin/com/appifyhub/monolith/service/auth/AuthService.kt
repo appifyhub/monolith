@@ -4,7 +4,7 @@ import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.service.user.UserServiceImpl.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.UserPrivilege
 import org.springframework.security.core.Authentication
 
 interface AuthService {
@@ -15,11 +15,11 @@ interface AuthService {
 
   @Throws fun resolveShallowUser(authData: Authentication): User
 
-  @Throws fun authUser(universalId: String, signature: String): User
-
-  @Throws fun authAdmin(universalId: String, signature: String): User
-
   @Throws fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User
+
+  @Throws fun resolveUser(universalId: String, signature: String): User
+
+  @Throws fun resolveAdmin(universalId: String, signature: String): User
 
   @Throws fun createTokenFor(user: User, origin: String?): String
 

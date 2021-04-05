@@ -8,7 +8,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.service.user.UserServiceImpl.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.UserPrivilege
 import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.throwUnauthorized
@@ -32,19 +32,23 @@ class AuthServiceImpl(
     authData: Authentication,
     forAuthority: Authority,
     shallow: Boolean,
-  ): Boolean {
-    try {
-      log.debug("Checking if authorized $authData for $forAuthority")
+  ) = try {
+    log.debug("Checking if authorized $authData for $forAuthority")
 
-      if (forAuthority == Authority.DEFAULT) return true // basic authority is always ok
-      val token = authData.requireValidJwt(shallow)
-
-      val shallowUser = authRepository.resolveShallowUser(token)
-      return shallowUser.isAuthorizedFor(forAuthority)
-    } catch (t: Throwable) {
-      log.warn("Failed isAuthorized check", t)
-      return false
+    when (forAuthority) {
+      Authority.DEFAULT -> {
+        authData.requireValidJwt(shallow = true)
+        true // basic authority is always ok
+      }
+      else -> {
+        val token = authData.requireValidJwt(shallow)
+        val shallowUser = authRepository.resolveShallowUser(token)
+        shallowUser.isAuthorizedFor(forAuthority)
+      }
     }
+  } catch (t: Throwable) {
+    log.warn("Failed isAuthorized check", t)
+    false
   }
 
   override fun isProjectOwner(authData: Authentication, shallow: Boolean): Boolean = try {
@@ -67,20 +71,46 @@ class AuthServiceImpl(
     return authRepository.resolveShallowUser(token)
   }
 
-  override fun authUser(universalId: String, signature: String): User {
+  override fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User {
+    log.debug("Authentication $authData requesting '${privilege.name}' access to $targetUserId")
+    adminService.fetchProjectById(targetUserId.projectId) // sanity check
+
+    val normalizedUserId = Normalizers.UserId.run(targetUserId).requireValid { "User ID" }
+    val token = authData.requireValidJwt(shallow = false)
+
+    // quick check to prevent unnecessary queries
+    val shallowRequester = authRepository.resolveShallowUser(token)
+    val isSelf = shallowRequester.userId == normalizedUserId
+    val isPrivilegedShallow = shallowRequester.isAuthorizedFor(privilege.level)
+    require(isSelf || isPrivilegedShallow) { "Only ${privilege.level.groupName} are authorized" }
+
+    // fetch non-shallow data for requester
+    val requester = userService.fetchUserByUserId(shallowRequester.userId, withTokens = false)
+    if (isSelf) return requester
+
+    // check minimum authorization level, as creds might have changed
+    val isPrivileged = requester.isAuthorizedFor(privilege.level)
+    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+
+    // check if authorization level is enough (mods can't access other mods)
+    val target = userService.fetchUserByUserId(normalizedUserId, withTokens = false)
+    val isHigherAuthority = requester.authority.ordinal > target.authority.ordinal
+    require(isHigherAuthority) { "Only ${target.authority.nextGroupName} are authorized" }
+
+    return target
+  }
+
+  override fun resolveUser(universalId: String, signature: String): User {
     log.debug("Fetching user by $universalId, signature $signature")
 
     val userId = UserId.fromUniversalFormat(universalId)
     val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
     val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
 
-    val project = adminService.fetchProjectById(normalizedUserId.projectId)
-    if (normalizedUserId.projectId != project.id) throwUnauthorized { "Project ID" }
-
     return fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
   }
 
-  override fun authAdmin(universalId: String, signature: String): User {
+  override fun resolveAdmin(universalId: String, signature: String): User {
     log.debug("Fetching admin by id $universalId, signature $signature")
 
     val userId = UserId.fromUniversalFormat(universalId)
@@ -88,9 +118,11 @@ class AuthServiceImpl(
     val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
 
     val project = adminService.getAdminProject()
-    if (normalizedUserId.projectId != project.id) throwUnauthorized { "Project ID" }
+    val user = fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
 
-    return fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
+    if (user.userId.projectId != project.id) throwUnauthorized { "Project ID" }
+
+    return user
   }
 
   override fun createTokenFor(
@@ -112,11 +144,13 @@ class AuthServiceImpl(
     log.debug("Refreshing authentication $authData")
     val token = authData.requireValidJwt(shallow = false)
 
-    // unauthorize current token
+    // fetch details for this token to reuse them in the new token
+    val ownedToken = authRepository.fetchTokenDetails(token)
+
+    // unauthorize the current token
     authRepository.unauthorizeToken(token)
 
     // create a new token for this user
-    val ownedToken = authRepository.fetchTokenDetails(token)
     return authRepository.createToken(
       userId = ownedToken.owner.userId,
       authorities = ownedToken.owner.allAuthorities,
@@ -178,36 +212,7 @@ class AuthServiceImpl(
     authRepository.unauthorizeAllTokens(tokens)
   }
 
-  override fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User {
-    log.debug("Authentication $authData requesting '${privilege.name}' access to $targetUserId")
-    adminService.fetchProjectById(targetUserId.projectId) // sanity check
-
-    val normalizedUserId = Normalizers.UserId.run(targetUserId).requireValid { "User ID" }
-    val token = authData.requireValidJwt(shallow = false)
-
-    // quick check to prevent unnecessary queries
-    val shallowRequester = authRepository.resolveShallowUser(token)
-    val isSelf = shallowRequester.userId == normalizedUserId
-    val isPrivilegedShallow = shallowRequester.isAuthorizedFor(privilege.level)
-    require(isSelf || isPrivilegedShallow) { "Only ${privilege.level.groupName} are authorized" }
-
-    // fetch non-shallow data for requester
-    val requester = userService.fetchUserByUserId(shallowRequester.userId, withTokens = false)
-    if (isSelf) return requester
-
-    // check minimum authorization level, as creds might have changed
-    val isPrivileged = requester.isAuthorizedFor(privilege.level)
-    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
-
-    // check if authorization level is enough (mods can't access other mods)
-    val target = userService.fetchUserByUserId(normalizedUserId, withTokens = false)
-    val isHigherAuthority = requester.authority.ordinal > target.authority.ordinal
-    require(isHigherAuthority) { "Only ${target.authority.nextGroupName} are authorized" }
-
-    return target
-  }
-
-  // Helpers
+// Helpers
 
   @Throws
   private fun fetchUserByCredentials(
@@ -228,7 +233,8 @@ class AuthServiceImpl(
         try {
           authRepository.requireValid(this, shallow)
         } catch (t: Throwable) {
-          throw IllegalAccessException(t.message).initCause(t)
+          log.warn("Invalid token", t)
+          throw IllegalAccessException(t.message)
         }
       }
     } catch (t: Throwable) {
