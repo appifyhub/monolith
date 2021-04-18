@@ -100,7 +100,37 @@ class CustomExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Response Error : ${exception.message}")
+        .isEqualTo("Request Error : ${exception.message}")
+    }
+  }
+
+  @Test fun `handle illegal state exception`() {
+    val exception = IllegalStateException("Something failed")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Request Error : ${exception.message}")
+    }
+  }
+
+  @Test fun `handle illegal argument exception`() {
+    val exception = IllegalArgumentException("Something failed")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Request Error : ${exception.message}")
     }
   }
 

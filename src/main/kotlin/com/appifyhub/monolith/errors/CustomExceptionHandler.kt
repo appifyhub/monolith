@@ -43,9 +43,23 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
 
       t is ResponseStatusException ->
         ResponseEntity(
-          MessageResponse(t.reason ?: "Response Error : ${t.message}"),
+          MessageResponse(t.reason ?: "Request Error : ${t.message}"),
           HttpHeaders(),
           t.status,
+        )
+
+      t is IllegalStateException ->
+        ResponseEntity(
+          MessageResponse("Request Error : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.UNPROCESSABLE_ENTITY,
+        )
+
+      t is IllegalArgumentException ->
+        ResponseEntity(
+          MessageResponse("Request Error : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.UNPROCESSABLE_ENTITY,
         )
 
       else ->
