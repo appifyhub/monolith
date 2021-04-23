@@ -62,6 +62,13 @@ class CustomExceptionHandler : ResponseEntityExceptionHandler() {
           HttpStatus.UNPROCESSABLE_ENTITY,
         )
 
+      t is NoSuchElementException ->
+        ResponseEntity(
+          MessageResponse("Request Error : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.NOT_FOUND,
+        )
+
       else ->
         ResponseEntity(
           MessageResponse("Internal Failure : ${t.message}"),

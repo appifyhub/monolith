@@ -134,6 +134,21 @@ class CustomExceptionHandlerTest {
     }
   }
 
+  @Test fun `handle no such element exception`() {
+    val exception = NoSuchElementException("Something failed")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.NOT_FOUND)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Request Error : ${exception.message}")
+    }
+  }
+
   @Test fun `handle random exception`() {
     val exception = Throwable("Random")
 
