@@ -24,7 +24,7 @@ app:
     rootProject:
       name: ${SEED_PROJECT_NAME:AppifyHub}
       owner:
-        name: ${SEED_OWNER_NAME:Administrator}
+        name: ${SEED_OWNER_NAME:Owner}
         signature: ${SEED_OWNER_SECRET:}
         email: ${SEED_OWNER_EMAIL:admin@appifyhub.com}
 

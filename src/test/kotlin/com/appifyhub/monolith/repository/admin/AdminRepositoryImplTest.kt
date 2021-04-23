@@ -4,14 +4,20 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isSuccess
+import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.mapper.toData
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.storage.dao.AccountDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
+import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
+import com.appifyhub.monolith.util.ext.truncateTo
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
@@ -20,6 +26,7 @@ import com.nhaarman.mockitokotlin2.stub
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Optional
 
@@ -27,11 +34,13 @@ class AdminRepositoryImplTest {
 
   private val accountDao = mock<AccountDao>()
   private val projectDao = mock<ProjectDao>()
+  private val userDao = mock<UserDao>()
   private val timeProvider = TimeProviderFake()
 
   private val repository = AdminRepositoryImpl(
     accountDao = accountDao,
     projectDao = projectDao,
+    userDao = userDao,
     timeProvider = timeProvider,
   )
 
@@ -50,6 +59,9 @@ class AdminRepositoryImplTest {
           accountId = Stubs.account.id
         }
       }
+    }
+    userDao.stub {
+      onGeneric { save(any()) } doAnswer { it.arguments.first() as UserDbm }
     }
   }
 
@@ -175,15 +187,17 @@ class AdminRepositoryImplTest {
     accountDao.stub {
       onGeneric { findById(Stubs.account.id) } doReturn Optional.of(Stubs.accountDbm)
     }
+    userDao.stub {
+      onGeneric { findAllByAccount(any()) } doReturn Stubs.account.owners.map(User::toData)
+    }
     timeProvider.staticTime = { 0xA10001 }
 
     val emptyUpdater = AccountUpdater(id = Stubs.account.id)
-    assertThat(repository.updateAccount(emptyUpdater))
+    assertThat(repository.updateAccount(emptyUpdater).cleanStubArtifacts())
       .isDataClassEqualTo(
         Stubs.account.copy(
-          owners = emptyList(), // not available in admin DAOs
           updatedAt = Date(0xA10001),
-        )
+        ).cleanStubArtifacts()
       )
   }
 
@@ -191,14 +205,13 @@ class AdminRepositoryImplTest {
     accountDao.stub {
       onGeneric { findById(Stubs.account.id) } doReturn Optional.of(Stubs.accountDbm)
     }
+    userDao.stub {
+      onGeneric { findAllByAccount(any()) } doReturn Stubs.accountUpdated.owners.map(User::toData)
+    }
     timeProvider.staticTime = { 0xA10001 } // from the stub
 
-    assertThat(repository.updateAccount(Stubs.accountUpdater))
-      .isDataClassEqualTo(
-        Stubs.accountUpdated.copy(
-          owners = emptyList(), // not available in admin DAOs
-        )
-      )
+    assertThat(repository.updateAccount(Stubs.accountUpdater).cleanStubArtifacts())
+      .isDataClassEqualTo(Stubs.accountUpdated.cleanStubArtifacts())
   }
 
   // Deleting
@@ -223,11 +236,34 @@ class AdminRepositoryImplTest {
 
   @Test fun `removing account by ID works`() {
     accountDao.stub {
+      onGeneric { findById(any()) } doAnswer { Optional.of(Stubs.accountDbm) }
       onGeneric { deleteById(Stubs.account.id) } doAnswer { }
+    }
+    userDao.stub {
+      onGeneric { findAllByAccount(any()) } doAnswer { listOf(Stubs.userDbm) }
+      onGeneric { deleteById(any()) } doAnswer { }
     }
 
     assertThat { repository.removeAccountById(Stubs.account.id) }
       .isSuccess()
   }
+
+  // Helpers
+
+  // leftovers from stubbing
+  private fun Account.cleanStubArtifacts() = copy(
+    createdAt = createdAt.truncateTo(ChronoUnit.DAYS),
+    updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
+    owners = owners.map {
+      it.copy(
+        ownedTokens = emptyList(),
+        account = it.account?.copy(
+          createdAt = createdAt.truncateTo(ChronoUnit.DAYS),
+          updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
+          owners = emptyList(),
+        )
+      )
+    }
+  )
 
 }

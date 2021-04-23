@@ -20,6 +20,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
+import com.appifyhub.monolith.service.schema.RootProjectConfig
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.cleanDates
@@ -37,16 +38,15 @@ import org.springframework.web.server.ResponseStatusException
 import java.time.temporal.ChronoUnit
 import java.util.Date
 
-private const val ROOT_OWNER_NAME = "Administrator"
-
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
 class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
-  @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var adminRepo: AdminRepository
+  @Autowired lateinit var timeProvider: TimeProviderFake
+  @Autowired lateinit var rootProjectConfig: RootProjectConfig
 
   @BeforeEach fun setup() {
     // ensure valid birthday from the stub
@@ -353,7 +353,7 @@ class UserServiceImplTest {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
     val fetchedUsers = service.fetchAllUsersByProjectId(Stubs.userCreator.projectId)
       .map { it.cleanDates() }
-      .filter { it.name != ROOT_OWNER_NAME } // root user is ignored
+      .filter { it.name != rootProjectConfig.rootOwnerName } // root user is ignored
 
     assertThat(fetchedUsers)
       .isEqualTo(listOf(storedUser))
@@ -377,7 +377,7 @@ class UserServiceImplTest {
       .all {
         hasSize(1)
         transform { it.first().name }
-          .isEqualTo(ROOT_OWNER_NAME)
+          .isEqualTo(rootProjectConfig.rootOwnerName)
       }
   }
 

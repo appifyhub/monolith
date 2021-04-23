@@ -25,7 +25,7 @@ class RootProjectConfigTest {
       .all {
         isNotNull()
         transform { it.rootProjectName }.isEqualTo("AppifyHub")
-        transform { it.rootOwnerName }.isEqualTo("Administrator")
+        transform { it.rootOwnerName }.isEqualTo("Owner")
         transform { it.rootOwnerSignature }.isEmpty()
         transform { it.rootOwnerEmail }.isEqualTo("admin@appifyhub.com")
       }

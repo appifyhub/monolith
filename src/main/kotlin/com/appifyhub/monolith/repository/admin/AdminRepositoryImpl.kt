@@ -5,14 +5,17 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.mapper.toProjectData
 import com.appifyhub.monolith.storage.dao.AccountDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
+import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Repository
 class AdminRepositoryImpl(
   private val accountDao: AccountDao,
   private val projectDao: ProjectDao,
+  private val userDao: UserDao,
   private val timeProvider: TimeProvider,
 ) : AdminRepository {
 
@@ -51,7 +55,10 @@ class AdminRepositoryImpl(
 
   override fun fetchAccountById(id: Long): Account {
     log.debug("Fetching account by id $id")
-    return accountDao.findById(id).get().toDomain()
+
+    val account = accountDao.findById(id).get()
+    val owners = userDao.findAllByAccount(account)
+    return account.toDomain().copy(owners = owners.map(UserDbm::toDomain))
   }
 
   override fun getAdminProject(): Project {
@@ -82,11 +89,35 @@ class AdminRepositoryImpl(
   override fun updateAccount(updater: AccountUpdater): Account {
     log.debug("Updating account $updater")
     val fetchedAccount = fetchAccountById(updater.id)
-    val updatedAccount = updater.applyTo(
+
+    // update user ownership first
+    val addedOwners = updater.addedOwners?.mapValueNonNull { owners ->
+      owners.map {
+        // don't override an existing ownership
+        if (it.account != null) return@map it
+        userDao.save(it.copy(account = fetchedAccount).toData()).toDomain()
+      }
+    }
+    val removedOwners = updater.removedOwners?.mapValueNonNull { owners ->
+      owners.map {
+        // don't remove someone who was not an owner
+        if (it.account?.id != fetchedAccount.id) return@map it
+        userDao.save(it.copy(account = null).toData()).toDomain()
+      }
+    }
+
+    // user ownership is updated, now update account data
+    return updater.copy(
+      addedOwners = addedOwners,
+      removedOwners = removedOwners,
+    ).applyTo(
       account = fetchedAccount,
       timeProvider = timeProvider,
-    )
-    return accountDao.save(updatedAccount.toData()).toDomain()
+    ).let {
+      accountDao.save(it.toData())
+      // fetch again to add the missing ownership data
+      fetchAccountById(fetchedAccount.id)
+    }
   }
 
   override fun removeProjectById(projectId: Long) {
@@ -101,6 +132,11 @@ class AdminRepositoryImpl(
 
   override fun removeAccountById(accountId: Long) {
     log.debug("Removing account $accountId")
+    // delete user ownership data first
+    fetchAccountById(accountId).owners.forEach {
+      userDao.deleteById(it.userId.toData())
+    }
+    // finally delete account data
     accountDao.deleteById(accountId)
   }
 
