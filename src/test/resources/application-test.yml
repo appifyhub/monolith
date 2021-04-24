@@ -13,4 +13,12 @@ spring:
 
 logging:
   level:
-    root: ${LOGGING_LEVEL:ERROR}
+    root: ERROR
+    org:
+      apache:
+        http: ERROR
+      hibernate: ERROR
+      springframework:
+        web:
+          client:
+            RestTemplate: ERROR

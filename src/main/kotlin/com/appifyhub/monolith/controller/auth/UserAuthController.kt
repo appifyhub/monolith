@@ -7,7 +7,6 @@ import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.util.ext.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -40,14 +39,9 @@ class UserAuthController(
   ): TokenResponse {
     log.debug("[POST] auth user with $creds")
 
-    val user = try {
-      authService.resolveUser(creds.universalId, creds.secret)
-    } catch (t: Throwable) {
-      log.warn("Failed to find user identified by ${creds.universalId}", t)
-      throwUnauthorized { "Invalid credentials" }
-    }
-
+    val user = authService.resolveUser(creds.universalId, creds.secret)
     val token = authService.createTokenFor(user, creds.origin)
+
     return TokenResponse(token)
   }
 
@@ -83,11 +77,13 @@ class UserAuthController(
     @RequestParam(required = false) all: Boolean? = false,
   ): MessageResponse {
     log.debug("[DELETE] unauth user with $authentication, [all $all]")
+
     if (all == true) {
       authService.unauthorizeAll(authentication)
     } else {
       authService.unauthorize(authentication)
     }
+
     return MessageResponse.DONE
   }
 

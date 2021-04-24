@@ -32,6 +32,7 @@ class AuthTestHelper {
   @Autowired lateinit var timeProvider: TimeProvider
   @Autowired lateinit var jwtHelper: JwtHelper
 
+  var expirationDaysDelta: Int = 1
   val adminProject: Project by lazy { adminRepo.getAdminProject() }
   val ownerUser: User by lazy { userRepo.fetchAllUsersByProjectId(adminProject.id).first() }
   val defaultUser: User
@@ -40,7 +41,6 @@ class AuthTestHelper {
     get() = ensureUser(Authority.MODERATOR)
   val adminUser: User
     get() = ensureUser(Authority.ADMIN)
-  var expirationDaysDelta: Int = 1
 
   fun newStubToken() = convertTokenToJwt(createStubToken())
 
@@ -52,13 +52,14 @@ class AuthTestHelper {
     accountId = Stubs.account.id,
   )
 
-  private fun createUserToken(authority: Authority) = ensureUser(authority).let { user ->
-    newToken(
-      user = user,
-      storeOwnedToken = true,
-      accountId = user.account?.id,
-    )
-  }
+  private fun createUserToken(authority: Authority) = ensureUser(authority)
+    .let { user ->
+      newToken(
+        user = user,
+        storeOwnedToken = true,
+        accountId = user.account?.id,
+      )
+    }
 
   private fun convertTokenToJwt(token: String): JwtAuthenticationToken =
     JWT.decode(token).let { decoded ->

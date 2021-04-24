@@ -2,6 +2,7 @@ package com.appifyhub.monolith.security
 
 import com.appifyhub.monolith.controller.auth.UserAuthController
 import com.appifyhub.monolith.controller.heartbeat.HeartbeatController
+import com.appifyhub.monolith.errors.GlobalExceptionHandler
 import com.appifyhub.monolith.repository.user.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -15,6 +16,7 @@ import com.appifyhub.monolith.controller.common.Endpoints as CommonEndpoints
 @Component
 class WebSecurityConfiguration(
   private val userRepository: UserRepository,
+  private val exceptionHandler: GlobalExceptionHandler,
 ) : WebSecurityConfigurerAdapter() {
 
   public override fun configure(httpSecurityConfigurator: HttpSecurity) {
@@ -42,6 +44,7 @@ class WebSecurityConfiguration(
           .authenticated()
       }
       .exceptionHandling()
+      .authenticationEntryPoint(exceptionHandler)
       .disable()
 
       .headers()

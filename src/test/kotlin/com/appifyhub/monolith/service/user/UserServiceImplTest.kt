@@ -15,6 +15,7 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.AdminRepository
@@ -23,7 +24,7 @@ import com.appifyhub.monolith.repository.user.UserIdGenerator
 import com.appifyhub.monolith.init.RootProjectConfig
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import com.appifyhub.monolith.util.cleanDates
+import com.appifyhub.monolith.util.ext.truncateTo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -779,5 +780,11 @@ class UserServiceImplTest {
     TokenGenerator.emailInterceptor = { "email_token" }
     TokenGenerator.phoneInterceptor = { "phone_token" }
   }
+
+  fun User.cleanDates() = copy(
+    birthday = birthday?.truncateTo(ChronoUnit.DAYS),
+    createdAt = createdAt.truncateTo(ChronoUnit.SECONDS),
+    updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS),
+  )
 
 }

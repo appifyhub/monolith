@@ -6,7 +6,6 @@ import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService.UserPrivilege
-import com.appifyhub.monolith.util.ext.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
@@ -32,15 +31,11 @@ class AdminUserController(
   ): UserResponse {
     log.debug("[GET] user $id from project $projectId")
 
-    val targetUserId = UserId(id, projectId)
-    val targetUser = try {
-      authService.requestAccessFor(authentication, targetUserId, UserPrivilege.READ)
-    } catch (t: Throwable) {
-      log.warn("Failed to get access", t)
-      throwUnauthorized { t.message.orEmpty() }
-    }
-
-    return targetUser.toNetwork()
+    return authService.requestAccessFor(
+      authData = authentication,
+      targetUserId = UserId(id, projectId),
+      privilege = UserPrivilege.READ,
+    ).toNetwork()
   }
 
 }

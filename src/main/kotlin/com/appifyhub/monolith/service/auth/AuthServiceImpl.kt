@@ -65,10 +65,16 @@ class AuthServiceImpl(
     false
   }
 
-  override fun resolveShallowUser(authData: Authentication): User {
+  override fun resolveShallowUser(authData: Authentication, universalId: String): User {
     log.debug("Fetching user by authentication $authData")
+
+    val normalizedUserId = Normalizers.UserId.run(UserId.fromUniversalFormat(universalId)).requireValid { "User ID" }
     val token = authData.requireValidJwt(shallow = false)
-    return authRepository.resolveShallowUser(token)
+    val shallowUser = authRepository.resolveShallowUser(token)
+
+    if (normalizedUserId != shallowUser.userId) throwUnauthorized { "User ID and auth data mismatch" }
+
+    return shallowUser
   }
 
   override fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User {

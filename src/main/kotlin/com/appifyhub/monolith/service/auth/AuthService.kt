@@ -13,7 +13,7 @@ interface AuthService {
 
   fun isProjectOwner(authData: Authentication, shallow: Boolean): Boolean
 
-  @Throws fun resolveShallowUser(authData: Authentication): User
+  @Throws fun resolveShallowUser(authData: Authentication, universalId: String): User
 
   @Throws fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User
 

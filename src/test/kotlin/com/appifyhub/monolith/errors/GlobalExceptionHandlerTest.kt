@@ -4,18 +4,60 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.prop
+import com.appifyhub.monolith.network.common.MessageResponse
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.nhaarman.mockitokotlin2.mock
+import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import org.junit.jupiter.api.Test
+import org.mockito.Answers.RETURNS_DEEP_STUBS
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.authentication.InsufficientAuthenticationException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.server.ResponseStatusException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
-class CustomExceptionHandlerTest {
+class GlobalExceptionHandlerTest {
 
-  private val handler = CustomExceptionHandler()
+  private val testMapper = jacksonObjectMapper()
+  private val handler = GlobalExceptionHandler(testMapper)
+
+  @Test fun `handle pre-auth failure with commence`() {
+    val request = mock<HttpServletRequest>()
+    val response = mock<HttpServletResponse>(defaultAnswer = RETURNS_DEEP_STUBS)
+    val exception: AuthenticationException = InsufficientAuthenticationException("Something failed")
+
+    handler.commence(request, response, exception)
+
+    verifyZeroInteractions(request)
+    verify(response).status = HttpStatus.UNAUTHORIZED.value()
+    verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
+    verify(response.outputStream).println(testMapper.writeValueAsString(
+      MessageResponse(message = "Unauthorized Access : ${exception.message}")
+    ))
+  }
+
+  @Test fun `handle authentication exception`() {
+    val exception: AuthenticationException = InsufficientAuthenticationException("Something failed")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.UNAUTHORIZED)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Unauthorized Access : ${exception.message}")
+    }
+  }
 
   @Test fun `handle access denied exception`() {
-    val exception = AccessDeniedException("something")
+    val exception = AccessDeniedException("Something failed")
 
     val result = handler.handleThrowable(exception)
 

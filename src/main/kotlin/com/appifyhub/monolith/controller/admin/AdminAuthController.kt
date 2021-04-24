@@ -10,7 +10,6 @@ import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService.UserPrivilege
-import com.appifyhub.monolith.util.ext.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -42,13 +41,7 @@ class AdminAuthController(
   ): TokenResponse {
     log.debug("[POST] auth admin with $creds")
 
-    val user = try {
-      authService.resolveAdmin(creds.universalId, creds.secret)
-    } catch (t: Throwable) {
-      log.warn("Failed to find admin identified by ${creds.universalId}", t)
-      throwUnauthorized { "Invalid credentials" }
-    }
-
+    val user = authService.resolveAdmin(creds.universalId, creds.secret)
     val token = authService.createTokenFor(user, creds.origin)
     return TokenResponse(token)
   }
@@ -65,12 +58,7 @@ class AdminAuthController(
     log.debug("[GET] get all tokens for user $id from project $projectId, [valid $valid]")
 
     val targetUserId = UserId(id, projectId)
-    val targetUser = try {
-      authService.requestAccessFor(authentication, targetUserId, UserPrivilege.WRITE)
-    } catch (t: Throwable) {
-      log.warn("Failed to get access", t)
-      throwUnauthorized { t.message.orEmpty() }
-    }
+    val targetUser = authService.requestAccessFor(authentication, targetUserId, UserPrivilege.WRITE)
 
     val isSelf = targetUser.userId == targetUserId
     val tokens = if (isSelf) {
@@ -78,6 +66,7 @@ class AdminAuthController(
     } else {
       authService.fetchAllTokenDetailsFor(authentication, targetUser.userId, valid)
     }
+
     return tokens.map(OwnedToken::toNetwork)
   }
 
@@ -90,12 +79,7 @@ class AdminAuthController(
     log.debug("[DELETE] unauth user $id from project $projectId")
 
     val targetUserId = UserId(id, projectId)
-    val targetUser = try {
-      authService.requestAccessFor(authentication, targetUserId, UserPrivilege.WRITE)
-    } catch (t: Throwable) {
-      log.warn("Failed to get access", t)
-      throwUnauthorized { t.message.orEmpty() }
-    }
+    val targetUser = authService.requestAccessFor(authentication, targetUserId, UserPrivilege.WRITE)
 
     val isSelf = targetUser.userId == targetUserId
     if (isSelf) {

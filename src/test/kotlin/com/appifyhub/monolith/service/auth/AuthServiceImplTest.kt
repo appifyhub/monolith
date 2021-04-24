@@ -28,7 +28,6 @@ import com.appifyhub.monolith.service.user.UserService.UserPrivilege
 import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import com.appifyhub.monolith.util.cleanDates
 import com.appifyhub.monolith.util.ext.truncateTo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -229,12 +228,40 @@ class AuthServiceImplTest {
     ).isTrue()
   }
 
+  @Test fun `resolving shallow user with invalid universal ID fails (default authority)`() {
+    val moderatorToken = authHelper.newRealToken(MODERATOR)
+
+    assertThat {
+      service.resolveShallowUser(authData = moderatorToken, universalId = "invalid")
+    }
+      .isFailure()
+      .all {
+        hasClass(NumberFormatException::class)
+      }
+  }
+
+  @Test fun `resolving shallow user with mismatched ID fails (default authority)`() {
+    val moderatorToken = authHelper.newRealToken(MODERATOR)
+    val user = authHelper.defaultUser
+
+    assertThat {
+      service.resolveShallowUser(authData = moderatorToken, universalId = user.userId.toUniversalFormat())
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID and auth data mismatch")
+      }
+  }
+
   @Test fun `resolving shallow user from token works (default authority)`() {
     val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
     timeProvider.staticTime = { modernTime.time }
+    val user = authHelper.defaultUser
+    val token = authHelper.newRealToken(DEFAULT)
 
     assertThat(
-      service.resolveShallowUser(authHelper.newRealToken(DEFAULT))
+      service.resolveShallowUser(authData = token, universalId = user.userId.toUniversalFormat())
         .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
@@ -261,9 +288,11 @@ class AuthServiceImplTest {
   @Test fun `resolving shallow user from token works (owner authority)`() {
     val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
     timeProvider.staticTime = { modernTime.time }
+    val owner = authHelper.ownerUser
+    val token = authHelper.newRealToken(OWNER)
 
     assertThat(
-      service.resolveShallowUser(authHelper.newRealToken(OWNER))
+      service.resolveShallowUser(authData = token, universalId = owner.userId.toUniversalFormat())
         .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
@@ -601,6 +630,7 @@ class AuthServiceImplTest {
       }
   }
 
+  @Suppress("SpellCheckingInspection")
   @Test fun `fetching token details succeeds with valid data`() {
     val token = authHelper.newRealToken(DEFAULT)
 
@@ -633,6 +663,7 @@ class AuthServiceImplTest {
       }
   }
 
+  @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token details succeeds with valid data`() {
     val token = authHelper.newRealToken(DEFAULT)
 
@@ -680,6 +711,7 @@ class AuthServiceImplTest {
       }
   }
 
+  @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token for others details succeeds with valid data`() {
     authHelper.newRealToken(DEFAULT)
     val token = authHelper.newRealToken(OWNER)
@@ -870,6 +902,12 @@ class AuthServiceImplTest {
     createdAt = timeProvider.currentDate,
     verificationToken = null,
   ).cleanDates()
+
+  fun User.cleanDates() = copy(
+    birthday = birthday?.truncateTo(ChronoUnit.DAYS),
+    createdAt = createdAt.truncateTo(ChronoUnit.SECONDS),
+    updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS),
+  )
 
   // leftovers from hacking in auth utils need to be removed
   private fun OwnedToken.cleanStubArtifacts() = copy(
