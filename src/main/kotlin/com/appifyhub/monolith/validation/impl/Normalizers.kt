@@ -1,6 +1,8 @@
-package com.appifyhub.monolith.service.validation
+package com.appifyhub.monolith.validation.impl
 
 import com.appifyhub.monolith.util.TimeProvider
+import com.appifyhub.monolith.validation.normalizesNonNull
+import com.appifyhub.monolith.validation.normalizesNullable
 import java.util.Date
 
 typealias BDay = Pair<Date?, TimeProvider>

@@ -6,7 +6,7 @@ import assertk.assertions.hasClass
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.prop
-import com.appifyhub.monolith.service.validation.Normalizer
+import com.appifyhub.monolith.validation.Normalizer
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException

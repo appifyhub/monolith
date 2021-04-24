@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.service.schema
+package com.appifyhub.monolith.init
 
 import assertk.all
 import assertk.assertThat

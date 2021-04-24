@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.service.schema
+package com.appifyhub.monolith.init
 
 import assertk.assertThat
 import assertk.assertions.isFailure
@@ -12,6 +12,7 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.SignatureGenerator
 import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
 import com.nhaarman.mockitokotlin2.any

@@ -1,8 +1,11 @@
-package com.appifyhub.monolith.service.validation
+package com.appifyhub.monolith.validation.impl
 
 import assertk.Assert
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import com.appifyhub.monolith.validation.Cleaner
+import com.appifyhub.monolith.validation.Normalizer
+import com.appifyhub.monolith.validation.Validator
 import org.junit.jupiter.api.Test
 
 class NormalizersTest {

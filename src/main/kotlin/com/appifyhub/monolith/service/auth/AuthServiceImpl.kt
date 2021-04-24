@@ -9,9 +9,9 @@ import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.service.user.UserService.UserPrivilege
-import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.throwUnauthorized
+import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder

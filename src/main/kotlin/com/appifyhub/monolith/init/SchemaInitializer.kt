@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.service.schema
+package com.appifyhub.monolith.init
 
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
@@ -7,12 +7,13 @@ import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
 import com.appifyhub.monolith.repository.admin.SignatureGenerator
 import com.appifyhub.monolith.service.admin.AdminService
-import com.appifyhub.monolith.service.schema.SchemaInitializer.Seed.INITIAL
+import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner

@@ -1,9 +1,10 @@
-package com.appifyhub.monolith.service.validation
+package com.appifyhub.monolith.validation.impl
 
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.hasNoSpaces
 import com.appifyhub.monolith.util.ext.isNullOrNotBlank
+import com.appifyhub.monolith.validation.validatesAs
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN
 import org.slf4j.LoggerFactory

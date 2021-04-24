@@ -2,8 +2,8 @@ package com.appifyhub.monolith.service.schema
 
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.repository.schema.SchemaRepository
-import com.appifyhub.monolith.service.validation.Normalizers
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.service.validation
+package com.appifyhub.monolith.validation.impl
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo

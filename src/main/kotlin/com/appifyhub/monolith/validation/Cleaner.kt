@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.service.validation
+package com.appifyhub.monolith.validation
 
 interface Cleaner<in T, out R> {
 

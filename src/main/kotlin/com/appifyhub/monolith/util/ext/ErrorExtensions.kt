@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.util.ext
 
-import com.appifyhub.monolith.service.validation.Normalizer
+import com.appifyhub.monolith.validation.Normalizer
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
