@@ -5,7 +5,6 @@ import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.ext.throwUnauthorized
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
@@ -34,15 +33,13 @@ class UserController(
     log.debug("[GET] universal user $universalId")
 
     // get auth data
-    val userId = try {
-      authService.resolveShallowUser(authentication).userId
-    } catch (t: Throwable) {
-      log.warn("User could not be resolved from auth data", t)
-      throwUnauthorized { t.message.orEmpty() }
-    }
+    val shallowUser = authService.resolveShallowUser(
+      authData = authentication,
+      universalId = universalId,
+    )
 
     // fetch non-shallow data
-    val user = userService.fetchUserByUserId(userId, withTokens = true)
+    val user = userService.fetchUserByUserId(shallowUser.userId, withTokens = true)
     return user.toNetwork()
   }
 
