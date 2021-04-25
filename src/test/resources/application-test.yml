@@ -1,0 +1,24 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: "jdbc:h2:mem:ah_test_db"
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    root: ERROR
+    org:
+      apache:
+        http: ERROR
+      hibernate: ERROR
+      springframework:
+        web:
+          client:
+            RestTemplate: ERROR
