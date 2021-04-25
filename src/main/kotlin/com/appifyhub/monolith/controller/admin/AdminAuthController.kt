@@ -29,6 +29,7 @@ class AdminAuthController(
     const val ADMIN_AUTH = UserAuthController.Endpoints.ADMIN_AUTH
 
     const val ANY_USER_AUTH = UserAuthController.Endpoints.ANY_USER_AUTH
+    const val ANY_USER_TOKENS = UserAuthController.Endpoints.ANY_USER_TOKENS
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -48,7 +49,7 @@ class AdminAuthController(
 
   // For others
 
-  @GetMapping(Endpoints.ANY_USER_AUTH)
+  @GetMapping(Endpoints.ANY_USER_TOKENS)
   fun getAnyUserTokens(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -57,12 +58,11 @@ class AdminAuthController(
   ): List<TokenDetailsResponse> {
     log.debug("[GET] get all tokens for user $id from project $projectId, [valid $valid]")
 
-    val targetUserId = UserId(id, projectId)
-    val targetUser = authService.requestAccessFor(authentication, targetUserId, UserPrivilege.WRITE)
+    val authUser = authService.resolveShallowSelf(authentication)
+    val targetUser = authService.requestAccessFor(authentication, UserId(id, projectId), UserPrivilege.READ)
 
-    val isSelf = targetUser.userId == targetUserId
-    val tokens = if (isSelf) {
-      authService.fetchAllTokenDetails(authentication, valid)
+    val tokens = if (targetUser.userId == authUser.userId) {
+      authService.fetchAllTokenDetails(authentication, valid) // for self only
     } else {
       authService.fetchAllTokenDetailsFor(authentication, targetUser.userId, valid)
     }
@@ -78,12 +78,11 @@ class AdminAuthController(
   ): MessageResponse {
     log.debug("[DELETE] unauth user $id from project $projectId")
 
-    val targetUserId = UserId(id, projectId)
-    val targetUser = authService.requestAccessFor(authentication, targetUserId, UserPrivilege.WRITE)
+    val authUser = authService.resolveShallowSelf(authentication)
+    val targetUser = authService.requestAccessFor(authentication, UserId(id, projectId), UserPrivilege.WRITE)
 
-    val isSelf = targetUser.userId == targetUserId
-    if (isSelf) {
-      authService.unauthorizeAll(authentication)
+    if (targetUser.userId == authUser.userId) {
+      authService.unauthorizeAll(authentication) // for self only
     } else {
       authService.unauthorizeAllFor(authentication, targetUser.userId)
     }

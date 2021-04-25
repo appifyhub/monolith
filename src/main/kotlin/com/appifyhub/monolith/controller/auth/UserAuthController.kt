@@ -27,8 +27,8 @@ class UserAuthController(
     const val TOKENS = "/v1/universal/auth/tokens"
 
     const val ADMIN_AUTH = "/v1/admin/auth"
-
     const val ANY_USER_AUTH = "/v1/projects/{projectId}/users/{id}/auth"
+    const val ANY_USER_TOKENS = "/v1/projects/{projectId}/users/{id}/auth"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
