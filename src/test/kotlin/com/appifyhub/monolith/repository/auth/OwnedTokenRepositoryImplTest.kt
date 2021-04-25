@@ -237,7 +237,7 @@ class OwnedTokenRepositoryImplTest {
         it.copy(isBlocked = false)
       },
     )
-    assertThat(repository.blockAllTokensFrom(user))
+    assertThat(repository.blockAllTokensFromModel(user))
       // token DAO knows nothing about users, so:
       .transform { tokens -> tokens.map { it.copy(owner = Stubs.ownedToken.owner) } }
       .isEqualTo(listOf(Stubs.ownedToken))

@@ -35,6 +35,6 @@ interface OwnedTokenRepository {
 
   @Throws fun blockAllTokens(tokens: List<Token>): List<OwnedToken>
 
-  @Throws fun blockAllTokensFrom(owner: User): List<OwnedToken>
+  @Throws fun blockAllTokensFromModel(owner: User): List<OwnedToken>
 
 }

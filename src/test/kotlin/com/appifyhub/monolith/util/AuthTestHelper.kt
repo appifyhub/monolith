@@ -2,11 +2,13 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.auth.OwnedToken
 import com.appifyhub.monolith.domain.auth.Token
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.admin.AdminRepository
+import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.repository.auth.OwnedTokenRepository
 import com.appifyhub.monolith.repository.auth.locator.TokenLocator
 import com.appifyhub.monolith.repository.auth.locator.TokenLocatorEncoder
@@ -27,6 +29,7 @@ class AuthTestHelper {
 
   @Autowired lateinit var userRepo: UserRepository
   @Autowired lateinit var adminRepo: AdminRepository
+  @Autowired lateinit var authRepo: AuthRepository
   @Autowired lateinit var ownedTokenRepo: OwnedTokenRepository
   @Autowired lateinit var tokenEncoder: TokenLocatorEncoder
   @Autowired lateinit var timeProvider: TimeProvider
@@ -45,6 +48,25 @@ class AuthTestHelper {
   fun newStubToken() = convertTokenToJwt(createStubToken())
 
   fun newRealToken(authority: Authority) = convertTokenToJwt(createUserToken(authority))
+
+  fun fetchLastTokenOf(user: User): OwnedToken =
+    ownedTokenRepo.fetchAllTokens(
+      owner = user,
+      project = adminRepo.fetchProjectById(user.userId.projectId),
+    ).maxByOrNull { it.createdAt }!!
+
+  fun fetchAllTokensOf(user: User): List<OwnedToken> =
+    ownedTokenRepo.fetchAllTokens(
+      owner = user,
+      project = adminRepo.fetchProjectById(user.userId.projectId),
+    )
+
+  fun fetchOwnedTokenFrom(token: JwtAuthenticationToken): OwnedToken =
+    ownedTokenRepo.fetchTokenDetails(Token(
+      tokenLocator = token.tokenAttributes["tokenLocator"].toString(),
+    ))
+
+  fun isAuthorized(token: JwtAuthenticationToken) = authRepo.checkIsValid(token, shallow = false)
 
   private fun createStubToken(): String = newToken(
     user = Stubs.user,

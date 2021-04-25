@@ -15,7 +15,7 @@ import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerAuthRequestEntity
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -62,7 +62,7 @@ class AdminUserControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerAuthRequestEntity("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
           "id" to userId.id,
@@ -81,7 +81,7 @@ class AdminUserControllerTest {
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerAuthRequestEntity(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to user.userId.projectId,
           "id" to user.userId.id,
@@ -111,7 +111,7 @@ class AdminUserControllerTest {
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerAuthRequestEntity(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to user.userId.projectId,
           "id" to user.userId.id,

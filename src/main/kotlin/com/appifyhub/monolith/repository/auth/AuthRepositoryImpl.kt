@@ -211,13 +211,13 @@ class AuthRepositoryImpl(
     log.debug("Unauthorizing all tokens with $token")
     val userId = UserId.fromUniversalFormat(token.name)
     val user = userRepository.fetchUserByUserId(userId, withTokens = true)
-    ownedTokenRepository.blockAllTokensFrom(user)
+    ownedTokenRepository.blockAllTokensFromModel(user)
   }
 
   override fun unauthorizeAllTokensFor(userId: UserId) {
     log.debug("Unauthorizing all tokens for $userId")
     val user = userRepository.fetchUserByUserId(userId, withTokens = true)
-    ownedTokenRepository.blockAllTokensFrom(user)
+    ownedTokenRepository.blockAllTokensFromModel(user)
   }
 
   override fun unauthorizeAllTokens(tokens: List<Token>) {

@@ -104,7 +104,7 @@ class OwnedTokenRepositoryImpl(
     return ownedTokenDao.saveAll(toBlock.map(OwnedToken::toData)).map(OwnedTokenDbm::toDomain)
   }
 
-  override fun blockAllTokensFrom(owner: User): List<OwnedToken> {
+  override fun blockAllTokensFromModel(owner: User): List<OwnedToken> {
     log.debug("Blocking tokens for $owner")
 
     val valid = owner.ownedTokens.filter { !it.isExpired && !it.isBlocked }
