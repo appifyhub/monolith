@@ -37,7 +37,7 @@ class GlobalExceptionHandlerTest {
     verify(response).status = HttpStatus.UNAUTHORIZED.value()
     verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
     verify(response.outputStream).println(testMapper.writeValueAsString(
-      MessageResponse(message = "Unauthorized Access : ${exception.message}")
+      MessageResponse(message = "Unauthorized : ${exception.message}")
     ))
   }
 
@@ -52,7 +52,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Unauthorized Access : ${exception.message}")
+        .isEqualTo("Unauthorized : ${exception.message}")
     }
   }
 
@@ -67,7 +67,22 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Unauthorized Access : ${exception.message}")
+        .isEqualTo("Unauthorized : ${exception.message}")
+    }
+  }
+
+  @Test fun `handle credentials invalid message`() {
+    val exception = Throwable("Invalid credentials")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.UNAUTHORIZED)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Credentials Error : ${exception.message}")
     }
   }
 
@@ -82,7 +97,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Unauthorized Access : ${exception.message}")
+        .isEqualTo("Unauthorized : ${exception.message}")
     }
   }
 
@@ -97,7 +112,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Blocked Access : ${exception.message}")
+        .isEqualTo("Access Error : ${exception.message}")
     }
   }
 
@@ -112,7 +127,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Expired Access : ${exception.message}")
+        .isEqualTo("Access Error : ${exception.message}")
     }
   }
 
@@ -202,7 +217,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Internal Failure : ${exception.message}")
+        .isEqualTo("Internal Error : ${exception.message}")
     }
   }
 

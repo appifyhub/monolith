@@ -48,21 +48,28 @@ class GlobalExceptionHandler(
         || t.message?.contains("access is denied", ignoreCase = true) == true ->
 
         ResponseEntity(
-          MessageResponse("Unauthorized Access : ${t.message}"),
+          MessageResponse("Unauthorized : ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
-      t.message?.toLowerCase()?.contains("token is blocked") == true ->
+      t.message?.contains("invalid credentials", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Blocked Access : ${t.message}"),
+          MessageResponse("Credentials Error : ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
-      t.message?.toLowerCase()?.contains("token expired") == true ->
+      t.message?.contains("token is blocked", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Expired Access : ${t.message}"),
+          MessageResponse("Access Error : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.UNAUTHORIZED,
+        )
+
+      t.message?.contains("token expired", ignoreCase = true) == true ->
+        ResponseEntity(
+          MessageResponse("Access Error : ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
@@ -97,7 +104,7 @@ class GlobalExceptionHandler(
 
       else ->
         ResponseEntity(
-          MessageResponse("Internal Failure : ${t.message}"),
+          MessageResponse("Internal Error : ${t.message}"),
           HttpHeaders(),
           HttpStatus.INTERNAL_SERVER_ERROR,
         )
