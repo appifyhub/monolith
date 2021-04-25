@@ -228,6 +228,32 @@ class AuthServiceImplTest {
     ).isTrue()
   }
 
+  @Test fun `resolving shallow user from token works()`() {
+    val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
+    timeProvider.staticTime = { modernTime.time }
+    val token = authHelper.newRealToken(DEFAULT)
+
+    assertThat(
+      service.resolveShallowSelf(token)
+        .copy(ownedTokens = emptyList()) // doesn't matter for this test
+    ).isDataClassEqualTo(
+      // no rich data in shallow user
+      authHelper.defaultUser.copy(
+        name = null,
+        signature = "spring-asks-for-it",
+        allowsSpam = false,
+        birthday = null,
+        company = null,
+        verificationToken = null,
+        contactType = User.ContactType.CUSTOM,
+        contact = null,
+        ownedTokens = emptyList(),
+        createdAt = modernTime,
+        updatedAt = modernTime,
+      )
+    )
+  }
+
   @Test fun `resolving shallow user with invalid universal ID fails (default authority)`() {
     val moderatorToken = authHelper.newRealToken(MODERATOR)
 

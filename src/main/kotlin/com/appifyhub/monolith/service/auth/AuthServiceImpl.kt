@@ -65,8 +65,14 @@ class AuthServiceImpl(
     false
   }
 
+  override fun resolveShallowSelf(authData: Authentication): User {
+    log.debug("Fetching self by authentication $authData")
+    val token = authData.requireValidJwt(shallow = true)
+    return authRepository.resolveShallowUser(token)
+  }
+
   override fun resolveShallowUser(authData: Authentication, universalId: String): User {
-    log.debug("Fetching user by authentication $authData")
+    log.debug("Fetching user by authentication $authData, universalId = $universalId")
 
     val normalizedUserId = Normalizers.UserId.run(UserId.fromUniversalFormat(universalId)).requireValid { "User ID" }
     val token = authData.requireValidJwt(shallow = false)
