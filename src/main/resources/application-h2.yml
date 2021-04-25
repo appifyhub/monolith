@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+  datasource:
+    url: "jdbc:h2:mem:ah_db"
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    root: ${LOGGING_LEVEL:DEBUG}

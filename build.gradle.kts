@@ -18,9 +18,13 @@ buildscript {
 }
 
 plugins {
-  kotlin("jvm") version "1.4.21"
-  kotlin("plugin.spring") version "1.4.21"
-  kotlin("plugin.jpa") version "1.4.21"
+  val kotlinVersion = "1.4.31"
+  kotlin("jvm") version kotlinVersion
+  kotlin("plugin.spring") version kotlinVersion
+  kotlin("plugin.jpa") version kotlinVersion
+  kotlin("plugin.noarg") version kotlinVersion
+  kotlin("plugin.allopen") version kotlinVersion
+  kotlin("kapt") version kotlinVersion
 
   id("org.springframework.boot") version "2.4.1"
   id("io.spring.dependency-management") version "1.0.10.RELEASE"
@@ -33,21 +37,56 @@ repositories {
 }
 
 dependencies {
+
+  // language essentials
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
+  // web frameworks
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("org.springframework.boot:spring-boot-starter-jdbc")
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-web-services")
+  implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
+  implementation("org.apache.httpcomponents:httpclient")
 
-  testImplementation("org.springframework.boot:spring-boot-starter-test")
-  testImplementation("org.springframework.security:spring-security-test")
+  // auth
+  implementation("com.auth0:java-jwt:3+")
+  implementation("org.springframework.security:spring-security-core")
+  implementation("org.springframework.security:spring-security-web")
+  implementation("org.springframework.security:spring-security-config")
+  implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
+  // persistence
+  implementation("org.springframework.boot:spring-boot-starter-jdbc")
+  implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+  implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("org.springframework.boot:spring-boot-starter-data-rest")
+  implementation("org.hibernate:hibernate-core")
+
+  // annotation processors
+  implementation("org.springframework.boot:spring-boot-configuration-processor")
+  annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+  kapt("org.springframework.boot:spring-boot-configuration-processor")
+
+  // runtime dependencies
   runtimeOnly("com.h2database:h2")
   runtimeOnly("org.postgresql:postgresql")
+
+  // test annotation processors
+  testImplementation("org.springframework.boot:spring-boot-configuration-processor")
+  testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+
+  // tests
+  testImplementation(platform("org.junit:junit-bom:5+"))
+  testImplementation("org.junit.jupiter:junit-jupiter")
+  testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("org.hibernate:hibernate-testing")
+  testImplementation("com.h2database:h2")
+  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
+  testImplementation("org.mockito:mockito-core:3.+")
+  testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2+")
+
 }
 
 // endregion
@@ -63,7 +102,7 @@ java.targetCompatibility = JavaVersion.VERSION_11
 
 // endregion
 
-// Tasks configuration
+// region Tasks configuration
 
 tasks {
 
@@ -95,7 +134,13 @@ tasks {
 
 // endregion
 
-// Plugin configuration
+// region Plugin configuration
+
+allOpen {
+  annotation("javax.persistence.Entity")
+  annotation("javax.persistence.Embeddable")
+  annotation("javax.persistence.MappedSuperclass")
+}
 
 githubRelease {
   val writeToken = Env.get("GITHUB_TOKEN")
@@ -157,7 +202,7 @@ apply(plugin = "com.github.breadmoirai.github-release")
 
 // endregion
 
-// Helpers
+// region Helpers
 
 object Env {
   const val INVALID = "<invalid>"

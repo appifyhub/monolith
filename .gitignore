@@ -15,6 +15,7 @@
 
 # Generated files
 .idea/**/contentModel.xml
+.idea/**/*log.http
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -409,3 +410,8 @@ gradle-app.setting
 **/build/
 
 # End of https://www.toptal.com/developers/gitignore/api/java,linux,macos,kotlin,python,windows,java-web,intellij+all,intellij+iml,gradle
+
+
+# Custom rules
+**/release.jks
+**/release.keystore.info
