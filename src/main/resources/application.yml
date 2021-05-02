@@ -1,3 +1,5 @@
+# IMPORTANT: Keep environment variables in sync with docker configurations
+
 spring:
   jpa:
     hibernate:
