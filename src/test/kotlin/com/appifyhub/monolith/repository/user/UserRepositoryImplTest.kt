@@ -73,7 +73,7 @@ class UserRepositoryImplTest {
   // region Add user
 
   @Test fun `adding user fails with null ID and non-random ID type`() {
-    val creator = Stubs.userCreator.copy(id = null)
+    val creator = Stubs.userCreator.copy(userId = null)
 
     assertThat { repository.addUser(creator, UserIdType.USERNAME) }
       .isFailure()
@@ -84,7 +84,7 @@ class UserRepositoryImplTest {
   }
 
   @Test fun `adding user fails with existing ID and random ID type`() {
-    val creator = Stubs.userCreator.copy(id = "non-null")
+    val creator = Stubs.userCreator.copy(userId = "non-null")
 
     assertThat { repository.addUser(creator, UserIdType.RANDOM) }
       .isFailure()
@@ -95,7 +95,7 @@ class UserRepositoryImplTest {
   }
 
   @Test fun `adding user generates new ID for random ID type`() {
-    val creator = Stubs.userCreator.copy(id = null)
+    val creator = Stubs.userCreator.copy(userId = null)
 
     // create & update times from the stub
     val times = listOf(0xC00000, 0xA00000).iterator()
@@ -106,7 +106,7 @@ class UserRepositoryImplTest {
     assertThat(repository.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = UserId("randomUserId", creator.projectId),
+          id = UserId("randomUserId", creator.projectId),
           account = null,
           ownedTokens = emptyList(),
         )
@@ -114,7 +114,7 @@ class UserRepositoryImplTest {
   }
 
   @Test fun `adding user saves existing ID for non-random ID type`() {
-    val creator = Stubs.userCreator.copy(id = "username")
+    val creator = Stubs.userCreator.copy(userId = "username")
 
     // create & update times from the stub
     val times = listOf(0xC00000, 0xA00000).iterator()
@@ -131,7 +131,7 @@ class UserRepositoryImplTest {
   }
 
   @Test fun `adding user with phone ID generates a phone-friendly verification token`() {
-    val creator = Stubs.userCreator.copy(id = "+1234567890")
+    val creator = Stubs.userCreator.copy(userId = "+1234567890")
 
     // create & update times from the stub
     val times = listOf(0xC00000, 0xA00000).iterator()
@@ -141,7 +141,7 @@ class UserRepositoryImplTest {
     assertThat(repository.addUser(creator, UserIdType.PHONE))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = UserId(creator.id!!, creator.projectId),
+          id = UserId(creator.userId!!, creator.projectId),
           account = null,
           ownedTokens = emptyList(),
           verificationToken = "123456"

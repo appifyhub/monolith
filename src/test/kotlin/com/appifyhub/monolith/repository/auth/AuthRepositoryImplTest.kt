@@ -85,7 +85,7 @@ class AuthRepositoryImplTest {
     timeProvider.staticTime = { createTime.time }
 
     val creator = TokenCreator(
-      userId = Stubs.userId,
+      id = Stubs.userId,
       authority = Stubs.user.authority,
       origin = null,
       ipAddress = null,
@@ -109,11 +109,11 @@ class AuthRepositoryImplTest {
       ))
 
     verify(jwtHelper).createJwtForClaims(
-      subject = creator.userId.toUniversalFormat(),
+      subject = creator.id.toUniversalFormat(),
       claims = mapOf(
-        Claims.USER_ID to creator.userId.id,
-        Claims.PROJECT_ID to creator.userId.projectId,
-        Claims.UNIVERSAL_ID to creator.userId.toUniversalFormat(),
+        Claims.USER_ID to creator.id.userId,
+        Claims.PROJECT_ID to creator.id.projectId,
+        Claims.UNIVERSAL_ID to creator.id.toUniversalFormat(),
         Claims.AUTHORITIES to "DEFAULT,MODERATOR,ADMIN", // Stubs.user is ADMIN
         Claims.IS_STATIC to creator.isStatic,
       ),
@@ -324,13 +324,13 @@ class AuthRepositoryImplTest {
     val randomUserId = UserId("userId", Stubs.project.id)
 
     assertAll {
-      assertThat(repository.fetchAllTokenDetailsFor(userId = randomUserId, valid = null))
+      assertThat(repository.fetchAllTokenDetailsFor(id = randomUserId, valid = null))
         .isEqualTo(allTokens)
 
-      assertThat(repository.fetchAllTokenDetailsFor(userId = randomUserId, valid = true))
+      assertThat(repository.fetchAllTokenDetailsFor(id = randomUserId, valid = true))
         .isEqualTo(validTokens)
 
-      assertThat(repository.fetchAllTokenDetailsFor(userId = randomUserId, valid = false))
+      assertThat(repository.fetchAllTokenDetailsFor(id = randomUserId, valid = false))
         .isEqualTo(blockedTokens)
     }
   }

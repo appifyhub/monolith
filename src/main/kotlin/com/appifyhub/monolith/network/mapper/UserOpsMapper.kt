@@ -16,9 +16,9 @@ import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 
 fun UserUpdaterRequest.toDomain(
-  userId: UserId,
+  id: UserId,
 ): UserUpdater = UserUpdater(
-  id = userId,
+  id = id,
   rawSignature = rawSignature.toDomainNonNull(),
   type = type.mapToDomainNonNull { User.Type.find(it, default = PERSONAL) },
   authority = authority.mapToDomainNonNull { User.Authority.find(it, default = DEFAULT) },
@@ -43,7 +43,7 @@ fun OrganizationUpdaterDto.toDomain(): OrganizationUpdater = OrganizationUpdater
 fun UserCreatorRequest.toDomain(
   projectId: Long,
 ): UserCreator = UserCreator(
-  id = id,
+  userId = userId,
   projectId = projectId,
   rawSignature = rawSignature,
   name = name,

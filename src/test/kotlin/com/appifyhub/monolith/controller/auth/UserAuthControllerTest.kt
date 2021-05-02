@@ -18,7 +18,6 @@ import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
-import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -41,8 +40,6 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.Duration
-import java.util.Date
-import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -70,7 +67,7 @@ class UserAuthControllerTest {
 
   @Test fun `auth user fails with invalid credentials`() {
     val credentials = UserCredentialsRequest(
-      universalId = authTestHelper.defaultUser.userId.toUniversalFormat(),
+      universalId = authTestHelper.defaultUser.id.toUniversalFormat(),
       secret = "invalid",
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -89,7 +86,7 @@ class UserAuthControllerTest {
 
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = UserCredentialsRequest(
-      universalId = authTestHelper.defaultUser.userId.toUniversalFormat(),
+      universalId = authTestHelper.defaultUser.id.toUniversalFormat(),
       secret = Stubs.userCredentialsRequest.secret,
       origin = Stubs.userCredentialsRequest.origin,
     )

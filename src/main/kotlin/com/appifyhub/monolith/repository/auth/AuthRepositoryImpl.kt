@@ -48,18 +48,18 @@ class AuthRepositoryImpl(
     log.debug("Generating token for creator $creator")
 
     // prepare token data
-    val universalId = creator.userId.toUniversalFormat()
+    val universalId = creator.id.toUniversalFormat()
     val currentCalendar = timeProvider.currentCalendar
     val expirationCalendar = timeProvider.currentCalendar.apply { add(Calendar.DAY_OF_MONTH, expirationInDays) }
     val authoritiesEncoded = creator.authority.allAuthorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
     val accountId = adminRepository.getAdminProject()
-      .takeIf { adminProject -> adminProject.id == creator.userId.projectId }
-      ?.let { userRepository.fetchUserByUserId(creator.userId, withTokens = false).account?.id }
+      .takeIf { adminProject -> adminProject.id == creator.id.projectId }
+      ?.let { userRepository.fetchUserByUserId(creator.id, withTokens = false).account?.id }
 
     // create claims
     val claims = mutableMapOf(
-      USER_ID to creator.userId.id,
-      PROJECT_ID to creator.userId.projectId,
+      USER_ID to creator.id.userId,
+      PROJECT_ID to creator.id.projectId,
       UNIVERSAL_ID to universalId,
       AUTHORITIES to authoritiesEncoded,
       IS_STATIC to creator.isStatic,
@@ -84,7 +84,7 @@ class AuthRepositoryImpl(
         isBlocked = false,
         createdAt = currentCalendar.time,
         expiresAt = expirationCalendar.time,
-        ownerId = creator.userId,
+        ownerId = creator.id,
         authority = creator.authority,
         origin = creator.origin,
         ipAddress = creator.ipAddress,
@@ -170,10 +170,10 @@ class AuthRepositoryImpl(
     }
   }
 
-  override fun fetchAllTokenDetailsFor(userId: UserId, valid: Boolean?): List<TokenDetails> {
-    log.debug("Fetching all token details for $userId [valid $valid]")
-    val user = userRepository.fetchUserByUserId(userId, withTokens = false)
-    val project = stubProject().copy(id = userId.projectId)
+  override fun fetchAllTokenDetailsFor(id: UserId, valid: Boolean?): List<TokenDetails> {
+    log.debug("Fetching all token details for $id [valid $valid]")
+    val user = userRepository.fetchUserByUserId(id, withTokens = false)
+    val project = stubProject().copy(id = id.projectId)
     return when (valid) {
       true -> tokenDetailsRepository.fetchAllValidTokens(user, project)
       false -> tokenDetailsRepository.fetchAllBlockedTokens(user, project)
@@ -193,9 +193,9 @@ class AuthRepositoryImpl(
     tokenDetailsRepository.blockAllTokensFromModel(user)
   }
 
-  override fun unauthorizeAllTokensFor(userId: UserId) {
-    log.debug("Unauthorizing all tokens for $userId")
-    val user = userRepository.fetchUserByUserId(userId, withTokens = true)
+  override fun unauthorizeAllTokensFor(id: UserId) {
+    log.debug("Unauthorizing all tokens for $id")
+    val user = userRepository.fetchUserByUserId(id, withTokens = true)
     tokenDetailsRepository.blockAllTokensFromModel(user)
   }
 

@@ -17,7 +17,7 @@ interface UserService {
 
   @Throws fun addUser(creator: UserCreator, userIdType: Project.UserIdType): User
 
-  @Throws fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User
+  @Throws fun fetchUserByUserId(id: UserId, withTokens: Boolean): User
 
   @Throws fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User
 
@@ -29,7 +29,7 @@ interface UserService {
 
   @Throws fun updateUser(updater: UserUpdater, userIdType: Project.UserIdType): User
 
-  @Throws fun removeUserById(userId: UserId)
+  @Throws fun removeUserById(id: UserId)
 
   @Throws fun removeUserByUniversalId(universalId: String)
 

@@ -56,7 +56,7 @@ class UserControllerTest {
   }
 
   @Test fun `get user fails when unauthorized`() {
-    val universalId = authTestHelper.defaultUser.userId.toUniversalFormat()
+    val universalId = authTestHelper.defaultUser.id.toUniversalFormat()
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -72,7 +72,7 @@ class UserControllerTest {
 
   @Test fun `get user succeeds with valid authorization`() {
     val user = authTestHelper.defaultUser
-    val universalId = user.userId.toUniversalFormat()
+    val universalId = user.id.toUniversalFormat()
     val token = authTestHelper.newRealToken(DEFAULT).token.tokenValue
 
     assertThat(
@@ -86,7 +86,7 @@ class UserControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         Stubs.userResponse.copy(
-          userId = user.userId.id,
+          userId = user.id.userId,
           universalId = universalId,
           type = user.type.name,
           authority = user.authority.name,

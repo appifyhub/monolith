@@ -16,7 +16,7 @@ interface AuthRepository {
 
   @Throws fun fetchAllTokenDetails(jwt: JwtAuthenticationToken, valid: Boolean?): List<TokenDetails>
 
-  @Throws fun fetchAllTokenDetailsFor(userId: UserId, valid: Boolean?): List<TokenDetails>
+  @Throws fun fetchAllTokenDetailsFor(id: UserId, valid: Boolean?): List<TokenDetails>
 
   @Throws fun checkIsValid(jwt: JwtAuthenticationToken, shallow: Boolean): Boolean
 
@@ -26,7 +26,7 @@ interface AuthRepository {
 
   @Throws fun unauthorizeAllTokens(jwt: JwtAuthenticationToken)
 
-  @Throws fun unauthorizeAllTokensFor(userId: UserId)
+  @Throws fun unauthorizeAllTokensFor(id: UserId)
 
   @Throws fun unauthorizeAllTokens(tokenValues: List<String>)
 

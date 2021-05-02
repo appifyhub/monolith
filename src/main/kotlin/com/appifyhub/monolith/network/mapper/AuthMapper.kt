@@ -9,7 +9,7 @@ fun tokenResponseOf(tokenValue: String): TokenResponse = TokenResponse(tokenValu
 
 fun TokenDetails.toNetwork() = TokenDetailsResponse(
   tokenValue = tokenValue,
-  ownerId = ownerId.id,
+  ownerId = ownerId.userId,
   ownerProjectId = ownerId.projectId,
   ownerUniversalId = ownerId.toUniversalFormat(),
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),

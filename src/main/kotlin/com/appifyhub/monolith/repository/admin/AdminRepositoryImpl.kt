@@ -134,7 +134,7 @@ class AdminRepositoryImpl(
     log.debug("Removing account $accountId")
     // delete user ownership data first
     fetchAccountById(accountId).owners.forEach {
-      userDao.deleteById(it.userId.toData())
+      userDao.deleteById(it.id.toData())
     }
     // finally delete account data
     accountDao.deleteById(accountId)

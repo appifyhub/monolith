@@ -69,7 +69,7 @@ class UserServiceImplTest {
   // Adding
 
   @Test fun `adding user fails with invalid username`() {
-    val creator = Stubs.userCreator.copy(id = " ")
+    val creator = Stubs.userCreator.copy(userId = " ")
 
     assertThat { service.addUser(creator, UserIdType.USERNAME) }
       .isFailure()
@@ -80,7 +80,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid email`() {
-    val creator = Stubs.userCreator.copy(id = "invalid")
+    val creator = Stubs.userCreator.copy(userId = "invalid")
 
     assertThat { service.addUser(creator, UserIdType.EMAIL) }
       .isFailure()
@@ -91,7 +91,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid phone`() {
-    val creator = Stubs.userCreator.copy(id = "invalid")
+    val creator = Stubs.userCreator.copy(userId = "invalid")
 
     assertThat { service.addUser(creator, UserIdType.PHONE) }
       .isFailure()
@@ -102,7 +102,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid custom user ID`() {
-    val creator = Stubs.userCreator.copy(id = " ")
+    val creator = Stubs.userCreator.copy(userId = " ")
 
     assertThat { service.addUser(creator, UserIdType.CUSTOM) }
       .isFailure()
@@ -192,13 +192,13 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with random ID`() {
-    val creator = Stubs.userCreator.copy(id = null)
+    val creator = Stubs.userCreator.copy(userId = null)
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = Stubs.userId.copy(id = UserIdGenerator.nextId),
+          id = Stubs.userId.copy(userId = UserIdGenerator.nextId),
           verificationToken = TokenGenerator.nextEmailToken,
           ownedTokens = emptyList(),
           account = null,
@@ -210,13 +210,13 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with username ID`() {
-    val creator = Stubs.userCreator.copy(id = "username")
+    val creator = Stubs.userCreator.copy(userId = "username")
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.USERNAME))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = Stubs.userId.copy(id = "username"),
+          id = Stubs.userId.copy(userId = "username"),
           verificationToken = TokenGenerator.nextEmailToken,
           ownedTokens = emptyList(),
           account = null,
@@ -228,13 +228,13 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with email ID`() {
-    val creator = Stubs.userCreator.copy(id = "email@domain.com")
+    val creator = Stubs.userCreator.copy(userId = "email@domain.com")
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.EMAIL))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = Stubs.userId.copy(id = "email@domain.com"),
+          id = Stubs.userId.copy(userId = "email@domain.com"),
           verificationToken = TokenGenerator.nextEmailToken,
           ownedTokens = emptyList(),
           account = null,
@@ -247,7 +247,7 @@ class UserServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with phone ID (and phone contact)`() {
     val creator = Stubs.userCreator.copy(
-      id = "+491760000000",
+      userId = "+491760000000",
       contactType = ContactType.PHONE,
       contact = "+491760000000",
     )
@@ -256,7 +256,7 @@ class UserServiceImplTest {
     assertThat(service.addUser(creator, UserIdType.PHONE))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = Stubs.userId.copy(id = "+491760000000"),
+          id = Stubs.userId.copy(userId = "+491760000000"),
           verificationToken = TokenGenerator.nextPhoneToken,
           ownedTokens = emptyList(),
           contactType = ContactType.PHONE,
@@ -270,13 +270,13 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with custom ID (and no contact)`() {
-    val creator = Stubs.userCreator.copy(id = "custom_id", contactType = ContactType.CUSTOM, contact = null)
+    val creator = Stubs.userCreator.copy(userId = "custom_id", contactType = ContactType.CUSTOM, contact = null)
     stubGenerators()
 
     assertThat(service.addUser(creator, UserIdType.CUSTOM))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          userId = Stubs.userId.copy(id = "custom_id"),
+          id = Stubs.userId.copy(userId = "custom_id"),
           verificationToken = null,
           ownedTokens = emptyList(),
           contactType = ContactType.CUSTOM,
@@ -292,7 +292,7 @@ class UserServiceImplTest {
   @Test fun `adding user works with random ID (minimal data)`() {
     stubGenerators()
     val creator = UserCreator(
-      id = null,
+      userId = null,
       projectId = Stubs.project.id,
       rawSignature = "12345678",
       name = null,
@@ -307,7 +307,7 @@ class UserServiceImplTest {
 
     assertThat(service.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(User(
-        userId = UserId(id = "user_id", projectId = Stubs.project.id),
+        id = UserId(userId = "user_id", projectId = Stubs.project.id),
         signature = "87654321",
         name = null,
         type = Type.PERSONAL,
@@ -328,7 +328,7 @@ class UserServiceImplTest {
   // Fetching
 
   @Test fun `fetching user fails with invalid user ID`() {
-    assertThat { service.fetchUserByUserId(Stubs.userId.copy(id = " "), withTokens = true) }
+    assertThat { service.fetchUserByUserId(Stubs.userId.copy(userId = " "), withTokens = true) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -338,7 +338,7 @@ class UserServiceImplTest {
 
   @Test fun `fetching user works with a user ID`() {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
-    val fetchedUser = service.fetchUserByUserId(storedUser.userId, withTokens = true).cleanDates()
+    val fetchedUser = service.fetchUserByUserId(storedUser.id, withTokens = true).cleanDates()
 
     assertThat(fetchedUser)
       .isDataClassEqualTo(storedUser)
@@ -355,7 +355,7 @@ class UserServiceImplTest {
 
   @Test fun `fetching user works with a universal ID`() {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
-    val fetchedUser = service.fetchUserByUniversalId(storedUser.userId.toUniversalFormat(), withTokens = true)
+    val fetchedUser = service.fetchUserByUniversalId(storedUser.id.toUniversalFormat(), withTokens = true)
       .cleanDates()
 
     assertThat(fetchedUser)
@@ -437,7 +437,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid username`() {
-    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = " "))
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(userId = " "))
 
     assertThat { service.updateUser(updater, UserIdType.USERNAME) }
       .isFailure()
@@ -448,7 +448,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid email`() {
-    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = "invalid"))
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(userId = "invalid"))
 
     assertThat { service.updateUser(updater, UserIdType.EMAIL) }
       .isFailure()
@@ -459,7 +459,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid phone`() {
-    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = "invalid"))
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(userId = "invalid"))
 
     assertThat { service.updateUser(updater, UserIdType.PHONE) }
       .isFailure()
@@ -470,7 +470,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid custom user ID`() {
-    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = " "))
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(userId = " "))
 
     assertThat { service.updateUser(updater, UserIdType.CUSTOM) }
       .isFailure()
@@ -481,7 +481,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid random user ID`() {
-    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(id = " "))
+    val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(userId = " "))
 
     assertThat { service.updateUser(updater, UserIdType.RANDOM) }
       .isFailure()
@@ -685,7 +685,7 @@ class UserServiceImplTest {
     val storedUser = service.addUser(creator, UserIdType.RANDOM).cleanDates()
 
     val updater = Stubs.userUpdater.copy(
-      id = storedUser.userId,
+      id = storedUser.id,
       account = null,
     )
     val updatedUser = service.updateUser(updater, UserIdType.RANDOM).cleanDates()
@@ -693,7 +693,7 @@ class UserServiceImplTest {
     assertThat(updatedUser)
       .isDataClassEqualTo(
         Stubs.userUpdated.copy(
-          userId = storedUser.userId,
+          id = storedUser.id,
           verificationToken = TokenGenerator.nextPhoneToken,
           ownedTokens = emptyList(),
           account = null,
@@ -713,7 +713,7 @@ class UserServiceImplTest {
     val storedUser = service.addUser(creator, UserIdType.USERNAME).cleanDates()
 
     val updater = UserUpdater(
-      id = storedUser.userId,
+      id = storedUser.id,
       rawSignature = null,
       type = null,
       authority = null,
@@ -731,7 +731,7 @@ class UserServiceImplTest {
     assertThat(updatedUser)
       .isDataClassEqualTo(
         storedUser.copy(
-          userId = storedUser.userId,
+          id = storedUser.id,
           ownedTokens = emptyList(),
           name = null,
           contactType = ContactType.CUSTOM,
@@ -758,15 +758,15 @@ class UserServiceImplTest {
   }
 
   @Test fun `removing user works with a user ID`() {
-    val creator = Stubs.userCreator.copy(id = null)
+    val creator = Stubs.userCreator.copy(userId = null)
     val storedUser = service.addUser(creator, UserIdType.RANDOM)
 
     assertAll {
-      assertThat { service.fetchUserByUserId(storedUser.userId, withTokens = false) }
+      assertThat { service.fetchUserByUserId(storedUser.id, withTokens = false) }
         .isSuccess() // user is there
-      assertThat { service.removeUserById(storedUser.userId) }
+      assertThat { service.removeUserById(storedUser.id) }
         .isSuccess()
-      assertThat { service.fetchUserByUserId(storedUser.userId, withTokens = false) }
+      assertThat { service.fetchUserByUserId(storedUser.id, withTokens = false) }
         .isFailure() // user is not there anymore
     }
   }
@@ -777,15 +777,15 @@ class UserServiceImplTest {
   }
 
   @Test fun `removing user works with a universal user ID`() {
-    val creator = Stubs.userCreator.copy(id = null)
+    val creator = Stubs.userCreator.copy(userId = null)
     val storedUser = service.addUser(creator, UserIdType.RANDOM)
 
     assertAll {
-      assertThat { service.fetchUserByUniversalId(storedUser.userId.toUniversalFormat(), withTokens = false) }
+      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat(), withTokens = false) }
         .isSuccess() // user is there
-      assertThat { service.removeUserByUniversalId(storedUser.userId.toUniversalFormat()) }
+      assertThat { service.removeUserByUniversalId(storedUser.id.toUniversalFormat()) }
         .isSuccess()
-      assertThat { service.fetchUserByUniversalId(storedUser.userId.toUniversalFormat(), withTokens = false) }
+      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat(), withTokens = false) }
         .isFailure() // user is not there anymore
     }
   }
@@ -801,15 +801,15 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   @Test fun `removing users works with a project ID`() {
-    val creator = Stubs.userCreator.copy(id = null)
+    val creator = Stubs.userCreator.copy(userId = null)
     val storedUser = service.addUser(creator, UserIdType.RANDOM)
 
     assertAll {
-      assertThat(service.fetchAllUsersByProjectId(storedUser.userId.projectId).size)
+      assertThat(service.fetchAllUsersByProjectId(storedUser.id.projectId).size)
         .isGreaterThan(1) // at least admin and new users from this and other tests
-      assertThat { service.removeAllUsersByProjectId(storedUser.userId.projectId) }
+      assertThat { service.removeAllUsersByProjectId(storedUser.id.projectId) }
         .isSuccess()
-      assertThat(service.fetchAllUsersByProjectId(storedUser.userId.projectId))
+      assertThat(service.fetchAllUsersByProjectId(storedUser.id.projectId))
         .isEmpty()
     }
   }

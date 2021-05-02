@@ -31,7 +31,7 @@ class SpringSecurityUserManagerImpl(
     log.warn("Security: creating $user")
     val domainUser = user!!.toDomain(timeProvider).let {
       it.updateVerificationToken(
-        project = stubProject().copy(id = it.userId.projectId)
+        project = stubProject().copy(id = it.id.projectId)
       )
     }
     userDao.save(domainUser.toData())
@@ -61,8 +61,8 @@ class SpringSecurityUserManagerImpl(
   override fun updateUser(user: UserDetails?) {
     log.warn("Security: updating user $user")
     val domainUser = user!!.toDomain(timeProvider)
-    val fetchedUser = userDao.findById(domainUser.userId.toData()).get().toDomain()
-    val project = stubProject().copy(id = fetchedUser.userId.projectId)
+    val fetchedUser = userDao.findById(domainUser.id.toData()).get().toDomain()
+    val project = stubProject().copy(id = fetchedUser.id.projectId)
     val updatedUser = fetchedUser
       .updateFromSecurityUser(domainUser.toSecurityUser())
       .updateVerificationToken(project, oldUser = fetchedUser)
@@ -83,8 +83,8 @@ class SpringSecurityUserManagerImpl(
   override fun updatePassword(user: UserDetails?, newPassword: String?): UserDetails {
     log.warn("Security: updating password $user")
     val domainUser = user!!.toDomain(timeProvider).copy(signature = newPassword!!)
-    val fetchedUser = userDao.findById(domainUser.userId.toData()).get().toDomain()
-    val project = stubProject().copy(id = fetchedUser.userId.projectId)
+    val fetchedUser = userDao.findById(domainUser.id.toData()).get().toDomain()
+    val project = stubProject().copy(id = fetchedUser.id.projectId)
     val updatedUser = fetchedUser
       .updateFromSecurityUser(domainUser.toSecurityUser())
       .updateVerificationToken(project, oldUser = fetchedUser)
@@ -110,10 +110,10 @@ class SpringSecurityUserManagerImpl(
   }
 
   private fun User.hasEmailIdChanged(project: Project, oldUser: User? = null): Boolean =
-    project.userIdType == Project.UserIdType.EMAIL && oldUser?.userId?.id != userId.id
+    project.userIdType == Project.UserIdType.EMAIL && oldUser?.id?.userId != id.userId
 
   private fun User.hasPhoneIdChanged(project: Project, oldUser: User? = null): Boolean =
-    project.userIdType == Project.UserIdType.PHONE && oldUser?.userId?.id != userId.id
+    project.userIdType == Project.UserIdType.PHONE && oldUser?.id?.userId != id.userId
 
   private fun User.needsNewEmailToken(project: Project, oldUser: User? = null): Boolean {
     // check if contact ID changed

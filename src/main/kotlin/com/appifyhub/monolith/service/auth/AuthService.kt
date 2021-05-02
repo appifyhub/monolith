@@ -17,7 +17,7 @@ interface AuthService {
 
   @Throws fun resolveShallowUser(authData: Authentication, universalId: String): User
 
-  @Throws fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User
+  @Throws fun requestAccessFor(authData: Authentication, targetId: UserId, privilege: UserPrivilege): User
 
   @Throws fun resolveUser(universalId: String, signature: String): User
 
@@ -31,13 +31,13 @@ interface AuthService {
 
   @Throws fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<TokenDetails>
 
-  @Throws fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<TokenDetails>
+  @Throws fun fetchAllTokenDetailsFor(authData: Authentication, id: UserId, valid: Boolean?): List<TokenDetails>
 
   @Throws fun unauthorize(authData: Authentication)
 
   @Throws fun unauthorizeAll(authData: Authentication)
 
-  @Throws fun unauthorizeAllFor(authData: Authentication, userId: UserId)
+  @Throws fun unauthorizeAllFor(authData: Authentication, id: UserId)
 
   @Throws fun unauthorizeTokens(authData: Authentication, tokenValues: List<String>)
 

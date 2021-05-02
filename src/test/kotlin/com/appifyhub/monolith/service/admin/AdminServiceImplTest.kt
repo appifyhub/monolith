@@ -245,7 +245,7 @@ class AdminServiceImplTest {
       service.updateAccount(
         Stubs.accountUpdater.copy(
           addedOwners = Settable(listOf(
-            Stubs.user.copy(userId = UserId("\t\n", -1)),
+            Stubs.user.copy(id = UserId("\t\n", -1)),
           ))
         )
       )
@@ -262,7 +262,7 @@ class AdminServiceImplTest {
       service.updateAccount(
         Stubs.accountUpdater.copy(
           removedOwners = Settable(listOf(
-            Stubs.user.copy(userId = UserId("\t\n", -1)),
+            Stubs.user.copy(id = UserId("\t\n", -1)),
           ))
         )
       )
