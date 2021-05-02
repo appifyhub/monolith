@@ -94,8 +94,8 @@ class AdminServiceImpl(
     log.debug("Updating account $updater")
 
     Normalizers.AccountId.run(updater.id).requireValid { "Account ID" }
-    updater.addedOwners?.value?.forEach { Normalizers.UserId.run(it.userId).requireValid { "Added User ID" } }
-    updater.removedOwners?.value?.forEach { Normalizers.UserId.run(it.userId).requireValid { "Removed User ID" } }
+    updater.addedOwners?.value?.forEach { Normalizers.UserId.run(it.id).requireValid { "Added User ID" } }
+    updater.removedOwners?.value?.forEach { Normalizers.UserId.run(it.id).requireValid { "Removed User ID" } }
 
     return adminRepository.updateAccount(updater)
   }

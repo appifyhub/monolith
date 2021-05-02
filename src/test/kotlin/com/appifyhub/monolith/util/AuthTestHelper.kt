@@ -51,7 +51,7 @@ class AuthTestHelper {
   fun fetchLastTokenOf(user: User): TokenDetails =
     tokenDetailsRepo.fetchAllTokens(
       owner = user,
-      project = adminRepo.fetchProjectById(user.userId.projectId),
+      project = adminRepo.fetchProjectById(user.id.projectId),
     ).maxByOrNull { it.createdAt }!!
 
   fun fetchTokenDetailsFor(tokenValue: String): TokenDetails =
@@ -105,11 +105,11 @@ class AuthTestHelper {
     val exp = now + TimeUnit.DAYS.toMillis(expirationDaysDelta)
 
     val tokenValue = jwtHelper.createJwtForClaims(
-      subject = user.userId.toUniversalFormat(),
+      subject = user.id.toUniversalFormat(),
       claims = mutableMapOf(
-        Claims.USER_ID to user.userId.id,
-        Claims.PROJECT_ID to user.userId.projectId.toString(),
-        Claims.UNIVERSAL_ID to user.userId.toUniversalFormat(),
+        Claims.USER_ID to user.id.userId,
+        Claims.PROJECT_ID to user.id.projectId.toString(),
+        Claims.UNIVERSAL_ID to user.id.toUniversalFormat(),
         Claims.AUTHORITIES to user.allAuthorities.joinToString(",") { it.authority },
         Claims.ORIGIN to Stubs.userCredentialsRequest.origin!!,
         Claims.IS_STATIC to isStatic,
@@ -126,7 +126,7 @@ class AuthTestHelper {
         isBlocked = false,
         createdAt = Date(now),
         expiresAt = Date(exp),
-        ownerId = user.userId,
+        ownerId = user.id,
         authority = user.authority,
         origin = Stubs.userCredentialsRequest.origin!!,
         ipAddress = null,
@@ -145,7 +145,7 @@ class AuthTestHelper {
       else -> silent {
         userRepo.addUser(
           creator = Stubs.userCreator.copy(
-            id = "username_${authority.name.toLowerCase()}",
+            userId = "username_${authority.name.toLowerCase()}",
             projectId = adminProject.id,
             type = User.Type.PERSONAL,
             authority = authority,
@@ -153,7 +153,7 @@ class AuthTestHelper {
           userIdType = Project.UserIdType.USERNAME,
         )
       } ?: userRepo.fetchUserByUserId(
-        userId = UserId("username_${authority.name.toLowerCase()}", adminProject.id),
+        id = UserId("username_${authority.name.toLowerCase()}", adminProject.id),
         withTokens = false,
       )
     }

@@ -10,7 +10,7 @@ import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm
 
 fun UserDbm.toDomain(): User = User(
-  userId = userId.toDomain(),
+  id = id.toDomain(),
   signature = signature,
   name = name,
   type = User.Type.find(type, default = User.Type.PERSONAL),
@@ -30,8 +30,8 @@ fun UserDbm.toDomain(): User = User(
 fun User.toData(
   project: Project? = null,
 ): UserDbm = UserDbm(
-  userId = userId.toData(),
-  project = (project ?: stubProject().copy(id = userId.projectId)).toData(),
+  id = id.toData(),
+  project = (project ?: stubProject().copy(id = id.projectId)).toData(),
   signature = signature,
   name = name,
   type = type.name,
@@ -48,12 +48,12 @@ fun User.toData(
 )
 
 fun UserIdDbm.toDomain(): UserId = UserId(
-  id = identifier,
+  userId = userId,
   projectId = projectId,
 )
 
 fun UserId.toData(): UserIdDbm = UserIdDbm(
-  identifier = id,
+  userId = userId,
   projectId = projectId,
 )
 

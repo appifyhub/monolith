@@ -8,7 +8,7 @@ import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class UserCreatorRequest(
-  @JsonProperty("user_id") val id: String?,
+  @JsonProperty("user_id") val userId: String?,
   @JsonProperty("raw_signature") val rawSignature: String,
   @JsonProperty("name") val name: String?,
   @JsonProperty("type") val type: String?,

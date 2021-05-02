@@ -270,7 +270,7 @@ class AuthServiceImplTest {
     val user = authHelper.defaultUser
 
     assertThat {
-      service.resolveShallowUser(authData = moderatorToken, universalId = user.userId.toUniversalFormat())
+      service.resolveShallowUser(authData = moderatorToken, universalId = user.id.toUniversalFormat())
     }
       .isFailure()
       .all {
@@ -286,12 +286,12 @@ class AuthServiceImplTest {
     val token = authHelper.newRealToken(DEFAULT)
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = defaultUser.userId.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat())
         .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
-        userId = authHelper.defaultUser.userId,
+        id = authHelper.defaultUser.id,
         name = null,
         signature = "spring-asks-for-it",
         type = User.Type.PERSONAL,
@@ -317,12 +317,12 @@ class AuthServiceImplTest {
     val token = authHelper.newRealToken(OWNER)
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = owner.userId.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat())
         .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
-        userId = authHelper.ownerUser.userId,
+        id = authHelper.ownerUser.id,
         name = null,
         signature = "spring-asks-for-it",
         type = User.Type.PERSONAL,
@@ -349,7 +349,7 @@ class AuthServiceImplTest {
     assertThat {
       service.requestAccessFor(
         authData = authHelper.newRealToken(OWNER),
-        targetUserId = UserId("", authHelper.adminProject.id),
+        targetId = UserId("", authHelper.adminProject.id),
         privilege = UserPrivilege.READ,
       )
     }
@@ -367,7 +367,7 @@ class AuthServiceImplTest {
     assertThat {
       service.requestAccessFor(
         authData = token,
-        targetUserId = authHelper.ownerUser.userId,
+        targetId = authHelper.ownerUser.id,
         privilege = UserPrivilege.READ,
       )
     }
@@ -383,7 +383,7 @@ class AuthServiceImplTest {
     assertThat {
       service.requestAccessFor(
         authData = authHelper.newRealToken(DEFAULT),
-        targetUserId = authHelper.moderatorUser.userId,
+        targetId = authHelper.moderatorUser.id,
         privilege = UserPrivilege.READ,
       )
     }
@@ -398,7 +398,7 @@ class AuthServiceImplTest {
     assertThat {
       service.requestAccessFor(
         authData = authHelper.newRealToken(ADMIN),
-        targetUserId = authHelper.ownerUser.userId,
+        targetId = authHelper.ownerUser.id,
         privilege = UserPrivilege.WRITE,
       )
     }
@@ -413,7 +413,7 @@ class AuthServiceImplTest {
     assertThat(
       service.requestAccessFor(
         authData = authHelper.newRealToken(DEFAULT),
-        targetUserId = authHelper.defaultUser.userId,
+        targetId = authHelper.defaultUser.id,
         privilege = UserPrivilege.READ,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.defaultUser.cleanStubArtifacts())
@@ -423,7 +423,7 @@ class AuthServiceImplTest {
     assertThat(
       service.requestAccessFor(
         authData = authHelper.newRealToken(OWNER),
-        targetUserId = authHelper.ownerUser.userId,
+        targetId = authHelper.ownerUser.id,
         privilege = UserPrivilege.WRITE,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.ownerUser.cleanStubArtifacts())
@@ -433,7 +433,7 @@ class AuthServiceImplTest {
     assertThat(
       service.requestAccessFor(
         authData = authHelper.newRealToken(MODERATOR),
-        targetUserId = authHelper.defaultUser.userId,
+        targetId = authHelper.defaultUser.id,
         privilege = UserPrivilege.READ,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.defaultUser.cleanStubArtifacts())
@@ -443,7 +443,7 @@ class AuthServiceImplTest {
     assertThat(
       service.requestAccessFor(
         authData = authHelper.newRealToken(ADMIN),
-        targetUserId = authHelper.moderatorUser.userId,
+        targetId = authHelper.moderatorUser.id,
         privilege = UserPrivilege.WRITE,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.moderatorUser.cleanStubArtifacts())
@@ -474,7 +474,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth user fails with invalid signature`() {
     assertThat {
-      service.resolveUser(authHelper.ensureUser(DEFAULT).userId.toUniversalFormat(), "\n\t")
+      service.resolveUser(authHelper.ensureUser(DEFAULT).id.toUniversalFormat(), "\n\t")
     }
       .isFailure()
       .all {
@@ -486,7 +486,7 @@ class AuthServiceImplTest {
   @Test fun `auth user fails with wrong signature`() {
     assertThat {
       service.resolveUser(
-        universalId = authHelper.ensureUser(DEFAULT).userId.toUniversalFormat(),
+        universalId = authHelper.ensureUser(DEFAULT).id.toUniversalFormat(),
         signature = "pass",
       )
     }
@@ -500,7 +500,7 @@ class AuthServiceImplTest {
   @Test fun `auth user succeeds with correct signature`() {
     assertThat(
       service.resolveUser(
-        universalId = authHelper.ensureUser(MODERATOR).userId.toUniversalFormat(),
+        universalId = authHelper.ensureUser(MODERATOR).id.toUniversalFormat(),
         signature = "password",
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(
@@ -529,7 +529,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth admin fails with invalid signature`() {
     assertThat {
-      service.resolveAdmin(authHelper.ensureUser(ADMIN).userId.toUniversalFormat(), "\n\t")
+      service.resolveAdmin(authHelper.ensureUser(ADMIN).id.toUniversalFormat(), "\n\t")
     }
       .isFailure()
       .all {
@@ -541,7 +541,7 @@ class AuthServiceImplTest {
   @Test fun `auth admin fails with wrong signature`() {
     assertThat {
       service.resolveAdmin(
-        universalId = authHelper.ensureUser(ADMIN).userId.toUniversalFormat(),
+        universalId = authHelper.ensureUser(ADMIN).id.toUniversalFormat(),
         signature = "pass",
       )
     }
@@ -555,7 +555,7 @@ class AuthServiceImplTest {
   @Test fun `auth admin succeeds with correct signature`() {
     assertThat(
       service.resolveUser(
-        universalId = authHelper.ensureUser(ADMIN).userId.toUniversalFormat(),
+        universalId = authHelper.ensureUser(ADMIN).id.toUniversalFormat(),
         signature = "password",
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(
@@ -597,7 +597,7 @@ class AuthServiceImplTest {
         contains("Some Origin")
         contains("1.2.3.4")
         contains(DEFAULT.name)
-        contains(authHelper.defaultUser.userId.toUniversalFormat())
+        contains(authHelper.defaultUser.id.toUniversalFormat())
       }
   }
 
@@ -612,7 +612,7 @@ class AuthServiceImplTest {
         contains(MODERATOR.name)
         contains(ADMIN.name)
         contains(OWNER.name)
-        contains(authHelper.ownerUser.userId.toUniversalFormat())
+        contains(authHelper.ownerUser.id.toUniversalFormat())
       }
   }
 
@@ -664,7 +664,7 @@ class AuthServiceImplTest {
         contains(Stubs.userCredentialsRequest.origin!!)
         contains("1.2.3.4")
         contains(DEFAULT.name)
-        contains(authHelper.defaultUser.userId.toUniversalFormat())
+        contains(authHelper.defaultUser.id.toUniversalFormat())
       }
   }
 
@@ -697,7 +697,7 @@ class AuthServiceImplTest {
           isBlocked = false,
           origin = Stubs.userCredentialsRequest.origin,
           expiresAt = Date(timeProvider.currentMillis + Duration.ofDays(1).toMillis()),
-          ownerId = defaultUser.userId,
+          ownerId = defaultUser.id,
           authority = defaultUser.authority,
           ipAddress = null,
           geo = null,
@@ -737,7 +737,7 @@ class AuthServiceImplTest {
             isBlocked = false,
             origin = Stubs.userCredentialsRequest.origin,
             expiresAt = Date(timeProvider.currentMillis + Duration.ofDays(1).toMillis()),
-            ownerId = defaultUser.userId,
+            ownerId = defaultUser.id,
             authority = defaultUser.authority,
             ipAddress = null,
             geo = null,
@@ -753,7 +753,7 @@ class AuthServiceImplTest {
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.fetchAllTokenDetailsFor(token, valid = true, userId = authHelper.defaultUser.userId)
+      service.fetchAllTokenDetailsFor(token, valid = true, id = authHelper.defaultUser.id)
     }
       .isFailure()
       .all {
@@ -766,7 +766,7 @@ class AuthServiceImplTest {
     val token = authHelper.newRealToken(OWNER)
 
     assertThat {
-      service.fetchAllTokenDetailsFor(token, valid = true, userId = UserId("\t\n", -1))
+      service.fetchAllTokenDetailsFor(token, valid = true, id = UserId("\t\n", -1))
     }
       .isFailure()
       .all {
@@ -782,7 +782,7 @@ class AuthServiceImplTest {
     val ownerJwt = authHelper.newRealToken(OWNER)
 
     assertThat(
-      service.fetchAllTokenDetailsFor(ownerJwt, valid = true, userId = authHelper.defaultUser.userId)
+      service.fetchAllTokenDetailsFor(ownerJwt, valid = true, id = authHelper.defaultUser.id)
         .map { it.cleanStubArtifacts() }
     )
       .isEqualTo(
@@ -793,7 +793,7 @@ class AuthServiceImplTest {
             isBlocked = false,
             origin = Stubs.userCredentialsRequest.origin,
             expiresAt = Date(timeProvider.currentMillis + Duration.ofDays(1).toMillis()),
-            ownerId = defaultUser.userId,
+            ownerId = defaultUser.id,
             authority = defaultUser.authority,
             ipAddress = null,
             geo = null,
@@ -872,7 +872,7 @@ class AuthServiceImplTest {
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.unauthorizeAllFor(token, userId = authHelper.defaultUser.userId)
+      service.unauthorizeAllFor(token, id = authHelper.defaultUser.id)
     }
       .isFailure()
       .all {
@@ -885,7 +885,7 @@ class AuthServiceImplTest {
     val token = authHelper.newRealToken(DEFAULT)
 
     assertThat {
-      service.unauthorizeAllFor(token, userId = UserId("\t\n", -1))
+      service.unauthorizeAllFor(token, id = UserId("\t\n", -1))
     }
       .isFailure()
       .all {
@@ -901,7 +901,7 @@ class AuthServiceImplTest {
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorizeAllFor(tokenAdmin, userId = authHelper.defaultUser.userId) }
+      assertThat { service.unauthorizeAllFor(tokenAdmin, id = authHelper.defaultUser.id) }
         .isSuccess()
 
       // and then try to re-auth

@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.domain.user
 
 data class UserId(
-  val id: String,
+  val userId: String,
   val projectId: Long,
 ) {
 
@@ -12,10 +12,10 @@ data class UserId(
     fun fromUniversalFormat(universalId: String): UserId {
       val (userId, projectId) = universalId.split(UNIVERSAL_DELIMITER).let { it.first() to it.last() }
       if (userId.isBlank() || projectId.isBlank()) throw IllegalArgumentException("ID and Project ID can't be blank")
-      return UserId(id = userId.trim(), projectId = projectId.trim().toLong())
+      return UserId(userId = userId.trim(), projectId = projectId.trim().toLong())
     }
   }
 
-  fun toUniversalFormat() = "$id$UNIVERSAL_DELIMITER$projectId"
+  fun toUniversalFormat() = "$userId$UNIVERSAL_DELIMITER$projectId"
 
 }

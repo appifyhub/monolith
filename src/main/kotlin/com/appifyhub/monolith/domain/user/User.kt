@@ -6,7 +6,7 @@ import org.springframework.security.core.GrantedAuthority
 import java.util.Date
 
 data class User(
-  val userId: UserId,
+  val id: UserId,
   val signature: String,
   val name: String? = null,
   val type: Type = Type.PERSONAL,

@@ -30,10 +30,10 @@ class UserServiceImpl(
     log.debug("Adding user $creator")
 
     val normalizedId = when (userIdType) {
-      UserIdType.USERNAME -> Normalizers.Username.run(creator.id).requireValid { "Username ID" }
-      UserIdType.EMAIL -> Normalizers.Email.run(creator.id).requireValid { "Email ID" }
-      UserIdType.PHONE -> Normalizers.Phone.run(creator.id).requireValid { "Phone ID" }
-      UserIdType.CUSTOM -> Normalizers.CustomUserId.run(creator.id).requireValid { "User ID" }
+      UserIdType.USERNAME -> Normalizers.Username.run(creator.userId).requireValid { "Username ID" }
+      UserIdType.EMAIL -> Normalizers.Email.run(creator.userId).requireValid { "Email ID" }
+      UserIdType.PHONE -> Normalizers.Phone.run(creator.userId).requireValid { "Phone ID" }
+      UserIdType.CUSTOM -> Normalizers.CustomUserId.run(creator.userId).requireValid { "User ID" }
       UserIdType.RANDOM -> null
     }
     val normalizedRawSignature = Normalizers.RawSignature.run(creator.rawSignature).requireValid { "Signature" }
@@ -48,7 +48,7 @@ class UserServiceImpl(
     val normalizedBirthday = Normalizers.BDay.run(creator.birthday to timeProvider).requireValid { "Birthday" }?.first
 
     val normalizedCreator = UserCreator(
-      id = normalizedId,
+      userId = normalizedId,
       projectId = creator.projectId,
       rawSignature = normalizedRawSignature,
       name = normalizedName,
@@ -64,9 +64,9 @@ class UserServiceImpl(
     return userRepository.addUser(normalizedCreator, userIdType)
   }
 
-  override fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User {
-    log.debug("Fetching user by $userId")
-    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+  override fun fetchUserByUserId(id: UserId, withTokens: Boolean): User {
+    log.debug("Fetching user by $id")
+    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
     return userRepository.fetchUserByUserId(normalizedUserId, withTokens = withTokens)
   }
 
@@ -101,11 +101,11 @@ class UserServiceImpl(
 
     Normalizers.UserId.run(updater.id).requireValid { "User ID" }
     val normalizedUserId = when (userIdType) {
-      UserIdType.USERNAME -> Normalizers.Username.run(updater.id.id).requireValid { "Username ID" }
-      UserIdType.EMAIL -> Normalizers.Email.run(updater.id.id).requireValid { "Email ID" }
-      UserIdType.PHONE -> Normalizers.Phone.run(updater.id.id).requireValid { "Phone ID" }
-      UserIdType.CUSTOM -> Normalizers.CustomUserId.run(updater.id.id).requireValid { "User ID" }
-      UserIdType.RANDOM -> Normalizers.CustomUserId.run(updater.id.id).requireValid { "User ID" }
+      UserIdType.USERNAME -> Normalizers.Username.run(updater.id.userId).requireValid { "Username ID" }
+      UserIdType.EMAIL -> Normalizers.Email.run(updater.id.userId).requireValid { "Email ID" }
+      UserIdType.PHONE -> Normalizers.Phone.run(updater.id.userId).requireValid { "Phone ID" }
+      UserIdType.CUSTOM -> Normalizers.CustomUserId.run(updater.id.userId).requireValid { "User ID" }
+      UserIdType.RANDOM -> Normalizers.CustomUserId.run(updater.id.userId).requireValid { "User ID" }
     }
     val normalizedId = UserId(normalizedUserId, updater.id.projectId)
     val normalizedRawSignature = updater.rawSignature?.mapValueNonNull {
@@ -189,9 +189,9 @@ class UserServiceImpl(
     return userRepository.updateUser(normalizedUpdater, userIdType)
   }
 
-  override fun removeUserById(userId: UserId) {
-    log.debug("Removing user by $userId")
-    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+  override fun removeUserById(id: UserId) {
+    log.debug("Removing user by $id")
+    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
     return userRepository.removeUserById(normalizedUserId)
   }
 

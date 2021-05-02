@@ -35,13 +35,13 @@ class UserRepositoryImpl(
 
   override fun addUser(creator: UserCreator, userIdType: UserIdType): User {
     log.debug("Adding user by creator $creator")
-    if (creator.id == null && userIdType != UserIdType.RANDOM)
+    if (creator.userId == null && userIdType != UserIdType.RANDOM)
       throw IllegalArgumentException("Missing user ID for creator $creator")
-    if (creator.id != null && userIdType == UserIdType.RANDOM)
+    if (creator.userId != null && userIdType == UserIdType.RANDOM)
       throw IllegalArgumentException("Provided user ID instead of keeping random for creator $creator")
 
     val user = creator.toUser(
-      userId = creator.id ?: UserIdGenerator.nextId,
+      userId = creator.userId ?: UserIdGenerator.nextId,
       passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
     ).updateVerificationToken(userIdType)
@@ -49,9 +49,9 @@ class UserRepositoryImpl(
     return userDao.save(user.toData()).toDomain()
   }
 
-  override fun fetchUserByUserId(userId: UserId, withTokens: Boolean): User {
-    log.debug("Fetching user $userId")
-    return fetchUser(userId, withTokens)
+  override fun fetchUserByUserId(id: UserId, withTokens: Boolean): User {
+    log.debug("Fetching user $id")
+    return fetchUser(id, withTokens)
   }
 
   override fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User {
@@ -88,9 +88,9 @@ class UserRepositoryImpl(
     return userDao.save(updatedUser.toData()).toDomain()
   }
 
-  override fun removeUserById(userId: UserId) {
-    log.debug("Removing user $userId")
-    userDao.deleteById(userId.toData())
+  override fun removeUserById(id: UserId) {
+    log.debug("Removing user $id")
+    userDao.deleteById(id.toData())
   }
 
   override fun removeUserByUniversalId(universalId: String) {
@@ -107,10 +107,10 @@ class UserRepositoryImpl(
   // Helpers
 
   @Throws
-  private fun fetchUser(userId: UserId, withTokens: Boolean): User {
-    val user = userDao.findById(userId.toData()).get().toDomain()
+  private fun fetchUser(id: UserId, withTokens: Boolean): User {
+    val user = userDao.findById(id.toData()).get().toDomain()
     if (!withTokens) return user
-    val project = adminRepository.fetchProjectById(userId.projectId)
+    val project = adminRepository.fetchProjectById(id.projectId)
     val allTokenDetails = tokenDetailsRepository.fetchAllTokens(user, project)
     return user.copy(ownedTokens = allTokenDetails)
   }
@@ -122,10 +122,10 @@ class UserRepositoryImpl(
   }
 
   private fun User.hasEmailIdChanged(userIdType: UserIdType, oldUser: User? = null): Boolean =
-    userIdType == UserIdType.EMAIL && oldUser?.userId?.id != userId.id
+    userIdType == UserIdType.EMAIL && oldUser?.id?.userId != id.userId
 
   private fun User.hasPhoneIdChanged(userIdType: UserIdType, oldUser: User? = null): Boolean =
-    userIdType == UserIdType.PHONE && oldUser?.userId?.id != userId.id
+    userIdType == UserIdType.PHONE && oldUser?.id?.userId != id.userId
 
   private fun User.needsNewEmailToken(userIdType: UserIdType, oldUser: User? = null): Boolean {
     // check if contact ID changed

@@ -7,9 +7,9 @@ import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 
 fun User.toNetwork(): UserResponse = UserResponse(
-  userId = userId.id,
-  projectId = userId.projectId,
-  universalId = userId.toUniversalFormat(),
+  userId = id.userId,
+  projectId = id.projectId,
+  universalId = id.toUniversalFormat(),
   name = name,
   type = type.name,
   authority = authority.name,
