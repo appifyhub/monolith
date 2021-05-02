@@ -36,7 +36,7 @@ object Cleaners {
   val RawSignatureNullified = TrimNullified
   val UserId = cleansToNonNull<UserId>("UserId") {
     UserId(
-      id = RemoveSpaces.clean(it?.id),
+      userId = RemoveSpaces.clean(it?.userId),
       projectId = LongToCardinal.clean(it?.projectId),
     )
   }

@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails
 
 fun User.toSecurityUser(): UserDetails =
   org.springframework.security.core.userdetails.User.builder()
-    .username(userId.toUniversalFormat())
+    .username(id.toUniversalFormat())
     .password(signature)
     .authorities(*allAuthorities.toTypedArray())
     .accountLocked(verificationToken != null)
@@ -17,7 +17,7 @@ fun User.toSecurityUser(): UserDetails =
     .build()
 
 fun UserDetails.toDomain(timeProvider: TimeProvider): User = User(
-  userId = UserId.fromUniversalFormat(username ?: String.empty),
+  id = UserId.fromUniversalFormat(username ?: String.empty),
   signature = password ?: String.empty,
   name = null,
   type = User.Type.PERSONAL,

@@ -26,7 +26,6 @@ import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
 import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 import com.appifyhub.monolith.security.JwtClaims
-import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
@@ -65,7 +64,7 @@ object Stubs {
   val universalUserId = "username$2"
 
   val userId = UserId(
-    id = "username",
+    userId = "username",
     projectId = 2,
   )
 
@@ -92,7 +91,7 @@ object Stubs {
   )
 
   var user = User(
-    userId = userId,
+    id = userId,
     signature = "drowssap",
     name = "User's Name",
     type = User.Type.ORGANIZATION,
@@ -144,7 +143,7 @@ object Stubs {
   // region Data Models
 
   val userIdDbm = UserIdDbm(
-    identifier = "username",
+    userId = "username",
     projectId = 2,
   )
 
@@ -174,7 +173,7 @@ object Stubs {
   )
 
   val userDbm = UserDbm(
-    userId = userIdDbm,
+    id = userIdDbm,
     project = projectDbm,
     signature = "drowssap",
     name = "User's Name",
@@ -237,7 +236,7 @@ object Stubs {
   )
 
   var userUpdated = user.copy(
-    userId = user.userId,
+    id = user.id,
     signature = "1drowssap",
     name = "User's Name 1",
     type = User.Type.PERSONAL,
@@ -272,7 +271,7 @@ object Stubs {
   )
 
   val userUpdatedDbm = UserDbm(
-    userId = userIdDbm,
+    id = userIdDbm,
     project = projectDbm,
     signature = "1drowssap",
     name = "User's Name 1",
@@ -316,7 +315,7 @@ object Stubs {
   // region Auth Ops Models
 
   val tokenCreator = TokenCreator(
-    userId = userId,
+    id = userId,
     authority =User.Authority.ADMIN,
     isStatic = false,
     origin = "Token Origin",
@@ -326,7 +325,7 @@ object Stubs {
 
   val jwtClaims: JwtClaims = mapOf(
     Claims.VALUE to tokenValue,
-    Claims.USER_ID to userId.id,
+    Claims.USER_ID to userId.userId,
     Claims.PROJECT_ID to project.id,
     Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
     Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.createdAt.time).toInt(),
@@ -344,7 +343,7 @@ object Stubs {
   // region Domain Ops Models
 
   val userCreator = UserCreator(
-    id = "username",
+    userId = "username",
     projectId = project.id,
     rawSignature = "password",
     name = "User's Name",
@@ -415,7 +414,7 @@ object Stubs {
   )
 
   val userResponse = UserResponse(
-    userId = userId.id,
+    userId = userId.userId,
     projectId = userId.projectId,
     universalId = universalUserId,
     name = "User's Name",
@@ -436,7 +435,7 @@ object Stubs {
 
   val tokenDetailsResponse = TokenDetailsResponse(
     tokenValue = tokenValue,
-    ownerId = userId.id,
+    ownerId = userId.userId,
     ownerProjectId = userId.projectId,
     ownerUniversalId = universalUserId,
     createdAt = "2021-05-01 19:35",
@@ -466,7 +465,7 @@ object Stubs {
   // region Network Ops Models
 
   val userCreatorRequest = UserCreatorRequest(
-    id = "username",
+    userId = "username",
     rawSignature = "password",
     name = "User's Name",
     type = "ORGANIZATION",

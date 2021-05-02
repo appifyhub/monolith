@@ -19,7 +19,7 @@ import javax.persistence.TemporalType
 class UserDbm(
 
   @EmbeddedId
-  var userId: UserIdDbm,
+  var id: UserIdDbm,
 
   @MapsId("projectId")
   @JoinColumn(referencedColumnName = "projectId", nullable = false, updatable = false)
@@ -75,7 +75,7 @@ class UserDbm(
     if (this === other) return true
     if (other !is UserDbm) return false
 
-    if (userId != other.userId) return false
+    if (id != other.id) return false
     if (project != other.project) return false
     if (signature != other.signature) return false
     if (name != other.name) return false
@@ -95,7 +95,7 @@ class UserDbm(
   }
 
   override fun hashCode(): Int {
-    var result = userId.hashCode()
+    var result = id.hashCode()
     result = 31 * result + project.hashCode()
     result = 31 * result + signature.hashCode()
     result = 31 * result + (name?.hashCode() ?: 0)
@@ -115,7 +115,7 @@ class UserDbm(
 
   override fun toString(): String {
     return "UserDbm(" +
-      "userId=$userId, " +
+      "id=$id, " +
       "project=$project, " +
       "signature='$signature', " +
       "name=$name, " +

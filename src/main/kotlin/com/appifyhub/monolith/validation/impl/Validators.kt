@@ -50,7 +50,7 @@ object Validators {
   val Username = NoSpaces
   val RawSignature = NotBlank
   val RawSignatureNullable = NotBlankNullable
-  val UserId = validatesAs<UserId>("UserId") { NoSpaces.isValid(it?.id) && PositiveLong.isValid(it?.projectId) }
+  val UserId = validatesAs<UserId>("UserId") { NoSpaces.isValid(it?.userId) && PositiveLong.isValid(it?.projectId) }
 
   // Contact validators
 

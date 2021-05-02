@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test
 class UserOpsMapperTest {
 
   @Test fun `user updater network to domain`() {
-    val updater = Stubs.userUpdaterRequest.toDomain(userId = Stubs.userId)
+    val updater = Stubs.userUpdaterRequest.toDomain(id = Stubs.userId)
 
     assertThat(updater).isDataClassEqualTo(
       Stubs.userUpdater.copy(
@@ -31,7 +31,7 @@ class UserOpsMapperTest {
 
   @Test fun `user creator request network to domain with defaults`() {
     val creator = UserCreatorRequest(
-      id = null,
+      userId = null,
       rawSignature = "s",
       name = null,
       type = null,
@@ -45,7 +45,7 @@ class UserOpsMapperTest {
 
     assertThat(creator).isDataClassEqualTo(
       UserCreator(
-        id = null,
+        userId = null,
         projectId = Stubs.project.id,
         rawSignature = "s",
         name = null,

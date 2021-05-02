@@ -201,7 +201,7 @@ class UserOpsMapperTest {
 
   @Test fun `user creator to user (requesting new user ID)`() {
     val userCreator = UserCreator(
-      id = null,
+      userId = null,
       projectId = Stubs.project.id,
       rawSignature = "password",
       name = "User's Name",
@@ -233,7 +233,7 @@ class UserOpsMapperTest {
 
   @Test fun `user creator to user (existing user ID)`() {
     val userCreator = UserCreator(
-      id = "username",
+      userId = "username",
       projectId = Stubs.project.id,
       rawSignature = "password",
       name = "User's Name",
@@ -248,7 +248,7 @@ class UserOpsMapperTest {
 
     assertThat(
       userCreator.toUser(
-        userId = userCreator.id!!,
+        userId = userCreator.userId!!,
         passwordEncoder = PasswordEncoderFake(),
         timeProvider = TimeProviderFake(staticTime = { 10L }),
       )

@@ -33,7 +33,7 @@ class AdminUserController(
 
     return authService.requestAccessFor(
       authData = authentication,
-      targetUserId = UserId(userId, projectId),
+      targetId = UserId(userId, projectId),
       privilege = UserPrivilege.READ,
     ).toNetwork()
   }

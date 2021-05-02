@@ -85,7 +85,7 @@ class SchemaInitializer(
     var owner = userService.addUser(
       userIdType = project.userIdType,
       creator = UserCreator(
-        id = ownerEmail,
+        userId = ownerEmail,
         projectId = project.id,
         rawSignature = rawOwnerSignature,
         name = ownerName,
@@ -103,7 +103,7 @@ class SchemaInitializer(
     owner = userService.updateUser(
       userIdType = project.userIdType,
       updater = UserUpdater(
-        id = owner.userId,
+        id = owner.id,
         account = Settable(account),
         verificationToken = Settable(null),
       )
@@ -125,8 +125,8 @@ class SchemaInitializer(
         Project owner is '${owner.name} <${owner.contact}>'.
         
         Project ID     = ${project.id}
-        User ID        = '${owner.userId.id}'
-        Universal ID   = '${owner.userId.toUniversalFormat()}'
+        User ID        = '${owner.id.userId}'
+        Universal ID   = '${owner.id.toUniversalFormat()}'
         User Signature = '$printableOwnerSignature'
         
         [[ SECRET SECTION END ]]

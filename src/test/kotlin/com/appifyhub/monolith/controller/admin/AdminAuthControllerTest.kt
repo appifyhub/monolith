@@ -68,7 +68,7 @@ class AdminAuthControllerTest {
 
   @Test fun `auth admin fails with invalid credentials`() {
     val credentials = AdminCredentialsRequest(
-      universalId = authTestHelper.defaultUser.userId.toUniversalFormat(),
+      universalId = authTestHelper.defaultUser.id.toUniversalFormat(),
       secret = "invalid",
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -87,7 +87,7 @@ class AdminAuthControllerTest {
 
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = AdminCredentialsRequest(
-      universalId = authTestHelper.adminUser.userId.toUniversalFormat(),
+      universalId = authTestHelper.adminUser.id.toUniversalFormat(),
       secret = Stubs.userCredentialsRequest.secret,
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -106,7 +106,7 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `get any user tokens fails when unauthorized`() {
-    val userId = authTestHelper.adminUser.userId
+    val userId = authTestHelper.adminUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -115,7 +115,7 @@ class AdminAuthControllerTest {
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
-          "userId" to userId.id,
+          "userId" to userId.userId,
         ),
       )
     ).all {
@@ -133,8 +133,8 @@ class AdminAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
-          "projectId" to user.userId.projectId,
-          "userId" to user.userId.id,
+          "projectId" to user.id.projectId,
+          "userId" to user.id.userId,
         ),
       )
     ).all {
@@ -157,8 +157,8 @@ class AdminAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(adminToken),
         uriVariables = mapOf(
-          "projectId" to user.userId.projectId,
-          "userId" to user.userId.id,
+          "projectId" to user.id.projectId,
+          "userId" to user.id.userId,
         ),
       )
     ).all {
@@ -170,7 +170,7 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `unauth any user tokens fails when unauthorized`() {
-    val userId = authTestHelper.adminUser.userId
+    val userId = authTestHelper.adminUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -179,7 +179,7 @@ class AdminAuthControllerTest {
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
-          "userId" to userId.id,
+          "userId" to userId.userId,
         ),
       )
     ).all {
@@ -201,8 +201,8 @@ class AdminAuthControllerTest {
           method = HttpMethod.DELETE,
           requestEntity = bearerEmptyRequest(token1),
           uriVariables = mapOf(
-            "projectId" to user.userId.projectId,
-            "userId" to user.userId.id,
+            "projectId" to user.id.projectId,
+            "userId" to user.id.userId,
           ),
         )
       ).all {
@@ -230,8 +230,8 @@ class AdminAuthControllerTest {
           method = HttpMethod.DELETE,
           requestEntity = bearerEmptyRequest(adminToken),
           uriVariables = mapOf(
-            "projectId" to user.userId.projectId,
-            "userId" to user.userId.id,
+            "projectId" to user.id.projectId,
+            "userId" to user.id.userId,
           ),
         )
       ).all {

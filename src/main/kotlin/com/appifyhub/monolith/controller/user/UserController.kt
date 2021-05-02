@@ -39,7 +39,7 @@ class UserController(
     )
 
     // fetch non-shallow data
-    val user = userService.fetchUserByUserId(shallowUser.userId, withTokens = true)
+    val user = userService.fetchUserByUserId(shallowUser.id, withTokens = true)
     return user.toNetwork()
   }
 

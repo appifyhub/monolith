@@ -57,7 +57,7 @@ class AuthServiceImpl(
     val token = authData.requireValidJwt(shallow)
     val shallowUser = authRepository.resolveShallowUser(token)
     val userAccountId = shallowUser.account?.id ?: -1
-    val projectAccountId = adminService.fetchProjectById(shallowUser.userId.projectId).account.id
+    val projectAccountId = adminService.fetchProjectById(shallowUser.id.projectId).account.id
 
     projectAccountId == userAccountId
   } catch (t: Throwable) {
@@ -78,26 +78,26 @@ class AuthServiceImpl(
     val token = authData.requireValidJwt(shallow = false)
     val shallowUser = authRepository.resolveShallowUser(token)
 
-    if (normalizedUserId != shallowUser.userId) throwUnauthorized { "User ID and auth data mismatch" }
+    if (normalizedUserId != shallowUser.id) throwUnauthorized { "User ID and auth data mismatch" }
 
     return shallowUser
   }
 
-  override fun requestAccessFor(authData: Authentication, targetUserId: UserId, privilege: UserPrivilege): User {
-    log.debug("Authentication $authData requesting '${privilege.name}' access to $targetUserId")
-    adminService.fetchProjectById(targetUserId.projectId) // sanity check
+  override fun requestAccessFor(authData: Authentication, targetId: UserId, privilege: UserPrivilege): User {
+    log.debug("Authentication $authData requesting '${privilege.name}' access to $targetId")
+    adminService.fetchProjectById(targetId.projectId) // sanity check
 
-    val normalizedUserId = Normalizers.UserId.run(targetUserId).requireValid { "User ID" }
+    val normalizedUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
     val token = authData.requireValidJwt(shallow = false)
 
     // quick check to prevent unnecessary queries
     val shallowRequester = authRepository.resolveShallowUser(token)
-    val isSelf = shallowRequester.userId == normalizedUserId
+    val isSelf = shallowRequester.id == normalizedUserId
     val isPrivilegedShallow = shallowRequester.isAuthorizedFor(privilege.level)
     require(isSelf || isPrivilegedShallow) { "Only ${privilege.level.groupName} are authorized" }
 
     // fetch non-shallow data for requester
-    val requester = userService.fetchUserByUserId(shallowRequester.userId, withTokens = false)
+    val requester = userService.fetchUserByUserId(shallowRequester.id, withTokens = false)
     if (isSelf) return requester
 
     // check minimum authorization level, as creds might have changed
@@ -132,7 +132,7 @@ class AuthServiceImpl(
     val project = adminService.getAdminProject()
     val user = fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
 
-    if (user.userId.projectId != project.id) throwUnauthorized { "Project ID" }
+    if (user.id.projectId != project.id) throwUnauthorized { "Project ID" }
 
     return user
   }
@@ -144,7 +144,7 @@ class AuthServiceImpl(
     val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
 
     return authRepository.createToken(TokenCreator(
-      userId = user.userId,
+      id = user.id,
       authority = user.authority,
       isStatic = false,
       origin = normalizedOrigin,
@@ -167,7 +167,7 @@ class AuthServiceImpl(
 
     // create a new token for this user
     return authRepository.createToken(TokenCreator(
-      userId = tokenDetails.ownerId,
+      id = tokenDetails.ownerId,
       authority = tokenDetails.authority,
       isStatic = tokenDetails.isStatic,
       origin = tokenDetails.origin,
@@ -188,10 +188,10 @@ class AuthServiceImpl(
     return authRepository.fetchAllTokenDetails(token, valid)
   }
 
-  override fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<TokenDetails> {
-    log.debug("Fetching all token details for user $userId [valid $valid]")
+  override fun fetchAllTokenDetailsFor(authData: Authentication, id: UserId, valid: Boolean?): List<TokenDetails> {
+    log.debug("Fetching all token details for user $id [valid $valid]")
 
-    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
     authData.requireValidJwt(shallow = false)
 
     return authRepository.fetchAllTokenDetailsFor(normalizedUserId, valid)
@@ -209,10 +209,10 @@ class AuthServiceImpl(
     authRepository.unauthorizeAllTokens(token)
   }
 
-  override fun unauthorizeAllFor(authData: Authentication, userId: UserId) {
-    log.debug("Unauthorizing all access for $userId")
+  override fun unauthorizeAllFor(authData: Authentication, id: UserId) {
+    log.debug("Unauthorizing all access for $id")
 
-    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
     authData.requireValidJwt(shallow = false)
 
     authRepository.unauthorizeAllTokensFor(normalizedUserId)
@@ -233,12 +233,12 @@ class AuthServiceImpl(
 
   @Throws
   private fun fetchUserByCredentials(
-    userId: UserId,
+    id: UserId,
     signature: String,
   ): User {
-    val user = userService.fetchUserByUserId(userId, withTokens = false)
+    val user = userService.fetchUserByUserId(id, withTokens = false)
     if (!passwordEncoder.matches(signature, user.signature)) {
-      log.warn("Password mismatch for $userId")
+      log.warn("Password mismatch for $id")
       throw IllegalArgumentException("Invalid credentials")
     }
     return user

@@ -94,7 +94,7 @@ class SchemaInitializerTest {
       owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
     )
     val user = Stubs.user.copy(
-      userId = UserId(Stubs.user.contact!!, project.id),
+      id = UserId(Stubs.user.contact!!, project.id),
       ownedTokens = emptyList(),
     )
 
@@ -123,7 +123,7 @@ class SchemaInitializerTest {
     verify(userService).addUser(
       userIdType = project.userIdType,
       creator = UserCreator(
-        id = user.contact,
+        userId = user.contact,
         projectId = project.id,
         rawSignature = "root sig",
         name = user.name,
@@ -155,7 +155,7 @@ class SchemaInitializerTest {
       owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
     )
     val user = Stubs.user.copy(
-      userId = UserId(Stubs.user.contact!!, project.id),
+      id = UserId(Stubs.user.contact!!, project.id),
       ownedTokens = emptyList(),
     )
 
@@ -186,7 +186,7 @@ class SchemaInitializerTest {
     verify(userService).addUser(
       userIdType = project.userIdType,
       creator = UserCreator(
-        id = user.contact,
+        userId = user.contact,
         projectId = project.id,
         rawSignature = "generated sig",
         name = user.name,

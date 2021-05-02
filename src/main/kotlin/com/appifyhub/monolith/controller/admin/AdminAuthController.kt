@@ -63,10 +63,10 @@ class AdminAuthController(
     val authUser = authService.resolveShallowSelf(authentication)
     val targetUser = authService.requestAccessFor(authentication, UserId(userId, projectId), UserPrivilege.READ)
 
-    val tokens = if (targetUser.userId == authUser.userId) {
+    val tokens = if (targetUser.id == authUser.id) {
       authService.fetchAllTokenDetails(authentication, valid) // for self only
     } else {
-      authService.fetchAllTokenDetailsFor(authentication, targetUser.userId, valid)
+      authService.fetchAllTokenDetailsFor(authentication, targetUser.id, valid)
     }
 
     return tokens.map(TokenDetails::toNetwork)
@@ -83,10 +83,10 @@ class AdminAuthController(
     val authUser = authService.resolveShallowSelf(authentication)
     val targetUser = authService.requestAccessFor(authentication, UserId(userId, projectId), UserPrivilege.WRITE)
 
-    if (targetUser.userId == authUser.userId) {
+    if (targetUser.id == authUser.id) {
       authService.unauthorizeAll(authentication) // for self only
     } else {
-      authService.unauthorizeAllFor(authentication, targetUser.userId)
+      authService.unauthorizeAllFor(authentication, targetUser.id)
     }
 
     return MessageResponse.DONE

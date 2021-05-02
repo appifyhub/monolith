@@ -35,7 +35,7 @@ fun TokenDetails.toData(
 ): TokenDetailsDbm = TokenDetailsDbm(
   tokenValue = tokenValue,
   blocked = isBlocked,
-  owner = owner?.toData(project) ?: stubUser().copy(userId = ownerId).toData(project),
+  owner = owner?.toData(project) ?: stubUser().copy(id = ownerId).toData(project),
 )
 
 fun JwtClaims.toTokenDetails(

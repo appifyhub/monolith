@@ -36,7 +36,7 @@ class AdminMapperTest {
 
   @Test fun `account updater to account (added owners)`() {
     val newOwner = Stubs.user.copy(
-      userId = Stubs.userId.copy(id = "u1"),
+      id = Stubs.userId.copy(userId = "u1"),
     )
     val accountUpdater = AccountUpdater(
       id = Stubs.account.id,
@@ -79,7 +79,7 @@ class AdminMapperTest {
 
   @Test fun `account updater to account (added and removed owners)`() {
     val newOwner = Stubs.user.copy(
-      userId = Stubs.userId.copy(id = "u1"),
+      id = Stubs.userId.copy(userId = "u1"),
     )
     val accountUpdater = AccountUpdater(
       id = Stubs.account.id,

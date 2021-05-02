@@ -56,7 +56,7 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user fails when unauthorized`() {
-    val userId = authTestHelper.defaultUser.userId
+    val userId = authTestHelper.defaultUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -65,7 +65,7 @@ class AdminUserControllerTest {
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
-          "userId" to userId.id,
+          "userId" to userId.userId,
         ),
       )
     ).all {
@@ -83,16 +83,16 @@ class AdminUserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
-          "projectId" to user.userId.projectId,
-          "userId" to user.userId.id,
+          "projectId" to user.id.projectId,
+          "userId" to user.id.userId,
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         Stubs.userResponse.copy(
-          userId = user.userId.id,
-          universalId = user.userId.toUniversalFormat(),
+          userId = user.id.userId,
+          universalId = user.id.toUniversalFormat(),
           type = user.type.name,
           authority = user.authority.name,
           birthday = DateTimeMapper.formatAsDate(user.birthday!!),
@@ -113,16 +113,16 @@ class AdminUserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
-          "projectId" to user.userId.projectId,
-          "userId" to user.userId.id,
+          "projectId" to user.id.projectId,
+          "userId" to user.id.userId,
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         Stubs.userResponse.copy(
-          userId = user.userId.id,
-          universalId = user.userId.toUniversalFormat(),
+          userId = user.id.userId,
+          universalId = user.id.toUniversalFormat(),
           type = user.type.name,
           authority = user.authority.name,
           birthday = DateTimeMapper.formatAsDate(user.birthday!!),

@@ -26,7 +26,7 @@ fun stubProject() = Project(
 )
 
 fun stubUserId() = UserId(
-  id = "id",
+  userId = "id",
   projectId = -1,
 )
 
@@ -39,7 +39,7 @@ fun stubOrganization() = Organization(
 )
 
 fun stubUser() = User(
-  userId = stubUserId(),
+  id = stubUserId(),
   signature = "signature",
   name = "name",
   type = User.Type.PERSONAL,
