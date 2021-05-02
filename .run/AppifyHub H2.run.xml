@@ -4,6 +4,13 @@
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.appifyhub.monolith.AppifyHubApplication" />
     <option name="ACTIVE_PROFILES" value="h2" />
     <option name="ALTERNATIVE_JRE_PATH" />
+    <additionalParameters>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="SEED_OWNER_SECRET" />
+        <option name="value" value="12345678!!!!!!!!abcdefgh" />
+      </param>
+    </additionalParameters>
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
