@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.domain.user
 
 import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.auth.OwnedToken
+import com.appifyhub.monolith.domain.auth.TokenDetails
 import org.springframework.security.core.GrantedAuthority
 import java.util.Date
 
@@ -19,7 +19,7 @@ data class User(
   val createdAt: Date,
   val updatedAt: Date = createdAt,
   val company: Organization? = null,
-  val ownedTokens: List<OwnedToken> = emptyList(),
+  val ownedTokens: List<TokenDetails> = emptyList(),
   val account: Account? = null,
 ) {
 
@@ -66,9 +66,12 @@ data class User(
     // OWNER -> gods
     val nextGroupName: String by lazy { values().getOrNull(ordinal + 1)?.groupName ?: "gods" }
 
+    // MODERATOR -> [DEFAULT, MODERATOR]
+    val allAuthorities: List<Authority> by lazy { values().takeWhile { it.ordinal <= this.ordinal } }
+
   }
 
-  val allAuthorities = Authority.values().takeWhile { it.ordinal <= authority.ordinal }
+  val allAuthorities = authority.allAuthorities
 
   fun isAuthorizedFor(authority: Authority) = this.authority.ordinal >= authority.ordinal
 

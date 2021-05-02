@@ -19,7 +19,11 @@ object Validators {
   private const val AGE_MAX = 100L
   private const val AGE_MIN = 10L
 
+  // @formatter:off
   private val REGEX_EMAIL = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,10}$", CASE_INSENSITIVE)
+  private val REGEX_IP_4 = Pattern.compile("^((0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)\\.){3}(0|1\\d?\\d?|2[0-4]?\\d?|25[0-5]?|[3-9]\\d?)$")
+  private val REGEX_IP_6 = Pattern.compile("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")
+  // @formatter:on
 
   private val phoneNumberUtil = PhoneNumberUtil.getInstance()
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -88,6 +92,11 @@ object Validators {
   // Other validators
 
   val Origin = NotBlankNullable
+
+  val IpAddress = validatesAs<String>("IpAddress") {
+    if (it == null) return@validatesAs true
+    NotBlank.isValid(it) && (REGEX_IP_4.matcher(it).matches() || REGEX_IP_6.matcher(it).matches())
+  }
 
   val BDay = validatesAs<BDay>("BDay") validator@{
     val rawBirthday = it?.first ?: return@validator true

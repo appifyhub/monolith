@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.service.auth
 
-import com.appifyhub.monolith.domain.auth.OwnedToken
+import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
@@ -23,15 +23,15 @@ interface AuthService {
 
   @Throws fun resolveAdmin(universalId: String, signature: String): User
 
-  @Throws fun createTokenFor(user: User, origin: String?): String
+  @Throws fun createTokenFor(user: User, origin: String?, ipAddress: String?): String
 
-  @Throws fun refreshAuth(authData: Authentication): String
+  @Throws fun refreshAuth(authData: Authentication, ipAddress: String?): String
 
-  @Throws fun fetchTokenDetails(authData: Authentication): OwnedToken
+  @Throws fun fetchTokenDetails(authData: Authentication): TokenDetails
 
-  @Throws fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<OwnedToken>
+  @Throws fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<TokenDetails>
 
-  @Throws fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<OwnedToken>
+  @Throws fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<TokenDetails>
 
   @Throws fun unauthorize(authData: Authentication)
 
@@ -39,6 +39,6 @@ interface AuthService {
 
   @Throws fun unauthorizeAllFor(authData: Authentication, userId: UserId)
 
-  @Throws fun unauthorizeTokens(authData: Authentication, tokenLocators: List<String>)
+  @Throws fun unauthorizeTokens(authData: Authentication, tokenValues: List<String>)
 
 }

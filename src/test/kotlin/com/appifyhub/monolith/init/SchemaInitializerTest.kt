@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.SignatureGenerator
@@ -85,13 +86,25 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed uses config signature if present`() {
+    val project = Stubs.project.copy(
+      userIdType = Project.UserIdType.EMAIL,
+      type = Project.Type.FREE,
+    )
+    val account = Stubs.account.copy(
+      owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
+    )
+    val user = Stubs.user.copy(
+      userId = UserId(Stubs.user.contact!!, project.id),
+      ownedTokens = emptyList(),
+    )
+
     adminService.stub {
-      on { addAccount() } doReturn Stubs.account
-      on { addProject(any()) } doReturn Stubs.project
+      on { addAccount() } doReturn account
+      on { addProject(any()) } doReturn project
     }
     userService.stub {
-      on { addUser(any(), any()) } doReturn Stubs.user
-      on { updateUser(any(), any()) } doReturn Stubs.user
+      on { addUser(any(), any()) } doReturn user
+      on { updateUser(any(), any()) } doReturn user
     }
 
     assertThat { runInitializer(rootOwnerSignature = "root sig") }
@@ -100,47 +113,61 @@ class SchemaInitializerTest {
     verify(adminService).addAccount()
     verify(adminService).addProject(
       ProjectCreator(
-        account = Stubs.account,
-        name = Stubs.project.name,
-        type = Project.Type.FREE,
-        status = Project.Status.ACTIVE,
-        userIdType = Project.UserIdType.RANDOM,
+        account = account,
+        name = project.name,
+        type = project.type,
+        status = project.status,
+        userIdType = project.userIdType,
       )
     )
     verify(userService).addUser(
-      userIdType = Stubs.project.userIdType,
+      userIdType = project.userIdType,
       creator = UserCreator(
-        id = null,
-        projectId = Stubs.project.id,
+        id = user.contact,
+        projectId = project.id,
         rawSignature = "root sig",
-        name = Stubs.user.name,
+        name = user.name,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
         allowsSpam = true,
-        contact = Stubs.user.contact,
+        contact = user.contact,
         contactType = User.ContactType.EMAIL,
         birthday = null,
         company = null,
       )
     )
     verify(userService).updateUser(
-      userIdType = Stubs.project.userIdType,
+      userIdType = project.userIdType,
       updater = UserUpdater(
-        id = Stubs.userId,
-        account = Settable(Stubs.account),
+        id = UserId(user.contact!!, project.id),
+        verificationToken = Settable(null),
+        account = Settable(account),
       )
     )
   }
 
   @Test fun `initial seed generates a new signature if configured signature is blank`() {
+    val project = Stubs.project.copy(
+      userIdType = Project.UserIdType.EMAIL,
+      type = Project.Type.FREE,
+    )
+    val account = Stubs.account.copy(
+      owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
+    )
+    val user = Stubs.user.copy(
+      userId = UserId(Stubs.user.contact!!, project.id),
+      ownedTokens = emptyList(),
+    )
+
     adminService.stub {
-      on { addAccount() } doReturn Stubs.account
-      on { addProject(any()) } doReturn Stubs.project
+      on { addAccount() } doReturn account
+      on { addProject(any()) } doReturn project
     }
     userService.stub {
-      on { addUser(any(), any()) } doReturn Stubs.user
-      on { updateUser(any(), any()) } doReturn Stubs.user
+      on { addUser(any(), any()) } doReturn user
+      on { updateUser(any(), any()) } doReturn user
     }
+
     SignatureGenerator.interceptor = { "generated sig" }
 
     assertThat { runInitializer(rootOwnerSignature = " \t\n ") }
@@ -149,34 +176,35 @@ class SchemaInitializerTest {
     verify(adminService).addAccount()
     verify(adminService).addProject(
       ProjectCreator(
-        account = Stubs.account,
-        name = Stubs.project.name,
-        type = Project.Type.FREE,
-        status = Project.Status.ACTIVE,
-        userIdType = Project.UserIdType.RANDOM,
+        account = account,
+        name = project.name,
+        type = project.type,
+        status = project.status,
+        userIdType = project.userIdType,
       )
     )
     verify(userService).addUser(
-      userIdType = Stubs.project.userIdType,
+      userIdType = project.userIdType,
       creator = UserCreator(
-        id = null,
-        projectId = Stubs.project.id,
+        id = user.contact,
+        projectId = project.id,
         rawSignature = "generated sig",
-        name = Stubs.user.name,
+        name = user.name,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
         allowsSpam = true,
-        contact = Stubs.user.contact,
+        contact = user.contact,
         contactType = User.ContactType.EMAIL,
         birthday = null,
         company = null,
       )
     )
     verify(userService).updateUser(
-      userIdType = Stubs.project.userIdType,
+      userIdType = project.userIdType,
       updater = UserUpdater(
-        id = Stubs.userId,
-        account = Settable(Stubs.account),
+        id = UserId(user.contact!!, project.id),
+        verificationToken = Settable(null),
+        account = Settable(account),
       )
     )
   }

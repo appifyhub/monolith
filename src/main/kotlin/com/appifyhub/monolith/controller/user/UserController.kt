@@ -20,7 +20,7 @@ class UserController(
   object Endpoints {
     const val ONE_USER = "/v1/universal/users/{universalId}"
 
-    const val ANY_USER = "/v1/projects/{projectId}/users/{id}"
+    const val ANY_USER = "/v1/projects/{projectId}/users/{userId}"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)

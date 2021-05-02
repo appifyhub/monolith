@@ -71,21 +71,22 @@ class SchemaInitializer(
     val account = adminService.addAccount()
 
     // create the root project
-    val rawProject = adminService.addProject(
+    val project = adminService.addProject(
       ProjectCreator(
         account = account,
         name = rootProjectName,
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
+        userIdType = Project.UserIdType.EMAIL,
       )
     )
 
     // create the owner's user in the root project
     var owner = userService.addUser(
-      userIdType = rawProject.userIdType,
+      userIdType = project.userIdType,
       creator = UserCreator(
-        id = null,
-        projectId = rawProject.id,
+        id = ownerEmail,
+        projectId = project.id,
         rawSignature = rawOwnerSignature,
         name = ownerName,
         type = User.Type.ORGANIZATION,
@@ -100,10 +101,11 @@ class SchemaInitializer(
 
     // make root user own the root account
     owner = userService.updateUser(
-      userIdType = rawProject.userIdType,
+      userIdType = project.userIdType,
       updater = UserUpdater(
         id = owner.userId,
         account = Settable(account),
+        verificationToken = Settable(null),
       )
     )
 
@@ -116,17 +118,19 @@ class SchemaInitializer(
     log.info(
       """
         (see below)
+        
         [[ SECRET SECTION START: PRINTED ONLY ONCE ]]
         
-        Admin project '${rawProject.name}' is now set up. 
+        Admin project '${project.name}' is now set up. 
         Project owner is '${owner.name} <${owner.contact}>'.
         
-        Project ID     = ${rawProject.id}
+        Project ID     = ${project.id}
         User ID        = '${owner.userId.id}'
         Universal ID   = '${owner.userId.toUniversalFormat()}'
         User Signature = '$printableOwnerSignature'
         
         [[ SECRET SECTION END ]]
+        
       """.trimIndent()
     )
   }

@@ -1,11 +1,13 @@
 package com.appifyhub.monolith.controller.auth
 
-import com.appifyhub.monolith.domain.auth.OwnedToken
+import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
+import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
+import com.appifyhub.monolith.network.mapper.tokenResponseOf
 import com.appifyhub.monolith.service.auth.AuthService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -20,15 +22,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class UserAuthController(
   private val authService: AuthService,
-) {
+) : RequestIpAddressHolder {
 
   object Endpoints {
     const val AUTH = "/v1/universal/auth"
     const val TOKENS = "/v1/universal/auth/tokens"
 
     const val ADMIN_AUTH = "/v1/admin/auth"
-    const val ANY_USER_AUTH = "/v1/projects/{projectId}/users/{id}/auth"
-    const val ANY_USER_TOKENS = "/v1/projects/{projectId}/users/{id}/auth/tokens"
+    const val ANY_USER_AUTH = "/v1/projects/{projectId}/users/{userId}/auth"
+    const val ANY_USER_TOKENS = "/v1/projects/{projectId}/users/{userId}/auth/tokens"
   }
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -40,9 +42,9 @@ class UserAuthController(
     log.debug("[POST] auth user with $creds")
 
     val user = authService.resolveUser(creds.universalId, creds.secret)
-    val token = authService.createTokenFor(user, creds.origin)
+    val tokenValue = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
 
-    return TokenResponse(token)
+    return tokenResponseOf(tokenValue)
   }
 
   @GetMapping(Endpoints.AUTH)
@@ -61,14 +63,14 @@ class UserAuthController(
   ): List<TokenDetailsResponse> {
     log.debug("[GET] get all tokens, [valid $valid]")
     val tokens = authService.fetchAllTokenDetails(authentication, valid)
-    return tokens.map(OwnedToken::toNetwork)
+    return tokens.map(TokenDetails::toNetwork)
   }
 
   @PutMapping(Endpoints.AUTH)
   fun refreshUser(authentication: Authentication): TokenResponse {
     log.debug("[PUT] refresh user with $authentication")
-    val token = authService.refreshAuth(authentication)
-    return TokenResponse(token)
+    val tokenValue = authService.refreshAuth(authentication, getRequestIpAddress())
+    return tokenResponseOf(tokenValue)
   }
 
   @DeleteMapping(Endpoints.AUTH)

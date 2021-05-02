@@ -90,6 +90,8 @@ object Cleaners {
 
   val Origin = TrimNullable
 
+  val IpAddress = RemoveSpacesNullable
+
   val BDay = cleansToNullable<BDay>("BDay") { it }
 
 }

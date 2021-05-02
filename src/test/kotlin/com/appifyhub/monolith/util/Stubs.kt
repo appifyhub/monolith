@@ -5,10 +5,9 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
-import com.appifyhub.monolith.domain.auth.OwnedToken
-import com.appifyhub.monolith.domain.auth.Token
+import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.common.stubUser
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
@@ -26,35 +25,38 @@ import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
 import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
-import com.appifyhub.monolith.repository.auth.locator.TokenLocator
+import com.appifyhub.monolith.security.JwtClaims
+import com.appifyhub.monolith.security.JwtHelper
+import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
-import com.appifyhub.monolith.storage.model.auth.OwnedTokenDbm
-import com.appifyhub.monolith.storage.model.auth.TokenDbm
+import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 @Suppress("MemberVisibilityCanBePrivate", "unused", "MayBeConstant")
 object Stubs {
 
   // region Auth Models
 
+  // signed with debug key, will expire in 2026
   @Suppress("SpellCheckingInspection")
-  val tokenLocatorEncoded = "MiQjVExQSSMkZFhObGNtNWhiV1U9JCNUTFBJIyRWRzlyWlc0Z1QzSnBaMmx1JCNUTFBJIyQw"
-
-  val token = Token(tokenLocator = tokenLocatorEncoded)
-
-  val tokenLocator = TokenLocator(
-    userId = UserId(
-      id = "username",
-      projectId = 2,
-    ),
-    origin = "Token Origin",
-    timestamp = 0,
-  )
+  val tokenValue = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9." +
+    "eyJnZW8iOiJnZW8iLCJzdWIiOiJ1c2VybmFtZSQyIiwidXNlcl9pZCI6InVzZXJu" +
+    "YW1lIiwicHJvamVjdF9pZCI6IjIiLCJpc19zdGF0aWMiOiJmYWxzZSIsIm9yaWdp" +
+    "biI6IlRva2VuIE9yaWdpbiIsImlwX2FkZHJlc3MiOiIxLjIuMy40IiwiZXhwIjox" +
+    "NzkyNjk3NzU4LCJ1bml2ZXJzYWxfaWQiOiJ1c2VybmFtZSQyIiwiaWF0IjoxNjE5" +
+    "ODk3NzU4LCJhdXRob3JpdGllcyI6IkRFRkFVTFQsTU9ERVJBVE9SLEFETUlOIn0." +
+    "Oe1CIh1vcTrMlM0bPC1Nv_9xcA0rArxp-QO6n_67jEoNEKfPDM1cFbFyLxtUCuTd" +
+    "RUbxVji6020RqUn3SR033SweRXfMQnvm83hdDrstWs6EaK5t6AHNW2VALMqpTiBu" +
+    "k585_tCP6WWkj7khf_19Ly8YlTp3XFNadANUgB9-mYq1n_9COc2OzHuub7o4-OLJ" +
+    "tPE3NpPjB_v0kPRI5-Lz7dVaWTzkCjTPAdrwhe6NtZhg9IMtpZxVu-5aVh8iC9lD" +
+    "uKgTCrgQNcLnLX0hFpP58-s_kS1SpPsAl6266UUQJpXEJQPoZ8Q06aLI-W2vJH25" +
+    "J3-IaTDFIMexa64_cA8I0Q"
 
   // endregion
 
@@ -75,13 +77,18 @@ object Stubs {
     countryCode = "DE",
   )
 
-  var ownedToken = OwnedToken(
-    token = token,
+  var tokenDetails = TokenDetails(
+    tokenValue = tokenValue,
     isBlocked = true,
+    createdAt = Date(TimeUnit.SECONDS.toMillis(1619897758)), // decode token value
+    expiresAt = Date(TimeUnit.SECONDS.toMillis(1792697758)), // decode token value
+    ownerId = userId,
+    authority = User.Authority.ADMIN,
     origin = "Token Origin",
-    createdAt = Date(0xC30000),
-    expiresAt = Date(0xE00000),
-    owner = stubUser(), // updated below
+    ipAddress = "1.2.3.4",
+    geo = "geo",
+    accountId = 1,
+    isStatic = false,
   )
 
   var user = User(
@@ -109,11 +116,10 @@ object Stubs {
     updatedAt = Date(0xA10000),
   ).let { account ->
     // amazing hacks!
-    user = user.copy(account = account)
-    ownedToken = ownedToken.copy(owner = user)
-    user = user.copy(ownedTokens = listOf(ownedToken))
-    ownedToken = ownedToken.copy(owner = user)
-    user = user.copy(ownedTokens = listOf(ownedToken))
+    user = user.copy(
+      account = account,
+      ownedTokens = listOf(tokenDetails),
+    )
     account.copy(owners = listOf(user))
   }
 
@@ -185,14 +191,9 @@ object Stubs {
     account = accountDbm,
   )
 
-  val tokenDbm = TokenDbm(tokenLocator = tokenLocatorEncoded)
-
-  val ownedTokenDbm = OwnedTokenDbm(
-    tokenLocator = tokenLocatorEncoded,
+  val tokenDetailsDbm = TokenDetailsDbm(
+    tokenValue = tokenValue,
     blocked = true,
-    origin = "Token Origin",
-    createdAt = Date(0xC30000),
-    expiresAt = Date(0xE00000),
     owner = userDbm,
   )
 
@@ -205,18 +206,18 @@ object Stubs {
 
   // region Domain Models (with updated values)
 
-  @Suppress("SpellCheckingInspection")
-  val tokenLocatorUpdatedEncoded = "MiQjVExQSSMkZFhObGNtNWhiV1U9JCNUTFBJIyRWRzlyWlc0Z1QzSnBaMmx1SURFPSQjVExQSSMkMA=="
-
-  val tokenUpdated = Token(tokenLocator = tokenLocatorUpdatedEncoded)
-
-  var ownedTokenUpdated = OwnedToken(
-    token = tokenUpdated,
+  var tokenDetailsUpdated = TokenDetails(
+    tokenValue = tokenValue + "1",
     isBlocked = true,
-    origin = "Token Origin 1",
     createdAt = Date(0xC30001),
     expiresAt = Date(0xE00001),
-    owner = stubUser(), // updated below
+    ownerId = userId,
+    authority = User.Authority.ADMIN,
+    origin = "Token Origin 1",
+    ipAddress = "2.3.4.5",
+    geo = "geo 1",
+    accountId = 1,
+    isStatic = false,
   )
 
   val companyUpdated = company.copy(
@@ -257,11 +258,10 @@ object Stubs {
     updatedAt = Date(0xA10001),
   ).let { account ->
     // amazing hacks! again!
-    userUpdated = userUpdated.copy(account = account)
-    ownedTokenUpdated = ownedTokenUpdated.copy(owner = userUpdated)
-    userUpdated = userUpdated.copy(ownedTokens = listOf(ownedTokenUpdated))
-    ownedTokenUpdated = ownedTokenUpdated.copy(owner = userUpdated)
-    userUpdated = userUpdated.copy(ownedTokens = listOf(ownedTokenUpdated))
+    userUpdated = userUpdated.copy(
+      account = account,
+      ownedTokens = listOf(tokenDetailsUpdated),
+    )
     account.copy(owners = listOf(userUpdated))
   }
 
@@ -313,7 +313,35 @@ object Stubs {
 
   // endregion
 
-  // region Ops Domain Models
+  // region Auth Ops Models
+
+  val tokenCreator = TokenCreator(
+    userId = userId,
+    authority =User.Authority.ADMIN,
+    isStatic = false,
+    origin = "Token Origin",
+    ipAddress = "1.2.3.4",
+    geo = "geo",
+  )
+
+  val jwtClaims: JwtClaims = mapOf(
+    Claims.VALUE to tokenValue,
+    Claims.USER_ID to userId.id,
+    Claims.PROJECT_ID to project.id,
+    Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
+    Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.createdAt.time).toInt(),
+    Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.expiresAt.time).toInt(),
+    Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
+    Claims.ORIGIN to "Token Origin",
+    Claims.IP_ADDRESS to "1.2.3.4",
+    Claims.GEO to "geo",
+    Claims.ACCOUNT_ID to account.id,
+    Claims.IS_STATIC to false,
+  )
+
+  // endregion
+
+  // region Domain Ops Models
 
   val userCreator = UserCreator(
     id = "username",
@@ -403,18 +431,22 @@ object Stubs {
   )
 
   val tokenResponse = TokenResponse(
-    token = token.tokenLocator,
+    tokenValue = tokenValue,
   )
 
   val tokenDetailsResponse = TokenDetailsResponse(
+    tokenValue = tokenValue,
     ownerId = userId.id,
     ownerProjectId = userId.projectId,
     ownerUniversalId = universalUserId,
-    tokenId = token.tokenLocator,
+    createdAt = "2021-05-01 19:35",
+    expiresAt = "2026-10-22 19:35",
+    authority = "ADMIN",
     isBlocked = true,
     origin = "Token Origin",
-    createdAt = "1970-05-28 00:00",
-    expiresAt = "1970-06-19 00:00",
+    ipAddress = "1.2.3.4",
+    geo = "geo",
+    isStatic = false,
   )
 
   val userCredentialsRequest = UserCredentialsRequest(

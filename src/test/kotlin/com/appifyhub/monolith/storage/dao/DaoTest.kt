@@ -16,14 +16,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 class DaoTest {
 
   @Autowired lateinit var accountDao: AccountDao
-  @Autowired lateinit var ownedTokenDao: OwnedTokenDao
+  @Autowired lateinit var tokenDetailsDao: TokenDetailsDao
   @Autowired lateinit var projectDao: ProjectDao
   @Autowired lateinit var schemaDao: SchemaDao
   @Autowired lateinit var userDao: UserDao
 
   @Test fun `DAO autowiring works`() {
     assertThat(accountDao).isNotNull()
-    assertThat(ownedTokenDao).isNotNull()
+    assertThat(tokenDetailsDao).isNotNull()
     assertThat(projectDao).isNotNull()
     assertThat(schemaDao).isNotNull()
     assertThat(userDao).isNotNull()

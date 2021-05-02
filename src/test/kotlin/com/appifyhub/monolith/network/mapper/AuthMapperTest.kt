@@ -8,17 +8,20 @@ import org.junit.jupiter.api.Test
 
 class AuthMapperTest {
 
-  @Test fun `token domain to network`() {
-    assertThat(Stubs.token.toNetwork()).isDataClassEqualTo(Stubs.tokenResponse)
+  @Test fun `token response of value`() {
+    assertThat(tokenResponseOf(Stubs.tokenValue))
+      .isDataClassEqualTo(Stubs.tokenResponse)
   }
 
-  @Test fun `owned token domain to network`() {
-    val token = Stubs.ownedToken.copy(
-      createdAt = DateTimeMapper.parseAsDateTime("1970-05-28 00:00"), // from the stub
-      expiresAt = DateTimeMapper.parseAsDateTime("1970-06-19 00:00"), // from the stub
+  @Test fun `token details domain to network`() {
+    // copying here might be unnecessary...
+    val token = Stubs.tokenDetails.copy(
+      createdAt = DateTimeMapper.parseAsDateTime("2021-05-01 19:35"), // from the stub
+      expiresAt = DateTimeMapper.parseAsDateTime("2026-10-22 19:35"), // from the stub
     )
 
-    assertThat(token.toNetwork()).isDataClassEqualTo(Stubs.tokenDetailsResponse)
+    assertThat(token.toNetwork())
+      .isDataClassEqualTo(Stubs.tokenDetailsResponse)
   }
 
 }

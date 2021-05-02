@@ -355,6 +355,31 @@ class ValidatorsTest {
       .isEqualTo(Validators.NotBlankNullable)
   }
 
+  @Test fun `IP address fails with blank`() {
+    assertThat(Validators.IpAddress.isValid("\t\n"))
+      .isFalse()
+  }
+
+  @Test fun `IP address fails with invalid address`() {
+    assertThat(Validators.IpAddress.isValid("12.142414"))
+      .isFalse()
+  }
+
+  @Test fun `IP address succeeds with null`() {
+    assertThat(Validators.IpAddress.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `IP address succeeds with valid IPv4 address`() {
+    assertThat(Validators.IpAddress.isValid("1.2.3.4"))
+      .isTrue()
+  }
+
+  @Test fun `IP address succeeds with valid IPv6 address`() {
+    assertThat(Validators.IpAddress.isValid("2001:db8:3333:4444:5555:6666:7777:8888"))
+      .isTrue()
+  }
+
   @Test fun `birthday succeeds with null`() {
     assertThat(Validators.BDay.isValid(null))
       .isTrue()

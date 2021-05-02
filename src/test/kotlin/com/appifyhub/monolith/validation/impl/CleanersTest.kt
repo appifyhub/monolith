@@ -293,6 +293,11 @@ class CleanersTest {
       .isEqualTo(Cleaners.TrimNullable)
   }
 
+  @Test fun `IP address is removing spaces nullable`() {
+    assertThat(Cleaners.IpAddress)
+      .isEqualTo(Cleaners.RemoveSpacesNullable)
+  }
+
   @Test fun `birthday is doing nothing`() {
     val birthday: BDay = Date() to mock()
     assertThat(Cleaners.BDay.clean(birthday))

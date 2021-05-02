@@ -16,12 +16,16 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
+import com.appifyhub.monolith.domain.user.User.Type
+import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.init.RootProjectConfig
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
-import com.appifyhub.monolith.init.RootProjectConfig
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
@@ -282,6 +286,43 @@ class UserServiceImplTest {
           updatedAt = timeProvider.currentDate,
         )
       )
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `adding user works with random ID (minimal data)`() {
+    stubGenerators()
+    val creator = UserCreator(
+      id = null,
+      projectId = Stubs.project.id,
+      rawSignature = "12345678",
+      name = null,
+      type = Type.PERSONAL,
+      authority = Authority.DEFAULT,
+      allowsSpam = false,
+      contact = null,
+      contactType = ContactType.CUSTOM,
+      birthday = null,
+      company = null,
+    )
+
+    assertThat(service.addUser(creator, UserIdType.RANDOM))
+      .isDataClassEqualTo(User(
+        userId = UserId(id = "user_id", projectId = Stubs.project.id),
+        signature = "87654321",
+        name = null,
+        type = Type.PERSONAL,
+        authority = Authority.DEFAULT,
+        allowsSpam = false,
+        contact = null,
+        contactType = ContactType.CUSTOM,
+        verificationToken = null,
+        birthday = null,
+        createdAt = timeProvider.currentDate,
+        updatedAt = timeProvider.currentDate,
+        company = null,
+        ownedTokens = emptyList(),
+        account = null,
+      ))
   }
 
   // Fetching
