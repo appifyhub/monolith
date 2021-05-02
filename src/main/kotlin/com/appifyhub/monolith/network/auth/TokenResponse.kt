@@ -7,5 +7,5 @@ import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class TokenResponse(
-  @JsonProperty("token") val token: String,
+  @JsonProperty("token_value") val tokenValue: String,
 ) : Serializable

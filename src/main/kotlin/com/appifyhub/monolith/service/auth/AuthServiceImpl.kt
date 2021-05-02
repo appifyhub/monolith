@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.service.auth
 
-import com.appifyhub.monolith.domain.auth.OwnedToken
-import com.appifyhub.monolith.domain.auth.Token
+import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
@@ -137,52 +137,58 @@ class AuthServiceImpl(
     return user
   }
 
-  override fun createTokenFor(
-    user: User,
-    origin: String?,
-  ): String {
+  override fun createTokenFor(user: User, origin: String?, ipAddress: String?): String {
     log.debug("Generating token for $user, origin $origin")
 
     val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
+    val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
 
-    return authRepository.createToken(
+    return authRepository.createToken(TokenCreator(
       userId = user.userId,
-      authorities = user.allAuthorities,
+      authority = user.authority,
+      isStatic = false,
       origin = normalizedOrigin,
-    )
+      ipAddress = normalizedIp,
+      geo = null, // TODO (but nothing for now)
+    )).tokenValue
   }
 
-  override fun refreshAuth(authData: Authentication): String {
+  override fun refreshAuth(authData: Authentication, ipAddress: String?): String {
     log.debug("Refreshing authentication $authData")
     val token = authData.requireValidJwt(shallow = false)
 
+    val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
+
     // fetch details for this token to reuse them in the new token
-    val ownedToken = authRepository.fetchTokenDetails(token)
+    val tokenDetails = authRepository.fetchTokenDetails(token)
 
     // unauthorize the current token
     authRepository.unauthorizeToken(token)
 
     // create a new token for this user
-    return authRepository.createToken(
-      userId = ownedToken.owner.userId,
-      authorities = ownedToken.owner.allAuthorities,
-      origin = ownedToken.origin,
-    )
+    return authRepository.createToken(TokenCreator(
+      userId = tokenDetails.ownerId,
+      authority = tokenDetails.authority,
+      isStatic = tokenDetails.isStatic,
+      origin = tokenDetails.origin,
+      ipAddress = normalizedIp,
+      geo = null, // TODO (but nothing for now)
+    )).tokenValue
   }
 
-  override fun fetchTokenDetails(authData: Authentication): OwnedToken {
+  override fun fetchTokenDetails(authData: Authentication): TokenDetails {
     log.debug("Fetching token details for authentication $authData")
     val token = authData.requireValidJwt(shallow = false)
     return authRepository.fetchTokenDetails(token)
   }
 
-  override fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<OwnedToken> {
+  override fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<TokenDetails> {
     log.debug("Fetching all token details for authentication $authData [valid $valid]")
     val token = authData.requireValidJwt(shallow = false)
     return authRepository.fetchAllTokenDetails(token, valid)
   }
 
-  override fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<OwnedToken> {
+  override fun fetchAllTokenDetailsFor(authData: Authentication, userId: UserId, valid: Boolean?): List<TokenDetails> {
     log.debug("Fetching all token details for user $userId [valid $valid]")
 
     val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
@@ -212,19 +218,18 @@ class AuthServiceImpl(
     authRepository.unauthorizeAllTokensFor(normalizedUserId)
   }
 
-  override fun unauthorizeTokens(authData: Authentication, tokenLocators: List<String>) {
-    log.debug("Unauthorizing all access $tokenLocators")
+  override fun unauthorizeTokens(authData: Authentication, tokenValues: List<String>) {
+    log.debug("Unauthorizing all access $tokenValues")
 
-    val normalizedTokens = tokenLocators.map {
+    val normalizedTokens = tokenValues.map {
       Normalizers.Dense.run(it).requireValid { "Token ID" }
     }
     authData.requireValidJwt(shallow = false)
 
-    val tokens = normalizedTokens.map(::Token)
-    authRepository.unauthorizeAllTokens(tokens)
+    authRepository.unauthorizeAllTokens(normalizedTokens)
   }
 
-// Helpers
+  // Helpers
 
   @Throws
   private fun fetchUserByCredentials(

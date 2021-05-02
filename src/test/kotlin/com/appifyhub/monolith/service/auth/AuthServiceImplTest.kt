@@ -15,8 +15,7 @@ import assertk.assertions.isTrue
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.auth.OwnedToken
-import com.appifyhub.monolith.domain.auth.Token
+import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
@@ -283,11 +282,11 @@ class AuthServiceImplTest {
   @Test fun `resolving shallow user from token works (default authority)`() {
     val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
     timeProvider.staticTime = { modernTime.time }
-    val user = authHelper.defaultUser
+    val defaultUser = authHelper.defaultUser
     val token = authHelper.newRealToken(DEFAULT)
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = user.userId.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = defaultUser.userId.toUniversalFormat())
         .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
@@ -570,7 +569,7 @@ class AuthServiceImplTest {
 
   @Test fun `create token fails with invalid origin`() {
     assertThat {
-      service.createTokenFor(authHelper.defaultUser, "\n\t")
+      service.createTokenFor(authHelper.defaultUser, origin = "\n\t", ipAddress = null)
     }
       .isFailure()
       .all {
@@ -579,23 +578,36 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `create token succeeds with valid user data and non-empty origin`() {
-    assertThat(service.createTokenFor(authHelper.defaultUser, "Some Origin"))
+  @Test fun `create token fails with invalid IP address`() {
+    assertThat {
+      service.createTokenFor(authHelper.defaultUser, origin = "origin", ipAddress = "abc")
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("IP Address")
+      }
+  }
+
+  @Test fun `create token succeeds with valid user data and non-empty optionals`() {
+    assertThat(service.createTokenFor(authHelper.defaultUser, origin = "Some Origin", ipAddress = "1.2.3.4"))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
         contains("Some Origin")
+        contains("1.2.3.4")
         contains(DEFAULT.name)
         contains(authHelper.defaultUser.userId.toUniversalFormat())
       }
   }
 
-  @Test fun `create token succeeds with valid user data and null origin`() {
-    assertThat(service.createTokenFor(authHelper.ownerUser, null))
+  @Test fun `create token succeeds with valid user data and null optionals`() {
+    assertThat(service.createTokenFor(authHelper.ownerUser, origin = null, ipAddress = null))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
         doesNotContain("origin", ignoreCase = true)
+        doesNotContain("ip_address", ignoreCase = true)
         contains(DEFAULT.name)
         contains(MODERATOR.name)
         contains(ADMIN.name)
@@ -608,7 +620,7 @@ class AuthServiceImplTest {
     val token = authHelper.newStubToken()
 
     assertThat {
-      service.refreshAuth(token)
+      service.refreshAuth(token, ipAddress = null)
     }
       .isFailure()
       .all {
@@ -617,12 +629,25 @@ class AuthServiceImplTest {
       }
   }
 
+  @Test fun `refresh token fails with invalid IP address`() {
+    val token = authHelper.newRealToken(DEFAULT)
+
+    assertThat {
+      service.refreshAuth(token, ipAddress = "abc")
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("IP Address")
+      }
+  }
+
   @Test fun `refresh token fails with expired token`() {
     val token = authHelper.newRealToken(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.refreshAuth(token)
+      service.refreshAuth(token, ipAddress = null)
     }
       .isFailure()
       .all {
@@ -632,11 +657,12 @@ class AuthServiceImplTest {
   }
 
   @Test fun `refresh token grants a new token with valid auth data`() {
-    assertThat(service.refreshAuth(authHelper.newRealToken(DEFAULT)))
+    assertThat(service.refreshAuth(authHelper.newRealToken(DEFAULT), ipAddress = "1.2.3.4"))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
         contains(Stubs.userCredentialsRequest.origin!!)
+        contains("1.2.3.4")
         contains(DEFAULT.name)
         contains(authHelper.defaultUser.userId.toUniversalFormat())
       }
@@ -658,19 +684,25 @@ class AuthServiceImplTest {
 
   @Suppress("SpellCheckingInspection")
   @Test fun `fetching token details succeeds with valid data`() {
-    val token = authHelper.newRealToken(DEFAULT)
+    val jwt = authHelper.newRealToken(DEFAULT)
+    val defaultUser = authHelper.defaultUser
 
     assertThat(
-      service.fetchTokenDetails(token).cleanStubArtifacts()
+      service.fetchTokenDetails(jwt).cleanStubArtifacts()
     )
       .isDataClassEqualTo(
-        OwnedToken(
-          token = Token("MiQjVExQSSMkZFhObGNtNWhiV1ZmWkdWbVlYVnNkQT09JCNUTFBJIyRWRzlyWlc0Z1QzSnBaMmx1JCNUTFBJIyQw"),
+        TokenDetails(
+          tokenValue = jwt.token.tokenValue,
           createdAt = timeProvider.currentDate,
           isBlocked = false,
           origin = Stubs.userCredentialsRequest.origin,
           expiresAt = Date(timeProvider.currentMillis + Duration.ofDays(1).toMillis()),
-          owner = authHelper.defaultUser,
+          ownerId = defaultUser.userId,
+          authority = defaultUser.authority,
+          ipAddress = null,
+          geo = null,
+          accountId = null,
+          isStatic = false,
         ).cleanStubArtifacts()
       )
   }
@@ -691,20 +723,26 @@ class AuthServiceImplTest {
 
   @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token details succeeds with valid data`() {
-    val token = authHelper.newRealToken(DEFAULT)
+    val jwt = authHelper.newRealToken(DEFAULT)
+    val defaultUser = authHelper.defaultUser
 
     assertThat(
-      service.fetchAllTokenDetails(token, valid = null).map { it.cleanStubArtifacts() }
+      service.fetchAllTokenDetails(jwt, valid = null).map { it.cleanStubArtifacts() }
     )
       .isEqualTo(
         listOf(
-          OwnedToken(
-            token = Token("MiQjVExQSSMkZFhObGNtNWhiV1ZmWkdWbVlYVnNkQT09JCNUTFBJIyRWRzlyWlc0Z1QzSnBaMmx1JCNUTFBJIyQw"),
+          TokenDetails(
+            tokenValue = jwt.token.tokenValue,
             createdAt = timeProvider.currentDate,
             isBlocked = false,
             origin = Stubs.userCredentialsRequest.origin,
             expiresAt = Date(timeProvider.currentMillis + Duration.ofDays(1).toMillis()),
-            owner = authHelper.defaultUser,
+            ownerId = defaultUser.userId,
+            authority = defaultUser.authority,
+            ipAddress = null,
+            geo = null,
+            accountId = null,
+            isStatic = false,
           ).cleanStubArtifacts(),
         )
       )
@@ -739,22 +777,28 @@ class AuthServiceImplTest {
 
   @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token for others details succeeds with valid data`() {
-    authHelper.newRealToken(DEFAULT)
-    val token = authHelper.newRealToken(OWNER)
+    val defaultJwt = authHelper.newRealToken(DEFAULT)
+    val defaultUser = authHelper.defaultUser
+    val ownerJwt = authHelper.newRealToken(OWNER)
 
     assertThat(
-      service.fetchAllTokenDetailsFor(token, valid = true, userId = authHelper.defaultUser.userId)
+      service.fetchAllTokenDetailsFor(ownerJwt, valid = true, userId = authHelper.defaultUser.userId)
         .map { it.cleanStubArtifacts() }
     )
       .isEqualTo(
         listOf(
-          OwnedToken(
-            token = Token("MiQjVExQSSMkZFhObGNtNWhiV1ZmWkdWbVlYVnNkQT09JCNUTFBJIyRWRzlyWlc0Z1QzSnBaMmx1JCNUTFBJIyQw"),
+          TokenDetails(
+            tokenValue = defaultJwt.token.tokenValue,
             createdAt = timeProvider.currentDate,
             isBlocked = false,
             origin = Stubs.userCredentialsRequest.origin,
             expiresAt = Date(timeProvider.currentMillis + Duration.ofDays(1).toMillis()),
-            owner = authHelper.defaultUser,
+            ownerId = defaultUser.userId,
+            authority = defaultUser.authority,
+            ipAddress = null,
+            geo = null,
+            accountId = null,
+            isStatic = false,
           ).cleanStubArtifacts(),
         )
       )
@@ -787,7 +831,7 @@ class AuthServiceImplTest {
         .isSuccess()
 
       // and then try to re-auth with it
-      assertThat { service.refreshAuth(token) }
+      assertThat { service.refreshAuth(token, ipAddress = null) }
         .isFailure()
     }
   }
@@ -816,9 +860,9 @@ class AuthServiceImplTest {
         .isSuccess()
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1) }
+      assertThat { service.refreshAuth(token1, ipAddress = null) }
         .isFailure()
-      assertThat { service.refreshAuth(token2) }
+      assertThat { service.refreshAuth(token2, ipAddress = null) }
         .isFailure()
     }
   }
@@ -861,9 +905,9 @@ class AuthServiceImplTest {
         .isSuccess()
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1) }
+      assertThat { service.refreshAuth(token1, ipAddress = null) }
         .isFailure()
-      assertThat { service.refreshAuth(token2) }
+      assertThat { service.refreshAuth(token2, ipAddress = null) }
         .isFailure()
 
       // admin token should still work
@@ -878,7 +922,7 @@ class AuthServiceImplTest {
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.unauthorizeTokens(token, tokenLocators = emptyList())
+      service.unauthorizeTokens(token, tokenValues = emptyList())
     }
       .isFailure()
       .all {
@@ -887,11 +931,11 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `unauthorize tokens fails with invalid token locator`() {
+  @Test fun `unauthorize tokens fails with invalid token`() {
     val token = authHelper.newRealToken(DEFAULT)
 
     assertThat {
-      service.unauthorizeTokens(token, tokenLocators = listOf("\t\n"))
+      service.unauthorizeTokens(token, tokenValues = listOf("\t\n"))
     }
       .isFailure()
       .all {
@@ -904,17 +948,17 @@ class AuthServiceImplTest {
     val token1 = authHelper.newRealToken(DEFAULT)
     val token2 = authHelper.newRealToken(DEFAULT)
     val tokensToUnauth = listOf(token1, token2)
-      .map { service.fetchTokenDetails(it).token.tokenLocator }
+      .map { service.fetchTokenDetails(it).tokenValue }
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorizeTokens(token1, tokenLocators = tokensToUnauth) }
+      assertThat { service.unauthorizeTokens(token1, tokenValues = tokensToUnauth) }
         .isSuccess()
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1) }
+      assertThat { service.refreshAuth(token1, ipAddress = null) }
         .isFailure()
-      assertThat { service.refreshAuth(token2) }
+      assertThat { service.refreshAuth(token2, ipAddress = null) }
         .isFailure()
     }
   }
@@ -936,10 +980,9 @@ class AuthServiceImplTest {
   )
 
   // leftovers from hacking in auth utils need to be removed
-  private fun OwnedToken.cleanStubArtifacts() = copy(
+  private fun TokenDetails.cleanStubArtifacts() = copy(
     createdAt = createdAt.truncateTo(ChronoUnit.SECONDS),
     expiresAt = expiresAt.truncateTo(ChronoUnit.SECONDS),
-    owner = owner.cleanStubArtifacts(),
   )
 
   // endregion

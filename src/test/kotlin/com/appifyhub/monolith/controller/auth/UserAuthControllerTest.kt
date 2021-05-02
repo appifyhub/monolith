@@ -17,6 +17,7 @@ import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
@@ -40,8 +41,8 @@ import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.Duration
-import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.concurrent.TimeUnit
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -102,7 +103,7 @@ class UserAuthControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!!.token }.isNotEmpty()
+      transform { it.body!!.tokenValue }.isNotEmpty()
     }
   }
 
@@ -122,12 +123,6 @@ class UserAuthControllerTest {
   @Test fun `get token succeeds with valid authorization`() {
     val user = authTestHelper.defaultUser
     val token = authTestHelper.newRealToken(DEFAULT).token.tokenValue
-    val tokenId = authTestHelper.fetchLastTokenOf(user).token.tokenLocator
-    val expirationTime = Date(
-      timeProvider.currentMillis +
-        Duration.of(authTestHelper.expirationDaysDelta.toLong(), ChronoUnit.DAYS)
-          .toMillis()
-    )
 
     assertThat(
       restTemplate.exchange<TokenDetailsResponse>(
@@ -139,14 +134,7 @@ class UserAuthControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
-        Stubs.tokenDetailsResponse.copy(
-          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-          expiresAt = DateTimeMapper.formatAsDateTime(expirationTime),
-          isBlocked = false,
-          ownerId = user.userId.id,
-          ownerUniversalId = user.userId.toUniversalFormat(),
-          tokenId = tokenId,
-        )
+        authTestHelper.fetchLastTokenOf(user).toNetwork()
       )
     }
   }
@@ -165,35 +153,24 @@ class UserAuthControllerTest {
   }
 
   @Test fun `get all tokens succeeds with valid authorization`() {
-    val user = authTestHelper.defaultUser
-    authTestHelper.newRealToken(DEFAULT)
-    val token = authTestHelper.newRealToken(DEFAULT).token.tokenValue
-    val expirationTime = Date(
-      timeProvider.currentMillis +
-        Duration.of(authTestHelper.expirationDaysDelta.toLong(), ChronoUnit.DAYS)
-          .toMillis()
-    )
-    val expectedTokens = authTestHelper.fetchAllTokensOf(user).map {
-      Stubs.tokenDetailsResponse.copy(
-        createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        expiresAt = DateTimeMapper.formatAsDateTime(expirationTime),
-        isBlocked = false,
-        ownerId = user.userId.id,
-        ownerUniversalId = user.userId.toUniversalFormat(),
-        tokenId = it.token.tokenLocator,
-      )
-    }
+    val token1 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token2 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
+        requestEntity = bearerEmptyRequest(token1),
         uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isEqualTo(expectedTokens)
+      transform { it.body!! }.isEqualTo(
+        listOf(token1, token2).map {
+          authTestHelper.fetchTokenDetailsFor(it).toNetwork()
+        }
+      )
     }
   }
 
@@ -222,7 +199,7 @@ class UserAuthControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!!.token }.all {
+      transform { it.body!!.tokenValue }.all {
         isNotEmpty()
         isNotEqualTo(token)
       }
@@ -243,15 +220,14 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth user (single token) succeeds with valid authorization`() {
-    val token = authTestHelper.newRealToken(DEFAULT)
-    val tokenValue = token.token.tokenValue
+    val token = authTestHelper.newRealToken(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(tokenValue),
+          requestEntity = bearerEmptyRequest(token),
           uriVariables = mapOf("all" to false),
         )
       ).all {
@@ -264,16 +240,16 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth user (all tokens) succeeds with valid authorization`() {
-    val token1 = authTestHelper.newRealToken(DEFAULT)
-    val token2 = authTestHelper.newRealToken(DEFAULT)
-    val tokenValue = token1.token.tokenValue
+    val token1 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token2 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(tokenValue),
+          requestEntity = bearerEmptyRequest(token1),
           uriVariables = mapOf("all" to true),
         )
       ).all {
@@ -303,22 +279,21 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth tokens succeeds with valid authorization`() {
-    val token1 = authTestHelper.newRealToken(DEFAULT)
-    val tokenId1 = authTestHelper.fetchOwnedTokenFrom(token1).token.tokenLocator
-    val token2 = authTestHelper.newRealToken(DEFAULT)
-    val tokenId2 = authTestHelper.fetchOwnedTokenFrom(token2).token.tokenLocator
-    val token3 = authTestHelper.newRealToken(DEFAULT)
-    val tokenValue = token3.token.tokenValue
+    val token1 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token2 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token3 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(tokenValue),
+          requestEntity = bearerEmptyRequest(token3),
           uriVariables = mapOf(
-            "token1" to tokenId1,
-            "token2" to tokenId2,
+            "token1" to token1,
+            "token2" to token2,
           ),
         )
       ).all {

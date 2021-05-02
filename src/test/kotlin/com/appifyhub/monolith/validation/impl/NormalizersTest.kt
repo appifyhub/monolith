@@ -142,6 +142,11 @@ class NormalizersTest {
       .consistsOf(Validators.Origin, Cleaners.Origin)
   }
 
+  @Test fun `ip address = ip address + ip address`() {
+    assertThat(Normalizers.IpAddress)
+      .consistsOf(Validators.IpAddress, Cleaners.IpAddress)
+  }
+
   @Test fun `birthday = birthday + birthday`() {
     assertThat(Normalizers.BDay)
       .consistsOf(Validators.BDay, Cleaners.BDay)

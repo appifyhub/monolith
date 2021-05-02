@@ -1,13 +1,15 @@
 package com.appifyhub.monolith.controller.admin
 
 import com.appifyhub.monolith.controller.auth.UserAuthController
-import com.appifyhub.monolith.domain.auth.OwnedToken
+import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
+import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
+import com.appifyhub.monolith.network.mapper.tokenResponseOf
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService.UserPrivilege
 import org.slf4j.LoggerFactory
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class AdminAuthController(
   private val authService: AuthService,
-) {
+) : RequestIpAddressHolder {
 
   object Endpoints {
     const val ADMIN_AUTH = UserAuthController.Endpoints.ADMIN_AUTH
@@ -43,8 +45,8 @@ class AdminAuthController(
     log.debug("[POST] auth admin with $creds")
 
     val user = authService.resolveAdmin(creds.universalId, creds.secret)
-    val token = authService.createTokenFor(user, creds.origin)
-    return TokenResponse(token)
+    val token = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
+    return tokenResponseOf(token)
   }
 
   // For others
@@ -53,13 +55,13 @@ class AdminAuthController(
   fun getAnyUserTokens(
     authentication: Authentication,
     @PathVariable projectId: Long,
-    @PathVariable id: String,
+    @PathVariable userId: String,
     @RequestParam(required = false) valid: Boolean?,
   ): List<TokenDetailsResponse> {
-    log.debug("[GET] get all tokens for user $id from project $projectId, [valid $valid]")
+    log.debug("[GET] get all tokens for user $userId from project $projectId, [valid $valid]")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestAccessFor(authentication, UserId(id, projectId), UserPrivilege.READ)
+    val targetUser = authService.requestAccessFor(authentication, UserId(userId, projectId), UserPrivilege.READ)
 
     val tokens = if (targetUser.userId == authUser.userId) {
       authService.fetchAllTokenDetails(authentication, valid) // for self only
@@ -67,19 +69,19 @@ class AdminAuthController(
       authService.fetchAllTokenDetailsFor(authentication, targetUser.userId, valid)
     }
 
-    return tokens.map(OwnedToken::toNetwork)
+    return tokens.map(TokenDetails::toNetwork)
   }
 
   @DeleteMapping(Endpoints.ANY_USER_AUTH)
   fun unauthAnyUser(
     authentication: Authentication,
     @PathVariable projectId: Long,
-    @PathVariable id: String,
+    @PathVariable userId: String,
   ): MessageResponse {
-    log.debug("[DELETE] unauth user $id from project $projectId")
+    log.debug("[DELETE] unauth user $userId from project $projectId")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestAccessFor(authentication, UserId(id, projectId), UserPrivilege.WRITE)
+    val targetUser = authService.requestAccessFor(authentication, UserId(userId, projectId), UserPrivilege.WRITE)
 
     if (targetUser.userId == authUser.userId) {
       authService.unauthorizeAll(authentication) // for self only

@@ -27,13 +27,13 @@ class AdminUserController(
   fun getAnyUser(
     authentication: Authentication,
     @PathVariable projectId: Long,
-    @PathVariable id: String,
+    @PathVariable userId: String,
   ): UserResponse {
-    log.debug("[GET] user $id from project $projectId")
+    log.debug("[GET] user $userId from project $projectId")
 
     return authService.requestAccessFor(
       authData = authentication,
-      targetUserId = UserId(id, projectId),
+      targetUserId = UserId(userId, projectId),
       privilege = UserPrivilege.READ,
     ).toNetwork()
   }

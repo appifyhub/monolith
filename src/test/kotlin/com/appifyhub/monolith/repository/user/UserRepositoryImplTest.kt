@@ -15,7 +15,7 @@ import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.repository.auth.OwnedTokenRepository
+import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
@@ -36,7 +36,7 @@ import java.util.Optional
 class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
-  private val ownedTokenRepo = mock<OwnedTokenRepository>()
+  private val tokenDetailsRepo = mock<TokenDetailsRepository>()
   private val adminRepo = mock<AdminRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
@@ -44,7 +44,7 @@ class UserRepositoryImplTest {
 
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
-    ownedTokenRepository = ownedTokenRepo,
+    tokenDetailsRepository = tokenDetailsRepo,
     adminRepository = adminRepo,
     passwordEncoder = passwordEncoder,
     timeProvider = timeProvider,
@@ -58,7 +58,7 @@ class UserRepositoryImplTest {
     adminRepo.stub {
       on { fetchProjectById(Stubs.project.id) } doReturn Stubs.project
     }
-    ownedTokenRepo.stub {
+    tokenDetailsRepo.stub {
       on { fetchAllTokens(Stubs.userDbm.toDomain(), Stubs.project) } doReturn Stubs.user.ownedTokens
     }
   }

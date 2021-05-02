@@ -65,7 +65,7 @@ class AdminUserControllerTest {
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
-          "id" to userId.id,
+          "userId" to userId.id,
         ),
       )
     ).all {
@@ -84,7 +84,7 @@ class AdminUserControllerTest {
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to user.userId.projectId,
-          "id" to user.userId.id,
+          "userId" to user.userId.id,
         ),
       )
     ).all {
@@ -114,7 +114,7 @@ class AdminUserControllerTest {
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to user.userId.projectId,
-          "id" to user.userId.id,
+          "userId" to user.userId.id,
         ),
       )
     ).all {

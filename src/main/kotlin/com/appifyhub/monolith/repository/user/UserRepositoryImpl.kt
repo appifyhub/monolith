@@ -12,7 +12,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.repository.auth.OwnedTokenRepository
+import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class UserRepositoryImpl(
   private val userDao: UserDao,
-  private val ownedTokenRepository: OwnedTokenRepository,
+  private val tokenDetailsRepository: TokenDetailsRepository,
   private val adminRepository: AdminRepository,
   private val passwordEncoder: PasswordEncoder,
   private val timeProvider: TimeProvider,
@@ -111,8 +111,8 @@ class UserRepositoryImpl(
     val user = userDao.findById(userId.toData()).get().toDomain()
     if (!withTokens) return user
     val project = adminRepository.fetchProjectById(userId.projectId)
-    val tokens = ownedTokenRepository.fetchAllTokens(user, project)
-    return user.copy(ownedTokens = tokens)
+    val allTokenDetails = tokenDetailsRepository.fetchAllTokens(user, project)
+    return user.copy(ownedTokens = allTokenDetails)
   }
 
   private fun User.updateVerificationToken(userIdType: UserIdType, oldUser: User? = null): User = when {
