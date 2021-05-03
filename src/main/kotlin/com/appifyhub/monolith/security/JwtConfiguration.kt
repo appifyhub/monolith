@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.oauth2.jwt.JwtDecoder
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
+import java.io.FileInputStream
 import java.security.KeyStore
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -31,6 +32,7 @@ class JwtConfiguration {
   fun keyStore(): KeyStore = try {
     KeyStore.getInstance(KeyStore.getDefaultType()).apply {
       val resourceAsStream = Thread.currentThread().contextClassLoader.getResourceAsStream(keyStorePath)
+        ?: FileInputStream(keyStorePath) // used for external keystores
       load(resourceAsStream, keyStorePassword.toCharArray())
     }
   } catch (t: Throwable) {
