@@ -33,6 +33,8 @@ jobs:
           settings-path: ${{ github.workspace }}
 
       - name: Build and test service
+        env:
+          BUILD_QUALITY: "GA"
         run: ./gradlew build
 
       - name: Build Docker image
@@ -50,16 +52,29 @@ jobs:
           echo "Tagging images with version '$VERSION'..."
           docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
           docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest
+          docker tag service appifyhub/service:$VERSION
+          docker tag service appifyhub/service:latest
 
-      - name: Publish Docker images
+      - name: Publish Docker images to GitHub
         run: |
           VERSION=$(scripts/prop.sh version)
           echo "Publishing images with version '$VERSION'..."
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:$VERSION
           docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest
 
+      - name: Publish Docker images to DockerHub
+        env:
+          USER: ${{ secrets.DOCKER_HUB_USER }}
+          TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+        run: |
+          VERSION=$(scripts/prop.sh version)
+          docker login docker.io -u $USER -p $TOKEN
+          echo "Publishing images with version '$VERSION'..."
+          docker push appifyhub/service:$VERSION
+          docker push appifyhub/service:latest
+
       - name: Publish to GitHub Releases
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BUILD_QUALITY: "GA"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew githubRelease
