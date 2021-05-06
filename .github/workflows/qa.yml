@@ -30,6 +30,8 @@ jobs:
           settings-path: ${{ github.workspace }}
 
       - name: Build and test service
+        env:
+          BUILD_QUALITY: "PR"
         run: ./gradlew build
 
       - name: Build Docker image
@@ -45,16 +47,30 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.number }}
         run: |
-          VERSION="$(scripts/prop.sh version).qa"
+          VERSION=$(scripts/prop.sh version)
           echo "Tagging images with version '$VERSION'..."
-          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:"$VERSION"_pr_$PR_NUMBER
-          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_qa
+          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:"$VERSION".pr_$PR_NUMBER
+          docker tag service docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_pr
+          docker tag service appifyhub/service:"$VERSION".pr_$PR_NUMBER
+          docker tag service appifyhub/service:latest_pr
 
-      - name: Publish Docker images
+      - name: Publish Docker images to GitHub
         env:
           PR_NUMBER: ${{ github.event.number }}
         run: |
-          VERSION="$(scripts/prop.sh version).qa"
+          VERSION=$(scripts/prop.sh version)
           echo "Publishing images with version '$VERSION'..."
-          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:"$VERSION"_pr_$PR_NUMBER
-          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_qa
+          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:"$VERSION".pr_$PR_NUMBER
+          docker push docker.pkg.github.com/$GITHUB_REPOSITORY/service:latest_pr
+
+      - name: Publish Docker images to DockerHub
+        env:
+          USER: ${{ secrets.DOCKER_HUB_USER }}
+          TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          VERSION=$(scripts/prop.sh version)
+          docker login docker.io -u $USER -p $TOKEN
+          echo "Publishing images with version '$VERSION'..."
+          docker push appifyhub/service:"$VERSION".pr_$PR_NUMBER
+          docker push appifyhub/service:latest_pr
