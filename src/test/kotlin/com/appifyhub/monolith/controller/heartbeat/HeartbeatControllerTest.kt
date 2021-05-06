@@ -61,7 +61,11 @@ class HeartbeatControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
-        HeartbeatResponse(timeProvider.currentInstant)
+        HeartbeatResponse(
+          beat = timeProvider.currentInstant,
+          ip = null,
+          version = "1.0.1.beta", // from test properties
+        )
       )
     }
   }

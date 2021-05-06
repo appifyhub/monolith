@@ -415,3 +415,4 @@ gradle-app.setting
 # Custom rules
 **/release.jks
 **/release.keystore.info
+**/generated.properties
