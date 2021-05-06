@@ -106,11 +106,33 @@ java.targetCompatibility = JavaVersion.VERSION_11
 
 tasks {
 
+  register<SourceTask>("propertyGenerator") {
+    setSource(file("gradle.properties"))
+
+    doLast {
+      file("src/main/resources/generated.properties")
+        .apply { createNewFile() }
+        .writeText(
+          """
+            # This is a generated file. Your changes won't be saved.
+            # Created at: ${org.joda.time.LocalDateTime.now()}
+            # suppress inspection "UnusedProperty" for whole file
+
+            version=$version
+            quality=${Env.get("BUILD_QUALITY", default = "Debug").toLowerCase()}
+          """.trimIndent(),
+          Charsets.UTF_8
+        )
+    }
+  }
+
   withType<Jar> {
     archiveFileName.set("$artifact.jar")
   }
 
   withType<KotlinCompile> {
+    dependsOn("propertyGenerator")
+
     kotlinOptions {
       freeCompilerArgs = listOf("-Xjsr305=strict")
       jvmTarget = "11"
