@@ -145,7 +145,7 @@ class AuthTestHelper {
       else -> silent {
         userRepo.addUser(
           creator = Stubs.userCreator.copy(
-            userId = "username_${authority.name.toLowerCase()}",
+            userId = "username_${authority.name.lowercase()}",
             projectId = adminProject.id,
             type = User.Type.PERSONAL,
             authority = authority,
@@ -153,7 +153,7 @@ class AuthTestHelper {
           userIdType = Project.UserIdType.USERNAME,
         )
       } ?: userRepo.fetchUserByUserId(
-        id = UserId("username_${authority.name.toLowerCase()}", adminProject.id),
+        id = UserId("username_${authority.name.lowercase()}", adminProject.id),
         withTokens = false,
       )
     }

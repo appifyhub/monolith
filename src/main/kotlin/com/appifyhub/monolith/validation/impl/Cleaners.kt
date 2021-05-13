@@ -67,7 +67,7 @@ object Cleaners {
   val OrganizationPostcode = TrimNullable
   val OrganizationCity = TrimNullable
   val OrganizationCountryCode = cleansToNullable<String>("OrganizationCountryCode") {
-    it?.trim()?.takeIfNotBlank()?.take(2)?.toUpperCase()
+    it?.trim()?.takeIfNotBlank()?.take(2)?.uppercase()
   }
   val Organization = cleansToNullable<Organization>("Organization") {
     it?.copy(

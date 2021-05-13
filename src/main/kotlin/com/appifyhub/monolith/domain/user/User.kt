@@ -4,6 +4,7 @@ import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import org.springframework.security.core.GrantedAuthority
 import java.util.Date
+import java.util.Locale
 
 data class User(
   val id: UserId,
@@ -60,7 +61,7 @@ data class User(
     override fun getAuthority() = name
 
     // ADMIN -> admins
-    val groupName: String by lazy { name.toLowerCase().plus("s") }
+    val groupName: String by lazy { name.lowercase().plus("s") }
 
     // DEFAULT -> moderators
     // OWNER -> gods

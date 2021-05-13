@@ -9,7 +9,6 @@ import org.joda.time.format.DateTimeFormat
 
 buildscript {
   repositories {
-    jcenter()
     mavenCentral()
   }
   dependencies {
@@ -18,7 +17,7 @@ buildscript {
 }
 
 plugins {
-  val kotlinVersion = "1.4.31"
+  val kotlinVersion = "1.5.0"
   kotlin("jvm") version kotlinVersion
   kotlin("plugin.spring") version kotlinVersion
   kotlin("plugin.jpa") version kotlinVersion
@@ -26,13 +25,12 @@ plugins {
   kotlin("plugin.allopen") version kotlinVersion
   kotlin("kapt") version kotlinVersion
 
-  id("org.springframework.boot") version "2.4.1"
+  id("org.springframework.boot") version "2.4.5"
   id("io.spring.dependency-management") version "1.0.10.RELEASE"
   id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
 repositories {
-  jcenter()
   mavenCentral()
 }
 

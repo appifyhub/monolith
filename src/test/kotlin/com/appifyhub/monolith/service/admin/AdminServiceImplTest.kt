@@ -34,6 +34,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
 import java.time.temporal.ChronoUnit
+import javax.annotation.Resource
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -42,9 +43,12 @@ class AdminServiceImplTest {
 
   @Autowired lateinit var service: AdminService
   @Autowired lateinit var adminRepo: AdminRepository
-  @Autowired lateinit var userRepo: UserRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var authHelper: AuthTestHelper
+
+  // for some reason this injection is problematic
+  @Resource(name = "userRepositoryImpl")
+  lateinit var userRepo: UserRepository
 
   private val rootProject: Project by lazy { adminRepo.getAdminProject() }
   private val rootAccount: Account by lazy { adminRepo.fetchAccountById(rootProject.account.id) }

@@ -16,7 +16,7 @@ object TokenGenerator {
     get() = emailInterceptor() ?: UUID.randomUUID()
       .toString()
       .replace(UUID_DELIMITER, String.empty)
-      .toUpperCase()
+      .uppercase()
       .take(EMAIL_TOKEN_LENGTH)
 
   val nextPhoneToken: String
