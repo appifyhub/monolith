@@ -11,7 +11,7 @@ object SignatureGenerator {
     get() = interceptor() ?: UUID.randomUUID()
       .toString()
       .replace(UUID_DELIMITER, String.empty)
-      .toUpperCase()
+      .uppercase()
 
   var interceptor: () -> String? = { null }
 
