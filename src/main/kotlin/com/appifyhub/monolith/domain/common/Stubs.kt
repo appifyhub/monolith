@@ -55,4 +55,3 @@ fun stubUser() = User(
   ownedTokens = emptyList(),
   account = stubAccount(),
 )
-

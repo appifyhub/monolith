@@ -43,9 +43,9 @@ class GlobalExceptionHandler(
   fun handleThrowable(t: Throwable): ResponseEntity<MessageResponse> =
     when {
 
-      t is AuthenticationException
-        || t is AccessDeniedException
-        || t.message?.contains("access is denied", ignoreCase = true) == true ->
+      t is AuthenticationException ||
+        t is AccessDeniedException ||
+        t.message?.contains("access is denied", ignoreCase = true) == true ->
 
         ResponseEntity(
           MessageResponse("Unauthorized : ${t.message}"),

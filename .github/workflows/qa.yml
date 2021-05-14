@@ -29,6 +29,9 @@ jobs:
           server-id: github
           settings-path: ${{ github.workspace }}
 
+      - name: Run KtLint
+        run: ./gradlew ktlintCheck
+
       - name: Build and test service
         env:
           BUILD_QUALITY: "PR"

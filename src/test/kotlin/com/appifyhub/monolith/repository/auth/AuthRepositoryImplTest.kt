@@ -30,15 +30,15 @@ import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.stub
 import com.nhaarman.mockitokotlin2.verify
+import java.time.Duration
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.jwt.JwtClaimNames
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
-import java.time.Duration
-import java.util.Date
-import java.util.concurrent.TimeUnit
 
 class AuthRepositoryImplTest {
 
@@ -94,19 +94,21 @@ class AuthRepositoryImplTest {
     )
 
     assertThat(repository.createToken(creator))
-      .isDataClassEqualTo(TokenDetails(
-        tokenValue = Stubs.tokenValue,
-        isBlocked = false,
-        createdAt = createTime,
-        expiresAt = expireTime,
-        ownerId = Stubs.userId,
-        authority = Stubs.user.authority,
-        origin = null,
-        ipAddress = null,
-        geo = null,
-        accountId = null,
-        isStatic = false,
-      ))
+      .isDataClassEqualTo(
+        TokenDetails(
+          tokenValue = Stubs.tokenValue,
+          isBlocked = false,
+          createdAt = createTime,
+          expiresAt = expireTime,
+          ownerId = Stubs.userId,
+          authority = Stubs.user.authority,
+          origin = null,
+          ipAddress = null,
+          geo = null,
+          accountId = null,
+          isStatic = false,
+        )
+      )
 
     verify(jwtHelper).createJwtForClaims(
       subject = creator.id.toUniversalFormat(),
@@ -128,10 +130,12 @@ class AuthRepositoryImplTest {
     timeProvider.staticTime = { createTime.time }
 
     assertThat(repository.createToken(Stubs.tokenCreator))
-      .isDataClassEqualTo(Stubs.tokenDetails.copy(
-        expiresAt = expireTime,
-        isBlocked = false,
-      ))
+      .isDataClassEqualTo(
+        Stubs.tokenDetails.copy(
+          expiresAt = expireTime,
+          isBlocked = false,
+        )
+      )
 
     verify(jwtHelper).createJwtForClaims(
       subject = Stubs.universalUserId,
@@ -254,31 +258,37 @@ class AuthRepositoryImplTest {
   @Test fun `resolve shallow user succeeds with all properties`() {
     timeProvider.staticTime = { Stubs.tokenDetails.createdAt.time }
 
-    assertThat(repository.resolveShallowUser(newJwt(
-      tokenValue = Stubs.tokenValue,
-      createdAt = Stubs.tokenDetails.createdAt,
-      expiresAt = Stubs.tokenDetails.expiresAt,
-      claims = Stubs.jwtClaims,
-    ))).isDataClassEqualTo(Stubs.user.copy(
-      // lots of changes for shallow user...
-      name = null,
-      type = User.Type.PERSONAL,
-      allowsSpam = false,
-      birthday = null,
-      company = null,
-      contact = null,
-      contactType = User.ContactType.CUSTOM,
-      signature = "spring-asks-for-it",
-      verificationToken = null,
-      createdAt = timeProvider.currentDate,
-      updatedAt = timeProvider.currentDate,
-      ownedTokens = listOf(Stubs.tokenDetails.copy(isBlocked = false)),
-      account = stubAccount().copy(
-        id = Stubs.account.id,
-        createdAt = timeProvider.currentDate, // stubbed internally
-        updatedAt = timeProvider.currentDate, // stubbed internally
+    assertThat(
+      repository.resolveShallowUser(
+        newJwt(
+          tokenValue = Stubs.tokenValue,
+          createdAt = Stubs.tokenDetails.createdAt,
+          expiresAt = Stubs.tokenDetails.expiresAt,
+          claims = Stubs.jwtClaims,
+        )
       )
-    ))
+    ).isDataClassEqualTo(
+      Stubs.user.copy(
+        // lots of changes for shallow user...
+        name = null,
+        type = User.Type.PERSONAL,
+        allowsSpam = false,
+        birthday = null,
+        company = null,
+        contact = null,
+        contactType = User.ContactType.CUSTOM,
+        signature = "spring-asks-for-it",
+        verificationToken = null,
+        createdAt = timeProvider.currentDate,
+        updatedAt = timeProvider.currentDate,
+        ownedTokens = listOf(Stubs.tokenDetails.copy(isBlocked = false)),
+        account = stubAccount().copy(
+          id = Stubs.account.id,
+          createdAt = timeProvider.currentDate, // stubbed internally
+          updatedAt = timeProvider.currentDate, // stubbed internally
+        )
+      )
+    )
   }
 
   @Test fun `fetch token details succeeds`() {

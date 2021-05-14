@@ -60,7 +60,7 @@ data class User(
     override fun getAuthority() = name
 
     // ADMIN -> admins
-    val groupName: String by lazy { name.toLowerCase().plus("s") }
+    val groupName: String by lazy { name.lowercase().plus("s") }
 
     // DEFAULT -> moderators
     // OWNER -> gods

@@ -4,8 +4,8 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.size
-import org.junit.jupiter.api.Test
 import java.util.UUID
+import org.junit.jupiter.api.Test
 
 class UserIdGeneratorTest {
 

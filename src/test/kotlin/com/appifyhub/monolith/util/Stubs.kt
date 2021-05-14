@@ -316,7 +316,7 @@ object Stubs {
 
   val tokenCreator = TokenCreator(
     id = userId,
-    authority =User.Authority.ADMIN,
+    authority = User.Authority.ADMIN,
     isStatic = false,
     origin = "Token Origin",
     ipAddress = "1.2.3.4",

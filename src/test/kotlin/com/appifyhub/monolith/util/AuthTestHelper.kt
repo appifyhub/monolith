@@ -15,13 +15,13 @@ import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.util.ext.silent
 import com.auth0.jwt.JWT
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
-import java.util.Date
-import java.util.concurrent.TimeUnit
 
 @Component
 @Profile(TestAppifyHubApplication.PROFILE)
@@ -121,19 +121,21 @@ class AuthTestHelper {
     )
 
     if (storeTokenDetails) {
-      tokenDetailsRepo.addToken(TokenDetails(
-        tokenValue = tokenValue,
-        isBlocked = false,
-        createdAt = Date(now),
-        expiresAt = Date(exp),
-        ownerId = user.id,
-        authority = user.authority,
-        origin = Stubs.userCredentialsRequest.origin!!,
-        ipAddress = null,
-        geo = null,
-        accountId = accountId,
-        isStatic = isStatic,
-      ))
+      tokenDetailsRepo.addToken(
+        TokenDetails(
+          tokenValue = tokenValue,
+          isBlocked = false,
+          createdAt = Date(now),
+          expiresAt = Date(exp),
+          ownerId = user.id,
+          authority = user.authority,
+          origin = Stubs.userCredentialsRequest.origin!!,
+          ipAddress = null,
+          geo = null,
+          accountId = accountId,
+          isStatic = isStatic,
+        )
+      )
     }
 
     tokenValue
@@ -145,7 +147,7 @@ class AuthTestHelper {
       else -> silent {
         userRepo.addUser(
           creator = Stubs.userCreator.copy(
-            userId = "username_${authority.name.toLowerCase()}",
+            userId = "username_${authority.name.lowercase()}",
             projectId = adminProject.id,
             type = User.Type.PERSONAL,
             authority = authority,
@@ -153,7 +155,7 @@ class AuthTestHelper {
           userIdType = Project.UserIdType.USERNAME,
         )
       } ?: userRepo.fetchUserByUserId(
-        id = UserId("username_${authority.name.toLowerCase()}", adminProject.id),
+        id = UserId("username_${authority.name.lowercase()}", adminProject.id),
         withTokens = false,
       )
     }

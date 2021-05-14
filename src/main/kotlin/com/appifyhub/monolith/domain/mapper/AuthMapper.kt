@@ -19,9 +19,9 @@ import com.appifyhub.monolith.security.JwtHelper.Claims.ORIGIN
 import com.appifyhub.monolith.security.JwtHelper.Claims.UNIVERSAL_ID
 import com.appifyhub.monolith.security.JwtHelper.Claims.VALUE
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
-import org.springframework.security.core.GrantedAuthority
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import org.springframework.security.core.GrantedAuthority
 
 fun TokenDetailsDbm.toDomain(
   jwtHelper: JwtHelper,

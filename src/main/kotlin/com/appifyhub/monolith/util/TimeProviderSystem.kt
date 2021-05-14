@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.util
 
-import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.Calendar
 import java.util.Date
 import java.util.TimeZone
+import org.springframework.stereotype.Component
 
 @Component(TimeProvider.SYSTEM)
 class TimeProviderSystem : TimeProvider {

@@ -26,6 +26,7 @@ import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bodyRequest
 import com.appifyhub.monolith.util.emptyUriVariables
+import java.time.Duration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,7 +41,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import java.time.Duration
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -49,6 +49,7 @@ import java.time.Duration
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
+@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class AdminAuthControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake

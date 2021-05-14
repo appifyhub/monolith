@@ -67,7 +67,7 @@ object Cleaners {
   val OrganizationPostcode = TrimNullable
   val OrganizationCity = TrimNullable
   val OrganizationCountryCode = cleansToNullable<String>("OrganizationCountryCode") {
-    it?.trim()?.takeIfNotBlank()?.take(2)?.toUpperCase()
+    it?.trim()?.takeIfNotBlank()?.take(2)?.uppercase()
   }
   val Organization = cleansToNullable<Organization>("Organization") {
     it?.copy(
@@ -78,11 +78,11 @@ object Cleaners {
       countryCode = OrganizationCountryCode.clean(it.countryCode),
     ).takeIf { orga ->
       // need at least one property set
-      !orga?.name.isNullOrEmpty()
-        || !orga?.street.isNullOrEmpty()
-        || !orga?.postcode.isNullOrEmpty()
-        || !orga?.city.isNullOrEmpty()
-        || !orga?.countryCode.isNullOrEmpty()
+      !orga?.name.isNullOrEmpty() ||
+        !orga?.street.isNullOrEmpty() ||
+        !orga?.postcode.isNullOrEmpty() ||
+        !orga?.city.isNullOrEmpty() ||
+        !orga?.countryCode.isNullOrEmpty()
     }
   }
 

@@ -2,6 +2,7 @@ import com.github.breadmoirai.githubreleaseplugin.ChangeLogSupplier
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.joda.time.Instant
 import org.joda.time.format.DateTimeFormat
 
@@ -9,16 +10,16 @@ import org.joda.time.format.DateTimeFormat
 
 buildscript {
   repositories {
-    jcenter()
     mavenCentral()
   }
   dependencies {
     classpath("joda-time:joda-time:+")
+    classpath("org.jlleitschuh.gradle:ktlint-gradle:10.+")
   }
 }
 
 plugins {
-  val kotlinVersion = "1.4.31"
+  val kotlinVersion = "1.5.0"
   kotlin("jvm") version kotlinVersion
   kotlin("plugin.spring") version kotlinVersion
   kotlin("plugin.jpa") version kotlinVersion
@@ -26,13 +27,12 @@ plugins {
   kotlin("plugin.allopen") version kotlinVersion
   kotlin("kapt") version kotlinVersion
 
-  id("org.springframework.boot") version "2.4.1"
+  id("org.springframework.boot") version "2.4.5"
   id("io.spring.dependency-management") version "1.0.10.RELEASE"
   id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
 repositories {
-  jcenter()
   mavenCentral()
 }
 
@@ -215,12 +215,19 @@ githubRelease {
     }
   )
 
-  releaseAssets(arrayOf(
-    file("${project.buildDir}/libs/$artifact.jar")
-  ))
+  releaseAssets(
+    arrayOf(
+      file("${project.buildDir}/libs/$artifact.jar")
+    )
+  )
 }
-
 apply(plugin = "com.github.breadmoirai.github-release")
+
+apply(plugin = "org.jlleitschuh.gradle.ktlint")
+configure<KtlintExtension> {
+  verbose.set(true)
+  disabledRules.set(setOf("import-ordering", "no-blank-line-before-rbrace"))
+}
 
 // endregion
 
