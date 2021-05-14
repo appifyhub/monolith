@@ -38,6 +38,13 @@ To only run quality checks and test (this might build), run:
 ./gradlew check
 ```
 
+To run Kotlin lint checks locally, the recommended way is to install the **KtLint plugin** from your IntelliJ IDEA > Preferences > Plugins. KtLint configuration is in `.editorconfig`.
+KtLint can be run using Gradle:
+
+```bash
+./gradlew ktlintCheck
+```
+
 ## Reference Documentation
 
 ### Top-level Spring reference

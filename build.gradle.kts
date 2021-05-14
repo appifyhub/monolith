@@ -2,6 +2,7 @@ import com.github.breadmoirai.githubreleaseplugin.ChangeLogSupplier
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.joda.time.Instant
 import org.joda.time.format.DateTimeFormat
 
@@ -13,6 +14,7 @@ buildscript {
   }
   dependencies {
     classpath("joda-time:joda-time:+")
+    classpath("org.jlleitschuh.gradle:ktlint-gradle:10.+")
   }
 }
 
@@ -213,12 +215,19 @@ githubRelease {
     }
   )
 
-  releaseAssets(arrayOf(
-    file("${project.buildDir}/libs/$artifact.jar")
-  ))
+  releaseAssets(
+    arrayOf(
+      file("${project.buildDir}/libs/$artifact.jar")
+    )
+  )
 }
-
 apply(plugin = "com.github.breadmoirai.github-release")
+
+apply(plugin = "org.jlleitschuh.gradle.ktlint")
+configure<KtlintExtension> {
+  verbose.set(true)
+  disabledRules.set(setOf("import-ordering", "no-blank-line-before-rbrace"))
+}
 
 // endregion
 

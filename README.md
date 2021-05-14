@@ -4,8 +4,8 @@
 
 `WORK IN PROGRESS`
 
-See also:
+See:
 
-  - [How to run using Docker Compose](./docker)
-  - [License](LICENSE)
-  - [How to contribute](CONTRIBUTING.md)
+- [How to run using Docker Compose](./docker)
+- [License](LICENSE)
+- [How to contribute](CONTRIBUTING.md)
