@@ -8,9 +8,9 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.storage.dao.TokenDetailsDao
 import com.appifyhub.monolith.util.TimeProvider
+import java.util.concurrent.TimeUnit
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
-import java.util.concurrent.TimeUnit
 
 @Repository
 class TokenDetailsRepositoryImpl(

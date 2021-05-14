@@ -29,6 +29,8 @@ import com.appifyhub.monolith.repository.user.UserIdGenerator
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
+import java.time.temporal.ChronoUnit
+import java.util.Date
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,8 +42,6 @@ import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
-import java.time.temporal.ChronoUnit
-import java.util.Date
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -306,23 +306,25 @@ class UserServiceImplTest {
     )
 
     assertThat(service.addUser(creator, UserIdType.RANDOM))
-      .isDataClassEqualTo(User(
-        id = UserId(userId = "user_id", projectId = Stubs.project.id),
-        signature = "87654321",
-        name = null,
-        type = Type.PERSONAL,
-        authority = Authority.DEFAULT,
-        allowsSpam = false,
-        contact = null,
-        contactType = ContactType.CUSTOM,
-        verificationToken = null,
-        birthday = null,
-        createdAt = timeProvider.currentDate,
-        updatedAt = timeProvider.currentDate,
-        company = null,
-        ownedTokens = emptyList(),
-        account = null,
-      ))
+      .isDataClassEqualTo(
+        User(
+          id = UserId(userId = "user_id", projectId = Stubs.project.id),
+          signature = "87654321",
+          name = null,
+          type = Type.PERSONAL,
+          authority = Authority.DEFAULT,
+          allowsSpam = false,
+          contact = null,
+          contactType = ContactType.CUSTOM,
+          verificationToken = null,
+          birthday = null,
+          createdAt = timeProvider.currentDate,
+          updatedAt = timeProvider.currentDate,
+          company = null,
+          ownedTokens = emptyList(),
+          account = null,
+        )
+      )
   }
 
   // Fetching

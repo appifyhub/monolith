@@ -10,8 +10,8 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.ext.empty
 import com.nhaarman.mockitokotlin2.mock
-import org.junit.jupiter.api.Test
 import java.util.Date
+import org.junit.jupiter.api.Test
 
 class CleanersTest {
 

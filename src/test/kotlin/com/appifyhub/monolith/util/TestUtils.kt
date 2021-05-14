@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.util
 
+import java.nio.charset.Charset
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import java.nio.charset.Charset
 
 fun emptyRequest() = HttpEntity<Any?>(
   HttpHeaders().apply {

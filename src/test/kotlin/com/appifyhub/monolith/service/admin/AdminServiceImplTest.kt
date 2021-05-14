@@ -22,6 +22,8 @@ import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
+import java.time.temporal.ChronoUnit
+import javax.annotation.Resource
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,8 +35,6 @@ import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
-import java.time.temporal.ChronoUnit
-import javax.annotation.Resource
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -248,9 +248,11 @@ class AdminServiceImplTest {
     assertThat {
       service.updateAccount(
         Stubs.accountUpdater.copy(
-          addedOwners = Settable(listOf(
-            Stubs.user.copy(id = UserId("\t\n", -1)),
-          ))
+          addedOwners = Settable(
+            listOf(
+              Stubs.user.copy(id = UserId("\t\n", -1)),
+            )
+          )
         )
       )
     }
@@ -265,9 +267,11 @@ class AdminServiceImplTest {
     assertThat {
       service.updateAccount(
         Stubs.accountUpdater.copy(
-          removedOwners = Settable(listOf(
-            Stubs.user.copy(id = UserId("\t\n", -1)),
-          ))
+          removedOwners = Settable(
+            listOf(
+              Stubs.user.copy(id = UserId("\t\n", -1)),
+            )
+          )
         )
       )
     }
@@ -289,10 +293,12 @@ class AdminServiceImplTest {
     assertAll {
       // adding owners
       assertThat(
-        service.updateAccount(AccountUpdater(
-          id = account.id,
-          addedOwners = Settable(listOf(randomModerator)),
-        )).cleanDates()
+        service.updateAccount(
+          AccountUpdater(
+            id = account.id,
+            addedOwners = Settable(listOf(randomModerator)),
+          )
+        ).cleanDates()
       ).isDataClassEqualTo(
         account.copy(
           owners = listOf(randomModeratorUpdated),
@@ -301,11 +307,13 @@ class AdminServiceImplTest {
 
       // removing owners and adding new
       assertThat(
-        service.updateAccount(AccountUpdater(
-          id = account.id,
-          addedOwners = Settable(listOf(randomAdmin)),
-          removedOwners = Settable(listOf(randomModeratorUpdated)),
-        )).cleanDates()
+        service.updateAccount(
+          AccountUpdater(
+            id = account.id,
+            addedOwners = Settable(listOf(randomAdmin)),
+            removedOwners = Settable(listOf(randomModeratorUpdated)),
+          )
+        ).cleanDates()
       ).isDataClassEqualTo(
         account.copy(
           owners = listOf(randomAdminUpdated),
@@ -368,10 +376,12 @@ class AdminServiceImplTest {
       creator = Stubs.userCreator.copy(projectId = project.id),
       userIdType = project.userIdType,
     )
-    service.updateAccount(AccountUpdater(
-      id = account.id,
-      addedOwners = Settable(listOf(user)),
-    ))
+    service.updateAccount(
+      AccountUpdater(
+        id = account.id,
+        addedOwners = Settable(listOf(user)),
+      )
+    )
 
     assertAll {
       assertThat(service.fetchAccountById(account.id).id)
