@@ -9,9 +9,9 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.empty
-import org.junit.jupiter.api.Test
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import org.junit.jupiter.api.Test
 
 class ValidatorsTest {
 

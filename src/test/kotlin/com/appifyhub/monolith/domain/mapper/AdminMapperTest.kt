@@ -10,8 +10,8 @@ import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import org.junit.jupiter.api.Test
 import java.util.Date
+import org.junit.jupiter.api.Test
 
 class AdminMapperTest {
 

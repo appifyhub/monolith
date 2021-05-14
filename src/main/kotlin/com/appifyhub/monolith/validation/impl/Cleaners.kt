@@ -78,11 +78,11 @@ object Cleaners {
       countryCode = OrganizationCountryCode.clean(it.countryCode),
     ).takeIf { orga ->
       // need at least one property set
-      !orga?.name.isNullOrEmpty()
-        || !orga?.street.isNullOrEmpty()
-        || !orga?.postcode.isNullOrEmpty()
-        || !orga?.city.isNullOrEmpty()
-        || !orga?.countryCode.isNullOrEmpty()
+      !orga?.name.isNullOrEmpty() ||
+        !orga?.street.isNullOrEmpty() ||
+        !orga?.postcode.isNullOrEmpty() ||
+        !orga?.city.isNullOrEmpty() ||
+        !orga?.countryCode.isNullOrEmpty()
     }
   }
 

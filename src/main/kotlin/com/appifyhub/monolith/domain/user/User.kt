@@ -4,7 +4,6 @@ import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import org.springframework.security.core.GrantedAuthority
 import java.util.Date
-import java.util.Locale
 
 data class User(
   val id: UserId,

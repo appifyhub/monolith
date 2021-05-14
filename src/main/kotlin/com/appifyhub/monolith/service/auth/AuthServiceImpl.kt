@@ -143,14 +143,16 @@ class AuthServiceImpl(
     val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
     val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
 
-    return authRepository.createToken(TokenCreator(
-      id = user.id,
-      authority = user.authority,
-      isStatic = false,
-      origin = normalizedOrigin,
-      ipAddress = normalizedIp,
-      geo = null, // TODO (but nothing for now)
-    )).tokenValue
+    return authRepository.createToken(
+      TokenCreator(
+        id = user.id,
+        authority = user.authority,
+        isStatic = false,
+        origin = normalizedOrigin,
+        ipAddress = normalizedIp,
+        geo = null, // TODO (but nothing for now)
+      )
+    ).tokenValue
   }
 
   override fun refreshAuth(authData: Authentication, ipAddress: String?): String {
@@ -166,14 +168,16 @@ class AuthServiceImpl(
     authRepository.unauthorizeToken(token)
 
     // create a new token for this user
-    return authRepository.createToken(TokenCreator(
-      id = tokenDetails.ownerId,
-      authority = tokenDetails.authority,
-      isStatic = tokenDetails.isStatic,
-      origin = tokenDetails.origin,
-      ipAddress = normalizedIp,
-      geo = null, // TODO (but nothing for now)
-    )).tokenValue
+    return authRepository.createToken(
+      TokenCreator(
+        id = tokenDetails.ownerId,
+        authority = tokenDetails.authority,
+        isStatic = tokenDetails.isStatic,
+        origin = tokenDetails.origin,
+        ipAddress = normalizedIp,
+        geo = null, // TODO (but nothing for now)
+      )
+    ).tokenValue
   }
 
   override fun fetchTokenDetails(authData: Authentication): TokenDetails {

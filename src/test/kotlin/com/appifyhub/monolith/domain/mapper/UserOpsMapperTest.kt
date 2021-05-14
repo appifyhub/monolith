@@ -11,8 +11,8 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import org.junit.jupiter.api.Test
 import java.util.Date
+import org.junit.jupiter.api.Test
 
 class UserOpsMapperTest {
 

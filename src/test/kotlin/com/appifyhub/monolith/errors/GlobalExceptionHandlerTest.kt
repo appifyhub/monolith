@@ -9,6 +9,8 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.verifyZeroInteractions
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.junit.jupiter.api.Test
 import org.mockito.Answers.RETURNS_DEEP_STUBS
 import org.springframework.http.HttpHeaders
@@ -18,8 +20,6 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.server.ResponseStatusException
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 class GlobalExceptionHandlerTest {
 
@@ -36,9 +36,11 @@ class GlobalExceptionHandlerTest {
     verifyZeroInteractions(request)
     verify(response).status = HttpStatus.UNAUTHORIZED.value()
     verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
-    verify(response.outputStream).println(testMapper.writeValueAsString(
-      MessageResponse(message = "Unauthorized : ${exception.message}")
-    ))
+    verify(response.outputStream).println(
+      testMapper.writeValueAsString(
+        MessageResponse(message = "Unauthorized : ${exception.message}")
+      )
+    )
   }
 
   @Test fun `handle authentication exception`() {

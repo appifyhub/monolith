@@ -1,5 +1,8 @@
 package com.appifyhub.monolith.security
 
+import com.appifyhub.monolith.controller.auth.UserAuthController.Endpoints as UserAuthEndpoints
+import com.appifyhub.monolith.controller.common.Endpoints as CommonEndpoints
+import com.appifyhub.monolith.controller.heartbeat.HeartbeatController.Endpoints as HeartbeatEndpoints
 import com.appifyhub.monolith.errors.GlobalExceptionHandler
 import com.appifyhub.monolith.repository.user.UserRepository
 import org.springframework.context.annotation.Bean
@@ -8,9 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
-import com.appifyhub.monolith.controller.auth.UserAuthController.Endpoints as UserAuthEndpoints
-import com.appifyhub.monolith.controller.common.Endpoints as CommonEndpoints
-import com.appifyhub.monolith.controller.heartbeat.HeartbeatController.Endpoints as HeartbeatEndpoints
 
 @Component
 class WebSecurityConfiguration(
