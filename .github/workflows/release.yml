@@ -35,6 +35,11 @@ jobs:
       - name: Run KtLint
         run: ./gradlew ktlintCheck
 
+      - name: Pull latest IP Geolocation data
+        env:
+          IP_2_LOCATION_TOKEN: ${{ secrets.IP_2_LOCATION_TOKEN }}
+        run: ./scripts/pull_ip_geo.sh
+
       - name: Build and test service
         env:
           BUILD_QUALITY: "GA"
