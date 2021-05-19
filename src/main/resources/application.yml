@@ -29,6 +29,8 @@ app:
         name: ${SEED_OWNER_NAME:Owner}
         signature: ${SEED_OWNER_SECRET:}
         email: ${SEED_OWNER_EMAIL:admin@appifyhub.com}
+  ip2location:
+    file: ${IP_2_LOCATION_FILE:}
 
 logging:
   level:
