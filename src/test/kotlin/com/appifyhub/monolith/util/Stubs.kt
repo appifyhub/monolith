@@ -77,6 +77,17 @@ object Stubs {
     countryCode = "DE",
   )
 
+  val ipAddress = "173.85.251.191"
+
+  val geo = Geolocation(
+    countryCode = "US",
+    countryName = "United States of America",
+    region = "Minnesota",
+    city = "Lakeville",
+  )
+
+  val geoMerged = "US, United States of America, Minnesota, Lakeville"
+
   var tokenDetails = TokenDetails(
     tokenValue = tokenValue,
     isBlocked = true,
@@ -85,8 +96,8 @@ object Stubs {
     ownerId = userId,
     authority = User.Authority.ADMIN,
     origin = "Token Origin",
-    ipAddress = "1.2.3.4",
-    geo = "geo",
+    ipAddress = ipAddress,
+    geo = geoMerged,
     accountId = 1,
     isStatic = false,
   )
@@ -138,15 +149,6 @@ object Stubs {
     version = 1,
     isInitialized = true,
   )
-
-  val geo = Geolocation(
-    countryCode = "US",
-    countryName = "United States of America",
-    region = "Minnesota",
-    city = "Lakeville",
-  )
-
-  val geoMerged = "US, United States of America, Minnesota, Lakeville"
 
   // endregion
 
@@ -223,8 +225,8 @@ object Stubs {
     ownerId = userId,
     authority = User.Authority.ADMIN,
     origin = "Token Origin 1",
-    ipAddress = "2.3.4.5",
-    geo = "geo 1",
+    ipAddress = ipAddress.reversed(),
+    geo = "$geoMerged 1",
     accountId = 1,
     isStatic = false,
   )
@@ -329,8 +331,8 @@ object Stubs {
     authority = User.Authority.ADMIN,
     isStatic = false,
     origin = "Token Origin",
-    ipAddress = "1.2.3.4",
-    geo = "geo",
+    ipAddress = ipAddress,
+    geo = geoMerged,
   )
 
   val jwtClaims: JwtClaims = mapOf(
@@ -342,8 +344,8 @@ object Stubs {
     Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.expiresAt.time).toInt(),
     Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
     Claims.ORIGIN to "Token Origin",
-    Claims.IP_ADDRESS to "1.2.3.4",
-    Claims.GEO to "geo",
+    Claims.IP_ADDRESS to ipAddress,
+    Claims.GEO to geoMerged,
     Claims.ACCOUNT_ID to account.id,
     Claims.IS_STATIC to false,
   )
@@ -453,8 +455,8 @@ object Stubs {
     authority = "ADMIN",
     isBlocked = true,
     origin = "Token Origin",
-    ipAddress = "1.2.3.4",
-    geo = "geo",
+    ipAddress = ipAddress,
+    geo = geoMerged,
     isStatic = false,
   )
 

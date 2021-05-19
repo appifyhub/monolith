@@ -8,6 +8,7 @@ import assertk.assertions.isFailure
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.storage.dao.GeolocationDao
+import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -52,15 +53,8 @@ class GeolocationDaoLocalFileTest {
   }
 
   @Test fun `fetching USA IP works`() {
-    assertThat(dao.fetchGeolocationForIp("173.85.251.191"))
-      .isDataClassEqualTo(
-        Geolocation(
-          countryCode = "US",
-          countryName = "United States of America",
-          region = "Minnesota",
-          city = "Lakeville",
-        )
-      )
+    assertThat(dao.fetchGeolocationForIp(Stubs.ipAddress))
+      .isDataClassEqualTo(Stubs.geo)
   }
 
   @Test fun `fetching German IP works`() {

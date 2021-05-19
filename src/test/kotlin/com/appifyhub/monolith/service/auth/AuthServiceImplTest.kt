@@ -590,12 +590,13 @@ class AuthServiceImplTest {
   }
 
   @Test fun `create token succeeds with valid user data and non-empty optionals`() {
-    assertThat(service.createTokenFor(authHelper.defaultUser, origin = "Some Origin", ipAddress = "1.2.3.4"))
+    assertThat(service.createTokenFor(authHelper.defaultUser, origin = "Some Origin", ipAddress = Stubs.ipAddress))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
         contains("Some Origin")
-        contains("1.2.3.4")
+        contains(Stubs.ipAddress)
+        contains(Stubs.geoMerged)
         contains(DEFAULT.name)
         contains(authHelper.defaultUser.id.toUniversalFormat())
       }
@@ -608,6 +609,7 @@ class AuthServiceImplTest {
       .all {
         doesNotContain("origin", ignoreCase = true)
         doesNotContain("ip_address", ignoreCase = true)
+        doesNotContain("geo", ignoreCase = true)
         contains(DEFAULT.name)
         contains(MODERATOR.name)
         contains(ADMIN.name)

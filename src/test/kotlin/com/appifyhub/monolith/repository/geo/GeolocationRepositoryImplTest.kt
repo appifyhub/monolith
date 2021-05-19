@@ -21,6 +21,11 @@ class GeolocationRepositoryImplTest {
     geolocationDao = geolocationDao,
   )
 
+  @Test fun `repository returns null when IP is null`() {
+    assertThat(repository.fetchGeolocationForIp(null))
+      .isNull()
+  }
+
   @Test fun `repository returns null when dao throws`() {
     geolocationDao.stub {
       on { fetchGeolocationForIp(any()) } doThrow IllegalArgumentException("failed")

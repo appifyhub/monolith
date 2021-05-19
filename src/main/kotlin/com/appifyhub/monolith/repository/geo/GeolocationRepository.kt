@@ -4,6 +4,6 @@ import com.appifyhub.monolith.domain.geo.Geolocation
 
 interface GeolocationRepository {
 
-  fun fetchGeolocationForIp(ipAddress: String): Geolocation?
+  fun fetchGeolocationForIp(ipAddress: String?): Geolocation?
 
 }
