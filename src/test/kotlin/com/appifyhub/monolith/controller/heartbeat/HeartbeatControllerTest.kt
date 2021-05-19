@@ -34,6 +34,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
   classes = [TestAppifyHubApplication::class],
   webEnvironment = WebEnvironment.RANDOM_PORT,
 )
+@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class HeartbeatControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -64,7 +65,8 @@ class HeartbeatControllerTest {
         HeartbeatResponse(
           beat = timeProvider.currentInstant,
           ip = null,
-          version = "1.0.1.beta", // from test properties
+          geo = null,
+          version = "1.0.1.test", // from test properties
         )
       )
     }

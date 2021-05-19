@@ -10,5 +10,6 @@ import java.time.Instant
 data class HeartbeatResponse(
   @JsonProperty("beat_time") val beat: Instant,
   @JsonProperty("request_ip") val ip: String?,
+  @JsonProperty("request_geo") val geo: String?,
   @JsonProperty("version") val version: String,
 ) : Serializable

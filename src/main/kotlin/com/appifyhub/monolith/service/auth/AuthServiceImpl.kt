@@ -2,10 +2,12 @@ package com.appifyhub.monolith.service.auth
 
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
+import com.appifyhub.monolith.domain.mapper.mergeToString
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.auth.AuthRepository
+import com.appifyhub.monolith.repository.geo.GeolocationRepository
 import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.service.user.UserService.UserPrivilege
@@ -23,6 +25,7 @@ class AuthServiceImpl(
   private val authRepository: AuthRepository,
   private val userService: UserService,
   private val adminService: AdminService,
+  private val geoRepository: GeolocationRepository,
   private val passwordEncoder: PasswordEncoder,
 ) : AuthService {
 
@@ -150,7 +153,7 @@ class AuthServiceImpl(
         isStatic = false,
         origin = normalizedOrigin,
         ipAddress = normalizedIp,
-        geo = null, // TODO (but nothing for now)
+        geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString(),
       )
     ).tokenValue
   }
@@ -175,7 +178,7 @@ class AuthServiceImpl(
         isStatic = tokenDetails.isStatic,
         origin = tokenDetails.origin,
         ipAddress = normalizedIp,
-        geo = null, // TODO (but nothing for now)
+        geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString(),
       )
     ).tokenValue
   }

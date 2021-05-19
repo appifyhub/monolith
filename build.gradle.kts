@@ -46,7 +46,6 @@ dependencies {
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("org.springframework.boot:spring-boot-starter-web-services")
-  implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
   implementation("org.apache.httpcomponents:httpclient")
 
   // auth
@@ -63,10 +62,14 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-rest")
   implementation("org.hibernate:hibernate-core")
 
+  // helpers
+  implementation("com.ip2location:ip2location-java:8.5.+")
+  implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
+
   // annotation processors
+  kapt("org.springframework.boot:spring-boot-configuration-processor")
   implementation("org.springframework.boot:spring-boot-configuration-processor")
   annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-  kapt("org.springframework.boot:spring-boot-configuration-processor")
 
   // runtime dependencies
   runtimeOnly("com.h2database:h2")
