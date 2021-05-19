@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
@@ -137,6 +138,15 @@ object Stubs {
     version = 1,
     isInitialized = true,
   )
+
+  val geo = Geolocation(
+    countryCode = "US",
+    countryName = "United States of America",
+    region = "Minnesota",
+    city = "Lakeville",
+  )
+
+  val geoMerged = "US, United States of America, Minnesota, Lakeville"
 
   // endregion
 

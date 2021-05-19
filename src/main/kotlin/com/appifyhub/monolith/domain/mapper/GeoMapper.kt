@@ -17,4 +17,6 @@ fun IPResult.toDomain(): Geolocation? = Geolocation(
     it.city != null
 }
 
-private fun String?.takeIfValid() = this?.trim()?.takeIf { it.isNotBlank() && it != MISSING_PROP }
+fun Geolocation.mergeToString(): String = listOfNotNull(countryCode, countryName, region, city).joinToString(", ")
+
+private fun String?.takeIfValid(): String? = this?.trim()?.takeIf { it.isNotBlank() && it != MISSING_PROP }
