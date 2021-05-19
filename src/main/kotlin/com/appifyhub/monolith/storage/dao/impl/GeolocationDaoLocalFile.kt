@@ -3,25 +3,34 @@ package com.appifyhub.monolith.storage.dao.impl
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.storage.dao.GeolocationDao
+import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import com.ip2location.IP2Location
-import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 
-private const val BIN_PATH = "ip2location/IP2Location.bin"
+private const val CLASSPATH_LOCATIONS_FILE = "ip2location/IP2Location.bin"
 
 @Component
 class GeolocationDaoLocalFile : GeolocationDao {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
+  @Value("\${app.ip2location.file}")
+  private var externalLocationsFile: String? = null
+
   private val ipLocation = IP2Location()
 
   @PostConstruct fun setup() {
-    val loader = Thread.currentThread().contextClassLoader
-    val v6Resource = loader.getResource(BIN_PATH)
-    ipLocation.Open(v6Resource!!.file)
+    val filePath = externalLocationsFile?.takeIfNotBlank()?.trim()
+      ?: Thread.currentThread()
+        .contextClassLoader
+        .getResource(CLASSPATH_LOCATIONS_FILE)!!
+        .file
+
+    ipLocation.Open(filePath)
   }
 
   @PreDestroy fun teardown() = try {
