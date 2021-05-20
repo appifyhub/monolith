@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
 
       - name: Print build name
         run: echo "$GITHUB_ACTOR is building '$GITHUB_REPOSITORY' (commit $GITHUB_SHA)"
@@ -77,3 +79,9 @@ jobs:
           echo "Publishing images with version '$VERSION'..."
           docker push appifyhub/service:"$VERSION".beta
           docker push appifyhub/service:latest_beta
+
+      - name: Publish to GitHub Releases
+        env:
+          BUILD_QUALITY: "Beta"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew githubRelease
