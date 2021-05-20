@@ -42,15 +42,15 @@ Here's what's possible for each of the child directories.
   - `local/h2/` - This is essentially the same as `local/`, with one key difference: instead of PostgreSQL,
     this configuration launches the service with a built-in `H2` database that runs in-memory.
     
-  - `qa` - This configuration pulls the `latest_qa` image from 
-    [GitHub Packages](https://github.com/appifyhub/monolith/packages/549093?version=latest_qa).
+  - `qa` - This configuration pulls the `latest_pr` image from 
+    [Docker Hub](https://hub.docker.com/r/appifyhub/service/tags?page=1&ordering=last_updated&name=latest_pr).
     Nothing is built. To reconfigure it for another version, you can edit the `docker-compose.yml` config locally.
     
   - `beta` - Similarly to `qa`, this configuration pulls the `latest_beta` image from
-    [GitHub Packages](https://github.com/appifyhub/monolith/packages/549093?version=latest_beta).
+    [Docker Hub](https://hub.docker.com/r/appifyhub/service/tags?page=1&ordering=last_updated&name=latest_beta).
     
   - `prod` - Similarly to `beta` and `qa`, this configuration pulls the `latest` (prod) image from
-    [GitHub Packages](https://github.com/appifyhub/monolith/packages/549093).
+    [Docker Hub](https://hub.docker.com/r/appifyhub/service/tags?page=1&ordering=last_updated&name=latest).
 
 All configurations should (theoretically) work well with either PostgreSQL or H2, if reconfigured to use H2.
 For information on how to change that configuration, see the next section.
