@@ -9,7 +9,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 
 interface UserService {
 
-  enum class UserPrivilege(val level: User.Authority) {
+  enum class UserPrivilege(val minLevel: User.Authority) {
     READ(User.Authority.MODERATOR),
     WRITE(User.Authority.ADMIN),
     ;

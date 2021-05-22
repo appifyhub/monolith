@@ -1,16 +1,12 @@
 package com.appifyhub.monolith.repository.auth
 
-import assertk.all
 import assertk.assertAll
 import assertk.assertThat
-import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isFalse
 import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
-import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.stubAccount
@@ -153,14 +149,14 @@ class AuthRepositoryImplTest {
     val jwt = newJwt()
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat(repository.checkIsValid(jwt, shallow = true))
+    assertThat(repository.isTokenValid(jwt, shallow = true))
       .isFalse()
   }
 
   @Test fun `check is valid is true when token is non-expired (shallow)`() {
     val jwt = newJwt()
 
-    assertThat(repository.checkIsValid(jwt, shallow = true))
+    assertThat(repository.isTokenValid(jwt, shallow = true))
       .isTrue()
   }
 
@@ -170,7 +166,7 @@ class AuthRepositoryImplTest {
     }
     val jwt = newJwt()
 
-    assertThat(repository.checkIsValid(jwt, shallow = false))
+    assertThat(repository.isTokenValid(jwt, shallow = false))
       .isFalse()
   }
 
@@ -181,7 +177,7 @@ class AuthRepositoryImplTest {
     }
     val jwt = newJwt()
 
-    assertThat(repository.checkIsValid(jwt, shallow = false))
+    assertThat(repository.isTokenValid(jwt, shallow = false))
       .isFalse()
   }
 
@@ -192,67 +188,28 @@ class AuthRepositoryImplTest {
     }
     val jwt = newJwt()
 
-    assertThat(repository.checkIsValid(jwt, shallow = false))
+    assertThat(repository.isTokenValid(jwt, shallow = false))
       .isTrue()
   }
 
-  @Test fun `require valid throws when token is expired (shallow)`() {
-    val jwt = newJwt()
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat { repository.requireValid(jwt, shallow = true) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Token expired")
-      }
-  }
-
-  @Test fun `require valid succeeds when token is non-expired (shallow)`() {
-    val jwt = newJwt()
-
-    assertThat { repository.requireValid(jwt, shallow = true) }
-      .isSuccess()
-  }
-
-  @Test fun `require valid throws when token is blocked`() {
+  @Test fun `check is static is false when token is non-static`() {
     tokenDetailsRepo.stub {
-      onGeneric { checkIsBlocked(any()) } doReturn true
+      onGeneric { checkIsStatic(any()) } doReturn false
     }
     val jwt = newJwt()
 
-    assertThat { repository.requireValid(jwt, shallow = false) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Token is blocked")
-      }
+    assertThat(repository.isTokenStatic(jwt))
+      .isFalse()
   }
 
-  @Test fun `require valid throws when token is expired`() {
+  @Test fun `check is static is true when token is static`() {
     tokenDetailsRepo.stub {
-      onGeneric { checkIsBlocked(any()) } doReturn false
-      onGeneric { checkIsExpired(any()) } doReturn true
+      onGeneric { checkIsStatic(any()) } doReturn true
     }
     val jwt = newJwt()
 
-    assertThat { repository.requireValid(jwt, shallow = false) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Token expired")
-      }
-  }
-
-  @Test fun `require valid succeeds when token is valid`() {
-    tokenDetailsRepo.stub {
-      onGeneric { checkIsBlocked(any()) } doReturn false
-      onGeneric { checkIsExpired(any()) } doReturn false
-    }
-    val jwt = newJwt()
-
-    assertThat { repository.requireValid(jwt, shallow = false) }
-      .isSuccess()
+    assertThat(repository.isTokenStatic(jwt))
+      .isTrue()
   }
 
   @Test fun `resolve shallow user succeeds with all properties`() {

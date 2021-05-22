@@ -2,7 +2,10 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -44,9 +47,16 @@ class AuthTestHelper {
   val adminUser: User
     get() = ensureUser(Authority.ADMIN)
 
-  fun newStubToken() = convertTokenToJwt(createStubToken())
+  fun newStubJwt(isStatic: Boolean = false) = convertTokenToJwt(
+    tokenValue = createStubToken(isStatic = isStatic),
+  )
 
-  fun newRealToken(authority: Authority) = convertTokenToJwt(createUserToken(authority))
+  fun newRealJwt(authority: Authority, isStatic: Boolean = false) = convertTokenToJwt(
+    tokenValue = createUserToken(
+      authority = authority,
+      isStatic = isStatic,
+    )
+  )
 
   fun fetchLastTokenOf(user: User): TokenDetails =
     tokenDetailsRepo.fetchAllTokens(
@@ -57,22 +67,66 @@ class AuthTestHelper {
   fun fetchTokenDetailsFor(tokenValue: String): TokenDetails =
     jwtHelper.extractPropertiesFromJwt(tokenValue).toTokenDetails()
 
-  fun isAuthorized(jwt: JwtAuthenticationToken) = authRepo.checkIsValid(jwt, shallow = false)
+  fun isAuthorized(jwt: JwtAuthenticationToken) = authRepo.isTokenValid(jwt, shallow = false)
 
-  fun isAuthorized(tokenValue: String) = authRepo.checkIsValid(convertTokenToJwt(tokenValue), shallow = false)
+  fun isAuthorized(tokenValue: String) = authRepo.isTokenValid(convertTokenToJwt(tokenValue), shallow = false)
 
-  private fun createStubToken(): String = newToken(
+  fun ensureUser(authority: Authority, forceNewOwner: Boolean = false): User =
+    when {
+      authority == Authority.OWNER && !forceNewOwner -> ownerUser
+      else -> silent {
+        userRepo.addUser(
+          creator = Stubs.userCreator.copy(
+            userId = "username_${authority.name.lowercase()}",
+            projectId = adminProject.id,
+            type = User.Type.PERSONAL,
+            authority = authority,
+          ),
+          userIdType = Project.UserIdType.USERNAME,
+        )
+      } ?: userRepo.fetchUserByUserId(
+        id = UserId("username_${authority.name.lowercase()}", adminProject.id),
+        withTokens = false,
+      )
+    }
+
+  fun ensureProject(forceNewProject: Boolean = false): Project {
+    if (!forceNewProject) return adminProject
+
+    return adminRepo.addAccount().let { account ->
+      val owner = ensureUser(Authority.OWNER, forceNewOwner = true)
+      adminRepo.updateAccount(AccountUpdater(id = account.id, addedOwners = Settable(listOf(owner))))
+      adminRepo.addProject(
+        ProjectCreator(
+          account = account,
+          name = "Commercial Project for Account #${account.id}",
+          type = Project.Type.COMMERCIAL,
+          status = Project.Status.ACTIVE,
+          userIdType = Project.UserIdType.USERNAME
+        )
+      )
+    }
+  }
+
+// Helper's helpers?
+
+  private fun createStubToken(isStatic: Boolean): String = newToken(
     user = Stubs.user,
     storeTokenDetails = false,
     accountId = Stubs.account.id,
+    isStatic = isStatic,
   )
 
-  private fun createUserToken(authority: Authority) = ensureUser(authority)
+  private fun createUserToken(
+    authority: Authority,
+    isStatic: Boolean,
+  ) = ensureUser(authority)
     .let { user ->
       newToken(
         user = user,
         storeTokenDetails = true,
         accountId = user.account?.id,
+        isStatic = isStatic && authority == Authority.OWNER,
       )
     }
 
@@ -97,8 +151,8 @@ class AuthTestHelper {
   private fun newToken(
     user: User,
     storeTokenDetails: Boolean,
+    isStatic: Boolean,
     accountId: Long? = null,
-    isStatic: Boolean = false,
   ): String = with(timeProvider) {
     // avoid double time call, 2 values would be returned from a mock provider
     val now = currentMillis
@@ -140,24 +194,5 @@ class AuthTestHelper {
 
     tokenValue
   }
-
-  fun ensureUser(authority: Authority): User =
-    when (authority) {
-      Authority.OWNER -> ownerUser
-      else -> silent {
-        userRepo.addUser(
-          creator = Stubs.userCreator.copy(
-            userId = "username_${authority.name.lowercase()}",
-            projectId = adminProject.id,
-            type = User.Type.PERSONAL,
-            authority = authority,
-          ),
-          userIdType = Project.UserIdType.USERNAME,
-        )
-      } ?: userRepo.fetchUserByUserId(
-        id = UserId("username_${authority.name.lowercase()}", adminProject.id),
-        withTokens = false,
-      )
-    }
 
 }

@@ -126,7 +126,7 @@ class AdminAuthControllerTest {
 
   @Test fun `get any user tokens succeeds for self`() {
     val user = authTestHelper.adminUser
-    val token = authTestHelper.newRealToken(ADMIN).token.tokenValue
+    val token = authTestHelper.newRealJwt(ADMIN).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
@@ -147,9 +147,9 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `get any user tokens succeeds for lower rank`() {
-    val adminToken = authTestHelper.newRealToken(ADMIN).token.tokenValue
+    val adminToken = authTestHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val userToken = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    val userToken = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
     val user = authTestHelper.defaultUser
 
     assertThat(
@@ -190,9 +190,9 @@ class AdminAuthControllerTest {
 
   @Test fun `unauth any user succeeds for self`() {
     val user = authTestHelper.adminUser
-    val token1 = authTestHelper.newRealToken(ADMIN).token.tokenValue
+    val token1 = authTestHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealToken(ADMIN).token.tokenValue
+    val token2 = authTestHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
 
     assertAll {
@@ -218,11 +218,11 @@ class AdminAuthControllerTest {
 
   @Test fun `unauth any user succeeds for lower rank`() {
     val user = authTestHelper.defaultUser
-    val adminToken = authTestHelper.newRealToken(ADMIN).token.tokenValue
+    val adminToken = authTestHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token1 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    val token1 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    val token2 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
