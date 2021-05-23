@@ -39,7 +39,10 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
 
   @Value("\${app.security.jwt.default-expiration-days}")
-  private var expirationInDays: Int = 1
+  private var defaultJwtExpDays: Int = 1
+
+  @Value("\${app.security.jwt.static-expiration-days}")
+  private var staticJwtExpDays: Int = 10
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -66,8 +69,9 @@ class AuthRepositoryImpl(
 
     // prepare token data
     val universalId = creator.id.toUniversalFormat()
+    val expDays = if (creator.isStatic) staticJwtExpDays else defaultJwtExpDays
     val currentCalendar = timeProvider.currentCalendar
-    val expirationCalendar = timeProvider.currentCalendar.apply { add(Calendar.DAY_OF_MONTH, expirationInDays) }
+    val expirationCalendar = timeProvider.currentCalendar.apply { add(Calendar.DAY_OF_MONTH, expDays) }
     val authoritiesEncoded = creator.authority.allAuthorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
     val accountId = adminRepository.getAdminProject()
       .takeIf { adminProject -> adminProject.id == creator.id.projectId }

@@ -5,6 +5,7 @@ import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
+import com.appifyhub.monolith.network.auth.ApiKeyRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -29,6 +30,7 @@ class AdminAuthController(
 
   object Endpoints {
     const val ADMIN_AUTH = UserAuthController.Endpoints.ADMIN_AUTH
+    const val ADMIN_API_KEY = UserAuthController.Endpoints.ADMIN_API_KEY
 
     const val ANY_USER_AUTH = UserAuthController.Endpoints.ANY_USER_AUTH
     const val ANY_USER_TOKENS = UserAuthController.Endpoints.ANY_USER_TOKENS
@@ -47,6 +49,18 @@ class AdminAuthController(
     val user = authService.resolveAdmin(creds.universalId, creds.secret)
     val token = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
     return tokenResponseOf(token)
+  }
+
+  @PostMapping(Endpoints.ADMIN_API_KEY)
+  fun createApiKey(
+    authentication: Authentication,
+    @RequestBody keyData: ApiKeyRequest,
+  ): TokenResponse {
+    log.debug("[POST] create API key")
+
+    val authUser = authService.resolveShallowSelf(authentication)
+    val apiKey = authService.createStaticTokenFor(authUser, keyData.origin, getRequestIpAddress())
+    return tokenResponseOf(apiKey)
   }
 
   // For others

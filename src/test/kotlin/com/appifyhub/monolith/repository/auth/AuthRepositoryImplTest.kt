@@ -145,6 +145,81 @@ class AuthRepositoryImplTest {
     )
   }
 
+  @Test fun `create static token succeeds with only mandatory properties`() {
+    userRepo.stub {
+      onGeneric { fetchUserByUserId(any(), any()) } doReturn Stubs.user.copy(account = null)
+    }
+    val createTime = DateTimeMapper.parseAsDateTime("2020-10-20 14:45")
+    val expireTime = DateTimeMapper.parseAsDateTime("2020-10-30 14:45")
+    timeProvider.staticTime = { createTime.time }
+
+    val creator = TokenCreator(
+      id = Stubs.userId,
+      authority = Stubs.user.authority,
+      origin = null,
+      ipAddress = null,
+      geo = null,
+      isStatic = true,
+    )
+
+    assertThat(repository.createToken(creator))
+      .isDataClassEqualTo(
+        TokenDetails(
+          tokenValue = Stubs.tokenValue,
+          isBlocked = false,
+          createdAt = createTime,
+          expiresAt = expireTime,
+          ownerId = Stubs.userId,
+          authority = Stubs.user.authority,
+          origin = null,
+          ipAddress = null,
+          geo = null,
+          accountId = null,
+          isStatic = true,
+        )
+      )
+
+    verify(jwtHelper).createJwtForClaims(
+      subject = creator.id.toUniversalFormat(),
+      claims = mapOf(
+        Claims.USER_ID to creator.id.userId,
+        Claims.PROJECT_ID to creator.id.projectId,
+        Claims.UNIVERSAL_ID to creator.id.toUniversalFormat(),
+        Claims.AUTHORITIES to "DEFAULT,MODERATOR,ADMIN", // Stubs.user is ADMIN
+        Claims.IS_STATIC to creator.isStatic,
+      ),
+      createdAt = createTime,
+      expiresAt = expireTime,
+    )
+  }
+
+  @Test fun `create static token succeeds with all properties`() {
+    val createTime = Stubs.tokenDetails.createdAt
+    val expireTime = Date(createTime.time + TimeUnit.DAYS.toMillis(10))
+    timeProvider.staticTime = { createTime.time }
+
+    assertThat(repository.createToken(Stubs.tokenCreator.copy(isStatic = true)))
+      .isDataClassEqualTo(
+        Stubs.tokenDetails.copy(
+          expiresAt = expireTime,
+          isBlocked = false,
+          isStatic = true,
+        )
+      )
+
+    verify(jwtHelper).createJwtForClaims(
+      subject = Stubs.universalUserId,
+      claims = HashMap(Stubs.jwtClaims).apply {
+        remove(Claims.VALUE)
+        remove(Claims.CREATED_AT)
+        remove(Claims.EXPIRES_AT)
+        set(Claims.IS_STATIC, true)
+      },
+      createdAt = createTime,
+      expiresAt = expireTime,
+    )
+  }
+
   @Test fun `check is valid is false when token is expired (shallow)`() {
     val jwt = newJwt()
     timeProvider.advanceBy(Duration.ofDays(2))

@@ -51,10 +51,15 @@ class AuthTestHelper {
     tokenValue = createStubToken(isStatic = isStatic),
   )
 
-  fun newRealJwt(authority: Authority, isStatic: Boolean = false) = convertTokenToJwt(
+  fun newRealJwt(
+    authority: Authority,
+    isStatic: Boolean = false,
+    forceNewOwner: Boolean = false,
+  ) = convertTokenToJwt(
     tokenValue = createUserToken(
       authority = authority,
       isStatic = isStatic,
+      forceNewOwner = forceNewOwner,
     )
   )
 
@@ -120,7 +125,8 @@ class AuthTestHelper {
   private fun createUserToken(
     authority: Authority,
     isStatic: Boolean,
-  ) = ensureUser(authority)
+    forceNewOwner: Boolean = false,
+  ) = ensureUser(authority, forceNewOwner = forceNewOwner)
     .let { user ->
       newToken(
         user = user,
