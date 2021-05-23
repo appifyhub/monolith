@@ -24,7 +24,6 @@ import com.appifyhub.monolith.security.JwtHelper.Claims.UNIVERSAL_ID
 import com.appifyhub.monolith.security.JwtHelper.Claims.USER_ID
 import com.appifyhub.monolith.util.TimeProvider
 import java.util.Calendar
-import kotlin.math.absoluteValue
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
@@ -40,17 +39,39 @@ class AuthRepositoryImpl(
 ) : AuthRepository {
 
   @Value("\${app.security.jwt.default-expiration-days}")
-  private var expirationInDays: Int = 1
+  private var defaultJwtExpDays: Int = 1
+
+  @Value("\${app.security.jwt.static-expiration-days}")
+  private var staticJwtExpDays: Int = 10
 
   private val log = LoggerFactory.getLogger(this::class.java)
+
+  override fun isTokenValid(jwt: JwtAuthenticationToken, shallow: Boolean): Boolean {
+    log.debug("Checking if token is valid $jwt [shallow $shallow]")
+
+    if (shallow) return !jwt.isExpired
+
+    val isBlocked = tokenDetailsRepository.checkIsBlocked(jwt.token.tokenValue)
+    if (isBlocked) return false
+
+    val isExpired = tokenDetailsRepository.checkIsExpired(jwt.token.tokenValue)
+    return !isExpired
+  }
+
+  override fun isTokenStatic(jwt: JwtAuthenticationToken): Boolean {
+    log.debug("Checking if token is static $jwt")
+
+    return tokenDetailsRepository.checkIsStatic(jwt.token.tokenValue)
+  }
 
   override fun createToken(creator: TokenCreator): TokenDetails {
     log.debug("Generating token for creator $creator")
 
     // prepare token data
     val universalId = creator.id.toUniversalFormat()
+    val expDays = if (creator.isStatic) staticJwtExpDays else defaultJwtExpDays
     val currentCalendar = timeProvider.currentCalendar
-    val expirationCalendar = timeProvider.currentCalendar.apply { add(Calendar.DAY_OF_MONTH, expirationInDays) }
+    val expirationCalendar = timeProvider.currentCalendar.apply { add(Calendar.DAY_OF_MONTH, expDays) }
     val authoritiesEncoded = creator.authority.allAuthorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
     val accountId = adminRepository.getAdminProject()
       .takeIf { adminProject -> adminProject.id == creator.id.projectId }
@@ -93,33 +114,6 @@ class AuthRepositoryImpl(
         isStatic = creator.isStatic,
       )
     )
-  }
-
-  override fun checkIsValid(jwt: JwtAuthenticationToken, shallow: Boolean): Boolean {
-    log.debug("Checking if token is valid $jwt [shallow $shallow]")
-
-    if (shallow) return !jwt.isExpired
-
-    val isBlocked = tokenDetailsRepository.checkIsBlocked(jwt.token.tokenValue)
-    if (isBlocked) return false
-
-    val isExpired = tokenDetailsRepository.checkIsExpired(jwt.token.tokenValue)
-    return !isExpired
-  }
-
-  override fun requireValid(jwt: JwtAuthenticationToken, shallow: Boolean) {
-    log.debug("Requiring valid token $jwt [shallow $shallow]")
-
-    if (shallow) {
-      require(!jwt.isExpired) { "Token expired ${jwt.secondsUntilExpired.absoluteValue} seconds ago" }
-      return
-    }
-
-    val isBlocked = tokenDetailsRepository.checkIsBlocked(jwt.token.tokenValue)
-    require(!isBlocked) { "Token is blocked" }
-
-    val isExpired = tokenDetailsRepository.checkIsExpired(jwt.token.tokenValue)
-    require(!isExpired) { "Token expired ${jwt.secondsUntilExpired.absoluteValue} seconds ago" }
   }
 
   override fun resolveShallowUser(jwt: JwtAuthenticationToken): User {

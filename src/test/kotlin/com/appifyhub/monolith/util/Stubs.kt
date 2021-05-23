@@ -58,6 +58,20 @@ object Stubs {
     "uKgTCrgQNcLnLX0hFpP58-s_kS1SpPsAl6266UUQJpXEJQPoZ8Q06aLI-W2vJH25" +
     "J3-IaTDFIMexa64_cA8I0Q"
 
+  // signed with debug key, will expire in 2026
+  @Suppress("SpellCheckingInspection")
+  val tokenValueStatic = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdW" +
+    "IiOiJ1c2VybmFtZSQyIiwiYWNjb3VudF9pZCI6IjEiLCJ1c2VyX2lkIjoidXNlcm" +
+    "5hbWUiLCJwcm9qZWN0X2lkIjoiMiIsImlzX3N0YXRpYyI6InRydWUiLCJvcmlnaW" +
+    "4iOiJUb2tlbiBPcmlnaW4iLCJleHAiOjE3Nzk0ODI0OTQsInVuaXZlcnNhbF9pZC" +
+    "I6InVzZXJuYW1lJDIiLCJpYXQiOjE2MjE2OTc3MzQsImF1dGhvcml0aWVzIjoiRE" +
+    "VGQVVMVCxNT0RFUkFUT1IsQURNSU4ifQ.hz8bqB2P2UdhionSyL5umquuXjZ2KKC" +
+    "81AADgzwaqkpp3rPZnyiL13VQdKbMmmC4mcg1q7_mikLERfvdN9f3E-IBMQmU_0O" +
+    "S9dzN9Il9Q1rshpzDqSCGndQZBfQT1TTFibZzAarB1zIUzSLhHsKMoOhxxNDourW" +
+    "QdfEUlmLC5jbNKh4gOPEBCvFxvTJ2SPaeONsL-aOaI9naXSIGWTOptALVGs9oTL3" +
+    "bKyAyQ-RnPt_fVpe042vBqQRlu11aZw6Nbtn4vMStwR_GCnIy9dK4AaQCjkIu1JY" +
+    "93uFL6VEbzcZd1GuteWC3PRMD0fu6O9CsGxJUTnqcT4_ifUHy0cBItQ"
+
   // endregion
 
   // region Domain Models
@@ -100,6 +114,20 @@ object Stubs {
     geo = geoMerged,
     accountId = 1,
     isStatic = false,
+  )
+
+  var tokenDetailsStatic = TokenDetails(
+    tokenValue = tokenValueStatic,
+    isBlocked = true,
+    createdAt = Date(TimeUnit.SECONDS.toMillis(1621697734)), // decode token value
+    expiresAt = Date(TimeUnit.SECONDS.toMillis(1779482494)), // decode token value
+    ownerId = userId,
+    authority = User.Authority.ADMIN,
+    origin = "Token Origin",
+    ipAddress = ipAddress,
+    geo = geoMerged,
+    accountId = 1,
+    isStatic = true,
   )
 
   var user = User(
@@ -348,6 +376,21 @@ object Stubs {
     Claims.GEO to geoMerged,
     Claims.ACCOUNT_ID to account.id,
     Claims.IS_STATIC to false,
+  )
+
+  val jwtClaimsStatic: JwtClaims = mapOf(
+    Claims.VALUE to tokenValueStatic,
+    Claims.USER_ID to userId.userId,
+    Claims.PROJECT_ID to project.id,
+    Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
+    Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetailsStatic.createdAt.time).toInt(),
+    Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetailsStatic.expiresAt.time).toInt(),
+    Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
+    Claims.ORIGIN to "Token Origin",
+    Claims.IP_ADDRESS to ipAddress,
+    Claims.GEO to geoMerged,
+    Claims.ACCOUNT_ID to account.id,
+    Claims.IS_STATIC to true,
   )
 
   // endregion

@@ -151,6 +151,36 @@ class TokenDetailsRepositoryImplTest {
       .isFalse()
   }
 
+  @Test fun `checking that non-static tokens report as non-static`() {
+    tokenDetailsDao.stub {
+      onGeneric { findById(Stubs.tokenValue) } doReturn Optional.of(Stubs.tokenDetailsDbm)
+    }
+
+    assertThat(repository.checkIsStatic(Stubs.tokenValue))
+      .isFalse()
+  }
+
+  @Test fun `checking that static tokens report as static`() {
+    jwtHelper.stub {
+      onGeneric { createJwtForClaims(any(), any(), any(), any()) } doReturn Stubs.tokenValueStatic
+      onGeneric { extractPropertiesFromJwt(any()) } doReturn Stubs.jwtClaimsStatic
+    }
+    tokenDetailsDao.stub {
+      onGeneric { findById(Stubs.tokenValueStatic) } doReturn Optional.of(
+        Stubs.tokenDetails.copy(
+          tokenValue = Stubs.tokenValueStatic,
+          isStatic = true,
+        ).toData(
+          Stubs.user,
+          Stubs.project,
+        ),
+      )
+    }
+
+    assertThat(repository.checkIsStatic(Stubs.tokenValueStatic))
+      .isTrue()
+  }
+
   @Test fun `blocking already blocked token works`() {
     tokenDetailsDao.stub {
       onGeneric { findById(Stubs.tokenValue) } doReturn Optional.of(Stubs.tokenDetailsDbm)
