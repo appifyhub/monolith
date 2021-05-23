@@ -9,7 +9,7 @@ import org.springframework.security.core.Authentication
 
 interface AuthService {
 
-  fun isAuthorized(authData: Authentication, forAuthority: Authority, shallow: Boolean): Boolean
+  fun hasSelfAuthority(authData: Authentication, authority: Authority, shallow: Boolean): Boolean
 
   fun isProjectOwner(authData: Authentication, shallow: Boolean): Boolean
 
@@ -25,19 +25,21 @@ interface AuthService {
 
   @Throws fun createTokenFor(user: User, origin: String?, ipAddress: String?): String
 
+  @Throws fun createStaticTokenFor(user: User, origin: String?, ipAddress: String?): String
+
   @Throws fun refreshAuth(authData: Authentication, ipAddress: String?): String
 
   @Throws fun fetchTokenDetails(authData: Authentication): TokenDetails
 
   @Throws fun fetchAllTokenDetails(authData: Authentication, valid: Boolean?): List<TokenDetails>
 
-  @Throws fun fetchAllTokenDetailsFor(authData: Authentication, id: UserId, valid: Boolean?): List<TokenDetails>
+  @Throws fun fetchAllTokenDetailsFor(authData: Authentication, targetId: UserId, valid: Boolean?): List<TokenDetails>
 
   @Throws fun unauthorize(authData: Authentication)
 
   @Throws fun unauthorizeAll(authData: Authentication)
 
-  @Throws fun unauthorizeAllFor(authData: Authentication, id: UserId)
+  @Throws fun unauthorizeAllFor(authData: Authentication, targetId: UserId)
 
   @Throws fun unauthorizeTokens(authData: Authentication, tokenValues: List<String>)
 

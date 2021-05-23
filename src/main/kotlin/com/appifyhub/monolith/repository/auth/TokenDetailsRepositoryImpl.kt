@@ -67,6 +67,11 @@ class TokenDetailsRepositoryImpl(
     return tokenDetailsDao.findById(tokenValue).map { it.toDomain(jwtHelper).isBlocked }.orElse(true)
   }
 
+  override fun checkIsStatic(tokenValue: String): Boolean {
+    log.debug("Checking if $tokenValue is a static token")
+    return tokenDetailsDao.findById(tokenValue).map { it.toDomain(jwtHelper).isStatic }.orElse(false)
+  }
+
   override fun blockToken(tokenValue: String): TokenDetails {
     log.debug("Blocking token $tokenValue")
     val tokenDetails = tokenDetailsDao.findById(tokenValue).get().toDomain(jwtHelper)

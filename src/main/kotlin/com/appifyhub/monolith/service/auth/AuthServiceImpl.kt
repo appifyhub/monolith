@@ -31,22 +31,21 @@ class AuthServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun isAuthorized(
+  override fun hasSelfAuthority(
     authData: Authentication,
-    forAuthority: Authority,
+    authority: Authority,
     shallow: Boolean,
   ) = try {
-    log.debug("Checking if authorized $authData for $forAuthority")
+    log.debug("Checking if authorized $authData for $authority")
 
-    when (forAuthority) {
+    when (authority) {
       Authority.DEFAULT -> {
         authData.requireValidJwt(shallow = true)
         true // basic authority is always ok
       }
-      else -> {
-        val token = authData.requireValidJwt(shallow)
-        val shallowUser = authRepository.resolveShallowUser(token)
-        shallowUser.isAuthorizedFor(forAuthority)
+      else -> with(authData.requireValidJwt(shallow)) {
+        authRepository.resolveShallowUser(this)
+          .canActAs(authority)
       }
     }
   } catch (t: Throwable) {
@@ -88,31 +87,37 @@ class AuthServiceImpl(
 
   override fun requestAccessFor(authData: Authentication, targetId: UserId, privilege: UserPrivilege): User {
     log.debug("Authentication $authData requesting '${privilege.name}' access to $targetId")
-    adminService.fetchProjectById(targetId.projectId) // sanity check
 
-    val normalizedUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
-    val token = authData.requireValidJwt(shallow = false)
+    // validate request data and token
+    val normalizedTargetUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
+    val jwt = authData.requireValidJwt(shallow = false)
+    val tokenDetails = authRepository.fetchTokenDetails(jwt)
 
-    // quick check to prevent unnecessary queries
-    val shallowRequester = authRepository.resolveShallowUser(token)
-    val isSelf = shallowRequester.id == normalizedUserId
-    val isPrivilegedShallow = shallowRequester.isAuthorizedFor(privilege.level)
-    require(isSelf || isPrivilegedShallow) { "Only ${privilege.level.groupName} are authorized" }
+    // validate that the project matches
+    adminService.fetchProjectById(targetId.projectId) // sanity check for project existence
+    val shallowRequester = authRepository.resolveShallowUser(jwt)
+    val targetProjectMatches = tokenDetails.ownerId.projectId == targetId.projectId
+    val requesterProjectMatches = tokenDetails.ownerId.projectId == shallowRequester.id.projectId
+    require(targetProjectMatches && requesterProjectMatches) { "Only requests within the same project are allowed" }
 
-    // fetch non-shallow data for requester
-    val requester = userService.fetchUserByUserId(shallowRequester.id, withTokens = false)
-    if (isSelf) return requester
+    // fetch requester and target users
+    val requesterUser = userService.fetchUserByUserId(shallowRequester.id, withTokens = false)
+    val targetUser = userService.fetchUserByUserId(normalizedTargetUserId, withTokens = false)
 
-    // check minimum authorization level, as creds might have changed
-    val isPrivileged = requester.isAuthorizedFor(privilege.level)
-    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+    // self access is always allowed
+    if (requesterUser.id == normalizedTargetUserId) return requesterUser
+    // static tokens are always allowed
+    if (tokenDetails.isStatic) return targetUser
+
+    // check if minimum authorization level is met
+    val isPrivileged = requesterUser.canActAs(privilege.minLevel)
+    require(isPrivileged) { "Only ${privilege.minLevel.groupName} are authorized" }
 
     // check if authorization level is enough (mods can't access other mods)
-    val target = userService.fetchUserByUserId(normalizedUserId, withTokens = false)
-    val isHigherAuthority = requester.authority.ordinal > target.authority.ordinal
-    require(isHigherAuthority) { "Only ${target.authority.nextGroupName} are authorized" }
+    val isHigherAuthority = requesterUser.authority.ordinal > targetUser.authority.ordinal
+    require(isHigherAuthority) { "Only ${targetUser.authority.nextGroupName} are authorized" }
 
-    return target
+    return targetUser
   }
 
   override fun resolveUser(universalId: String, signature: String): User {
@@ -141,28 +146,24 @@ class AuthServiceImpl(
   }
 
   override fun createTokenFor(user: User, origin: String?, ipAddress: String?): String {
-    log.debug("Generating token for $user, origin $origin")
+    log.debug("Generating token for $user, origin $origin, IP $ipAddress")
 
-    val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
-    val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
+    return createToken(user, origin, ipAddress, isStatic = false)
+  }
 
-    return authRepository.createToken(
-      TokenCreator(
-        id = user.id,
-        authority = user.authority,
-        isStatic = false,
-        origin = normalizedOrigin,
-        ipAddress = normalizedIp,
-        geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString(),
-      )
-    ).tokenValue
+  override fun createStaticTokenFor(user: User, origin: String?, ipAddress: String?): String {
+    log.debug("Generating static token for $user, origin $origin, IP $ipAddress")
+
+    return createToken(user, origin, ipAddress, isStatic = true)
   }
 
   override fun refreshAuth(authData: Authentication, ipAddress: String?): String {
     log.debug("Refreshing authentication $authData")
+
     val token = authData.requireValidJwt(shallow = false)
 
     val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
+    if (authRepository.isTokenStatic(token)) throwUnauthorized { "Can't refresh static tokens" }
 
     // fetch details for this token to reuse them in the new token
     val tokenDetails = authRepository.fetchTokenDetails(token)
@@ -195,10 +196,14 @@ class AuthServiceImpl(
     return authRepository.fetchAllTokenDetails(token, valid)
   }
 
-  override fun fetchAllTokenDetailsFor(authData: Authentication, id: UserId, valid: Boolean?): List<TokenDetails> {
-    log.debug("Fetching all token details for user $id [valid $valid]")
+  override fun fetchAllTokenDetailsFor(
+    authData: Authentication,
+    targetId: UserId,
+    valid: Boolean?,
+  ): List<TokenDetails> {
+    log.debug("Fetching all token details for user $targetId [valid $valid]")
 
-    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
+    val normalizedUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
     authData.requireValidJwt(shallow = false)
 
     return authRepository.fetchAllTokenDetailsFor(normalizedUserId, valid)
@@ -216,10 +221,10 @@ class AuthServiceImpl(
     authRepository.unauthorizeAllTokens(token)
   }
 
-  override fun unauthorizeAllFor(authData: Authentication, id: UserId) {
-    log.debug("Unauthorizing all access for $id")
+  override fun unauthorizeAllFor(authData: Authentication, targetId: UserId) {
+    log.debug("Unauthorizing all access for $targetId")
 
-    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
+    val normalizedUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
     authData.requireValidJwt(shallow = false)
 
     authRepository.unauthorizeAllTokensFor(normalizedUserId)
@@ -253,17 +258,34 @@ class AuthServiceImpl(
 
   private fun Authentication.requireValidJwt(shallow: Boolean): JwtAuthenticationToken =
     try {
-      (this as JwtAuthenticationToken).apply {
-        try {
-          authRepository.requireValid(this, shallow)
-        } catch (t: Throwable) {
-          log.warn("Invalid token", t)
-          throw IllegalAccessException(t.message)
-        }
+      with(this as JwtAuthenticationToken) {
+        if (!authRepository.isTokenValid(this, shallow))
+          throw IllegalAccessException("Invalid token for '$name'")
+        else this
       }
     } catch (t: Throwable) {
       log.warn("Wrong token type $this")
       if (t is TypeCastException) throw IllegalAccessException(t.message) else throw t
     }
+
+  private fun createToken(user: User, origin: String?, ipAddress: String?, isStatic: Boolean): String {
+    val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
+    val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
+    val geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString()
+
+    if (isStatic && !user.canActAs(Authority.OWNER))
+      throwUnauthorized { "Only ${Authority.OWNER.groupName} can create static tokens" }
+
+    return authRepository.createToken(
+      TokenCreator(
+        id = user.id,
+        authority = user.authority,
+        isStatic = isStatic,
+        origin = normalizedOrigin,
+        ipAddress = normalizedIp,
+        geo = geo,
+      )
+    ).tokenValue
+  }
 
 }

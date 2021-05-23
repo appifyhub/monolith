@@ -8,6 +8,10 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 
 interface AuthRepository {
 
+  @Throws fun isTokenValid(jwt: JwtAuthenticationToken, shallow: Boolean): Boolean
+
+  @Throws fun isTokenStatic(jwt: JwtAuthenticationToken): Boolean
+
   @Throws fun createToken(creator: TokenCreator): TokenDetails
 
   @Throws fun resolveShallowUser(jwt: JwtAuthenticationToken): User
@@ -17,10 +21,6 @@ interface AuthRepository {
   @Throws fun fetchAllTokenDetails(jwt: JwtAuthenticationToken, valid: Boolean?): List<TokenDetails>
 
   @Throws fun fetchAllTokenDetailsFor(id: UserId, valid: Boolean?): List<TokenDetails>
-
-  @Throws fun checkIsValid(jwt: JwtAuthenticationToken, shallow: Boolean): Boolean
-
-  @Throws fun requireValid(jwt: JwtAuthenticationToken, shallow: Boolean)
 
   @Throws fun unauthorizeToken(jwt: JwtAuthenticationToken)
 

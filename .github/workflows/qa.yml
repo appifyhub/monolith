@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 100
 
       - name: Print build name
         run: echo "$GITHUB_ACTOR is building PR#$PR_NUMBER in '$GITHUB_REPOSITORY' (commit $GITHUB_SHA)"

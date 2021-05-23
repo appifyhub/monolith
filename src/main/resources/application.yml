@@ -22,6 +22,7 @@ app:
       key-alias: ${KEYSTORE_KEY:debug}
       private-key-passphrase: ${KEYSTORE_KEY_PASS:debug!}
       default-expiration-days: ${JWT_EXPIRATION_DAYS:90}
+      static-expiration-days: ${API_KEY_EXPIRATION_DAYS:700}
   seed:
     rootProject:
       name: ${SEED_PROJECT_NAME:AppifyHub}

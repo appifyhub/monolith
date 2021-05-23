@@ -29,6 +29,7 @@ class UserAuthController(
     const val TOKENS = "/v1/universal/auth/tokens"
 
     const val ADMIN_AUTH = "/v1/admin/auth"
+    const val ADMIN_API_KEY = "/v1/admin/apikey"
     const val ANY_USER_AUTH = "/v1/projects/{projectId}/users/{userId}/auth"
     const val ANY_USER_TOKENS = "/v1/projects/{projectId}/users/{userId}/auth/tokens"
   }

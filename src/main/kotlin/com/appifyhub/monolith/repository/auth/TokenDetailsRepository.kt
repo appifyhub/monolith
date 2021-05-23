@@ -22,6 +22,8 @@ interface TokenDetailsRepository {
 
   @Throws fun checkIsBlocked(tokenValue: String): Boolean
 
+  @Throws fun checkIsStatic(tokenValue: String): Boolean
+
   @Throws fun blockToken(tokenValue: String): TokenDetails
 
   @Throws fun blockAllTokens(tokenValues: List<String>): List<TokenDetails>

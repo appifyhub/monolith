@@ -38,6 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
+@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class UserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -73,7 +74,7 @@ class UserControllerTest {
   @Test fun `get user succeeds with valid authorization`() {
     val user = authTestHelper.defaultUser
     val universalId = user.id.toUniversalFormat()
-    val token = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(

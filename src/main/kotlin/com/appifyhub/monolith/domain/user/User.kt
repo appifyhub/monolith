@@ -73,6 +73,6 @@ data class User(
 
   val allAuthorities = authority.allAuthorities
 
-  fun isAuthorizedFor(authority: Authority) = this.authority.ordinal >= authority.ordinal
+  fun canActAs(authority: Authority) = this.authority.ordinal >= authority.ordinal
 
 }

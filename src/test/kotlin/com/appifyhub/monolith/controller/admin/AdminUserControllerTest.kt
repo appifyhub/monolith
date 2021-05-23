@@ -38,6 +38,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
+@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class AdminUserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -75,7 +76,7 @@ class AdminUserControllerTest {
 
   @Test fun `get any user succeeds for self`() {
     val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealToken(DEFAULT).token.tokenValue
+    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -105,7 +106,7 @@ class AdminUserControllerTest {
 
   @Test fun `get any user succeeds for lower rank`() {
     val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealToken(MODERATOR).token.tokenValue
+    val token = authTestHelper.newRealJwt(MODERATOR).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
