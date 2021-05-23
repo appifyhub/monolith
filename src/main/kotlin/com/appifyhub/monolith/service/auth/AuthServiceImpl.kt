@@ -146,34 +146,24 @@ class AuthServiceImpl(
   }
 
   override fun createTokenFor(user: User, origin: String?, ipAddress: String?): String {
-    log.debug("Generating token for $user, origin $origin")
+    log.debug("Generating token for $user, origin $origin, IP $ipAddress")
 
-    val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
-    val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
-
-    return authRepository.createToken(
-      TokenCreator(
-        id = user.id,
-        authority = user.authority,
-        isStatic = false,
-        origin = normalizedOrigin,
-        ipAddress = normalizedIp,
-        geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString(),
-      )
-    ).tokenValue
+    return createToken(user, origin, ipAddress, isStatic = false)
   }
 
   override fun createStaticTokenFor(user: User, origin: String?, ipAddress: String?): String {
-    TODO("Not yet implemented")
+    log.debug("Generating static token for $user, origin $origin, IP $ipAddress")
+
+    return createToken(user, origin, ipAddress, isStatic = true)
   }
 
   override fun refreshAuth(authData: Authentication, ipAddress: String?): String {
     log.debug("Refreshing authentication $authData")
 
     val token = authData.requireValidJwt(shallow = false)
-    if (authRepository.isTokenStatic(token)) throwUnauthorized { "Can't refresh static tokens" }
 
     val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
+    if (authRepository.isTokenStatic(token)) throwUnauthorized { "Can't refresh static tokens" }
 
     // fetch details for this token to reuse them in the new token
     val tokenDetails = authRepository.fetchTokenDetails(token)
@@ -277,5 +267,25 @@ class AuthServiceImpl(
       log.warn("Wrong token type $this")
       if (t is TypeCastException) throw IllegalAccessException(t.message) else throw t
     }
+
+  private fun createToken(user: User, origin: String?, ipAddress: String?, isStatic: Boolean): String {
+    val normalizedOrigin = Normalizers.Origin.run(origin).requireValid { "Origin" }
+    val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
+    val geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString()
+
+    if (isStatic && !user.canActAs(Authority.OWNER))
+      throwUnauthorized { "Only ${Authority.OWNER.groupName} can create static tokens" }
+
+    return authRepository.createToken(
+      TokenCreator(
+        id = user.id,
+        authority = user.authority,
+        isStatic = isStatic,
+        origin = normalizedOrigin,
+        ipAddress = normalizedIp,
+        geo = geo,
+      )
+    ).tokenValue
+  }
 
 }

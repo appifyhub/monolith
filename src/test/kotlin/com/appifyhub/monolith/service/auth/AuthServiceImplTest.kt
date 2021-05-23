@@ -645,6 +645,71 @@ class AuthServiceImplTest {
       }
   }
 
+  @Test fun `create static token fails with invalid origin`() {
+    assertThat {
+      service.createStaticTokenFor(authHelper.ownerUser, origin = "\n\t", ipAddress = null)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Origin")
+      }
+  }
+
+  @Test fun `create static token fails with invalid IP address`() {
+    assertThat {
+      service.createStaticTokenFor(authHelper.ownerUser, origin = "origin", ipAddress = "abc")
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("IP Address")
+      }
+  }
+
+  @Test fun `create static token fails with non-owner user`() {
+    assertThat {
+      service.createStaticTokenFor(authHelper.adminUser, origin = null, ipAddress = null)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Only ${OWNER.groupName} can create static tokens")
+      }
+  }
+
+  @Test fun `create static token succeeds with valid user data and non-empty optionals`() {
+    assertThat(service.createStaticTokenFor(authHelper.ownerUser, origin = "Some Origin", ipAddress = Stubs.ipAddress))
+      .transform { it.split(".")[1] } // take the token content
+      .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
+      .all {
+        contains("Some Origin")
+        contains(Stubs.ipAddress)
+        contains(Stubs.geoMerged)
+        contains(DEFAULT.name)
+        contains(MODERATOR.name)
+        contains(ADMIN.name)
+        contains(OWNER.name)
+        contains(authHelper.ownerUser.id.toUniversalFormat())
+      }
+  }
+
+  @Test fun `create static token succeeds with valid user data and null optionals`() {
+    assertThat(service.createStaticTokenFor(authHelper.ownerUser, origin = null, ipAddress = null))
+      .transform { it.split(".")[1] } // take the token content
+      .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
+      .all {
+        doesNotContain("origin", ignoreCase = true)
+        doesNotContain("ip_address", ignoreCase = true)
+        doesNotContain("geo", ignoreCase = true)
+        contains(DEFAULT.name)
+        contains(MODERATOR.name)
+        contains(ADMIN.name)
+        contains(OWNER.name)
+        contains(authHelper.ownerUser.id.toUniversalFormat())
+      }
+  }
+
   @Test fun `refresh token fails with invalid token`() {
     val token = authHelper.newStubJwt()
 
@@ -682,6 +747,19 @@ class AuthServiceImplTest {
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
+      }
+  }
+
+  @Test fun `refresh token fails with static token`() {
+    val token = authHelper.newRealJwt(OWNER, isStatic = true)
+
+    assertThat {
+      service.refreshAuth(token, ipAddress = null)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Can't refresh static tokens")
       }
   }
 
