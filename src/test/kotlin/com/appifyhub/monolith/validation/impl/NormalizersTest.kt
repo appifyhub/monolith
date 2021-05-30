@@ -81,7 +81,7 @@ class NormalizersTest {
       .consistsOf(Validators.UserId, Cleaners.UserId)
   }
 
-  // Contact validators
+  // Contact normalizers
 
   @Test fun `name = name + name`() {
     assertThat(Normalizers.Name)
@@ -103,7 +103,7 @@ class NormalizersTest {
       .consistsOf(Validators.Phone, Cleaners.Phone)
   }
 
-  // Organization validators
+  // Organization normalizers
 
   @Test fun `orga name = orga name + orga name`() {
     assertThat(Normalizers.OrganizationName)
@@ -135,7 +135,24 @@ class NormalizersTest {
       .consistsOf(Validators.Organization, Cleaners.Organization)
   }
 
-  // Other validators
+  // Project property normalizers
+
+  @Test fun `prop project description = not blank nullable + trim nullified`() {
+    assertThat(Normalizers.PropProjectDescription)
+      .consistsOf(Validators.NotBlankNullable, Cleaners.TrimNullified)
+  }
+
+  @Test fun `prop project logo url = url nullable + url nullified`() {
+    assertThat(Normalizers.PropProjectLogoUrl)
+      .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
+  }
+
+  @Test fun `prop project website = url nullable + url nullified`() {
+    assertThat(Normalizers.PropProjectWebsite)
+      .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
+  }
+
+  // Other normalizers
 
   @Test fun `origin = origin + origin`() {
     assertThat(Normalizers.Origin)

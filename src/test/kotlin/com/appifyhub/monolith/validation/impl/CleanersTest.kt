@@ -286,6 +286,18 @@ class CleanersTest {
       .isEqualTo(Stubs.company)
   }
 
+  // Project property cleaners
+
+  @Test fun `url is trimming`() {
+    assertThat(Cleaners.Url)
+      .isEqualTo(Cleaners.Trim)
+  }
+
+  @Test fun `nullified url is trimming nullified`() {
+    assertThat(Cleaners.UrlNullified)
+      .isEqualTo(Cleaners.TrimNullified)
+  }
+
   // Other cleaners
 
   @Test fun `origin is trimming nullable`() {

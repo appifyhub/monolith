@@ -86,6 +86,11 @@ object Cleaners {
     }
   }
 
+  // Project property cleaners
+
+  val Url = Trim
+  val UrlNullified = TrimNullified
+
   // Other cleaners
 
   val Origin = TrimNullable
