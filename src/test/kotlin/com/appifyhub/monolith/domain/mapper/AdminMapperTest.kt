@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.storage.model.admin.PropertyDbm
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import java.util.Date
@@ -195,6 +196,22 @@ class AdminMapperTest {
 
   @Test fun `project domain to data`() {
     assertThat(Stubs.project.toData()).isEqualTo(Stubs.projectDbm)
+  }
+
+  @Test fun `property data to domain`() {
+    val propsData = listOf(Stubs.propStringDbm, Stubs.propIntegerDbm, Stubs.propDecimalDbm, Stubs.propFlagDbm)
+    val propsDomain = listOf(Stubs.propString, Stubs.propInteger, Stubs.propDecimal, Stubs.propFlag)
+
+    assertThat(propsData.map(PropertyDbm::toDomain))
+      .isEqualTo(propsDomain)
+  }
+
+  @Test fun `property domain to data`() {
+    val propsDomain = listOf(Stubs.propString, Stubs.propInteger, Stubs.propDecimal, Stubs.propFlag)
+    val propsData = listOf(Stubs.propStringDbm, Stubs.propIntegerDbm, Stubs.propDecimalDbm, Stubs.propFlagDbm)
+
+    assertThat(propsDomain.map { it.toData(Stubs.project) })
+      .isEqualTo(propsData)
   }
 
 }

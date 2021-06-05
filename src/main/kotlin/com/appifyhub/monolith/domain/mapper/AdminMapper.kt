@@ -5,9 +5,21 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.admin.property.Property
+import com.appifyhub.monolith.domain.admin.property.Property.DecimalProp
+import com.appifyhub.monolith.domain.admin.property.Property.FlagProp
+import com.appifyhub.monolith.domain.admin.property.Property.IntegerProp
+import com.appifyhub.monolith.domain.admin.property.Property.StringProp
+import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.PropertyType.DECIMAL
+import com.appifyhub.monolith.domain.admin.property.PropertyType.FLAG
+import com.appifyhub.monolith.domain.admin.property.PropertyType.INTEGER
+import com.appifyhub.monolith.domain.admin.property.PropertyType.STRING
 import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.admin.PropertyDbm
+import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
 import com.appifyhub.monolith.util.TimeProvider
 
 fun AccountUpdater.applyTo(
@@ -74,6 +86,27 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   type = type.name,
   status = status.name,
   userIdType = userIdType.name,
+  createdAt = createdAt,
+  updatedAt = updatedAt,
+)
+
+fun PropertyDbm.toDomain(): Property<*> =
+  PropertyConfiguration.find(name = id.name).let { propertyConfiguration ->
+    when (propertyConfiguration?.type) {
+      STRING -> StringProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
+      INTEGER -> IntegerProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
+      DECIMAL -> DecimalProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
+      FLAG -> FlagProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
+      null -> throw IllegalArgumentException("Couldn't resolve property type of $id")
+    }
+  }
+
+fun Property<*>.toData(
+  project: Project,
+): PropertyDbm = PropertyDbm(
+  id = PropertyIdDbm(name = config.name, projectId = project.id),
+  project = project.toData(),
+  rawValue = rawValue,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )

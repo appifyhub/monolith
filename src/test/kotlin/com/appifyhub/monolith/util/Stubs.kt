@@ -5,6 +5,8 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.admin.property.Property
+import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
@@ -30,6 +32,8 @@ import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.admin.PropertyDbm
+import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
@@ -178,6 +182,38 @@ object Stubs {
     isInitialized = true,
   )
 
+  val propString: Property<String> = Property.StringProp(
+    config = PropertyConfiguration.GENERIC_STRING,
+    projectId = project.id,
+    rawValue = "value",
+    createdAt = Date(0xFF0000),
+    updatedAt = Date(0xFF0001),
+  )
+
+  val propInteger: Property<Int> = Property.IntegerProp(
+    config = PropertyConfiguration.GENERIC_INTEGER,
+    projectId = project.id,
+    rawValue = "1",
+    createdAt = Date(0xFF0000),
+    updatedAt = Date(0xFF0001),
+  )
+
+  val propDecimal: Property<Double> = Property.DecimalProp(
+    config = PropertyConfiguration.GENERIC_DECIMAL,
+    projectId = project.id,
+    rawValue = "1.1",
+    createdAt = Date(0xFF0000),
+    updatedAt = Date(0xFF0001),
+  )
+
+  val propFlag: Property<Boolean> = Property.FlagProp(
+    config = PropertyConfiguration.GENERIC_FLAG,
+    projectId = project.id,
+    rawValue = "true",
+    createdAt = Date(0xFF0000),
+    updatedAt = Date(0xFF0001),
+  )
+
   // endregion
 
   // region Data Models
@@ -239,6 +275,46 @@ object Stubs {
   val schemaDbm = SchemaDbm(
     version = 1,
     isInitialized = true,
+  )
+
+  val propStringIdDbm = PropertyIdDbm(propString.config.name, propString.projectId)
+
+  val propIntegerIdDbm = PropertyIdDbm(propInteger.config.name, propInteger.projectId)
+
+  val propDecimalIdDbm = PropertyIdDbm(propDecimal.config.name, propDecimal.projectId)
+
+  val propFlagIdDbm = PropertyIdDbm(propFlag.config.name, propFlag.projectId)
+
+  val propStringDbm = PropertyDbm(
+    id = propStringIdDbm,
+    project = projectDbm,
+    rawValue = propString.rawValue,
+    createdAt = propString.createdAt,
+    updatedAt = propString.updatedAt,
+  )
+
+  val propIntegerDbm = PropertyDbm(
+    id = propIntegerIdDbm,
+    project = projectDbm,
+    rawValue = propInteger.rawValue,
+    createdAt = propInteger.createdAt,
+    updatedAt = propInteger.updatedAt,
+  )
+
+  val propDecimalDbm = PropertyDbm(
+    id = propDecimalIdDbm,
+    project = projectDbm,
+    rawValue = propDecimal.rawValue,
+    createdAt = propDecimal.createdAt,
+    updatedAt = propDecimal.updatedAt,
+  )
+
+  val propFlagDbm = PropertyDbm(
+    id = propFlagIdDbm,
+    project = projectDbm,
+    rawValue = propFlag.rawValue,
+    createdAt = propFlag.createdAt,
+    updatedAt = propFlag.updatedAt,
   )
 
   // endregion
