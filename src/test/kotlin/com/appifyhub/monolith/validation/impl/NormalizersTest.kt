@@ -50,8 +50,8 @@ class NormalizersTest {
   }
 
   @Test fun `project name = project name + project name`() {
-    assertThat(Normalizers.ProjectName)
-      .consistsOf(Validators.ProjectName, Cleaners.ProjectName)
+    assertThat(Normalizers.PropProjectName)
+      .consistsOf(Validators.PropProjectName, Cleaners.PropProjectName)
   }
 
   // ID normalizers

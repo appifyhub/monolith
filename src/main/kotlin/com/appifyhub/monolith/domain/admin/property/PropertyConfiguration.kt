@@ -28,7 +28,7 @@ enum class PropertyConfiguration(
   PROJECT_NAME(
     type = STRING,
     category = IDENTITY,
-    normalizer = Normalizers.ProjectName,
+    normalizer = Normalizers.PropProjectName,
     tags = setOf(IMPORTANT),
     isMandatory = true,
     isSecret = false,

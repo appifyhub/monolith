@@ -43,7 +43,7 @@ object Validators {
 
   val ProjectId = PositiveLong
   val AccountId = PositiveLong
-  val ProjectName = NotBlank
+  val PropProjectName = NotBlank
 
   // ID validators
 

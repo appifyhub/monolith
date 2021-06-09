@@ -10,7 +10,6 @@ sealed interface Property<out T : Any> {
   val config: PropertyConfiguration
   val projectId: Long
   val rawValue: String?
-  val createdAt: Date
   val updatedAt: Date
 
   fun hasValue(): Boolean = silent { requireValue() } != null
@@ -22,8 +21,7 @@ sealed interface Property<out T : Any> {
     override val config: PropertyConfiguration,
     override val projectId: Long,
     override val rawValue: String?,
-    override val createdAt: Date,
-    override val updatedAt: Date = createdAt,
+    override val updatedAt: Date,
   ) : Property<String> {
     override fun requireValue() = rawValue ?: error("No value found")
   }
@@ -32,8 +30,7 @@ sealed interface Property<out T : Any> {
     override val config: PropertyConfiguration,
     override val projectId: Long,
     override val rawValue: String?,
-    override val createdAt: Date,
-    override val updatedAt: Date = createdAt,
+    override val updatedAt: Date,
   ) : Property<Int> {
     override fun requireValue() = rawValue?.toInt() ?: error("No value found")
   }
@@ -42,8 +39,7 @@ sealed interface Property<out T : Any> {
     override val config: PropertyConfiguration,
     override val projectId: Long,
     override val rawValue: String?,
-    override val createdAt: Date,
-    override val updatedAt: Date = createdAt,
+    override val updatedAt: Date,
   ) : Property<Double> {
     override fun requireValue() = rawValue?.toDouble() ?: error("No value found")
   }
@@ -52,8 +48,7 @@ sealed interface Property<out T : Any> {
     override val config: PropertyConfiguration,
     override val projectId: Long,
     override val rawValue: String?,
-    override val createdAt: Date,
-    override val updatedAt: Date = createdAt,
+    override val updatedAt: Date,
   ) : Property<Boolean> {
     override fun requireValue() = rawValue?.toBooleanStrict() ?: error("No value found")
   }

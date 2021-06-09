@@ -182,36 +182,32 @@ object Stubs {
     isInitialized = true,
   )
 
-  val propString: Property<String> = Property.StringProp(
+  val propString = Property.StringProp(
     config = PropertyConfiguration.GENERIC_STRING,
     projectId = project.id,
     rawValue = "value",
-    createdAt = Date(0xFF0000),
-    updatedAt = Date(0xFF0001),
+    updatedAt = Date(0xFF0000),
   )
 
-  val propInteger: Property<Int> = Property.IntegerProp(
+  val propInteger = Property.IntegerProp(
     config = PropertyConfiguration.GENERIC_INTEGER,
     projectId = project.id,
     rawValue = "1",
-    createdAt = Date(0xFF0000),
-    updatedAt = Date(0xFF0001),
+    updatedAt = Date(0xFF0000),
   )
 
-  val propDecimal: Property<Double> = Property.DecimalProp(
+  val propDecimal = Property.DecimalProp(
     config = PropertyConfiguration.GENERIC_DECIMAL,
     projectId = project.id,
     rawValue = "1.1",
-    createdAt = Date(0xFF0000),
-    updatedAt = Date(0xFF0001),
+    updatedAt = Date(0xFF0000),
   )
 
-  val propFlag: Property<Boolean> = Property.FlagProp(
+  val propFlag = Property.FlagProp(
     config = PropertyConfiguration.GENERIC_FLAG,
     projectId = project.id,
     rawValue = "true",
-    createdAt = Date(0xFF0000),
-    updatedAt = Date(0xFF0001),
+    updatedAt = Date(0xFF0000),
   )
 
   // endregion
@@ -289,7 +285,6 @@ object Stubs {
     id = propStringIdDbm,
     project = projectDbm,
     rawValue = propString.rawValue,
-    createdAt = propString.createdAt,
     updatedAt = propString.updatedAt,
   )
 
@@ -297,7 +292,6 @@ object Stubs {
     id = propIntegerIdDbm,
     project = projectDbm,
     rawValue = propInteger.rawValue,
-    createdAt = propInteger.createdAt,
     updatedAt = propInteger.updatedAt,
   )
 
@@ -305,7 +299,6 @@ object Stubs {
     id = propDecimalIdDbm,
     project = projectDbm,
     rawValue = propDecimal.rawValue,
-    createdAt = propDecimal.createdAt,
     updatedAt = propDecimal.updatedAt,
   )
 
@@ -313,7 +306,6 @@ object Stubs {
     id = propFlagIdDbm,
     project = projectDbm,
     rawValue = propFlag.rawValue,
-    createdAt = propFlag.createdAt,
     updatedAt = propFlag.updatedAt,
   )
 

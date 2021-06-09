@@ -125,7 +125,7 @@ class ValidatorsTest {
   }
 
   @Test fun `project name is non blank`() {
-    assertThat(Validators.ProjectName)
+    assertThat(Validators.PropProjectName)
       .isEqualTo(Validators.NotBlank)
   }
 

@@ -10,11 +10,14 @@ import org.springframework.transaction.annotation.Transactional
 @Suppress("FunctionName")
 interface PropertyDao : CrudRepository<PropertyDbm, PropertyIdDbm> {
 
-  fun findAllByProject_ProjectId(projectId: Long): List<PropertyDbm>
+  fun findAllById_ProjectId(projectId: Long): List<PropertyDbm>
 
-  fun findAllById_Name(name: String): List<PropertyDbm>
+  fun findAllByIdIn(ids: List<PropertyIdDbm>): List<PropertyDbm>
 
   @Transactional
-  fun deleteAllByProject_ProjectId(projectId: Long)
+  fun deleteAllByIdIn(ids: List<PropertyIdDbm>)
+
+  @Transactional
+  fun deleteAllById_ProjectId(projectId: Long)
 
 }

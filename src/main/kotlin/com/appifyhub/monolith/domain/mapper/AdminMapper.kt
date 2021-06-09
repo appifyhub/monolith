@@ -93,10 +93,10 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
 fun PropertyDbm.toDomain(): Property<*> =
   PropertyConfiguration.find(name = id.name).let { propertyConfiguration ->
     when (propertyConfiguration?.type) {
-      STRING -> StringProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
-      INTEGER -> IntegerProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
-      DECIMAL -> DecimalProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
-      FLAG -> FlagProp(propertyConfiguration, id.projectId, rawValue, createdAt, updatedAt)
+      STRING -> StringProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
+      INTEGER -> IntegerProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
+      DECIMAL -> DecimalProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
+      FLAG -> FlagProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
       null -> throw IllegalArgumentException("Couldn't resolve property type of $id")
     }
   }
@@ -107,6 +107,8 @@ fun Property<*>.toData(
   id = PropertyIdDbm(name = config.name, projectId = project.id),
   project = project.toData(),
   rawValue = rawValue,
-  createdAt = createdAt,
   updatedAt = updatedAt,
 )
+
+@Suppress("UNCHECKED_CAST")
+fun <T : Any> Property<*>.typed(): Property<T> = this as Property<T>

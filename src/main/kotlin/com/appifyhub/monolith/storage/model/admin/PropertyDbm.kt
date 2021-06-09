@@ -26,13 +26,9 @@ class PropertyDbm(
   @Column(nullable = true, length = 1024)
   val rawValue: String?,
 
-  @Column(nullable = false, updatable = false)
-  @Temporal(TemporalType.TIMESTAMP)
-  var createdAt: Date,
-
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
-  var updatedAt: Date = createdAt,
+  var updatedAt: Date,
 
 ) : Serializable {
 
@@ -43,7 +39,6 @@ class PropertyDbm(
     if (id != other.id) return false
     if (project != other.project) return false
     if (rawValue != other.rawValue) return false
-    if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
 
     return true
@@ -53,7 +48,6 @@ class PropertyDbm(
     var result = id.hashCode()
     result = 31 * result + project.hashCode()
     result = 31 * result + (rawValue?.hashCode() ?: 0)
-    result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
     return result
   }
@@ -63,7 +57,6 @@ class PropertyDbm(
       "id=$id, " +
       "project=$project, " +
       "value='$rawValue', " +
-      "createdAt=$createdAt, " +
       "updatedAt=$updatedAt" +
       ")"
   }

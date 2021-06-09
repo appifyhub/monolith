@@ -100,7 +100,7 @@ class CleanersTest {
   }
 
   @Test fun `project name is trimming`() {
-    assertThat(Cleaners.ProjectName)
+    assertThat(Cleaners.PropProjectName)
       .isEqualTo(Cleaners.Trim)
   }
 

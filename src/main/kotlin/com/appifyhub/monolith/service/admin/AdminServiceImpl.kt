@@ -26,7 +26,7 @@ class AdminServiceImpl(
 
     val normalizeAccount = Normalizers.AccountId.run(creator.account.id).requireValid { "Account ID" }
       .let { creator.account.copy(id = it) }
-    val normalizedName = Normalizers.ProjectName.run(creator.name).requireValid { "Project Name" }
+    val normalizedName = Normalizers.PropProjectName.run(creator.name).requireValid { "Project Name" }
 
     val normalizedCreator = ProjectCreator(
       account = normalizeAccount,
@@ -76,7 +76,7 @@ class AdminServiceImpl(
       Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
     }
     val normalizedName = updater.name?.mapValueNonNull {
-      Normalizers.ProjectName.run(it).requireValid { "Project Name" }
+      Normalizers.PropProjectName.run(it).requireValid { "Project Name" }
     }
 
     val normalizedUpdater = ProjectUpdater(

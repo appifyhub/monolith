@@ -21,7 +21,7 @@ object Normalizers {
 
   val ProjectId = normalizesNonNull(Validators.ProjectId, Cleaners.ProjectId)
   val AccountId = normalizesNonNull(Validators.AccountId, Cleaners.AccountId)
-  val ProjectName = normalizesNonNull(Validators.ProjectName, Cleaners.ProjectName)
+  val PropProjectName = normalizesNonNull(Validators.PropProjectName, Cleaners.PropProjectName)
 
   // ID normalizers
 

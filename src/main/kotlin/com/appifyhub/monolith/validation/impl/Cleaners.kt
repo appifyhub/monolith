@@ -26,7 +26,7 @@ object Cleaners {
 
   val ProjectId = LongToCardinal
   val AccountId = LongToCardinal
-  val ProjectName = Trim
+  val PropProjectName = Trim
 
   // ID domain cleaners
 
