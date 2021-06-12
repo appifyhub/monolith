@@ -1,10 +1,11 @@
 package com.appifyhub.monolith.service.auth
 
+import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.service.user.UserService.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.Privilege
 import org.springframework.security.core.Authentication
 
 interface AuthService {
@@ -17,7 +18,9 @@ interface AuthService {
 
   @Throws fun resolveShallowUser(authData: Authentication, universalId: String): User
 
-  @Throws fun requestAccessFor(authData: Authentication, targetId: UserId, privilege: UserPrivilege): User
+  @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User
+
+  @Throws fun requestProjectAccess(authData: Authentication, targetProjectId: Long, privilege: Privilege): Project
 
   @Throws fun resolveUser(universalId: String, signature: String): User
 

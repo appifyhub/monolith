@@ -2,7 +2,7 @@ package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.admin.property.Property
@@ -21,8 +21,9 @@ import com.appifyhub.monolith.storage.model.admin.ProjectDbm
 import com.appifyhub.monolith.storage.model.admin.PropertyDbm
 import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
 import com.appifyhub.monolith.util.TimeProvider
+import java.util.Date
 
-fun AccountUpdater.applyTo(
+fun AccountOwnerUpdater.applyTo(
   account: Account,
   timeProvider: TimeProvider,
 ): Account = account
@@ -90,16 +91,24 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   updatedAt = updatedAt,
 )
 
-fun PropertyDbm.toDomain(): Property<*> =
-  PropertyConfiguration.find(name = id.name).let { propertyConfiguration ->
-    when (propertyConfiguration?.type) {
-      STRING -> StringProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
-      INTEGER -> IntegerProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
-      DECIMAL -> DecimalProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
-      FLAG -> FlagProp(propertyConfiguration, id.projectId, rawValue, updatedAt)
-      null -> throw IllegalArgumentException("Couldn't resolve property type of $id")
-    }
-  }
+fun Property.Companion.instantiate(
+  config: PropertyConfiguration,
+  projectId: Long,
+  rawValue: String,
+  updatedAt: Date,
+): Property<*> = when (config.type) {
+  STRING -> StringProp(config, projectId, rawValue, updatedAt)
+  INTEGER -> IntegerProp(config, projectId, rawValue, updatedAt)
+  DECIMAL -> DecimalProp(config, projectId, rawValue, updatedAt)
+  FLAG -> FlagProp(config, projectId, rawValue, updatedAt)
+}
+
+fun PropertyDbm.toDomain(): Property<*> = Property.instantiate(
+  config = PropertyConfiguration.find(name = id.name)!!,
+  projectId = id.projectId,
+  rawValue = rawValue,
+  updatedAt = updatedAt,
+)
 
 fun Property<*>.toData(
   project: Project,
@@ -111,4 +120,4 @@ fun Property<*>.toData(
 )
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> Property<*>.typed(): Property<T> = this as Property<T>
+fun <T : Any> Property<*>.withCast(): Property<T> = this as Property<T>

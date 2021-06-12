@@ -4,7 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test
 class AdminMapperTest {
 
   @Test fun `account updater to account (no changes)`() {
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = null,
       removedOwners = null,
@@ -39,7 +39,7 @@ class AdminMapperTest {
     val newOwner = Stubs.user.copy(
       id = Stubs.userId.copy(userId = "u1"),
     )
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = Settable(listOf(newOwner)),
       removedOwners = null,
@@ -59,7 +59,7 @@ class AdminMapperTest {
   }
 
   @Test fun `account updater to account (removed owners)`() {
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = null,
       removedOwners = Settable(listOf(Stubs.user)),
@@ -82,7 +82,7 @@ class AdminMapperTest {
     val newOwner = Stubs.user.copy(
       id = Stubs.userId.copy(userId = "u1"),
     )
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = Settable(listOf(newOwner)),
       removedOwners = Settable(listOf(Stubs.user)),

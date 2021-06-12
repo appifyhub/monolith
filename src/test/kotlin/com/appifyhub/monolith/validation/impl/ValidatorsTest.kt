@@ -390,6 +390,21 @@ class ValidatorsTest {
       .isTrue()
   }
 
+  @Test fun `positive long (as string) fails with null`() {
+    assertThat(Validators.PositiveLongAsString.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `positive long (as string) fails with zero`() {
+    assertThat(Validators.PositiveLongAsString.isValid("0"))
+      .isFalse()
+  }
+
+  @Test fun `positive long (as string) succeeds with positive`() {
+    assertThat(Validators.PositiveLongAsString.isValid("1"))
+      .isTrue()
+  }
+
   // Other validators
 
   @Test fun `origin is non blank nullable`() {

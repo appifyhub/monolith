@@ -53,7 +53,7 @@ class UserAuthControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authTestHelper: AuthTestHelper
+  @Autowired lateinit var authHelper: AuthTestHelper
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -68,7 +68,7 @@ class UserAuthControllerTest {
 
   @Test fun `auth user fails with invalid credentials`() {
     val credentials = UserCredentialsRequest(
-      universalId = authTestHelper.defaultUser.id.toUniversalFormat(),
+      universalId = authHelper.defaultUser.id.toUniversalFormat(),
       secret = "invalid",
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -87,7 +87,7 @@ class UserAuthControllerTest {
 
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = UserCredentialsRequest(
-      universalId = authTestHelper.defaultUser.id.toUniversalFormat(),
+      universalId = authHelper.defaultUser.id.toUniversalFormat(),
       secret = Stubs.userCredentialsRequest.secret,
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -119,8 +119,8 @@ class UserAuthControllerTest {
   }
 
   @Test fun `get token succeeds with valid authorization`() {
-    val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val user = authHelper.defaultUser
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<TokenDetailsResponse>(
@@ -132,7 +132,7 @@ class UserAuthControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
-        authTestHelper.fetchLastTokenOf(user).toNetwork()
+        authHelper.fetchLastTokenOf(user).toNetwork()
       )
     }
   }
@@ -151,9 +151,9 @@ class UserAuthControllerTest {
   }
 
   @Test fun `get all tokens succeeds with valid authorization`() {
-    val token1 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token1 = authHelper.newRealJwt(DEFAULT).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token2 = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
@@ -166,7 +166,7 @@ class UserAuthControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
         listOf(token1, token2).map {
-          authTestHelper.fetchTokenDetailsFor(it).toNetwork()
+          authHelper.fetchTokenDetailsFor(it).toNetwork()
         }
       )
     }
@@ -186,7 +186,7 @@ class UserAuthControllerTest {
   }
 
   @Test fun `refresh user succeeds with valid authorization`() {
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<TokenResponse>(
@@ -218,7 +218,7 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth user (single token) succeeds with valid authorization`() {
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
@@ -233,14 +233,14 @@ class UserAuthControllerTest {
         transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
       }
 
-      assertThat(authTestHelper.isAuthorized(token)).isFalse()
+      assertThat(authHelper.isAuthorized(token)).isFalse()
     }
   }
 
   @Test fun `unauth user (all tokens) succeeds with valid authorization`() {
-    val token1 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token1 = authHelper.newRealJwt(DEFAULT).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token2 = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
@@ -255,8 +255,8 @@ class UserAuthControllerTest {
         transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
       }
 
-      assertThat(authTestHelper.isAuthorized(token1)).isFalse()
-      assertThat(authTestHelper.isAuthorized(token2)).isFalse()
+      assertThat(authHelper.isAuthorized(token1)).isFalse()
+      assertThat(authHelper.isAuthorized(token2)).isFalse()
     }
   }
 
@@ -277,11 +277,11 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth tokens succeeds with valid authorization`() {
-    val token1 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token1 = authHelper.newRealJwt(DEFAULT).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token2 = authHelper.newRealJwt(DEFAULT).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token3 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token3 = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
@@ -299,9 +299,9 @@ class UserAuthControllerTest {
         transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
       }
 
-      assertThat(authTestHelper.isAuthorized(token1)).isFalse()
-      assertThat(authTestHelper.isAuthorized(token2)).isFalse()
-      assertThat(authTestHelper.isAuthorized(token3)).isTrue()
+      assertThat(authHelper.isAuthorized(token1)).isFalse()
+      assertThat(authHelper.isAuthorized(token2)).isFalse()
+      assertThat(authHelper.isAuthorized(token3)).isTrue()
     }
   }
 

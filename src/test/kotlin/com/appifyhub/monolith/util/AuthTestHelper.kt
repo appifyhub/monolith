@@ -2,7 +2,7 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.common.Settable
@@ -100,7 +100,7 @@ class AuthTestHelper {
 
     return adminRepo.addAccount().let { account ->
       val owner = ensureUser(Authority.OWNER, forceNewOwner = true)
-      adminRepo.updateAccount(AccountUpdater(id = account.id, addedOwners = Settable(listOf(owner))))
+      adminRepo.updateAccount(AccountOwnerUpdater(id = account.id, addedOwners = Settable(listOf(owner))))
       adminRepo.addProject(
         ProjectCreator(
           account = account,

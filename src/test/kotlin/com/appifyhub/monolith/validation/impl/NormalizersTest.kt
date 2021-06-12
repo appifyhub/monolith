@@ -139,17 +139,22 @@ class NormalizersTest {
 
   @Test fun `prop project description = not blank nullable + trim nullified`() {
     assertThat(Normalizers.PropProjectDescription)
-      .consistsOf(Validators.NotBlankNullable, Cleaners.TrimNullified)
+      .consistsOf(Validators.NotBlank, Cleaners.Trim)
   }
 
-  @Test fun `prop project logo url = url nullable + url nullified`() {
+  @Test fun `prop project logo url = url + url`() {
     assertThat(Normalizers.PropProjectLogoUrl)
-      .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
+      .consistsOf(Validators.Url, Cleaners.Url)
   }
 
-  @Test fun `prop project website = url nullable + url nullified`() {
+  @Test fun `prop project website = url + url`() {
     assertThat(Normalizers.PropProjectWebsite)
-      .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
+      .consistsOf(Validators.Url, Cleaners.Url)
+  }
+
+  @Test fun `cardinal as string = positive long as string + long to cardinal as string`() {
+    assertThat(Normalizers.CardinalAsString)
+      .consistsOf(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
   }
 
   // Other normalizers

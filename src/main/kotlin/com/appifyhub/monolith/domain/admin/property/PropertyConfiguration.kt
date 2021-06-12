@@ -1,8 +1,11 @@
 package com.appifyhub.monolith.domain.admin.property
 
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.GENERIC as TAG_GENERIC
+import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.IDENTITY
+import com.appifyhub.monolith.domain.admin.property.PropertyCategory.OPERATIONAL
+import com.appifyhub.monolith.domain.admin.property.PropertyTag.CONSTRAINTS
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.COSMETIC
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.IMPORTANT
 import com.appifyhub.monolith.domain.admin.property.PropertyType.DECIMAL
@@ -12,14 +15,16 @@ import com.appifyhub.monolith.domain.admin.property.PropertyType.STRING
 import com.appifyhub.monolith.validation.Normalizer
 import com.appifyhub.monolith.validation.impl.Normalizers
 
+@Suppress("unused")
+// most of these won't be used directly but located by name
 enum class PropertyConfiguration(
   val type: PropertyType,
   val category: PropertyCategory,
-  val normalizer: Normalizer<*>,
+  val normalizer: Normalizer<String>,
   val tags: Set<PropertyTag>,
+  val defaultValue: String,
   val isMandatory: Boolean,
   val isSecret: Boolean,
-  val isReadOnly: Boolean,
   val isDeprecated: Boolean,
 ) {
 
@@ -30,9 +35,9 @@ enum class PropertyConfiguration(
     category = IDENTITY,
     normalizer = Normalizers.PropProjectName,
     tags = setOf(IMPORTANT),
+    defaultValue = "The Best Project Ever",
     isMandatory = true,
     isSecret = false,
-    isReadOnly = false,
     isDeprecated = false,
   ),
 
@@ -41,9 +46,9 @@ enum class PropertyConfiguration(
     category = IDENTITY,
     normalizer = Normalizers.PropProjectDescription,
     tags = setOf(COSMETIC),
+    defaultValue = "This project is about doing the best work I can.",
     isMandatory = false,
     isSecret = false,
-    isReadOnly = false,
     isDeprecated = false,
   ),
 
@@ -52,9 +57,9 @@ enum class PropertyConfiguration(
     category = IDENTITY,
     normalizer = Normalizers.PropProjectLogoUrl,
     tags = setOf(COSMETIC),
+    defaultValue = "https://i.imgur.com/4mcQDdB.png",
     isMandatory = false,
     isSecret = false,
-    isReadOnly = false,
     isDeprecated = false,
   ),
 
@@ -63,9 +68,24 @@ enum class PropertyConfiguration(
     category = IDENTITY,
     normalizer = Normalizers.PropProjectWebsite,
     tags = setOf(COSMETIC),
+    defaultValue = "https://www.appifyhub.com",
     isMandatory = false,
     isSecret = false,
-    isReadOnly = false,
+    isDeprecated = false,
+  ),
+
+  // endregion
+
+  // region Operational
+
+  PROJECT_USERS_MAX(
+    type = INTEGER,
+    category = OPERATIONAL,
+    normalizer = Normalizers.CardinalAsString,
+    tags = setOf(CONSTRAINTS),
+    defaultValue = "100 000",
+    isMandatory = false,
+    isSecret = false,
     isDeprecated = false,
   ),
 
@@ -78,9 +98,9 @@ enum class PropertyConfiguration(
     category = GENERIC,
     normalizer = Normalizers.NotBlank,
     tags = emptySet(),
+    defaultValue = "A string",
     isMandatory = true,
     isSecret = false,
-    isReadOnly = false,
     isDeprecated = false,
   ),
 
@@ -89,9 +109,9 @@ enum class PropertyConfiguration(
     category = GENERIC,
     normalizer = Normalizers.NotBlank,
     tags = setOf(TAG_GENERIC),
+    defaultValue = "An integer",
     isMandatory = false,
     isSecret = true,
-    isReadOnly = false,
     isDeprecated = false,
   ),
 
@@ -100,9 +120,9 @@ enum class PropertyConfiguration(
     category = GENERIC,
     normalizer = Normalizers.NotBlank,
     tags = setOf(IMPORTANT, TAG_GENERIC),
+    defaultValue = "A decimal",
     isMandatory = false,
     isSecret = false,
-    isReadOnly = true,
     isDeprecated = false,
   ),
 
@@ -111,9 +131,9 @@ enum class PropertyConfiguration(
     category = GENERIC,
     normalizer = Normalizers.NotBlank,
     tags = setOf(IMPORTANT, COSMETIC, TAG_GENERIC),
+    defaultValue = "A flag",
     isMandatory = false,
     isSecret = false,
-    isReadOnly = false,
     isDeprecated = true,
   ),
 
@@ -123,32 +143,23 @@ enum class PropertyConfiguration(
 
   companion object {
 
-    fun find(name: String) = values().firstOrNull { it.name == name }
+    fun find(name: String): PropertyConfiguration? = values().firstOrNull { it.name == name }
 
-    fun findAllWith(
-      type: PropertyType? = null,
-      category: PropertyCategory? = null,
-      nameContains: String? = null,
-      isMandatory: Boolean? = null,
-      isSecret: Boolean? = null,
-      isReadOnly: Boolean? = null,
-      isDeprecated: Boolean? = null,
-      mustHaveTags: Set<PropertyTag>? = null,
-      hasAtLeastOneOfTags: Set<PropertyTag>? = null,
+    fun filter(
+      filter: PropertyFilter? = null,
       includeGeneric: Boolean = false,
     ): List<PropertyConfiguration> =
       values()
         .asSequence()
         .filter { includeGeneric || it.category != GENERIC }
-        .filterWith(type) { this.type == it }
-        .filterWith(category) { this.category == it }
-        .filterWith(nameContains) { this.name.contains(it) }
-        .filterWith(isMandatory) { this.isMandatory == it }
-        .filterWith(isSecret) { this.isSecret == it }
-        .filterWith(isReadOnly) { this.isReadOnly == it }
-        .filterWith(isDeprecated) { this.isDeprecated == it }
-        .filterWith(mustHaveTags) { this.tags.containsAll(it) }
-        .filterWith(hasAtLeastOneOfTags) { this.tags.any(it::contains) }
+        .filterWith(filter?.type) { type == it }
+        .filterWith(filter?.category) { category == it }
+        .filterWith(filter?.nameContains) { name.contains(it, ignoreCase = true) }
+        .filterWith(filter?.isMandatory) { isMandatory == it }
+        .filterWith(filter?.isSecret) { isSecret == it }
+        .filterWith(filter?.isDeprecated) { isDeprecated == it }
+        .filterWith(filter?.mustHaveTags) { tags.containsAll(it) }
+        .filterWith(filter?.hasAtLeastOneOfTags) { tags.any(it::contains) }
         .toList()
 
     private inline fun <T : Any> Sequence<PropertyConfiguration>.filterWith(

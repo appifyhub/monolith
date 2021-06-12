@@ -12,7 +12,7 @@ import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
 import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.service.user.UserService.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.Privilege
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -75,7 +75,11 @@ class AdminAuthController(
     log.debug("[GET] get all tokens for user $userId from project $projectId, [valid $valid]")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestAccessFor(authentication, UserId(userId, projectId), UserPrivilege.READ)
+    val targetUser = authService.requestUserAccess(
+      authData = authentication,
+      targetId = UserId(userId, projectId),
+      privilege = Privilege.USER_READ
+    )
 
     val tokens = if (targetUser.id == authUser.id) {
       authService.fetchAllTokenDetails(authentication, valid) // for self only
@@ -95,7 +99,7 @@ class AdminAuthController(
     log.debug("[DELETE] unauth user $userId from project $projectId")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestAccessFor(authentication, UserId(userId, projectId), UserPrivilege.WRITE)
+    val targetUser = authService.requestUserAccess(authentication, UserId(userId, projectId), Privilege.USER_WRITE)
 
     if (targetUser.id == authUser.id) {
       authService.unauthorizeAll(authentication) // for self only

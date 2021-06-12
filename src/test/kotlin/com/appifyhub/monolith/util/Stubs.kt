@@ -2,11 +2,15 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.Property
+import com.appifyhub.monolith.domain.admin.property.PropertyCategory
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.PropertyTag
+import com.appifyhub.monolith.domain.admin.property.PropertyType
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
@@ -18,6 +22,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.network.admin.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
@@ -208,6 +213,17 @@ object Stubs {
     projectId = project.id,
     rawValue = "true",
     updatedAt = Date(0xFF0000),
+  )
+
+  val propertyFilter = PropertyFilter(
+    type = PropertyType.STRING,
+    category = PropertyCategory.GENERIC,
+    nameContains = "_STRING",
+    isMandatory = true,
+    isSecret = true,
+    isDeprecated = true,
+    mustHaveTags = setOf(PropertyTag.GENERIC),
+    hasAtLeastOneOfTags = setOf(PropertyTag.GENERIC),
   )
 
   // endregion
@@ -518,7 +534,7 @@ object Stubs {
     status = Settable(Project.Status.SUSPENDED),
   )
 
-  val accountUpdater = AccountUpdater(
+  val accountUpdater = AccountOwnerUpdater(
     id = account.id,
     addedOwners = Settable(emptyList()),
     removedOwners = Settable(emptyList()),
@@ -581,6 +597,17 @@ object Stubs {
     universalId = universalUserId,
     secret = "password",
     origin = "Token Origin",
+  )
+
+  val propertyFilterQueryParams = PropertyFilterQueryParams(
+    type = PropertyType.STRING.name,
+    category = PropertyCategory.GENERIC.name,
+    name_contains = "_STRING",
+    mandatory = true,
+    secret = true,
+    deprecated = true,
+    must_have_tags = listOf(PropertyTag.GENERIC.name),
+    has_at_least_one_of_tags = listOf(PropertyTag.GENERIC.name),
   )
 
   // endregion

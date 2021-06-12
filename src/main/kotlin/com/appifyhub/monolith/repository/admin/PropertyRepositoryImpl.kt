@@ -5,7 +5,7 @@ import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.domain.mapper.typed
+import com.appifyhub.monolith.domain.mapper.withCast
 import com.appifyhub.monolith.storage.dao.PropertyDao
 import com.appifyhub.monolith.storage.model.admin.PropertyDbm
 import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
@@ -23,7 +23,7 @@ class PropertyRepositoryImpl(
 
   override fun <T : Any> fetchProperty(project: Project, config: PropertyConfiguration): Property<T> {
     log.debug("Fetching property ${config.name} from $project")
-    return propertyDao.findById(PropertyIdDbm(config.name, project.id)).get().toDomain().typed()
+    return propertyDao.findById(PropertyIdDbm(config.name, project.id)).get().toDomain().withCast()
   }
 
   override fun fetchProperties(project: Project, configs: List<PropertyConfiguration>): List<Property<*>> {
@@ -41,7 +41,7 @@ class PropertyRepositoryImpl(
     val propertyData = property.toData(project).apply {
       updatedAt = timeProvider.currentDate
     }
-    return propertyDao.save(propertyData).toDomain().typed()
+    return propertyDao.save(propertyData).toDomain().withCast()
   }
 
   override fun saveProperties(project: Project, properties: List<Property<*>>): List<Property<*>> {

@@ -23,8 +23,8 @@ class PropertyDbm(
   @ManyToOne(fetch = FetchType.EAGER)
   val project: ProjectDbm,
 
-  @Column(nullable = true, length = 1024)
-  val rawValue: String?,
+  @Column(nullable = false, length = 1024)
+  val rawValue: String,
 
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -47,7 +47,7 @@ class PropertyDbm(
   override fun hashCode(): Int {
     var result = id.hashCode()
     result = 31 * result + project.hashCode()
-    result = 31 * result + (rawValue?.hashCode() ?: 0)
+    result = 31 * result + rawValue.hashCode()
     result = 31 * result + updatedAt.hashCode()
     return result
   }

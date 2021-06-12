@@ -49,9 +49,10 @@ object Normalizers {
 
   // Project property normalizers
 
-  val PropProjectDescription = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullified)
-  val PropProjectLogoUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
-  val PropProjectWebsite = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
+  val PropProjectDescription = normalizesNonNull(Validators.NotBlank, Cleaners.Trim)
+  val PropProjectLogoUrl = normalizesNonNull(Validators.Url, Cleaners.Url)
+  val PropProjectWebsite = normalizesNonNull(Validators.Url, Cleaners.Url)
+  val CardinalAsString = normalizesNonNull(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
 
   // Other normalizers
 

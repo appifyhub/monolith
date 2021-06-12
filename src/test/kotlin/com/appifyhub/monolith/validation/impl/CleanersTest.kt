@@ -298,6 +298,21 @@ class CleanersTest {
       .isEqualTo(Cleaners.TrimNullified)
   }
 
+  @Test fun `long to cardinal (as string) with null is zero`() {
+    assertThat(Cleaners.LongToCardinalAsString.clean(null))
+      .isEqualTo("0")
+  }
+
+  @Test fun `long to cardinal (as string) with negative is zero`() {
+    assertThat(Cleaners.LongToCardinalAsString.clean("-5"))
+      .isEqualTo("0")
+  }
+
+  @Test fun `long to cardinal (as string) with positive works`() {
+    assertThat(Cleaners.LongToCardinalAsString.clean("5"))
+      .isEqualTo("5")
+  }
+
   // Other cleaners
 
   @Test fun `origin is trimming nullable`() {

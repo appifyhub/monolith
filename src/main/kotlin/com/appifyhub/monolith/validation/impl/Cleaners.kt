@@ -90,6 +90,9 @@ object Cleaners {
 
   val Url = Trim
   val UrlNullified = TrimNullified
+  val LongToCardinalAsString = cleansToNonNull<String>("LongToCardinalAsString") {
+    (it?.toLongOrNull()?.takeIf { num -> num > 0L } ?: 0L).toString()
+  }
 
   // Other cleaners
 

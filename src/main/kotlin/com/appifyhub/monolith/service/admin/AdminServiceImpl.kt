@@ -2,7 +2,7 @@ package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.mapValueNonNull
@@ -90,7 +90,7 @@ class AdminServiceImpl(
     return adminRepository.updateProject(normalizedUpdater)
   }
 
-  override fun updateAccount(updater: AccountUpdater): Account {
+  override fun updateAccount(updater: AccountOwnerUpdater): Account {
     log.debug("Updating account $updater")
 
     Normalizers.AccountId.run(updater.id).requireValid { "Account ID" }

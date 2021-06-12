@@ -7,4 +7,10 @@ enum class PropertyType {
   DECIMAL,
   FLAG,
 
+  ;
+
+  companion object {
+    fun find(name: String) = values().firstOrNull { it.name == name }
+  }
+
 }

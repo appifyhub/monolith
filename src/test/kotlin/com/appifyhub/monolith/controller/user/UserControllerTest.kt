@@ -43,7 +43,7 @@ class UserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authTestHelper: AuthTestHelper
+  @Autowired lateinit var authHelper: AuthTestHelper
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -57,7 +57,7 @@ class UserControllerTest {
   }
 
   @Test fun `get user fails when unauthorized`() {
-    val universalId = authTestHelper.defaultUser.id.toUniversalFormat()
+    val universalId = authHelper.defaultUser.id.toUniversalFormat()
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -72,9 +72,9 @@ class UserControllerTest {
   }
 
   @Test fun `get user succeeds with valid authorization`() {
-    val user = authTestHelper.defaultUser
+    val user = authHelper.defaultUser
     val universalId = user.id.toUniversalFormat()
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(

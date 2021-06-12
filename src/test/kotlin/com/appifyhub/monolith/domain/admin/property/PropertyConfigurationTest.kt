@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.containsAll
 import assertk.assertions.containsNone
 import assertk.assertions.isEqualTo
+import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_DECIMAL
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_FLAG
@@ -19,86 +20,85 @@ import org.junit.jupiter.api.Test
 class PropertyConfigurationTest {
 
   @Test fun `including generic properties works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true))
+    assertThat(PropertyConfiguration.filter(includeGeneric = true))
       .containsAll(*allGeneric.toTypedArray())
   }
 
   @Test fun `excluding generic properties works`() {
-    assertThat(PropertyConfiguration.findAllWith())
+    assertThat(PropertyConfiguration.filter())
       .containsNone(*allGeneric.toTypedArray())
   }
 
   private val allGeneric = listOf(GENERIC_STRING, GENERIC_INTEGER, GENERIC_DECIMAL, GENERIC_FLAG)
 
   @Test fun `filtering by type works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, type = STRING).strip())
+    assertThat(PropertyConfiguration.filter(PropertyFilter(type = STRING), includeGeneric = true).forTest())
       .isEqualTo(listOf(GENERIC_STRING))
   }
 
   @Test fun `filtering by category works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, category = GENERIC).strip())
+    assertThat(PropertyConfiguration.filter(PropertyFilter(category = GENERIC), includeGeneric = true).forTest())
       .isEqualTo(allGeneric)
   }
 
   @Test fun `filtering by name works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, nameContains = "DECIMAL").strip())
+    assertThat(PropertyConfiguration.filter(PropertyFilter(nameContains = "DECIMAL"), includeGeneric = true).forTest())
       .isEqualTo(listOf(GENERIC_DECIMAL))
   }
 
   @Test fun `filtering by being mandatory works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, isMandatory = true).strip())
+    assertThat(PropertyConfiguration.filter(PropertyFilter(isMandatory = true), includeGeneric = true).forTest())
       .isEqualTo(listOf(GENERIC_STRING))
   }
 
   @Test fun `filtering by being secret works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, isSecret = true).strip())
+    assertThat(PropertyConfiguration.filter(PropertyFilter(isSecret = true), includeGeneric = true).forTest())
       .isEqualTo(listOf(GENERIC_INTEGER))
   }
 
-  @Test fun `filtering by being read-only works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, isReadOnly = true).strip())
-      .isEqualTo(listOf(GENERIC_DECIMAL))
-  }
-
   @Test fun `filtering by being deprecated works`() {
-    assertThat(PropertyConfiguration.findAllWith(includeGeneric = true, isDeprecated = true).strip())
+    assertThat(PropertyConfiguration.filter(PropertyFilter(isDeprecated = true), includeGeneric = true).forTest())
       .isEqualTo(listOf(GENERIC_FLAG))
   }
 
   @Test fun `filtering by having must-have tags works`() {
     assertThat(
-      PropertyConfiguration.findAllWith(includeGeneric = true, mustHaveTags = setOf(IMPORTANT, TAG_GENERIC)).strip()
+      PropertyConfiguration.filter(
+        PropertyFilter(mustHaveTags = setOf(IMPORTANT, TAG_GENERIC)),
+        includeGeneric = true
+      ).forTest()
     ).isEqualTo(listOf(GENERIC_DECIMAL, GENERIC_FLAG))
   }
 
   @Test fun `filtering by having at least one tag works`() {
     assertThat(
-      PropertyConfiguration.findAllWith(
-        includeGeneric = true,
-        hasAtLeastOneOfTags = setOf(IMPORTANT, TAG_GENERIC)
-      ).strip()
+      PropertyConfiguration.filter(
+        PropertyFilter(hasAtLeastOneOfTags = setOf(IMPORTANT, TAG_GENERIC)),
+        includeGeneric = true
+      ).forTest()
     ).isEqualTo(listOf(GENERIC_INTEGER, GENERIC_DECIMAL, GENERIC_FLAG))
   }
 
   @Test fun `filtering by all properties works`() {
     assertThat(
-      PropertyConfiguration.findAllWith(
-        type = FLAG,
-        category = GENERIC,
-        nameContains = "FLAG",
-        isMandatory = false,
-        isSecret = false,
-        isReadOnly = false,
-        isDeprecated = true,
-        mustHaveTags = setOf(IMPORTANT, COSMETIC, TAG_GENERIC),
-        hasAtLeastOneOfTags = setOf(TAG_GENERIC),
+      PropertyConfiguration.filter(
+        PropertyFilter(
+          type = FLAG,
+          category = GENERIC,
+          nameContains = "FLAG",
+          isMandatory = false,
+          isSecret = false,
+          isDeprecated = true,
+          mustHaveTags = setOf(IMPORTANT, COSMETIC, TAG_GENERIC),
+          hasAtLeastOneOfTags = setOf(TAG_GENERIC),
+        ),
         includeGeneric = true,
-      ).strip()
+      ).forTest()
     ).isEqualTo(listOf(GENERIC_FLAG))
   }
 
   // Helpers 
 
-  private fun List<PropertyConfiguration>.strip() = filter { it in allGeneric }
+  private fun List<PropertyConfiguration>.forTest() = filter { it in allGeneric }
 
 }

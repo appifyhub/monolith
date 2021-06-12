@@ -92,10 +92,13 @@ object Validators {
 
   // Project property validators
 
-  val Url = validatesAs<String>("URL") { NotBlank.isValid(it) && REGEX_URL.matcher(it!!).matches() }
-  val UrlNullable = validatesAs<String>("NullableURL") {
+  val Url = validatesAs<String>("Url") { NotBlank.isValid(it) && REGEX_URL.matcher(it!!).matches() }
+  val UrlNullable = validatesAs<String>("UrlNullable") {
     if (it == null) return@validatesAs true
     NotBlank.isValid(it) && REGEX_URL.matcher(it).matches()
+  }
+  val PositiveLongAsString = validatesAs<String>("PositiveLongAsString") {
+    it != null && (it.toLongOrNull() ?: 0L) > 0L
   }
 
   // Other validators

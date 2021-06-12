@@ -43,7 +43,7 @@ class AdminUserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authTestHelper: AuthTestHelper
+  @Autowired lateinit var authHelper: AuthTestHelper
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -57,7 +57,7 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user fails when unauthorized`() {
-    val userId = authTestHelper.defaultUser.id
+    val userId = authHelper.defaultUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -75,8 +75,8 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user succeeds for self`() {
-    val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val user = authHelper.defaultUser
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -105,8 +105,8 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user succeeds for lower rank`() {
-    val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealJwt(MODERATOR).token.tokenValue
+    val user = authHelper.defaultUser
+    val token = authHelper.newRealJwt(MODERATOR).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
