@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.admin.ops
+package com.appifyhub.monolith.domain.admin.property.ops
 
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory
 import com.appifyhub.monolith.domain.admin.property.PropertyTag

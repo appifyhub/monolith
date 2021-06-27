@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.domain.admin.property
 
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.GENERIC as TAG_GENERIC
-import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.IDENTITY
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.OPERATIONAL
@@ -12,6 +11,7 @@ import com.appifyhub.monolith.domain.admin.property.PropertyType.DECIMAL
 import com.appifyhub.monolith.domain.admin.property.PropertyType.FLAG
 import com.appifyhub.monolith.domain.admin.property.PropertyType.INTEGER
 import com.appifyhub.monolith.domain.admin.property.PropertyType.STRING
+import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
 import com.appifyhub.monolith.validation.Normalizer
 import com.appifyhub.monolith.validation.impl.Normalizers
 
@@ -82,7 +82,7 @@ enum class PropertyConfiguration(
     type = INTEGER,
     category = OPERATIONAL,
     normalizer = Normalizers.CardinalAsString,
-    tags = setOf(CONSTRAINTS),
+    tags = setOf(CONSTRAINTS, IMPORTANT),
     defaultValue = "100 000",
     isMandatory = false,
     isSecret = false,

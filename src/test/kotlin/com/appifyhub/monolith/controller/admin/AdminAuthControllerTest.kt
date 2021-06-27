@@ -27,9 +27,9 @@ import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBodyRequest
-import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bearerBlankRequest
 import com.appifyhub.monolith.util.bodyRequest
-import com.appifyhub.monolith.util.emptyUriVariables
+import com.appifyhub.monolith.util.blankUriVariables
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -83,7 +83,7 @@ class AdminAuthControllerTest {
         url = "$baseUrl$ADMIN_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -102,7 +102,7 @@ class AdminAuthControllerTest {
         url = "$baseUrl$ADMIN_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -115,8 +115,8 @@ class AdminAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ADMIN_API_KEY",
         method = HttpMethod.POST,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -134,7 +134,7 @@ class AdminAuthControllerTest {
         url = "$baseUrl$ADMIN_API_KEY",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(keyData, ownerToken),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -149,7 +149,7 @@ class AdminAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
           "userId" to userId.userId,
@@ -168,7 +168,7 @@ class AdminAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
+        requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to user.id.projectId,
           "userId" to user.id.userId,
@@ -192,7 +192,7 @@ class AdminAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(adminToken),
+        requestEntity = bearerBlankRequest(adminToken),
         uriVariables = mapOf(
           "projectId" to user.id.projectId,
           "userId" to user.id.userId,
@@ -216,7 +216,7 @@ class AdminAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(staticToken),
+        requestEntity = bearerBlankRequest(staticToken),
         uriVariables = mapOf(
           "projectId" to anotherOwner.id.projectId,
           "userId" to anotherOwner.id.userId,
@@ -237,7 +237,7 @@ class AdminAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_AUTH",
         method = HttpMethod.DELETE,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
           "userId" to userId.userId,
@@ -260,7 +260,7 @@ class AdminAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(token1),
+          requestEntity = bearerBlankRequest(token1),
           uriVariables = mapOf(
             "projectId" to user.id.projectId,
             "userId" to user.id.userId,
@@ -289,7 +289,7 @@ class AdminAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(adminToken),
+          requestEntity = bearerBlankRequest(adminToken),
           uriVariables = mapOf(
             "projectId" to user.id.projectId,
             "userId" to user.id.userId,
@@ -318,7 +318,7 @@ class AdminAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(staticToken),
+          requestEntity = bearerBlankRequest(staticToken),
           uriVariables = mapOf(
             "projectId" to anotherOwner.id.projectId,
             "userId" to anotherOwner.id.userId,

@@ -12,4 +12,14 @@ class AdminMapperTest {
       .isDataClassEqualTo(Stubs.propertyFilter)
   }
 
+  @Test fun `property configuration - domain to network`() {
+    assertThat(Stubs.propString.config.toNetwork())
+      .isDataClassEqualTo(Stubs.propertyConfigurationResponse)
+  }
+
+  @Test fun `property - domain to network`() {
+    assertThat(Stubs.propString.toNetwork())
+      .isDataClassEqualTo(Stubs.propertyResponse)
+  }
+
 }

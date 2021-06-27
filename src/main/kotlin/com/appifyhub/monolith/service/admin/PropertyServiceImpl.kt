@@ -1,12 +1,12 @@
 package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
+import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
 import com.appifyhub.monolith.domain.mapper.instantiate
 import com.appifyhub.monolith.domain.mapper.withCast
-import com.appifyhub.monolith.network.admin.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.admin.PropertyRepository

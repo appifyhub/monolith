@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.junit.jupiter.api.Test
 import org.mockito.Answers.RETURNS_DEEP_STUBS
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -195,6 +196,21 @@ class GlobalExceptionHandlerTest {
 
   @Test fun `handle no such element exception`() {
     val exception = NoSuchElementException("Something failed")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.NOT_FOUND)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Request Error : ${exception.message}")
+    }
+  }
+
+  @Test fun `handle empty result data access exception`() {
+    val exception = EmptyResultDataAccessException("Not found", 1)
 
     val result = handler.handleThrowable(exception)
 

@@ -5,12 +5,12 @@ import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
-import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
 import com.appifyhub.monolith.domain.admin.property.PropertyTag
 import com.appifyhub.monolith.domain.admin.property.PropertyType
+import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
@@ -22,7 +22,9 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.network.admin.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.admin.property.PropertyConfigurationResponse
+import com.appifyhub.monolith.network.admin.property.PropertyResponse
 import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
@@ -608,6 +610,23 @@ object Stubs {
     deprecated = true,
     must_have_tags = listOf(PropertyTag.GENERIC.name),
     has_at_least_one_of_tags = listOf(PropertyTag.GENERIC.name),
+  )
+
+  val propertyConfigurationResponse = PropertyConfigurationResponse(
+    name = PropertyConfiguration.GENERIC_STRING.name,
+    type = PropertyConfiguration.GENERIC_STRING.type.name,
+    category = PropertyConfiguration.GENERIC_STRING.category.name,
+    tags = PropertyConfiguration.GENERIC_STRING.tags.map(PropertyTag::name).toSet(),
+    defaultValue = PropertyConfiguration.GENERIC_STRING.defaultValue,
+    isMandatory = PropertyConfiguration.GENERIC_STRING.isMandatory,
+    isSecret = PropertyConfiguration.GENERIC_STRING.isSecret,
+    isDeprecated = PropertyConfiguration.GENERIC_STRING.isDeprecated,
+  )
+
+  val propertyResponse = PropertyResponse(
+    config = propertyConfigurationResponse,
+    rawValue = propString.rawValue,
+    updatedAt = "1970-01-01 04:38",
   )
 
   // endregion

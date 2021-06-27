@@ -22,9 +22,9 @@ import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bearerBlankRequest
 import com.appifyhub.monolith.util.bodyRequest
-import com.appifyhub.monolith.util.emptyUriVariables
+import com.appifyhub.monolith.util.blankUriVariables
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -78,7 +78,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -97,7 +97,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -110,8 +110,8 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -126,8 +126,8 @@ class UserAuthControllerTest {
       restTemplate.exchange<TokenDetailsResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -142,8 +142,8 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -159,8 +159,8 @@ class UserAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token1),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest(token1),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -177,8 +177,8 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -192,8 +192,8 @@ class UserAuthControllerTest {
       restTemplate.exchange<TokenResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerEmptyRequest(token),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -209,7 +209,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH?all={all}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf("all" to null),
       )
     ).all {
@@ -225,7 +225,7 @@ class UserAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(token),
+          requestEntity = bearerBlankRequest(token),
           uriVariables = mapOf("all" to false),
         )
       ).all {
@@ -247,7 +247,7 @@ class UserAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(token1),
+          requestEntity = bearerBlankRequest(token1),
           uriVariables = mapOf("all" to true),
         )
       ).all {
@@ -265,7 +265,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "token1" to null,
           "token2" to null,
@@ -288,7 +288,7 @@ class UserAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(token3),
+          requestEntity = bearerBlankRequest(token3),
           uriVariables = mapOf(
             "token1" to token1,
             "token2" to token2,

@@ -4,7 +4,7 @@ import java.util.Date
 
 sealed interface Property<out T : Any> {
 
-  companion object // for extension
+  companion object // for extensions
 
   // Shared properties
 

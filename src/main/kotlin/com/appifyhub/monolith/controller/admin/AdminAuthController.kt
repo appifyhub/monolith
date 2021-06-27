@@ -78,7 +78,7 @@ class AdminAuthController(
     val targetUser = authService.requestUserAccess(
       authData = authentication,
       targetId = UserId(userId, projectId),
-      privilege = Privilege.USER_READ
+      privilege = Privilege.USER_READ,
     )
 
     val tokens = if (targetUser.id == authUser.id) {
@@ -99,7 +99,11 @@ class AdminAuthController(
     log.debug("[DELETE] unauth user $userId from project $projectId")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestUserAccess(authentication, UserId(userId, projectId), Privilege.USER_WRITE)
+    val targetUser = authService.requestUserAccess(
+      authData = authentication,
+      targetId = UserId(userId, projectId),
+      privilege = Privilege.USER_WRITE,
+    )
 
     if (targetUser.id == authUser.id) {
       authService.unauthorizeAll(authentication) // for self only

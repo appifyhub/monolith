@@ -1,5 +1,7 @@
-package com.appifyhub.monolith.network.admin
+package com.appifyhub.monolith.network.admin.property.ops
 
+// @JsonProperty is not needed (and won't work anyway)
+// because this is a holder for query params
 data class PropertyFilterQueryParams(
   var type: String? = null,
   var category: String? = null,

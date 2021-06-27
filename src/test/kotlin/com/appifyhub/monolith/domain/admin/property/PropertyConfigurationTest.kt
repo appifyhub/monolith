@@ -5,7 +5,6 @@ import assertk.assertThat
 import assertk.assertions.containsAll
 import assertk.assertions.containsNone
 import assertk.assertions.isEqualTo
-import com.appifyhub.monolith.domain.admin.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_DECIMAL
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_FLAG
@@ -15,6 +14,7 @@ import com.appifyhub.monolith.domain.admin.property.PropertyTag.COSMETIC
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.IMPORTANT
 import com.appifyhub.monolith.domain.admin.property.PropertyType.FLAG
 import com.appifyhub.monolith.domain.admin.property.PropertyType.STRING
+import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
 import org.junit.jupiter.api.Test
 
 class PropertyConfigurationTest {
@@ -65,7 +65,7 @@ class PropertyConfigurationTest {
     assertThat(
       PropertyConfiguration.filter(
         PropertyFilter(mustHaveTags = setOf(IMPORTANT, TAG_GENERIC)),
-        includeGeneric = true
+        includeGeneric = true,
       ).forTest()
     ).isEqualTo(listOf(GENERIC_DECIMAL, GENERIC_FLAG))
   }
@@ -74,7 +74,7 @@ class PropertyConfigurationTest {
     assertThat(
       PropertyConfiguration.filter(
         PropertyFilter(hasAtLeastOneOfTags = setOf(IMPORTANT, TAG_GENERIC)),
-        includeGeneric = true
+        includeGeneric = true,
       ).forTest()
     ).isEqualTo(listOf(GENERIC_INTEGER, GENERIC_DECIMAL, GENERIC_FLAG))
   }

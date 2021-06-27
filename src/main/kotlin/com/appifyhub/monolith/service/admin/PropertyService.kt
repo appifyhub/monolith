@@ -2,7 +2,7 @@ package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
-import com.appifyhub.monolith.network.admin.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
 
 interface PropertyService {
 

@@ -21,7 +21,7 @@ import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERI
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_DESCRIPTION
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_LOGO_URL
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_USERS_MAX
-import com.appifyhub.monolith.network.admin.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.admin.PropertyRepository
 import com.appifyhub.monolith.util.AuthTestHelper
