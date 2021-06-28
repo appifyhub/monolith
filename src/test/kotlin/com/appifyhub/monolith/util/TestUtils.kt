@@ -5,7 +5,7 @@ import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 
-fun emptyRequest() = HttpEntity<Any?>(
+fun blankRequest() = HttpEntity<Any?>(
   HttpHeaders().apply {
     acceptCharset = listOf(Charset.defaultCharset())
     accept = listOf(MediaType.APPLICATION_JSON)
@@ -20,7 +20,7 @@ fun <T> bodyRequest(body: T) = HttpEntity<T>(
   }
 )
 
-fun bearerEmptyRequest(token: String) = HttpEntity<Any?>(
+fun bearerBlankRequest(token: String) = HttpEntity<Any?>(
   HttpHeaders().apply {
     acceptCharset = listOf(Charset.defaultCharset())
     accept = listOf(MediaType.APPLICATION_JSON)
@@ -37,4 +37,4 @@ fun <T> bearerBodyRequest(body: T, token: String) = HttpEntity<T>(
   }
 )
 
-fun emptyUriVariables() = emptyMap<String, String>()
+fun blankUriVariables() = emptyMap<String, String>()

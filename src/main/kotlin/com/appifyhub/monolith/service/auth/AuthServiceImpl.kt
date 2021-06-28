@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.service.auth
 
+import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.mapper.mergeToString
@@ -10,7 +11,7 @@ import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.repository.geo.GeolocationRepository
 import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.service.user.UserService.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.Privilege
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.throwUnauthorized
 import com.appifyhub.monolith.validation.impl.Normalizers
@@ -85,7 +86,7 @@ class AuthServiceImpl(
     return shallowUser
   }
 
-  override fun requestAccessFor(authData: Authentication, targetId: UserId, privilege: UserPrivilege): User {
+  override fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User {
     log.debug("Authentication $authData requesting '${privilege.name}' access to $targetId")
 
     // validate request data and token
@@ -118,6 +119,32 @@ class AuthServiceImpl(
     require(isHigherAuthority) { "Only ${targetUser.authority.nextGroupName} are authorized" }
 
     return targetUser
+  }
+
+  override fun requestProjectAccess(authData: Authentication, targetProjectId: Long, privilege: Privilege): Project {
+    log.debug("Authentication $authData requesting '${privilege.name}' access to $targetProjectId")
+
+    // validate request data and token
+    val normalizedTargetProjectId = Normalizers.ProjectId.run(targetProjectId).requireValid { "Project ID" }
+    val jwt = authData.requireValidJwt(shallow = false)
+    val tokenDetails = authRepository.fetchTokenDetails(jwt)
+
+    // validate that the project matches
+    val targetProject = adminService.fetchProjectById(normalizedTargetProjectId)
+    val shallowRequester = authRepository.resolveShallowUser(jwt)
+    val targetProjectMatches = tokenDetails.ownerId.projectId == normalizedTargetProjectId
+    val requesterProjectMatches = tokenDetails.ownerId.projectId == shallowRequester.id.projectId
+    require(targetProjectMatches && requesterProjectMatches) { "Only requests within the same project are allowed" }
+
+    // static tokens are always allowed
+    if (tokenDetails.isStatic) return targetProject
+
+    // check if minimum authorization level is met
+    val requesterUser = userService.fetchUserByUserId(shallowRequester.id, withTokens = false)
+    val isPrivileged = requesterUser.canActAs(privilege.minLevel)
+    require(isPrivileged) { "Only ${privilege.minLevel.groupName} are authorized" }
+
+    return targetProject
   }
 
   override fun resolveUser(universalId: String, signature: String): User {

@@ -14,7 +14,7 @@ import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bearerBlankRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ class UserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authTestHelper: AuthTestHelper
+  @Autowired lateinit var authHelper: AuthTestHelper
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -57,13 +57,13 @@ class UserControllerTest {
   }
 
   @Test fun `get user fails when unauthorized`() {
-    val universalId = authTestHelper.defaultUser.id.toUniversalFormat()
+    val universalId = authHelper.defaultUser.id.toUniversalFormat()
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ONE_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
       )
     ).all {
@@ -72,15 +72,15 @@ class UserControllerTest {
   }
 
   @Test fun `get user succeeds with valid authorization`() {
-    val user = authTestHelper.defaultUser
+    val user = authHelper.defaultUser
     val universalId = user.id.toUniversalFormat()
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ONE_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
+        requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf("universalId" to universalId),
       )
     ).all {

@@ -4,14 +4,21 @@ import com.appifyhub.monolith.validation.Normalizer
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
+@Throws(ResponseStatusException::class)
 fun throwUnauthorized(
   message: () -> Any = { "Not authorized to perform this action" },
 ): Nothing = throw ResponseStatusException(HttpStatus.UNAUTHORIZED, message().toString())
 
+@Throws(ResponseStatusException::class)
 fun throwNormalization(
   message: () -> Any = { "Data is invalid" },
 ): Nothing = throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, message().toString())
 
+@Throws(IllegalArgumentException::class)
+fun throwPropertyNotFound(propName: String): Nothing =
+  throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Property '$propName' not found")
+
+@Throws(ResponseStatusException::class)
 fun <T> Normalizer.Result<T>.requireValid(
   propName: () -> Any = { "Property" },
 ) = if (!isValid) throwNormalization { "${propName()} '$value' is invalid" } else value

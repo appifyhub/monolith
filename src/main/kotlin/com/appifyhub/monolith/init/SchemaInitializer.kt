@@ -57,7 +57,7 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val rootProjectName = Normalizers.ProjectName.run(rootConfig.rootProjectName)
+    val rootProjectName = Normalizers.PropProjectName.run(rootConfig.rootProjectName)
       .requireValid { "Project Name" }
     val configuredSignature = Normalizers.RawSignatureNullified.run(rootConfig.rootOwnerSignature)
       .requireValid { "Owner Signature" }

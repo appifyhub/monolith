@@ -15,7 +15,7 @@ import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bearerBlankRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -43,7 +43,7 @@ class AdminUserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authTestHelper: AuthTestHelper
+  @Autowired lateinit var authHelper: AuthTestHelper
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -57,13 +57,13 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user fails when unauthorized`() {
-    val userId = authTestHelper.defaultUser.id
+    val userId = authHelper.defaultUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
           "userId" to userId.userId,
@@ -75,14 +75,14 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user succeeds for self`() {
-    val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val user = authHelper.defaultUser
+    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
+        requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to user.id.projectId,
           "userId" to user.id.userId,
@@ -105,14 +105,14 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user succeeds for lower rank`() {
-    val user = authTestHelper.defaultUser
-    val token = authTestHelper.newRealJwt(MODERATOR).token.tokenValue
+    val user = authHelper.defaultUser
+    val token = authHelper.newRealJwt(MODERATOR).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
+        requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to user.id.projectId,
           "userId" to user.id.userId,

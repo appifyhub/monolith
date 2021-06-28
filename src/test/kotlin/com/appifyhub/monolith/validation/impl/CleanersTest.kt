@@ -100,7 +100,7 @@ class CleanersTest {
   }
 
   @Test fun `project name is trimming`() {
-    assertThat(Cleaners.ProjectName)
+    assertThat(Cleaners.PropProjectName)
       .isEqualTo(Cleaners.Trim)
   }
 
@@ -284,6 +284,33 @@ class CleanersTest {
   @Test fun `orga with all non-blank properties works`() {
     assertThat(Cleaners.Organization.clean(Stubs.company))
       .isEqualTo(Stubs.company)
+  }
+
+  // Project property cleaners
+
+  @Test fun `url is trimming`() {
+    assertThat(Cleaners.Url)
+      .isEqualTo(Cleaners.Trim)
+  }
+
+  @Test fun `nullified url is trimming nullified`() {
+    assertThat(Cleaners.UrlNullified)
+      .isEqualTo(Cleaners.TrimNullified)
+  }
+
+  @Test fun `long to cardinal (as string) with null is zero`() {
+    assertThat(Cleaners.LongToCardinalAsString.clean(null))
+      .isEqualTo("0")
+  }
+
+  @Test fun `long to cardinal (as string) with negative is zero`() {
+    assertThat(Cleaners.LongToCardinalAsString.clean("-5"))
+      .isEqualTo("0")
+  }
+
+  @Test fun `long to cardinal (as string) with positive works`() {
+    assertThat(Cleaners.LongToCardinalAsString.clean("5"))
+      .isEqualTo("5")
   }
 
   // Other cleaners

@@ -2,7 +2,7 @@ package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.mapValueNonNull
@@ -26,7 +26,7 @@ class AdminServiceImpl(
 
     val normalizeAccount = Normalizers.AccountId.run(creator.account.id).requireValid { "Account ID" }
       .let { creator.account.copy(id = it) }
-    val normalizedName = Normalizers.ProjectName.run(creator.name).requireValid { "Project Name" }
+    val normalizedName = Normalizers.PropProjectName.run(creator.name).requireValid { "Project Name" }
 
     val normalizedCreator = ProjectCreator(
       account = normalizeAccount,
@@ -76,7 +76,7 @@ class AdminServiceImpl(
       Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
     }
     val normalizedName = updater.name?.mapValueNonNull {
-      Normalizers.ProjectName.run(it).requireValid { "Project Name" }
+      Normalizers.PropProjectName.run(it).requireValid { "Project Name" }
     }
 
     val normalizedUpdater = ProjectUpdater(
@@ -90,7 +90,7 @@ class AdminServiceImpl(
     return adminRepository.updateProject(normalizedUpdater)
   }
 
-  override fun updateAccount(updater: AccountUpdater): Account {
+  override fun updateAccount(updater: AccountOwnerUpdater): Account {
     log.debug("Updating account $updater")
 
     Normalizers.AccountId.run(updater.id).requireValid { "Account ID" }

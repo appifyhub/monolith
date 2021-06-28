@@ -125,7 +125,7 @@ class ValidatorsTest {
   }
 
   @Test fun `project name is non blank`() {
-    assertThat(Validators.ProjectName)
+    assertThat(Validators.PropProjectName)
       .isEqualTo(Validators.NotBlank)
   }
 
@@ -345,6 +345,63 @@ class ValidatorsTest {
 
   @Test fun `orga succeeds with valid content`() {
     assertThat(Validators.Organization.isValid(Stubs.company))
+      .isTrue()
+  }
+
+  // Project property validators
+
+  @Test fun `url fails with null`() {
+    assertThat(Validators.Url.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `url fails with blank`() {
+    assertThat(Validators.Url.isValid(" \t \n "))
+      .isFalse()
+  }
+
+  @Test fun `url fails with invalid format`() {
+    assertThat(Validators.Url.isValid("invalid"))
+      .isFalse()
+  }
+
+  @Test fun `url succeeds with valid content`() {
+    assertThat(Validators.Url.isValid("https://appifyhub.com"))
+      .isTrue()
+  }
+
+  @Test fun `nullable url fails with blank`() {
+    assertThat(Validators.UrlNullable.isValid(" \t \n "))
+      .isFalse()
+  }
+
+  @Test fun `nullable url fails with invalid format`() {
+    assertThat(Validators.UrlNullable.isValid("invalid"))
+      .isFalse()
+  }
+
+  @Test fun `nullable url succeeds with null`() {
+    assertThat(Validators.UrlNullable.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `nullable url succeeds with valid content`() {
+    assertThat(Validators.UrlNullable.isValid("https://appifyhub.com"))
+      .isTrue()
+  }
+
+  @Test fun `positive long (as string) fails with null`() {
+    assertThat(Validators.PositiveLongAsString.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `positive long (as string) fails with zero`() {
+    assertThat(Validators.PositiveLongAsString.isValid("0"))
+      .isFalse()
+  }
+
+  @Test fun `positive long (as string) succeeds with positive`() {
+    assertThat(Validators.PositiveLongAsString.isValid("1"))
       .isTrue()
   }
 

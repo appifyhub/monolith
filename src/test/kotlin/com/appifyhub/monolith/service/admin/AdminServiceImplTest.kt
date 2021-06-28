@@ -12,7 +12,7 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -294,7 +294,7 @@ class AdminServiceImplTest {
       // adding owners
       assertThat(
         service.updateAccount(
-          AccountUpdater(
+          AccountOwnerUpdater(
             id = account.id,
             addedOwners = Settable(listOf(randomModerator)),
           )
@@ -308,7 +308,7 @@ class AdminServiceImplTest {
       // removing owners and adding new
       assertThat(
         service.updateAccount(
-          AccountUpdater(
+          AccountOwnerUpdater(
             id = account.id,
             addedOwners = Settable(listOf(randomAdmin)),
             removedOwners = Settable(listOf(randomModeratorUpdated)),
@@ -377,7 +377,7 @@ class AdminServiceImplTest {
       userIdType = project.userIdType,
     )
     service.updateAccount(
-      AccountUpdater(
+      AccountOwnerUpdater(
         id = account.id,
         addedOwners = Settable(listOf(user)),
       )

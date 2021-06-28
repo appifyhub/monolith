@@ -26,7 +26,7 @@ object Cleaners {
 
   val ProjectId = LongToCardinal
   val AccountId = LongToCardinal
-  val ProjectName = Trim
+  val PropProjectName = Trim
 
   // ID domain cleaners
 
@@ -84,6 +84,14 @@ object Cleaners {
         !orga?.city.isNullOrEmpty() ||
         !orga?.countryCode.isNullOrEmpty()
     }
+  }
+
+  // Project property cleaners
+
+  val Url = Trim
+  val UrlNullified = TrimNullified
+  val LongToCardinalAsString = cleansToNonNull<String>("LongToCardinalAsString") {
+    (it?.toLongOrNull()?.takeIf { num -> num > 0L } ?: 0L).toString()
   }
 
   // Other cleaners

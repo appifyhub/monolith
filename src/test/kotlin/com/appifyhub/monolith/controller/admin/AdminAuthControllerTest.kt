@@ -27,9 +27,9 @@ import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBodyRequest
-import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bearerBlankRequest
 import com.appifyhub.monolith.util.bodyRequest
-import com.appifyhub.monolith.util.emptyUriVariables
+import com.appifyhub.monolith.util.blankUriVariables
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -58,7 +58,7 @@ class AdminAuthControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authTestHelper: AuthTestHelper
+  @Autowired lateinit var authHelper: AuthTestHelper
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -73,7 +73,7 @@ class AdminAuthControllerTest {
 
   @Test fun `auth admin fails with invalid credentials`() {
     val credentials = AdminCredentialsRequest(
-      universalId = authTestHelper.defaultUser.id.toUniversalFormat(),
+      universalId = authHelper.defaultUser.id.toUniversalFormat(),
       secret = "invalid",
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -83,7 +83,7 @@ class AdminAuthControllerTest {
         url = "$baseUrl$ADMIN_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -92,7 +92,7 @@ class AdminAuthControllerTest {
 
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = AdminCredentialsRequest(
-      universalId = authTestHelper.adminUser.id.toUniversalFormat(),
+      universalId = authHelper.adminUser.id.toUniversalFormat(),
       secret = Stubs.userCredentialsRequest.secret,
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -102,7 +102,7 @@ class AdminAuthControllerTest {
         url = "$baseUrl$ADMIN_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -115,8 +115,8 @@ class AdminAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ADMIN_API_KEY",
         method = HttpMethod.POST,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = emptyUriVariables(),
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -124,7 +124,7 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `create api key succeeds with valid credentials`() {
-    val ownerToken = authTestHelper.newRealJwt(OWNER).token.tokenValue
+    val ownerToken = authHelper.newRealJwt(OWNER).token.tokenValue
     val keyData = ApiKeyRequest(
       origin = Stubs.userCredentialsRequest.origin,
     )
@@ -134,7 +134,7 @@ class AdminAuthControllerTest {
         url = "$baseUrl$ADMIN_API_KEY",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(keyData, ownerToken),
-        uriVariables = emptyUriVariables(),
+        uriVariables = blankUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -143,13 +143,13 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `get any user tokens fails when unauthorized`() {
-    val userId = authTestHelper.adminUser.id
+    val userId = authHelper.adminUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
           "userId" to userId.userId,
@@ -161,14 +161,14 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `get any user tokens succeeds for self`() {
-    val user = authTestHelper.adminUser
-    val token = authTestHelper.newRealJwt(ADMIN).token.tokenValue
+    val user = authHelper.adminUser
+    val token = authHelper.newRealJwt(ADMIN).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
+        requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to user.id.projectId,
           "userId" to user.id.userId,
@@ -177,22 +177,22 @@ class AdminAuthControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
-        listOf(authTestHelper.fetchLastTokenOf(user).toNetwork())
+        listOf(authHelper.fetchLastTokenOf(user).toNetwork())
       )
     }
   }
 
   @Test fun `get any user tokens succeeds for lower rank`() {
-    val adminToken = authTestHelper.newRealJwt(ADMIN).token.tokenValue
+    val adminToken = authHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val userToken = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
-    val user = authTestHelper.defaultUser
+    val userToken = authHelper.newRealJwt(DEFAULT).token.tokenValue
+    val user = authHelper.defaultUser
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(adminToken),
+        requestEntity = bearerBlankRequest(adminToken),
         uriVariables = mapOf(
           "projectId" to user.id.projectId,
           "userId" to user.id.userId,
@@ -201,22 +201,22 @@ class AdminAuthControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
-        listOf(userToken).map { authTestHelper.fetchTokenDetailsFor(it).toNetwork() }
+        listOf(userToken).map { authHelper.fetchTokenDetailsFor(it).toNetwork() }
       )
     }
   }
 
   @Test fun `get any user tokens succeeds with static token`() {
-    val anotherOwner = authTestHelper.ensureUser(OWNER, forceNewOwner = true)
-    val anotherOwnerToken = authTestHelper.newRealJwt(OWNER, forceNewOwner = true).token.tokenValue
-    val staticToken = authTestHelper.newRealJwt(OWNER, isStatic = true).token.tokenValue
+    val anotherOwner = authHelper.ensureUser(OWNER, forceNewOwner = true)
+    val anotherOwnerToken = authHelper.newRealJwt(OWNER, forceNewOwner = true).token.tokenValue
+    val staticToken = authHelper.newRealJwt(OWNER, isStatic = true).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(staticToken),
+        requestEntity = bearerBlankRequest(staticToken),
         uriVariables = mapOf(
           "projectId" to anotherOwner.id.projectId,
           "userId" to anotherOwner.id.userId,
@@ -225,19 +225,19 @@ class AdminAuthControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
-        listOf(anotherOwnerToken).map { authTestHelper.fetchTokenDetailsFor(it).toNetwork() }
+        listOf(anotherOwnerToken).map { authHelper.fetchTokenDetailsFor(it).toNetwork() }
       )
     }
   }
 
   @Test fun `unauth any user tokens fails when unauthorized`() {
-    val userId = authTestHelper.adminUser.id
+    val userId = authHelper.adminUser.id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_AUTH",
         method = HttpMethod.DELETE,
-        requestEntity = bearerEmptyRequest("invalid"),
+        requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to userId.projectId,
           "userId" to userId.userId,
@@ -249,10 +249,10 @@ class AdminAuthControllerTest {
   }
 
   @Test fun `unauth any user succeeds for self`() {
-    val user = authTestHelper.adminUser
-    val token1 = authTestHelper.newRealJwt(ADMIN).token.tokenValue
+    val user = authHelper.adminUser
+    val token1 = authHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealJwt(ADMIN).token.tokenValue
+    val token2 = authHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
 
     assertAll {
@@ -260,7 +260,7 @@ class AdminAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(token1),
+          requestEntity = bearerBlankRequest(token1),
           uriVariables = mapOf(
             "projectId" to user.id.projectId,
             "userId" to user.id.userId,
@@ -271,25 +271,25 @@ class AdminAuthControllerTest {
         transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
       }
 
-      assertThat(authTestHelper.isAuthorized(token1)).isFalse()
-      assertThat(authTestHelper.isAuthorized(token2)).isFalse()
+      assertThat(authHelper.isAuthorized(token1)).isFalse()
+      assertThat(authHelper.isAuthorized(token2)).isFalse()
     }
   }
 
   @Test fun `unauth any user succeeds for lower rank`() {
-    val user = authTestHelper.defaultUser
-    val adminToken = authTestHelper.newRealJwt(ADMIN).token.tokenValue
+    val user = authHelper.defaultUser
+    val adminToken = authHelper.newRealJwt(ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token1 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token1 = authHelper.newRealJwt(DEFAULT).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = authTestHelper.newRealJwt(DEFAULT).token.tokenValue
+    val token2 = authHelper.newRealJwt(DEFAULT).token.tokenValue
 
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(adminToken),
+          requestEntity = bearerBlankRequest(adminToken),
           uriVariables = mapOf(
             "projectId" to user.id.projectId,
             "userId" to user.id.userId,
@@ -300,17 +300,17 @@ class AdminAuthControllerTest {
         transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
       }
 
-      assertThat(authTestHelper.isAuthorized(token1)).isFalse()
-      assertThat(authTestHelper.isAuthorized(token2)).isFalse()
-      assertThat(authTestHelper.isAuthorized(adminToken)).isTrue()
+      assertThat(authHelper.isAuthorized(token1)).isFalse()
+      assertThat(authHelper.isAuthorized(token2)).isFalse()
+      assertThat(authHelper.isAuthorized(adminToken)).isTrue()
     }
   }
 
   @Test fun `unauth any user succeeds with static token`() {
-    val anotherOwner = authTestHelper.ensureUser(OWNER, forceNewOwner = true)
-    val anotherOwnerToken1 = authTestHelper.newRealJwt(OWNER, forceNewOwner = true).token.tokenValue
-    val anotherOwnerToken2 = authTestHelper.newRealJwt(OWNER, forceNewOwner = true).token.tokenValue
-    val staticToken = authTestHelper.newRealJwt(OWNER, isStatic = true).token.tokenValue
+    val anotherOwner = authHelper.ensureUser(OWNER, forceNewOwner = true)
+    val anotherOwnerToken1 = authHelper.newRealJwt(OWNER, forceNewOwner = true).token.tokenValue
+    val anotherOwnerToken2 = authHelper.newRealJwt(OWNER, forceNewOwner = true).token.tokenValue
+    val staticToken = authHelper.newRealJwt(OWNER, isStatic = true).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
 
     assertAll {
@@ -318,7 +318,7 @@ class AdminAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(staticToken),
+          requestEntity = bearerBlankRequest(staticToken),
           uriVariables = mapOf(
             "projectId" to anotherOwner.id.projectId,
             "userId" to anotherOwner.id.userId,
@@ -329,9 +329,9 @@ class AdminAuthControllerTest {
         transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
       }
 
-      assertThat(authTestHelper.isAuthorized(anotherOwnerToken1)).isFalse()
-      assertThat(authTestHelper.isAuthorized(anotherOwnerToken2)).isFalse()
-      assertThat(authTestHelper.isAuthorized(staticToken)).isTrue()
+      assertThat(authHelper.isAuthorized(anotherOwnerToken1)).isFalse()
+      assertThat(authHelper.isAuthorized(anotherOwnerToken2)).isFalse()
+      assertThat(authHelper.isAuthorized(staticToken)).isTrue()
     }
   }
 
