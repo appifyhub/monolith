@@ -21,7 +21,7 @@ object Normalizers {
 
   val ProjectId = normalizesNonNull(Validators.ProjectId, Cleaners.ProjectId)
   val AccountId = normalizesNonNull(Validators.AccountId, Cleaners.AccountId)
-  val ProjectName = normalizesNonNull(Validators.ProjectName, Cleaners.ProjectName)
+  val PropProjectName = normalizesNonNull(Validators.PropProjectName, Cleaners.PropProjectName)
 
   // ID normalizers
 
@@ -31,14 +31,14 @@ object Normalizers {
   val RawSignatureNullified = normalizesNullable(Validators.RawSignatureNullable, Cleaners.RawSignatureNullified)
   val UserId = normalizesNonNull(Validators.UserId, Cleaners.UserId)
 
-  // Contact validators
+  // Contact normalizers
 
   val Name = normalizesNullable(Validators.Name, Cleaners.Name)
   val CustomContact = normalizesNullable(Validators.CustomContact, Cleaners.CustomContact)
   val Email = normalizesNonNull(Validators.Email, Cleaners.Email)
   val Phone = normalizesNonNull(Validators.Phone, Cleaners.Phone)
 
-  // Organization validators
+  // Organization normalizers
 
   val OrganizationName = normalizesNullable(Validators.OrganizationName, Cleaners.OrganizationName)
   val OrganizationStreet = normalizesNullable(Validators.OrganizationStreet, Cleaners.OrganizationStreet)
@@ -47,7 +47,14 @@ object Normalizers {
   val OrganizationCountryCode = normalizesNullable(Validators.OrganizationCountryCode, Cleaners.OrganizationCountryCode)
   val Organization = normalizesNullable(Validators.Organization, Cleaners.Organization)
 
-  // Other validators
+  // Project property normalizers
+
+  val PropProjectDescription = normalizesNonNull(Validators.NotBlank, Cleaners.Trim)
+  val PropProjectLogoUrl = normalizesNonNull(Validators.Url, Cleaners.Url)
+  val PropProjectWebsite = normalizesNonNull(Validators.Url, Cleaners.Url)
+  val CardinalAsString = normalizesNonNull(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
+
+  // Other normalizers
 
   val Origin = normalizesNullable(Validators.Origin, Cleaners.Origin)
   val IpAddress = normalizesNullable(Validators.IpAddress, Cleaners.IpAddress)

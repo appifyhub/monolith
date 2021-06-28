@@ -5,7 +5,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isSuccess
 import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.user.User
@@ -192,7 +192,7 @@ class AdminRepositoryImplTest {
     }
     timeProvider.staticTime = { 0xA10001 }
 
-    val emptyUpdater = AccountUpdater(id = Stubs.account.id)
+    val emptyUpdater = AccountOwnerUpdater(id = Stubs.account.id)
     assertThat(repository.updateAccount(emptyUpdater).cleanStubArtifacts())
       .isDataClassEqualTo(
         Stubs.account.copy(

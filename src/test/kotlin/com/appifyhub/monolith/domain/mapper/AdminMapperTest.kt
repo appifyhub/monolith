@@ -4,10 +4,11 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.storage.model.admin.PropertyDbm
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import java.util.Date
@@ -16,7 +17,7 @@ import org.junit.jupiter.api.Test
 class AdminMapperTest {
 
   @Test fun `account updater to account (no changes)`() {
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = null,
       removedOwners = null,
@@ -38,7 +39,7 @@ class AdminMapperTest {
     val newOwner = Stubs.user.copy(
       id = Stubs.userId.copy(userId = "u1"),
     )
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = Settable(listOf(newOwner)),
       removedOwners = null,
@@ -58,7 +59,7 @@ class AdminMapperTest {
   }
 
   @Test fun `account updater to account (removed owners)`() {
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = null,
       removedOwners = Settable(listOf(Stubs.user)),
@@ -81,7 +82,7 @@ class AdminMapperTest {
     val newOwner = Stubs.user.copy(
       id = Stubs.userId.copy(userId = "u1"),
     )
-    val accountUpdater = AccountUpdater(
+    val accountUpdater = AccountOwnerUpdater(
       id = Stubs.account.id,
       addedOwners = Settable(listOf(newOwner)),
       removedOwners = Settable(listOf(Stubs.user)),
@@ -195,6 +196,22 @@ class AdminMapperTest {
 
   @Test fun `project domain to data`() {
     assertThat(Stubs.project.toData()).isEqualTo(Stubs.projectDbm)
+  }
+
+  @Test fun `property data to domain`() {
+    val propsData = listOf(Stubs.propStringDbm, Stubs.propIntegerDbm, Stubs.propDecimalDbm, Stubs.propFlagDbm)
+    val propsDomain = listOf(Stubs.propString, Stubs.propInteger, Stubs.propDecimal, Stubs.propFlag)
+
+    assertThat(propsData.map(PropertyDbm::toDomain))
+      .isEqualTo(propsDomain)
+  }
+
+  @Test fun `property domain to data`() {
+    val propsDomain = listOf(Stubs.propString, Stubs.propInteger, Stubs.propDecimal, Stubs.propFlag)
+    val propsData = listOf(Stubs.propStringDbm, Stubs.propIntegerDbm, Stubs.propDecimalDbm, Stubs.propFlagDbm)
+
+    assertThat(propsDomain.map { it.toData(Stubs.project) })
+      .isEqualTo(propsData)
   }
 
 }

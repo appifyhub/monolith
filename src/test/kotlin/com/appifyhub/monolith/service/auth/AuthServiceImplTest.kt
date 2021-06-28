@@ -23,7 +23,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.user.DateTimeMapper
-import com.appifyhub.monolith.service.user.UserService.UserPrivilege
+import com.appifyhub.monolith.service.user.UserService.Privilege
 import com.appifyhub.monolith.util.AuthTestHelper
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -345,12 +345,16 @@ class AuthServiceImplTest {
     )
   }
 
+  // endregion
+
+  // region Requesting Access
+
   @Test fun `requesting user access with invalid user ID fails`() {
     assertThat {
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(OWNER),
         targetId = UserId("", authHelper.adminProject.id),
-        privilege = UserPrivilege.READ,
+        privilege = Privilege.USER_READ,
       )
     }
       .isFailure()
@@ -365,10 +369,10 @@ class AuthServiceImplTest {
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = token,
         targetId = authHelper.ownerUser.id,
-        privilege = UserPrivilege.READ,
+        privilege = Privilege.USER_READ,
       )
     }
       .isFailure()
@@ -378,13 +382,12 @@ class AuthServiceImplTest {
       }
   }
 
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `requesting user access fails with requesting READ for superiors`() {
     assertThat {
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(DEFAULT),
         targetId = authHelper.moderatorUser.id,
-        privilege = UserPrivilege.READ,
+        privilege = Privilege.USER_READ,
       )
     }
       .isFailure()
@@ -396,10 +399,10 @@ class AuthServiceImplTest {
 
   @Test fun `requesting user access fails with requesting WRITE for superiors`() {
     assertThat {
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(ADMIN),
         targetId = authHelper.ownerUser.id,
-        privilege = UserPrivilege.WRITE,
+        privilege = Privilege.USER_WRITE,
       )
     }
       .isFailure()
@@ -412,10 +415,10 @@ class AuthServiceImplTest {
   @Test fun `requesting user access fails with mismatching projects`() {
     val anotherProject = authHelper.ensureProject(forceNewProject = true)
     assertThat {
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(ADMIN, isStatic = true),
         targetId = authHelper.ownerUser.id.copy(projectId = anotherProject.id),
-        privilege = UserPrivilege.READ,
+        privilege = Privilege.USER_READ,
       )
     }
       .isFailure()
@@ -427,40 +430,40 @@ class AuthServiceImplTest {
 
   @Test fun `requesting user access succeeds with requesting READ for self`() {
     assertThat(
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(DEFAULT),
         targetId = authHelper.defaultUser.id,
-        privilege = UserPrivilege.READ,
+        privilege = Privilege.USER_READ,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.defaultUser.cleanStubArtifacts())
   }
 
   @Test fun `requesting user access succeeds with requesting WRITE for self`() {
     assertThat(
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(OWNER),
         targetId = authHelper.ownerUser.id,
-        privilege = UserPrivilege.WRITE,
+        privilege = Privilege.USER_WRITE,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.ownerUser.cleanStubArtifacts())
   }
 
   @Test fun `requesting user access succeeds with requesting READ for inferiors`() {
     assertThat(
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(MODERATOR),
         targetId = authHelper.defaultUser.id,
-        privilege = UserPrivilege.READ,
+        privilege = Privilege.USER_READ,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.defaultUser.cleanStubArtifacts())
   }
 
   @Test fun `requesting user access succeeds with requesting WRITE for inferiors`() {
     assertThat(
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(ADMIN),
         targetId = authHelper.moderatorUser.id,
-        privilege = UserPrivilege.WRITE,
+        privilege = Privilege.USER_WRITE,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(authHelper.moderatorUser.cleanStubArtifacts())
   }
@@ -468,12 +471,121 @@ class AuthServiceImplTest {
   @Test fun `requesting user access succeeds with requesting WRITE for another owner with static token`() {
     val anotherOwner = authHelper.ensureUser(OWNER, forceNewOwner = true)
     assertThat(
-      service.requestAccessFor(
+      service.requestUserAccess(
         authData = authHelper.newRealJwt(OWNER, isStatic = true),
         targetId = anotherOwner.id,
-        privilege = UserPrivilege.WRITE,
+        privilege = Privilege.USER_WRITE,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(anotherOwner.cleanStubArtifacts())
+  }
+
+  @Test fun `requesting project access with invalid project ID fails`() {
+    assertThat {
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(OWNER),
+        targetProjectId = -1,
+        privilege = Privilege.PROJECT_READ,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `requesting project access fails with expired token`() {
+    val token = authHelper.newRealJwt(OWNER)
+    timeProvider.advanceBy(Duration.ofDays(2))
+
+    assertThat {
+      service.requestProjectAccess(
+        authData = token,
+        targetProjectId = authHelper.ownerUser.id.projectId,
+        privilege = Privilege.PROJECT_READ,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalAccessException::class)
+        messageContains("Invalid token for")
+      }
+  }
+
+  @Test fun `requesting project access fails with mismatching projects`() {
+    val anotherProject = authHelper.ensureProject(forceNewProject = true)
+    assertThat {
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(OWNER, isStatic = true),
+        targetProjectId = anotherProject.id,
+        privilege = Privilege.PROJECT_READ,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only requests within the same project are allowed")
+      }
+  }
+
+  @Test fun `requesting project access fails with insufficient READ privileges`() {
+    assertThat {
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(ADMIN, isStatic = false),
+        targetProjectId = authHelper.adminUser.id.projectId,
+        privilege = Privilege.PROJECT_READ,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only owners are authorized")
+      }
+  }
+
+  @Test fun `requesting project access fails with insufficient WRITE privileges`() {
+    assertThat {
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(ADMIN, isStatic = false),
+        targetProjectId = authHelper.adminUser.id.projectId,
+        privilege = Privilege.PROJECT_WRITE,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only owners are authorized")
+      }
+  }
+
+  @Test fun `requesting project access succeeds with requesting READ`() {
+    assertThat(
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(OWNER),
+        targetProjectId = authHelper.ownerUser.id.projectId,
+        privilege = Privilege.PROJECT_READ,
+      )
+    ).isDataClassEqualTo(authHelper.adminProject)
+  }
+
+  @Test fun `requesting project access succeeds with requesting WRITE (static token)`() {
+    assertThat(
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(OWNER),
+        targetProjectId = authHelper.ownerUser.id.projectId,
+        privilege = Privilege.PROJECT_WRITE,
+      )
+    ).isDataClassEqualTo(authHelper.adminProject)
+  }
+
+  @Test fun `requesting project access succeeds with requesting WRITE (non-static token)`() {
+    assertThat(
+      service.requestProjectAccess(
+        authData = authHelper.newRealJwt(OWNER),
+        targetProjectId = authHelper.ownerUser.id.projectId,
+        privilege = Privilege.PROJECT_WRITE,
+      )
+    ).isDataClassEqualTo(authHelper.adminProject)
   }
 
   // endregion

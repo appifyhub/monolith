@@ -2,9 +2,15 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.admin.property.Property
+import com.appifyhub.monolith.domain.admin.property.PropertyCategory
+import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.PropertyTag
+import com.appifyhub.monolith.domain.admin.property.PropertyType
+import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
@@ -16,6 +22,9 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.admin.property.PropertyConfigurationResponse
+import com.appifyhub.monolith.network.admin.property.PropertyResponse
 import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
@@ -30,6 +39,8 @@ import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.storage.model.admin.AccountDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.admin.PropertyDbm
+import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
@@ -178,6 +189,45 @@ object Stubs {
     isInitialized = true,
   )
 
+  val propString = Property.StringProp(
+    config = PropertyConfiguration.GENERIC_STRING,
+    projectId = project.id,
+    rawValue = "value",
+    updatedAt = Date(0xFF0000),
+  )
+
+  val propInteger = Property.IntegerProp(
+    config = PropertyConfiguration.GENERIC_INTEGER,
+    projectId = project.id,
+    rawValue = "1",
+    updatedAt = Date(0xFF0000),
+  )
+
+  val propDecimal = Property.DecimalProp(
+    config = PropertyConfiguration.GENERIC_DECIMAL,
+    projectId = project.id,
+    rawValue = "1.1",
+    updatedAt = Date(0xFF0000),
+  )
+
+  val propFlag = Property.FlagProp(
+    config = PropertyConfiguration.GENERIC_FLAG,
+    projectId = project.id,
+    rawValue = "true",
+    updatedAt = Date(0xFF0000),
+  )
+
+  val propertyFilter = PropertyFilter(
+    type = PropertyType.STRING,
+    category = PropertyCategory.GENERIC,
+    nameContains = "_STRING",
+    isMandatory = true,
+    isSecret = true,
+    isDeprecated = true,
+    mustHaveTags = setOf(PropertyTag.GENERIC),
+    hasAtLeastOneOfTags = setOf(PropertyTag.GENERIC),
+  )
+
   // endregion
 
   // region Data Models
@@ -239,6 +289,42 @@ object Stubs {
   val schemaDbm = SchemaDbm(
     version = 1,
     isInitialized = true,
+  )
+
+  val propStringIdDbm = PropertyIdDbm(propString.config.name, propString.projectId)
+
+  val propIntegerIdDbm = PropertyIdDbm(propInteger.config.name, propInteger.projectId)
+
+  val propDecimalIdDbm = PropertyIdDbm(propDecimal.config.name, propDecimal.projectId)
+
+  val propFlagIdDbm = PropertyIdDbm(propFlag.config.name, propFlag.projectId)
+
+  val propStringDbm = PropertyDbm(
+    id = propStringIdDbm,
+    project = projectDbm,
+    rawValue = propString.rawValue,
+    updatedAt = propString.updatedAt,
+  )
+
+  val propIntegerDbm = PropertyDbm(
+    id = propIntegerIdDbm,
+    project = projectDbm,
+    rawValue = propInteger.rawValue,
+    updatedAt = propInteger.updatedAt,
+  )
+
+  val propDecimalDbm = PropertyDbm(
+    id = propDecimalIdDbm,
+    project = projectDbm,
+    rawValue = propDecimal.rawValue,
+    updatedAt = propDecimal.updatedAt,
+  )
+
+  val propFlagDbm = PropertyDbm(
+    id = propFlagIdDbm,
+    project = projectDbm,
+    rawValue = propFlag.rawValue,
+    updatedAt = propFlag.updatedAt,
   )
 
   // endregion
@@ -450,7 +536,7 @@ object Stubs {
     status = Settable(Project.Status.SUSPENDED),
   )
 
-  val accountUpdater = AccountUpdater(
+  val accountUpdater = AccountOwnerUpdater(
     id = account.id,
     addedOwners = Settable(emptyList()),
     removedOwners = Settable(emptyList()),
@@ -513,6 +599,34 @@ object Stubs {
     universalId = universalUserId,
     secret = "password",
     origin = "Token Origin",
+  )
+
+  val propertyFilterQueryParams = PropertyFilterQueryParams(
+    type = PropertyType.STRING.name,
+    category = PropertyCategory.GENERIC.name,
+    name_contains = "_STRING",
+    mandatory = true,
+    secret = true,
+    deprecated = true,
+    must_have_tags = listOf(PropertyTag.GENERIC.name),
+    has_at_least_one_of_tags = listOf(PropertyTag.GENERIC.name),
+  )
+
+  val propertyConfigurationResponse = PropertyConfigurationResponse(
+    name = PropertyConfiguration.GENERIC_STRING.name,
+    type = PropertyConfiguration.GENERIC_STRING.type.name,
+    category = PropertyConfiguration.GENERIC_STRING.category.name,
+    tags = PropertyConfiguration.GENERIC_STRING.tags.map(PropertyTag::name).toSet(),
+    defaultValue = PropertyConfiguration.GENERIC_STRING.defaultValue,
+    isMandatory = PropertyConfiguration.GENERIC_STRING.isMandatory,
+    isSecret = PropertyConfiguration.GENERIC_STRING.isSecret,
+    isDeprecated = PropertyConfiguration.GENERIC_STRING.isDeprecated,
+  )
+
+  val propertyResponse = PropertyResponse(
+    config = propertyConfigurationResponse,
+    rawValue = propString.rawValue,
+    updatedAt = "1970-01-01 04:38",
   )
 
   // endregion

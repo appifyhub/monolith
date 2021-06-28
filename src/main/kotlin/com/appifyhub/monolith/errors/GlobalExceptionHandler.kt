@@ -2,9 +2,12 @@ package com.appifyhub.monolith.errors
 
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.fasterxml.jackson.databind.ObjectMapper
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -16,8 +19,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -96,6 +97,13 @@ class GlobalExceptionHandler(
         )
 
       t is NoSuchElementException ->
+        ResponseEntity(
+          MessageResponse("Request Error : ${t.message}"),
+          HttpHeaders(),
+          HttpStatus.NOT_FOUND,
+        )
+
+      t is EmptyResultDataAccessException ->
         ResponseEntity(
           MessageResponse("Request Error : ${t.message}"),
           HttpHeaders(),

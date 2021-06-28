@@ -50,8 +50,8 @@ class NormalizersTest {
   }
 
   @Test fun `project name = project name + project name`() {
-    assertThat(Normalizers.ProjectName)
-      .consistsOf(Validators.ProjectName, Cleaners.ProjectName)
+    assertThat(Normalizers.PropProjectName)
+      .consistsOf(Validators.PropProjectName, Cleaners.PropProjectName)
   }
 
   // ID normalizers
@@ -81,7 +81,7 @@ class NormalizersTest {
       .consistsOf(Validators.UserId, Cleaners.UserId)
   }
 
-  // Contact validators
+  // Contact normalizers
 
   @Test fun `name = name + name`() {
     assertThat(Normalizers.Name)
@@ -103,7 +103,7 @@ class NormalizersTest {
       .consistsOf(Validators.Phone, Cleaners.Phone)
   }
 
-  // Organization validators
+  // Organization normalizers
 
   @Test fun `orga name = orga name + orga name`() {
     assertThat(Normalizers.OrganizationName)
@@ -135,7 +135,29 @@ class NormalizersTest {
       .consistsOf(Validators.Organization, Cleaners.Organization)
   }
 
-  // Other validators
+  // Project property normalizers
+
+  @Test fun `prop project description = not blank nullable + trim nullified`() {
+    assertThat(Normalizers.PropProjectDescription)
+      .consistsOf(Validators.NotBlank, Cleaners.Trim)
+  }
+
+  @Test fun `prop project logo url = url + url`() {
+    assertThat(Normalizers.PropProjectLogoUrl)
+      .consistsOf(Validators.Url, Cleaners.Url)
+  }
+
+  @Test fun `prop project website = url + url`() {
+    assertThat(Normalizers.PropProjectWebsite)
+      .consistsOf(Validators.Url, Cleaners.Url)
+  }
+
+  @Test fun `cardinal as string = positive long as string + long to cardinal as string`() {
+    assertThat(Normalizers.CardinalAsString)
+      .consistsOf(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
+  }
+
+  // Other normalizers
 
   @Test fun `origin = origin + origin`() {
     assertThat(Normalizers.Origin)
