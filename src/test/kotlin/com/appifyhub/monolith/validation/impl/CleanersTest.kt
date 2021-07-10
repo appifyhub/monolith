@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 class CleanersTest {
 
-  // Generic cleaners
+  // region Generic cleaners
 
   @Test fun `trim with null is empty`() {
     assertThat(Cleaners.Trim.clean(null))
@@ -87,7 +87,9 @@ class CleanersTest {
       .isEqualTo(5)
   }
 
-  // Top level cleaners
+  // endregion
+
+  // region Top level cleaners
 
   @Test fun `project ID is long-to-cardinal`() {
     assertThat(Cleaners.ProjectId)
@@ -99,12 +101,9 @@ class CleanersTest {
       .isEqualTo(Cleaners.LongToCardinal)
   }
 
-  @Test fun `project name is trimming`() {
-    assertThat(Cleaners.PropProjectName)
-      .isEqualTo(Cleaners.Trim)
-  }
+  // endregion
 
-  // ID domain cleaners
+  // region ID domain cleaners
 
   @Test fun `custom user ID is removing spaces`() {
     assertThat(Cleaners.CustomUserId)
@@ -136,7 +135,9 @@ class CleanersTest {
       .isEqualTo(UserId("ab", 5))
   }
 
-  // Contact cleaners
+  // endregion
+
+  // region Contact cleaners
 
   @Test fun `name is trimming nullable`() {
     assertThat(Cleaners.Name)
@@ -188,7 +189,9 @@ class CleanersTest {
       .isEqualTo("+123")
   }
 
-  // Organization cleaners
+  // endregion
+
+  // region Organization cleaners
 
   @Test fun `orga name is trimming nullable`() {
     assertThat(Cleaners.OrganizationName)
@@ -286,7 +289,14 @@ class CleanersTest {
       .isEqualTo(Stubs.company)
   }
 
-  // Project property cleaners
+  // endregion
+
+  // region Project property cleaners
+
+  @Test fun `project name is trimming`() {
+    assertThat(Cleaners.ProjectName)
+      .isEqualTo(Cleaners.Trim)
+  }
 
   @Test fun `url is trimming`() {
     assertThat(Cleaners.Url)
@@ -313,7 +323,9 @@ class CleanersTest {
       .isEqualTo("5")
   }
 
-  // Other cleaners
+  // endregion
+
+  // region Other cleaners
 
   @Test fun `origin is trimming nullable`() {
     assertThat(Cleaners.Origin)
@@ -330,5 +342,7 @@ class CleanersTest {
     assertThat(Cleaners.BDay.clean(birthday))
       .isEqualTo(birthday)
   }
+
+  // endregion
 
 }

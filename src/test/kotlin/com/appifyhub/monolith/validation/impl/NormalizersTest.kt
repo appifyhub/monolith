@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test
 
 class NormalizersTest {
 
-  // Generic normalizers
+  // region Generic normalizers
 
   @Test fun `trimmed = not blank + trim`() {
     assertThat(Normalizers.NotBlank)
@@ -37,7 +37,9 @@ class NormalizersTest {
       .consistsOf(Validators.PositiveLong, Cleaners.LongToCardinal)
   }
 
-  // Top level normalizers
+  // endregion
+
+  // region Top level normalizers
 
   @Test fun `project ID = project ID + project ID`() {
     assertThat(Normalizers.ProjectId)
@@ -49,12 +51,9 @@ class NormalizersTest {
       .consistsOf(Validators.AccountId, Cleaners.AccountId)
   }
 
-  @Test fun `project name = project name + project name`() {
-    assertThat(Normalizers.PropProjectName)
-      .consistsOf(Validators.PropProjectName, Cleaners.PropProjectName)
-  }
+  // endregion
 
-  // ID normalizers
+  // region ID normalizers
 
   @Test fun `custom user ID = custom user ID + custom user ID`() {
     assertThat(Normalizers.CustomUserId)
@@ -81,7 +80,9 @@ class NormalizersTest {
       .consistsOf(Validators.UserId, Cleaners.UserId)
   }
 
-  // Contact normalizers
+  // endregion
+
+  // region Contact normalizers
 
   @Test fun `name = name + name`() {
     assertThat(Normalizers.Name)
@@ -103,7 +104,9 @@ class NormalizersTest {
       .consistsOf(Validators.Phone, Cleaners.Phone)
   }
 
-  // Organization normalizers
+  // endregion
+
+  // region Organization normalizers
 
   @Test fun `orga name = orga name + orga name`() {
     assertThat(Normalizers.OrganizationName)
@@ -135,7 +138,14 @@ class NormalizersTest {
       .consistsOf(Validators.Organization, Cleaners.Organization)
   }
 
-  // Project property normalizers
+  // endregion
+
+  // region Project property normalizers
+
+  @Test fun `project name = project name + project name`() {
+    assertThat(Normalizers.PropProjectName)
+      .consistsOf(Validators.ProjectName, Cleaners.ProjectName)
+  }
 
   @Test fun `prop project description = not blank nullable + trim nullified`() {
     assertThat(Normalizers.PropProjectDescription)
@@ -157,7 +167,9 @@ class NormalizersTest {
       .consistsOf(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
   }
 
-  // Other normalizers
+  // endregion
+
+  // region Other normalizers
 
   @Test fun `origin = origin + origin`() {
     assertThat(Normalizers.Origin)
@@ -174,10 +186,14 @@ class NormalizersTest {
       .consistsOf(Validators.BDay, Cleaners.BDay)
   }
 
-  // Helpers
+  // endregion
+
+  // region Helpers
 
   // doing a shallow comparison because it's just config testing
   private fun Assert<Normalizer<*>>.consistsOf(validator: Validator<*>, cleaner: Cleaner<*, *>) =
     transform { it.name }.isEqualTo("${validator.name}.${cleaner.name}")
+
+  // endregion
 
 }

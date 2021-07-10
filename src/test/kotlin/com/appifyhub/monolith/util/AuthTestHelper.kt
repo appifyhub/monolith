@@ -104,7 +104,6 @@ class AuthTestHelper {
       adminRepo.addProject(
         ProjectCreator(
           account = account,
-          name = "Commercial Project for Account #${account.id}",
           type = Project.Type.COMMERCIAL,
           status = Project.Status.ACTIVE,
           userIdType = Project.UserIdType.USERNAME

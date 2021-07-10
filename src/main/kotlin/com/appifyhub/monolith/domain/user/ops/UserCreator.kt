@@ -9,7 +9,7 @@ import java.util.Date
 data class UserCreator(
   val userId: String?, // some projects have pre-existing IDs
   val projectId: Long,
-  val rawSignature: String,
+  val rawSecret: String,
   val name: String? = null,
   val type: Type = Type.PERSONAL,
   val authority: Authority = Authority.DEFAULT,

@@ -59,7 +59,7 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if project name is blank`() {
-    assertThat { runInitializer(rootProjectName = " ") }
+    assertThat { runInitializer(adminProjectName = " ") }
       .isFailure()
       .messageContains("Project Name")
 
@@ -68,7 +68,7 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
-    assertThat { runInitializer(rootOwnerName = " ") }
+    assertThat { runInitializer(adminOwnerName = " ") }
       .isFailure()
       .messageContains("Owner Name")
 
@@ -77,7 +77,7 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
-    assertThat { runInitializer(rootOwnerEmail = " ") }
+    assertThat { runInitializer(adminOwnerEmail = " ") }
       .isFailure()
       .messageContains("Owner Email")
 
@@ -107,14 +107,13 @@ class SchemaInitializerTest {
       on { updateUser(any(), any()) } doReturn user
     }
 
-    assertThat { runInitializer(rootOwnerSignature = "root sig") }
+    assertThat { runInitializer(adminOwnerSecret = "root secret") }
       .isSuccess()
 
     verify(adminService).addAccount()
     verify(adminService).addProject(
       ProjectCreator(
         account = account,
-        name = project.name,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
@@ -125,7 +124,7 @@ class SchemaInitializerTest {
       creator = UserCreator(
         userId = user.contact,
         projectId = project.id,
-        rawSignature = "root sig",
+        rawSecret = "root secret",
         name = user.name,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
@@ -170,14 +169,13 @@ class SchemaInitializerTest {
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(rootOwnerSignature = " \t\n ") }
+    assertThat { runInitializer(adminOwnerSecret = " \t\n ") }
       .isSuccess()
 
     verify(adminService).addAccount()
     verify(adminService).addProject(
       ProjectCreator(
         account = account,
-        name = project.name,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
@@ -188,7 +186,7 @@ class SchemaInitializerTest {
       creator = UserCreator(
         userId = user.contact,
         projectId = project.id,
-        rawSignature = "generated sig",
+        rawSecret = "generated sig",
         name = user.name,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
@@ -212,20 +210,20 @@ class SchemaInitializerTest {
   // Helpers
 
   private fun runInitializer(
-    rootProjectName: String = Stubs.project.name,
-    rootOwnerName: String = Stubs.user.name!!,
-    rootOwnerSignature: String = Stubs.userCreator.rawSignature,
-    rootOwnerEmail: String = Stubs.user.contact!!,
+    adminOwnerName: String = Stubs.user.name!!,
+    adminOwnerSecret: String = Stubs.userCreator.rawSecret,
+    adminOwnerEmail: String = Stubs.user.contact!!,
+    adminProjectName: String = "Project Name",
     args: ApplicationArguments? = null,
   ) = SchemaInitializer(
     adminService = adminService,
     userService = userService,
     schemaService = schemaService,
-    rootConfig = RootProjectConfig().apply {
-      this.rootProjectName = rootProjectName
-      this.rootOwnerName = rootOwnerName
-      this.rootOwnerSignature = rootOwnerSignature
-      this.rootOwnerEmail = rootOwnerEmail
+    adminConfig = AdminProjectConfig().apply {
+      this.ownerName = adminOwnerName
+      this.ownerSecret = adminOwnerSecret
+      this.ownerEmail = adminOwnerEmail
+      this.projectName = adminProjectName
     },
   ).run(args)
 

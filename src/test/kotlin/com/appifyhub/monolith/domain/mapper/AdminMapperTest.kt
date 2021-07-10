@@ -105,7 +105,6 @@ class AdminMapperTest {
     val projectUpdater = ProjectUpdater(
       id = Stubs.project.id,
       account = null,
-      name = null,
       type = null,
       status = null,
     )
@@ -127,7 +126,6 @@ class AdminMapperTest {
     val projectUpdater = ProjectUpdater(
       id = Stubs.project.id,
       account = Settable(newAccount),
-      name = Settable("Project's Name 2"),
       type = Settable(Project.Type.COMMERCIAL),
       status = Settable(Project.Status.SUSPENDED),
     )
@@ -140,7 +138,6 @@ class AdminMapperTest {
     assertThat(result).isDataClassEqualTo(
       Stubs.project.copy(
         account = newAccount,
-        name = "Project's Name 2",
         type = Project.Type.COMMERCIAL,
         status = Project.Status.SUSPENDED,
         updatedAt = Date(0),
@@ -156,7 +153,6 @@ class AdminMapperTest {
 
     val projectCreator = ProjectCreator(
       account = Stubs.account,
-      name = "Project's Name",
       type = Project.Type.OPENSOURCE,
       status = Project.Status.ACTIVE,
       userIdType = Project.UserIdType.USERNAME,

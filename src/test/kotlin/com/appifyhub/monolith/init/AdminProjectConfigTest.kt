@@ -16,18 +16,18 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-class RootProjectConfigTest {
+class AdminProjectConfigTest {
 
-  @Autowired lateinit var rootProjectConfig: RootProjectConfig
+  @Autowired lateinit var adminProjectConfig: AdminProjectConfig
 
-  @Test fun `root project config is autowired`() {
-    assertThat(rootProjectConfig)
+  @Test fun `admin project config is autowired`() {
+    assertThat(adminProjectConfig)
       .all {
         isNotNull()
-        transform { it.rootProjectName }.isEqualTo("AppifyHub")
-        transform { it.rootOwnerName }.isEqualTo("Owner")
-        transform { it.rootOwnerSignature }.isEmpty()
-        transform { it.rootOwnerEmail }.isEqualTo("admin@appifyhub.com")
+        transform { it.projectName }.isEqualTo("AppifyHub")
+        transform { it.ownerName }.isEqualTo("Owner")
+        transform { it.ownerSecret }.isEmpty()
+        transform { it.ownerEmail }.isEqualTo("admin@appifyhub.com")
       }
   }
 

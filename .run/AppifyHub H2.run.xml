@@ -8,7 +8,7 @@
     <additionalParameters>
       <param>
         <option name="enabled" value="true" />
-        <option name="name" value="SEED_OWNER_SECRET" />
+        <option name="name" value="ADMIN_OWNER_SECRET" />
         <option name="value" value="12345678!!!!!!!!abcdefgh" />
       </param>
     </additionalParameters>
