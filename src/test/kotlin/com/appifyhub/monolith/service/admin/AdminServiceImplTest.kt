@@ -50,8 +50,8 @@ class AdminServiceImplTest {
   @Resource(name = "userRepositoryImpl")
   lateinit var userRepo: UserRepository
 
-  private val rootProject: Project by lazy { adminRepo.getAdminProject() }
-  private val rootAccount: Account by lazy { adminRepo.fetchAccountById(rootProject.account.id) }
+  private val adminProject: Project by lazy { adminRepo.getAdminProject() }
+  private val adminAccount: Account by lazy { adminRepo.fetchAccountById(adminProject.account.id) }
 
   @BeforeEach fun setup() {
     timeProvider.staticTime = { 0 }
@@ -76,31 +76,16 @@ class AdminServiceImplTest {
       }
   }
 
-  @Test fun `add project fails with invalid project name`() {
-    assertThat {
-      service.addProject(
-        Stubs.projectCreator.copy(
-          name = "\t\n",
-        ),
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Project Name")
-      }
-  }
-
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `add project succeeds with valid data`() {
     assertThat(
       service.addProject(
-        Stubs.projectCreator.copy(account = rootAccount)
+        Stubs.projectCreator.copy(account = adminAccount)
       ).cleanDates()
     ).isDataClassEqualTo(
       Stubs.project.copy(
         id = 3,
-        account = rootAccount.copy(owners = emptyList()), // no ownership data here
+        account = adminAccount.copy(owners = emptyList()), // no ownership data here
       ).cleanStubArtifacts()
     )
   }
@@ -119,7 +104,7 @@ class AdminServiceImplTest {
 
   @Test fun `get admin project succeeds`() {
     assertThat(service.getAdminProject())
-      .isDataClassEqualTo(rootProject)
+      .isDataClassEqualTo(adminProject)
   }
 
   @Test fun `fetch account by ID fails with invalid account ID`() {
@@ -134,8 +119,8 @@ class AdminServiceImplTest {
   }
 
   @Test fun `fetch account by ID succeeds with valid account ID`() {
-    assertThat(service.fetchAccountById(rootAccount.id))
-      .isDataClassEqualTo(rootAccount)
+    assertThat(service.fetchAccountById(adminAccount.id))
+      .isDataClassEqualTo(adminAccount)
   }
 
   @Test fun `fetch project by ID fails with invalid account ID`() {
@@ -150,8 +135,8 @@ class AdminServiceImplTest {
   }
 
   @Test fun `fetch project by ID succeeds with valid account ID`() {
-    assertThat(service.fetchProjectById(rootProject.id))
-      .isDataClassEqualTo(rootProject)
+    assertThat(service.fetchProjectById(adminProject.id))
+      .isDataClassEqualTo(adminProject)
   }
 
   @Test fun `fetch all projects by account fails with invalid account ID`() {
@@ -203,17 +188,6 @@ class AdminServiceImplTest {
       }
   }
 
-  @Test fun `update project fails with invalid project name`() {
-    assertThat {
-      service.updateProject(Stubs.projectUpdater.copy(name = Settable("\t\n")))
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Project Name")
-      }
-  }
-
   @Test fun `update project succeeds with valid data`() {
     val account = service.addAccount()
     val project = service.addProject(Stubs.projectCreator.copy(account = account)).cleanStubArtifacts()
@@ -222,13 +196,13 @@ class AdminServiceImplTest {
       service.updateProject(
         Stubs.projectUpdater.copy(
           id = project.id,
-          account = Settable(rootAccount),
+          account = Settable(adminAccount),
         )
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(
       Stubs.projectUpdated.copy(
         id = project.id,
-        account = rootAccount.copy(owners = emptyList()), // no ownership data here,
+        account = adminAccount.copy(owners = emptyList()), // no ownership data here,
       ).cleanStubArtifacts()
     )
   }

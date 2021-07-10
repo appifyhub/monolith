@@ -26,7 +26,6 @@ object Cleaners {
 
   val ProjectId = LongToCardinal
   val AccountId = LongToCardinal
-  val PropProjectName = Trim
 
   // ID domain cleaners
 
@@ -88,6 +87,7 @@ object Cleaners {
 
   // Project property cleaners
 
+  val ProjectName = Trim
   val Url = Trim
   val UrlNullified = TrimNullified
   val LongToCardinalAsString = cleansToNonNull<String>("LongToCardinalAsString") {

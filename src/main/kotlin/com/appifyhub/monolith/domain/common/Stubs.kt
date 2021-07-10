@@ -17,7 +17,6 @@ fun stubAccount() = Account(
 fun stubProject() = Project(
   id = -1,
   account = stubAccount(),
-  name = "name",
   type = Project.Type.COMMERCIAL,
   status = Project.Status.REVIEW,
   userIdType = Project.UserIdType.RANDOM,

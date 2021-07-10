@@ -5,7 +5,6 @@ import java.util.Date
 data class Project(
   val id: Long,
   val account: Account,
-  val name: String,
   val type: Type = Type.COMMERCIAL,
   val status: Status = Status.REVIEW,
   val userIdType: UserIdType = UserIdType.RANDOM,

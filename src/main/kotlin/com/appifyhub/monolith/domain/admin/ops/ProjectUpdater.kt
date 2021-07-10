@@ -8,7 +8,6 @@ import com.appifyhub.monolith.domain.common.Settable
 data class ProjectUpdater(
   val id: Long,
   val account: Settable<Account>? = null,
-  val name: Settable<String>? = null,
   val type: Settable<Type>? = null,
   val status: Settable<Status>? = null,
 )

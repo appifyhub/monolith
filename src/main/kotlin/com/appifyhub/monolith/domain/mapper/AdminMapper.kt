@@ -38,7 +38,6 @@ fun ProjectUpdater.applyTo(
   timeProvider: TimeProvider,
 ): Project = project
   .applySettable(account) { copy(account = it) }
-  .applySettable(name) { copy(name = it) }
   .applySettable(type) { copy(type = it) }
   .applySettable(status) { copy(status = it) }
   .copy(updatedAt = timeProvider.currentDate)
@@ -48,7 +47,6 @@ fun ProjectCreator.toProjectData(
 ): ProjectDbm = ProjectDbm(
   projectId = null,
   account = account.toData(),
-  name = name,
   type = type.name,
   status = status.name,
   userIdType = userIdType.name,
@@ -72,7 +70,6 @@ fun Account.toData(): AccountDbm = AccountDbm(
 fun ProjectDbm.toDomain(): Project = Project(
   id = projectId!!,
   account = account.toDomain(),
-  name = name,
   type = Project.Type.find(type, default = Project.Type.COMMERCIAL),
   status = Project.Status.find(status, default = Project.Status.REVIEW),
   userIdType = Project.UserIdType.find(userIdType, default = Project.UserIdType.RANDOM),
@@ -83,7 +80,6 @@ fun ProjectDbm.toDomain(): Project = Project(
 fun Project.toData(): ProjectDbm = ProjectDbm(
   projectId = id,
   account = account.toData(),
-  name = name,
   type = type.name,
   status = status.name,
   userIdType = userIdType.name,

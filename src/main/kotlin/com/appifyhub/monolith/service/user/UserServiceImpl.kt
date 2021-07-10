@@ -36,7 +36,7 @@ class UserServiceImpl(
       UserIdType.CUSTOM -> Normalizers.CustomUserId.run(creator.userId).requireValid { "User ID" }
       UserIdType.RANDOM -> null
     }
-    val normalizedRawSignature = Normalizers.RawSignature.run(creator.rawSignature).requireValid { "Signature" }
+    val normalizedRawSignature = Normalizers.RawSignature.run(creator.rawSecret).requireValid { "Signature" }
     val normalizedName = Normalizers.Name.run(creator.name).requireValid { "Name" }
     val normalizedContact = when (creator.contactType) {
       ContactType.EMAIL -> Normalizers.Email.run(creator.contact).requireValid { "Contact Email" }
@@ -50,7 +50,7 @@ class UserServiceImpl(
     val normalizedCreator = UserCreator(
       userId = normalizedId,
       projectId = creator.projectId,
-      rawSignature = normalizedRawSignature,
+      rawSecret = normalizedRawSignature,
       name = normalizedName,
       type = creator.type,
       authority = creator.authority,

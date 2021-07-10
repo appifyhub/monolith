@@ -49,7 +49,7 @@ class PropertyServiceImplTest {
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var authHelper: AuthTestHelper
 
-  private val rootProject: Project by lazy { adminRepo.getAdminProject() }
+  private val adminProject: Project by lazy { adminRepo.getAdminProject() }
 
   @BeforeEach fun setup() {
     timeProvider.staticTime = { 0 }
@@ -57,7 +57,7 @@ class PropertyServiceImplTest {
 
   @AfterEach fun teardown() {
     timeProvider.staticTime = { null }
-    propRepo.clearAllProperties(rootProject)
+    propRepo.clearAllProperties(adminProject)
   }
 
   @Test fun `getting configurations filtered fails with invalid filter`() {
@@ -99,7 +99,7 @@ class PropertyServiceImplTest {
 
   @Test fun `fetching property fails with invalid prop name`() {
     assertThat {
-      service.fetchProperty<Any>(rootProject.id, "invalid")
+      service.fetchProperty<Any>(adminProject.id, "invalid")
     }
       .isFailure()
       .all {
@@ -109,11 +109,11 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `fetching property succeeds`() {
-    val propStub = IntegerProp(GENERIC_INTEGER, rootProject.id, "20", timeProvider.currentDate)
-    val prop = propRepo.saveProperty(rootProject, propStub)
+    val propStub = IntegerProp(GENERIC_INTEGER, adminProject.id, "20", timeProvider.currentDate)
+    val prop = propRepo.saveProperty(adminProject, propStub)
 
     assertThat(
-      service.fetchProperty<Int>(rootProject.id, GENERIC_INTEGER.name)
+      service.fetchProperty<Int>(adminProject.id, GENERIC_INTEGER.name)
         .cleanStubArtifacts()
     )
       .isEqualTo(prop.cleanStubArtifacts())
@@ -121,7 +121,7 @@ class PropertyServiceImplTest {
 
   @Test fun `fetching property list fails with invalid prop name`() {
     assertThat {
-      service.fetchProperties(rootProject.id, listOf(GENERIC_INTEGER.name, "invalid"))
+      service.fetchProperties(adminProject.id, listOf(GENERIC_INTEGER.name, "invalid"))
     }
       .isFailure()
       .all {
@@ -131,13 +131,13 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `fetching property list succeeds`() {
-    val propStub1 = IntegerProp(GENERIC_INTEGER, rootProject.id, "20", timeProvider.currentDate)
-    val propStub2 = FlagProp(GENERIC_FLAG, rootProject.id, "true", timeProvider.currentDate)
-    val prop1 = propRepo.saveProperty(rootProject, propStub1)
-    val prop2 = propRepo.saveProperty(rootProject, propStub2)
+    val propStub1 = IntegerProp(GENERIC_INTEGER, adminProject.id, "20", timeProvider.currentDate)
+    val propStub2 = FlagProp(GENERIC_FLAG, adminProject.id, "true", timeProvider.currentDate)
+    val prop1 = propRepo.saveProperty(adminProject, propStub1)
+    val prop2 = propRepo.saveProperty(adminProject, propStub2)
 
     assertThat(
-      service.fetchProperties(rootProject.id, listOf(GENERIC_INTEGER.name, GENERIC_FLAG.name))
+      service.fetchProperties(adminProject.id, listOf(GENERIC_INTEGER.name, GENERIC_FLAG.name))
         .map { it.cleanStubArtifacts() }
     )
       .isEqualTo(listOf(prop1, prop2).map { it.cleanStubArtifacts() })
@@ -146,7 +146,7 @@ class PropertyServiceImplTest {
   @Test fun `fetching property list filtered fails with invalid filter`() {
     val filter = PropertyFilterQueryParams(type = "invalid")
     assertThat {
-      service.fetchPropertiesFiltered(rootProject.id, filter)
+      service.fetchPropertiesFiltered(adminProject.id, filter)
     }
       .isFailure()
       .all {
@@ -156,12 +156,12 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `fetching property list filtered succeeds`() {
-    val propStub = IntegerProp(PROJECT_LOGO_URL, rootProject.id, "url", timeProvider.currentDate)
-    val prop = propRepo.saveProperty(rootProject, propStub)
+    val propStub = IntegerProp(PROJECT_LOGO_URL, adminProject.id, "url", timeProvider.currentDate)
+    val prop = propRepo.saveProperty(adminProject, propStub)
     val filter = PropertyFilterQueryParams(name_contains = PROJECT_LOGO_URL.name.lowercase())
 
     assertThat(
-      service.fetchPropertiesFiltered(rootProject.id, filter)
+      service.fetchPropertiesFiltered(adminProject.id, filter)
         .map { it.cleanStubArtifacts() }
     )
       .isEqualTo(listOf(prop).map { it.cleanStubArtifacts() })
@@ -169,7 +169,7 @@ class PropertyServiceImplTest {
 
   @Test fun `saving property fails with invalid value`() {
     assertThat {
-      service.saveProperty<Any>(rootProject.id, PROJECT_USERS_MAX.name, "abc")
+      service.saveProperty<Any>(adminProject.id, PROJECT_USERS_MAX.name, "abc")
     }
       .isFailure()
       .all {
@@ -179,9 +179,9 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `saving property succeeds`() {
-    val prop = IntegerProp(PROJECT_USERS_MAX, rootProject.id, "100", timeProvider.currentDate)
+    val prop = IntegerProp(PROJECT_USERS_MAX, adminProject.id, "100", timeProvider.currentDate)
     assertThat(
-      service.saveProperty<Int>(rootProject.id, PROJECT_USERS_MAX.name, "100")
+      service.saveProperty<Int>(adminProject.id, PROJECT_USERS_MAX.name, "100")
         .cleanStubArtifacts()
     )
       .isDataClassEqualTo(prop.cleanStubArtifacts())
@@ -189,7 +189,7 @@ class PropertyServiceImplTest {
 
   @Test fun `saving property list fails with mismatching sizes`() {
     assertThat {
-      service.saveProperties(rootProject.id, listOf(PROJECT_USERS_MAX.name), emptyList())
+      service.saveProperties(adminProject.id, listOf(PROJECT_USERS_MAX.name), emptyList())
     }
       .isFailure()
       .all {
@@ -201,7 +201,7 @@ class PropertyServiceImplTest {
   @Test fun `saving property list fails with invalid value`() {
     assertThat {
       service.saveProperties(
-        projectId = rootProject.id,
+        projectId = adminProject.id,
         propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
         propRawValues = listOf("100", "\t\n"),
       )
@@ -214,12 +214,12 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `saving property list succeeds`() {
-    val prop1 = IntegerProp(PROJECT_USERS_MAX, rootProject.id, "100", timeProvider.currentDate)
-    val prop2 = StringProp(PROJECT_DESCRIPTION, rootProject.id, "description", timeProvider.currentDate)
+    val prop1 = IntegerProp(PROJECT_USERS_MAX, adminProject.id, "100", timeProvider.currentDate)
+    val prop2 = StringProp(PROJECT_DESCRIPTION, adminProject.id, "description", timeProvider.currentDate)
 
     assertThat(
       service.saveProperties(
-        projectId = rootProject.id,
+        projectId = adminProject.id,
         propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
         propRawValues = listOf("100", "description"),
       ).map { it.cleanStubArtifacts() }
@@ -228,37 +228,37 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `clearing property succeeds`() {
-    val propStub = IntegerProp(PROJECT_USERS_MAX, rootProject.id, "100", timeProvider.currentDate)
-    propRepo.saveProperty(rootProject, propStub)
+    val propStub = IntegerProp(PROJECT_USERS_MAX, adminProject.id, "100", timeProvider.currentDate)
+    propRepo.saveProperty(adminProject, propStub)
 
     assertAll {
       // can find it at first
       assertThat {
-        service.fetchProperty<Any>(rootProject.id, PROJECT_USERS_MAX.name)
+        service.fetchProperty<Any>(adminProject.id, PROJECT_USERS_MAX.name)
       }.isSuccess()
 
       // removing works
       assertThat {
-        service.clearProperty(rootProject.id, PROJECT_USERS_MAX.name)
+        service.clearProperty(adminProject.id, PROJECT_USERS_MAX.name)
       }.isSuccess()
 
       // can't find it anymore
       assertThat {
-        service.fetchProperty<Any>(rootProject.id, PROJECT_USERS_MAX.name)
+        service.fetchProperty<Any>(adminProject.id, PROJECT_USERS_MAX.name)
       }.isFailure()
     }
   }
 
   @Test fun `clearing property list filtered succeeds`() {
     val filter = PropertyFilterQueryParams(name_contains = "project")
-    val propStub1 = IntegerProp(PROJECT_USERS_MAX, rootProject.id, "100", timeProvider.currentDate)
-    val propStub2 = StringProp(PROJECT_DESCRIPTION, rootProject.id, "description", timeProvider.currentDate)
-    propRepo.saveProperties(rootProject, listOf(propStub1, propStub2))
+    val propStub1 = IntegerProp(PROJECT_USERS_MAX, adminProject.id, "100", timeProvider.currentDate)
+    val propStub2 = StringProp(PROJECT_DESCRIPTION, adminProject.id, "description", timeProvider.currentDate)
+    propRepo.saveProperties(adminProject, listOf(propStub1, propStub2))
 
     assertAll {
       // can find them at first
       assertThat {
-        service.fetchPropertiesFiltered(rootProject.id, filter)
+        service.fetchPropertiesFiltered(adminProject.id, filter)
       }
         .isSuccess()
         .transform { it.filter { prop -> prop.config in setOf(PROJECT_USERS_MAX, PROJECT_DESCRIPTION) }.size }
@@ -266,12 +266,12 @@ class PropertyServiceImplTest {
 
       // removing works
       assertThat {
-        service.clearPropertiesFiltered(rootProject.id, filter)
+        service.clearPropertiesFiltered(adminProject.id, filter)
       }.isSuccess()
 
       // can't find it anymore
       assertThat {
-        service.fetchPropertiesFiltered(rootProject.id, filter)
+        service.fetchPropertiesFiltered(adminProject.id, filter)
       }
         .isSuccess()
         .isEqualTo(emptyList())
@@ -279,7 +279,7 @@ class PropertyServiceImplTest {
   }
 
   @Test fun `fetching from different projects yields different results`() {
-    val project1 = rootProject
+    val project1 = adminProject
     val propStub1 = IntegerProp(PROJECT_USERS_MAX, project1.id, "100", timeProvider.currentDate)
     val prop1 = propRepo.saveProperty(project1, propStub1)
 

@@ -22,7 +22,7 @@ import com.appifyhub.monolith.domain.user.User.Type
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.init.RootProjectConfig
+import com.appifyhub.monolith.init.AdminProjectConfig
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
@@ -51,7 +51,7 @@ class UserServiceImplTest {
   @Autowired lateinit var service: UserService
   @Autowired lateinit var adminRepo: AdminRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
-  @Autowired lateinit var rootProjectConfig: RootProjectConfig
+  @Autowired lateinit var adminProjectConfig: AdminProjectConfig
 
   @BeforeEach fun setup() {
     // ensure valid birthday from the stub
@@ -113,7 +113,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid raw signature`() {
-    val creator = Stubs.userCreator.copy(rawSignature = " ")
+    val creator = Stubs.userCreator.copy(rawSecret = " ")
 
     assertThat { service.addUser(creator, Stubs.project.userIdType) }
       .isFailure()
@@ -294,7 +294,7 @@ class UserServiceImplTest {
     val creator = UserCreator(
       userId = null,
       projectId = Stubs.project.id,
-      rawSignature = "12345678",
+      rawSecret = "12345678",
       name = null,
       type = Type.PERSONAL,
       authority = Authority.DEFAULT,
@@ -397,7 +397,7 @@ class UserServiceImplTest {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
     val fetchedUsers = service.fetchAllUsersByProjectId(Stubs.userCreator.projectId)
       .map { it.cleanDates() }
-      .filter { it.name != rootProjectConfig.rootOwnerName } // root user is ignored
+      .filter { it.name != adminProjectConfig.ownerName } // admin user is ignored
 
     assertThat(fetchedUsers)
       .isEqualTo(listOf(storedUser))
@@ -421,7 +421,7 @@ class UserServiceImplTest {
       .all {
         hasSize(1)
         transform { it.first().name }
-          .isEqualTo(rootProjectConfig.rootOwnerName)
+          .isEqualTo(adminProjectConfig.ownerName)
       }
   }
 
