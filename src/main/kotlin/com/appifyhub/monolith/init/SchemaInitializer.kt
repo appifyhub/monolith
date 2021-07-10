@@ -24,7 +24,7 @@ class SchemaInitializer(
   private val adminService: AdminService,
   private val userService: UserService,
   private val schemaService: SchemaService,
-  private val rootConfig: RootProjectConfig,
+  private val adminConfig: AdminProjectConfig,
 ) : ApplicationRunner {
 
   private enum class Seed(val version: Long) { INITIAL(1L) }
@@ -57,37 +57,36 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val rootProjectName = Normalizers.PropProjectName.run(rootConfig.rootProjectName)
-      .requireValid { "Project Name" }
-    val configuredSignature = Normalizers.RawSignatureNullified.run(rootConfig.rootOwnerSignature)
+    val configuredSignature = Normalizers.RawSignatureNullified.run(adminConfig.ownerSecret)
       .requireValid { "Owner Signature" }
-    val ownerName = Normalizers.Name.run(rootConfig.rootOwnerName)
+    val ownerName = Normalizers.Name.run(adminConfig.ownerName)
       .requireValid { "Owner Name" }
-    val ownerEmail = Normalizers.Email.run(rootConfig.rootOwnerEmail)
+    val ownerEmail = Normalizers.Email.run(adminConfig.ownerEmail)
       .requireValid { "Owner Email" }
-    val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
+    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
+    val adminProjectName = Normalizers.PropProjectName.run(adminConfig.projectName)
+      .requireValid { "Project Name" }
 
-    // create empty account for the root owner
+    // create empty account for the admin owner
     val account = adminService.addAccount()
 
-    // create the root project
+    // create the admin project
     val project = adminService.addProject(
       ProjectCreator(
         account = account,
-        name = rootProjectName,
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,
       )
     )
 
-    // create the owner's user in the root project
+    // create the owner's user in the admin project
     var owner = userService.addUser(
       userIdType = project.userIdType,
       creator = UserCreator(
         userId = ownerEmail,
         projectId = project.id,
-        rawSignature = rawOwnerSignature,
+        rawSecret = rawOwnerSecret,
         name = ownerName,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
@@ -99,7 +98,7 @@ class SchemaInitializer(
       )
     )
 
-    // make root user own the root account
+    // set admin user as owner for the admin account
     owner = userService.updateUser(
       userIdType = project.userIdType,
       updater = UserUpdater(
@@ -111,17 +110,19 @@ class SchemaInitializer(
 
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
-      ?.let { "<see env.\$SEED_OWNER_SECRET>" }
-      ?: rawOwnerSignature
+      ?.let { "<see \$env.ADMIN_OWNER_SECRET>" }
+      ?: rawOwnerSecret
 
     // print credentials
+    val margin = "\n".repeat(8)
     log.info(
       """
         (see below)
+        $margin
         
         [[ SECRET SECTION START: PRINTED ONLY ONCE ]]
         
-        Admin project '${project.name}' is now set up. 
+        Admin project '$adminProjectName' is now set up. 
         Project owner is '${owner.name} <${owner.contact}>'.
         
         Project ID     = ${project.id}
@@ -130,7 +131,7 @@ class SchemaInitializer(
         User Signature = '$printableOwnerSignature'
         
         [[ SECRET SECTION END ]]
-        
+        $margin
       """.trimIndent()
     )
   }

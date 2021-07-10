@@ -47,7 +47,7 @@ class UserOpsMapperTest {
       UserCreator(
         userId = null,
         projectId = Stubs.project.id,
-        rawSignature = "s",
+        rawSecret = "s",
         name = null,
         type = User.Type.PERSONAL,
         authority = User.Authority.DEFAULT,

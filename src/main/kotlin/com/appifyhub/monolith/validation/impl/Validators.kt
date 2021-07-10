@@ -43,7 +43,6 @@ object Validators {
 
   val ProjectId = PositiveLong
   val AccountId = PositiveLong
-  val PropProjectName = NotBlank
 
   // ID validators
 
@@ -92,6 +91,7 @@ object Validators {
 
   // Project property validators
 
+  val ProjectName = NotBlank
   val Url = validatesAs<String>("Url") { NotBlank.isValid(it) && REGEX_URL.matcher(it!!).matches() }
   val UrlNullable = validatesAs<String>("UrlNullable") {
     if (it == null) return@validatesAs true

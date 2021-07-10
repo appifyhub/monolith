@@ -23,9 +23,6 @@ class ProjectDbm(
   @ManyToOne(fetch = FetchType.EAGER)
   var account: AccountDbm,
 
-  @Column(nullable = false, length = 64)
-  var name: String,
-
   @Column(nullable = false, length = 16)
   var type: String,
 
@@ -52,7 +49,6 @@ class ProjectDbm(
 
     if (projectId != other.projectId) return false
     if (account != other.account) return false
-    if (name != other.name) return false
     if (type != other.type) return false
     if (status != other.status) return false
     if (userIdType != other.userIdType) return false
@@ -65,7 +61,6 @@ class ProjectDbm(
   override fun hashCode(): Int {
     var result = projectId?.hashCode() ?: 0
     result = 31 * result + account.hashCode()
-    result = 31 * result + name.hashCode()
     result = 31 * result + type.hashCode()
     result = 31 * result + status.hashCode()
     result = 31 * result + userIdType.hashCode()
@@ -78,7 +73,6 @@ class ProjectDbm(
     return "ProjectDbm(" +
       "projectId=$projectId, " +
       "account=$account, " +
-      "name='$name', " +
       "type='$type', " +
       "status='$status', " +
       "userIdType='$userIdType', " +

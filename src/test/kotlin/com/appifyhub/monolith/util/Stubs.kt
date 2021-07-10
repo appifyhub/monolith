@@ -22,9 +22,9 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.admin.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.admin.property.PropertyResponse
+import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
@@ -176,7 +176,6 @@ object Stubs {
   val project = Project(
     id = userId.projectId,
     account = account,
-    name = "Project's Name",
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
@@ -246,7 +245,6 @@ object Stubs {
   val projectDbm = ProjectDbm(
     projectId = userIdDbm.projectId,
     account = accountDbm,
-    name = "Project's Name",
     type = "OPENSOURCE",
     status = "ACTIVE",
     userIdType = "USERNAME",
@@ -417,7 +415,6 @@ object Stubs {
   val projectUpdated = Project(
     id = project.id,
     account = accountUpdated,
-    name = "Project's Name 1",
     type = Project.Type.FREE,
     status = Project.Status.SUSPENDED,
     userIdType = project.userIdType,
@@ -428,7 +425,6 @@ object Stubs {
   val projectUpdatedDbm = ProjectDbm(
     projectId = project.id,
     account = accountUpdatedDbm,
-    name = "Project's Name 1",
     type = "FREE",
     status = "SUSPENDED",
     userIdType = projectDbm.userIdType,
@@ -486,7 +482,7 @@ object Stubs {
   val userCreator = UserCreator(
     userId = "username",
     projectId = project.id,
-    rawSignature = "password",
+    rawSecret = "password",
     name = "User's Name",
     type = User.Type.ORGANIZATION,
     authority = User.Authority.ADMIN,
@@ -522,7 +518,6 @@ object Stubs {
 
   val projectCreator = ProjectCreator(
     account = account,
-    name = "Project's Name",
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
@@ -531,7 +526,6 @@ object Stubs {
   val projectUpdater = ProjectUpdater(
     id = project.id,
     account = Settable(accountUpdated),
-    name = Settable("Project's Name 1"),
     type = Settable(Project.Type.FREE),
     status = Settable(Project.Status.SUSPENDED),
   )

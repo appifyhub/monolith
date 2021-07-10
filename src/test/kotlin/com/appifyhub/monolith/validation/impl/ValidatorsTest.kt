@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 class ValidatorsTest {
 
-  // Generic validators
+  // region Generic validators
 
   @Test fun `not blank fails with null`() {
     assertThat(Validators.NotBlank.isValid(null))
@@ -112,7 +112,9 @@ class ValidatorsTest {
       .isTrue()
   }
 
-  // Top level domain validators
+  // endregion
+
+  // region Top level domain validators
 
   @Test fun `project ID is positive long`() {
     assertThat(Validators.ProjectId)
@@ -124,12 +126,9 @@ class ValidatorsTest {
       .isEqualTo(Validators.PositiveLong)
   }
 
-  @Test fun `project name is non blank`() {
-    assertThat(Validators.PropProjectName)
-      .isEqualTo(Validators.NotBlank)
-  }
+  // endregion
 
-  // ID validators
+  // region ID validators
 
   @Test fun `custom user ID is no spaces`() {
     assertThat(Validators.CustomUserId)
@@ -166,7 +165,9 @@ class ValidatorsTest {
       .isTrue()
   }
 
-  // Contact validators
+  // endregion
+
+  // region Contact validators
 
   @Test fun `name is non blank nullable`() {
     assertThat(Validators.Name)
@@ -258,7 +259,9 @@ class ValidatorsTest {
       .isTrue()
   }
 
-  // Organization validators
+  // endregion
+
+  // region Organization validators
 
   @Test fun `orga name is non blank nullable`() {
     assertThat(Validators.OrganizationName)
@@ -348,7 +351,14 @@ class ValidatorsTest {
       .isTrue()
   }
 
-  // Project property validators
+  // endregion
+
+  // region Project property validators
+
+  @Test fun `project name is non blank`() {
+    assertThat(Validators.ProjectName)
+      .isEqualTo(Validators.NotBlank)
+  }
 
   @Test fun `url fails with null`() {
     assertThat(Validators.Url.isValid(null))
@@ -405,7 +415,9 @@ class ValidatorsTest {
       .isTrue()
   }
 
-  // Other validators
+  // endregion
+
+  // region Other validators
 
   @Test fun `origin is non blank nullable`() {
     assertThat(Validators.Origin)
@@ -476,5 +488,7 @@ class ValidatorsTest {
     assertThat(Validators.BDay.isValid(birthday))
       .isTrue()
   }
+
+  // endregion
 
 }
