@@ -2,7 +2,7 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.admin.property.Property
@@ -530,7 +530,7 @@ object Stubs {
     status = Settable(Project.Status.SUSPENDED),
   )
 
-  val accountUpdater = AccountOwnerUpdater(
+  val accountUpdater = AccountUpdater(
     id = account.id,
     addedOwners = Settable(emptyList()),
     removedOwners = Settable(emptyList()),

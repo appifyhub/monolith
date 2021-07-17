@@ -2,7 +2,7 @@ package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.admin.property.Property
@@ -23,7 +23,7 @@ import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
 import com.appifyhub.monolith.util.TimeProvider
 import java.util.Date
 
-fun AccountOwnerUpdater.applyTo(
+fun AccountUpdater.applyTo(
   account: Account,
   timeProvider: TimeProvider,
 ): Account = account

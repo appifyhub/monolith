@@ -12,7 +12,7 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -51,7 +51,10 @@ class AdminServiceImplTest {
   lateinit var userRepo: UserRepository
 
   private val adminProject: Project by lazy { adminRepo.getAdminProject() }
-  private val adminAccount: Account by lazy { adminRepo.fetchAccountById(adminProject.account.id) }
+  private val adminAccount: Account by lazy {
+    // this way it fetches also owner data (it's not contained in project.account)
+    adminRepo.fetchAccountById(adminProject.account.id)
+  }
 
   @BeforeEach fun setup() {
     timeProvider.staticTime = { 0 }
@@ -268,7 +271,7 @@ class AdminServiceImplTest {
       // adding owners
       assertThat(
         service.updateAccount(
-          AccountOwnerUpdater(
+          AccountUpdater(
             id = account.id,
             addedOwners = Settable(listOf(randomModerator)),
           )
@@ -282,7 +285,7 @@ class AdminServiceImplTest {
       // removing owners and adding new
       assertThat(
         service.updateAccount(
-          AccountOwnerUpdater(
+          AccountUpdater(
             id = account.id,
             addedOwners = Settable(listOf(randomAdmin)),
             removedOwners = Settable(listOf(randomModeratorUpdated)),
@@ -304,6 +307,17 @@ class AdminServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
+      }
+  }
+
+  @Test fun `remove project by ID fails with admin project ID`() {
+    assertThat {
+      service.removeProjectById(adminProject.id)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Admin project")
       }
   }
 
@@ -331,7 +345,7 @@ class AdminServiceImplTest {
     }
   }
 
-  @Test fun `remove account by ID fails with invalid project ID`() {
+  @Test fun `remove account by ID fails with invalid account ID`() {
     assertThat {
       service.removeAccountById(-1)
     }
@@ -339,6 +353,17 @@ class AdminServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Account ID")
+      }
+  }
+
+  @Test fun `remove account by ID fails with admin account ID`() {
+    assertThat {
+      service.removeAccountById(adminAccount.id)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Admin account")
       }
   }
 
@@ -351,7 +376,7 @@ class AdminServiceImplTest {
       userIdType = project.userIdType,
     )
     service.updateAccount(
-      AccountOwnerUpdater(
+      AccountUpdater(
         id = account.id,
         addedOwners = Settable(listOf(user)),
       )

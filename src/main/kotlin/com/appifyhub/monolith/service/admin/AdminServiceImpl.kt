@@ -2,12 +2,13 @@ package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountOwnerUpdater
+import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.throwLocked
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -83,7 +84,7 @@ class AdminServiceImpl(
     return adminRepository.updateProject(normalizedUpdater)
   }
 
-  override fun updateAccount(updater: AccountOwnerUpdater): Account {
+  override fun updateAccount(updater: AccountUpdater): Account {
     log.debug("Updating account $updater")
 
     Normalizers.AccountId.run(updater.id).requireValid { "Account ID" }
@@ -98,6 +99,10 @@ class AdminServiceImpl(
 
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
 
+    // we can't delete the admin account
+    if (adminRepository.getAdminProject().id == projectId)
+      throwLocked { "Admin project can't be deleted" }
+
     // cascade manually for now
     userRepository.removeAllUsersByProjectId(normalizedProjectId)
     return adminRepository.removeProjectById(normalizedProjectId)
@@ -107,6 +112,10 @@ class AdminServiceImpl(
     log.debug("Removing account $accountId")
 
     val normalizedAccountId = Normalizers.AccountId.run(accountId).requireValid { "Account ID" }
+
+    // we can't remove the admin account
+    if (adminRepository.getAdminProject().account.id == accountId)
+      throwLocked { "Admin account can't be deleted" }
 
     // cascade manually for now
     val account = adminRepository.fetchAccountById(normalizedAccountId)

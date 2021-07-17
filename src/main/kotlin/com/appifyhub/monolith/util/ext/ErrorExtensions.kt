@@ -18,6 +18,11 @@ fun throwNormalization(
 fun throwPropertyNotFound(propName: String): Nothing =
   throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Property '$propName' not found")
 
+@Throws(IllegalArgumentException::class)
+fun throwLocked(
+  message: () -> Any = { "Operation is not allowed" },
+): Nothing = throw ResponseStatusException(HttpStatus.LOCKED, message().toString())
+
 @Throws(ResponseStatusException::class)
 fun <T> Normalizer.Result<T>.requireValid(
   propName: () -> Any = { "Property" },
