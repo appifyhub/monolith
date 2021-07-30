@@ -4,8 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.storage.model.admin.PropertyDbm
@@ -16,95 +15,9 @@ import org.junit.jupiter.api.Test
 
 class AdminMapperTest {
 
-  @Test fun `account updater to account (no changes)`() {
-    val accountUpdater = AccountUpdater(
-      id = Stubs.account.id,
-      addedOwners = null,
-      removedOwners = null,
-    )
-
-    val result = accountUpdater.applyTo(
-      account = Stubs.account,
-      timeProvider = TimeProviderFake(),
-    )
-
-    assertThat(result).isDataClassEqualTo(
-      Stubs.account.copy(
-        updatedAt = Date(0),
-      )
-    )
-  }
-
-  @Test fun `account updater to account (added owners)`() {
-    val newOwner = Stubs.user.copy(
-      id = Stubs.userId.copy(userId = "u1"),
-    )
-    val accountUpdater = AccountUpdater(
-      id = Stubs.account.id,
-      addedOwners = Settable(listOf(newOwner)),
-      removedOwners = null,
-    )
-
-    val result = accountUpdater.applyTo(
-      account = Stubs.account,
-      timeProvider = TimeProviderFake(),
-    )
-
-    assertThat(result).isDataClassEqualTo(
-      Stubs.account.copy(
-        updatedAt = Date(0),
-        owners = listOf(Stubs.user, newOwner),
-      )
-    )
-  }
-
-  @Test fun `account updater to account (removed owners)`() {
-    val accountUpdater = AccountUpdater(
-      id = Stubs.account.id,
-      addedOwners = null,
-      removedOwners = Settable(listOf(Stubs.user)),
-    )
-
-    val result = accountUpdater.applyTo(
-      account = Stubs.account,
-      timeProvider = TimeProviderFake(),
-    )
-
-    assertThat(result).isDataClassEqualTo(
-      Stubs.account.copy(
-        updatedAt = Date(0),
-        owners = emptyList(),
-      )
-    )
-  }
-
-  @Test fun `account updater to account (added and removed owners)`() {
-    val newOwner = Stubs.user.copy(
-      id = Stubs.userId.copy(userId = "u1"),
-    )
-    val accountUpdater = AccountUpdater(
-      id = Stubs.account.id,
-      addedOwners = Settable(listOf(newOwner)),
-      removedOwners = Settable(listOf(Stubs.user)),
-    )
-
-    val result = accountUpdater.applyTo(
-      account = Stubs.account,
-      timeProvider = TimeProviderFake(),
-    )
-
-    assertThat(result).isDataClassEqualTo(
-      Stubs.account.copy(
-        updatedAt = Date(0),
-        owners = listOf(newOwner),
-      )
-    )
-  }
-
   @Test fun `project updater to project (no changes)`() {
     val projectUpdater = ProjectUpdater(
       id = Stubs.project.id,
-      account = null,
       type = null,
       status = null,
     )
@@ -122,10 +35,8 @@ class AdminMapperTest {
   }
 
   @Test fun `project updater to project (with changes)`() {
-    val newAccount = Stubs.account.copy(id = 10)
     val projectUpdater = ProjectUpdater(
       id = Stubs.project.id,
-      account = Settable(newAccount),
       type = Settable(Project.Type.COMMERCIAL),
       status = Settable(Project.Status.SUSPENDED),
     )
@@ -137,7 +48,6 @@ class AdminMapperTest {
 
     assertThat(result).isDataClassEqualTo(
       Stubs.project.copy(
-        account = newAccount,
         type = Project.Type.COMMERCIAL,
         status = Project.Status.SUSPENDED,
         updatedAt = Date(0),
@@ -151,8 +61,7 @@ class AdminMapperTest {
     val timeIncrement = Stubs.projectDbm.updatedAt.time - startTime
     val timeProvider = TimeProviderFake(incrementalTime = startTime, timeIncrement = timeIncrement)
 
-    val projectCreator = ProjectCreator(
-      account = Stubs.account,
+    val projectCreator = ProjectCreationInfo(
       type = Project.Type.OPENSOURCE,
       status = Project.Status.ACTIVE,
       userIdType = Project.UserIdType.USERNAME,
@@ -168,26 +77,8 @@ class AdminMapperTest {
     assertThat(projectDbm).isEqualTo(Stubs.projectDbm)
   }
 
-  @Test fun `account data to domain`() {
-    val expected = Stubs.account.copy(
-      // no info about this on data layer
-      owners = emptyList(),
-    )
-    assertThat(Stubs.accountDbm.toDomain()).isDataClassEqualTo(expected)
-  }
-
-  @Test fun `account domain to data`() {
-    assertThat(Stubs.account.toData()).isEqualTo(Stubs.accountDbm)
-  }
-
   @Test fun `project data to domain`() {
-    val expected = Stubs.project.copy(
-      account = Stubs.account.copy(
-        // no info about this on data layer
-        owners = emptyList(),
-      ),
-    )
-    assertThat(Stubs.projectDbm.toDomain()).isDataClassEqualTo(expected)
+    assertThat(Stubs.projectDbm.toDomain()).isDataClassEqualTo(Stubs.project)
   }
 
   @Test fun `project domain to data`() {

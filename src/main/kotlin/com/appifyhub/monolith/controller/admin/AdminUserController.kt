@@ -4,8 +4,8 @@ import com.appifyhub.monolith.controller.user.UserController
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
-import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.service.user.UserService.Privilege
+import com.appifyhub.monolith.service.auth.AccessManager
+import com.appifyhub.monolith.service.auth.AccessManager.Privilege
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class AdminUserController(
-  private val authService: AuthService,
+  private val accessManager: AccessManager,
 ) {
 
   object Endpoints {
@@ -31,7 +31,7 @@ class AdminUserController(
   ): UserResponse {
     log.debug("[GET] user $userId from project $projectId")
 
-    return authService.requestUserAccess(
+    return accessManager.requestUserAccess(
       authData = authentication,
       targetId = UserId(userId, projectId),
       privilege = Privilege.USER_READ,

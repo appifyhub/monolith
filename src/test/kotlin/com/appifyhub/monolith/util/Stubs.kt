@@ -1,9 +1,7 @@
 package com.appifyhub.monolith.util
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory
@@ -37,7 +35,8 @@ import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
-import com.appifyhub.monolith.storage.model.admin.AccountDbm
+import com.appifyhub.monolith.storage.model.admin.ProjectCreationDbm
+import com.appifyhub.monolith.storage.model.admin.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
 import com.appifyhub.monolith.storage.model.admin.PropertyDbm
 import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
@@ -87,11 +86,11 @@ object Stubs {
 
   // region Domain Models
 
-  val universalUserId = "username$2"
+  val universalUserId = "username$1"
 
   val userId = UserId(
     userId = "username",
-    projectId = 2,
+    projectId = 1,
   )
 
   val company = Organization(
@@ -123,7 +122,6 @@ object Stubs {
     origin = "Token Origin",
     ipAddress = ipAddress,
     geo = geoMerged,
-    accountId = 1,
     isStatic = false,
   )
 
@@ -137,7 +135,6 @@ object Stubs {
     origin = "Token Origin",
     ipAddress = ipAddress,
     geo = geoMerged,
-    accountId = 1,
     isStatic = true,
   )
 
@@ -155,27 +152,11 @@ object Stubs {
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
     company = company,
-    ownedTokens = emptyList(), // updated below
-    account = null, // updated below
+    ownedTokens = listOf(tokenDetails),
   )
-
-  val account = Account(
-    id = 1,
-    owners = emptyList(), // updated below
-    createdAt = Date(0xC10000),
-    updatedAt = Date(0xA10000),
-  ).let { account ->
-    // amazing hacks!
-    user = user.copy(
-      account = account,
-      ownedTokens = listOf(tokenDetails),
-    )
-    account.copy(owners = listOf(user))
-  }
 
   val project = Project(
     id = userId.projectId,
-    account = account,
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
@@ -233,18 +214,11 @@ object Stubs {
 
   val userIdDbm = UserIdDbm(
     userId = "username",
-    projectId = 2,
-  )
-
-  val accountDbm = AccountDbm(
-    accountId = 1,
-    createdAt = Date(0xC10000),
-    updatedAt = Date(0xA10000),
+    projectId = 1,
   )
 
   val projectDbm = ProjectDbm(
     projectId = userIdDbm.projectId,
-    account = accountDbm,
     type = "OPENSOURCE",
     status = "ACTIVE",
     userIdType = "USERNAME",
@@ -275,7 +249,18 @@ object Stubs {
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
     company = companyDbm,
-    account = accountDbm,
+  )
+
+  val projectCreationKeyDbm = ProjectCreationKeyDbm(
+    creatorUserId = user.id.userId,
+    creatorProjectId = user.id.projectId,
+    createdProjectId = project.id,
+  )
+
+  val projectCreationDbm = ProjectCreationDbm(
+    data = projectCreationKeyDbm,
+    user = userDbm,
+    project = projectDbm,
   )
 
   val tokenDetailsDbm = TokenDetailsDbm(
@@ -339,7 +324,6 @@ object Stubs {
     origin = "Token Origin 1",
     ipAddress = ipAddress.reversed(),
     geo = "$geoMerged 1",
-    accountId = 1,
     isStatic = false,
   )
 
@@ -373,25 +357,7 @@ object Stubs {
     company = companyUpdated,
     createdAt = user.createdAt,
     updatedAt = Date(0xA00001),
-    ownedTokens = emptyList(), // updated below
-    account = null, // updated below
-  )
-
-  val accountUpdated = account.copy(
-    updatedAt = Date(0xA10001),
-  ).let { account ->
-    // amazing hacks! again!
-    userUpdated = userUpdated.copy(
-      account = account,
-      ownedTokens = listOf(tokenDetailsUpdated),
-    )
-    account.copy(owners = listOf(userUpdated))
-  }
-
-  val accountUpdatedDbm = AccountDbm(
-    accountId = account.id,
-    createdAt = accountDbm.createdAt,
-    updatedAt = Date(0xA10001),
+    ownedTokens = listOf(tokenDetailsUpdated),
   )
 
   val userUpdatedDbm = UserDbm(
@@ -409,12 +375,10 @@ object Stubs {
     createdAt = userDbm.createdAt,
     updatedAt = Date(0xA00001),
     company = companyUpdatedDbm,
-    account = accountUpdatedDbm,
   )
 
   val projectUpdated = Project(
     id = project.id,
-    account = accountUpdated,
     type = Project.Type.FREE,
     status = Project.Status.SUSPENDED,
     userIdType = project.userIdType,
@@ -424,7 +388,6 @@ object Stubs {
 
   val projectUpdatedDbm = ProjectDbm(
     projectId = project.id,
-    account = accountUpdatedDbm,
     type = "FREE",
     status = "SUSPENDED",
     userIdType = projectDbm.userIdType,
@@ -456,7 +419,6 @@ object Stubs {
     Claims.ORIGIN to "Token Origin",
     Claims.IP_ADDRESS to ipAddress,
     Claims.GEO to geoMerged,
-    Claims.ACCOUNT_ID to account.id,
     Claims.IS_STATIC to false,
   )
 
@@ -471,7 +433,6 @@ object Stubs {
     Claims.ORIGIN to "Token Origin",
     Claims.IP_ADDRESS to ipAddress,
     Claims.GEO to geoMerged,
-    Claims.ACCOUNT_ID to account.id,
     Claims.IS_STATIC to true,
   )
 
@@ -513,11 +474,9 @@ object Stubs {
     verificationToken = Settable("abcd12341"),
     birthday = Settable(Date(0x10B00001)),
     company = Settable(companyUpdater),
-    account = Settable(accountUpdated),
   )
 
-  val projectCreator = ProjectCreator(
-    account = account,
+  val projectCreator = ProjectCreationInfo(
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
@@ -525,15 +484,8 @@ object Stubs {
 
   val projectUpdater = ProjectUpdater(
     id = project.id,
-    account = Settable(accountUpdated),
     type = Settable(Project.Type.FREE),
     status = Settable(Project.Status.SUSPENDED),
-  )
-
-  val accountUpdater = AccountUpdater(
-    id = account.id,
-    addedOwners = Settable(emptyList()),
-    removedOwners = Settable(emptyList()),
   )
 
   // endregion

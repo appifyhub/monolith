@@ -28,7 +28,7 @@ import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.service.admin.PropertyService
-import com.appifyhub.monolith.util.AuthTestHelper
+import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBlankRequest
@@ -60,7 +60,7 @@ class AdminPropertyControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authHelper: AuthTestHelper
+  @Autowired lateinit var stubber: Stubber
   @Autowired lateinit var propertyService: PropertyService
 
   @LocalServerPort var port: Int = 0
@@ -75,7 +75,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get configurations fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.creator()
 
     assertThat(
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
@@ -92,8 +92,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get configurations succeeds with no filter`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
@@ -112,8 +112,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get configurations succeeds with filter`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val filter = PropertyFilterQueryParams(
       type = PropertyType.INTEGER.name,
       category = PropertyCategory.OPERATIONAL.name,
@@ -139,7 +139,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get property fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
@@ -157,9 +157,9 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get property succeeds`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val prop = propertyService.saveProperty<Int>(project.id, PROJECT_USERS_MAX.name, "20")
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
@@ -178,7 +178,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get properties fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
@@ -195,13 +195,13 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get properties succeeds with names`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val props = propertyService.saveProperties(
       projectId = project.id,
       propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
       propRawValues = listOf("20", "desc"),
     )
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
@@ -221,13 +221,13 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get properties succeeds with no filter`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val props = propertyService.saveProperties(
       projectId = project.id,
       propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
       propRawValues = listOf("20", "desc"),
     )
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
@@ -245,13 +245,13 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `get properties succeeds with filter`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val props = propertyService.saveProperties(
       projectId = project.id,
       propNames = listOf(PROJECT_USERS_MAX.name),
       propRawValues = listOf("20"),
     )
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
     val filter = PropertyFilterQueryParams(
       type = PropertyType.INTEGER.name,
       category = PropertyCategory.OPERATIONAL.name,
@@ -274,7 +274,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `save property fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
@@ -292,8 +292,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `save property succeeds`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
@@ -318,7 +318,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `save properties fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
@@ -335,8 +335,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `save properties succeeds`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val values = MultiplePropertiesSaveRequest(
       properties = listOf(
         PropertyDto(PROJECT_USERS_MAX.name, "20"),
@@ -373,7 +373,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `clear property fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -391,8 +391,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `clear property succeeds`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     propertyService.saveProperty<Int>(project.id, PROJECT_USERS_MAX.name, "20")
 
     assertThat(
@@ -415,7 +415,7 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `clear properties fails when unauthorized`() {
-    val project = authHelper.adminProject
+    val project = stubber.projects.new()
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -432,8 +432,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `clear properties succeeds with no filter`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     propertyService.saveProperties(
       projectId = project.id,
       propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
@@ -460,8 +460,8 @@ class AdminPropertyControllerTest {
   }
 
   @Test fun `clear properties succeeds with filter`() {
-    val project = authHelper.adminProject
-    val token = authHelper.newRealJwt(OWNER).token.tokenValue
+    val project = stubber.projects.new()
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
     propertyService.saveProperties(
       projectId = project.id,
       propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),

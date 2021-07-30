@@ -1,26 +1,18 @@
 package com.appifyhub.monolith.service.auth
 
-import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.service.user.UserService.Privilege
 import org.springframework.security.core.Authentication
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 
 interface AuthService {
 
-  fun hasSelfAuthority(authData: Authentication, authority: Authority, shallow: Boolean): Boolean
-
-  fun isProjectOwner(authData: Authentication, shallow: Boolean): Boolean
+  @Throws fun requireValidJwt(authData: Authentication, shallow: Boolean): JwtAuthenticationToken
 
   @Throws fun resolveShallowSelf(authData: Authentication): User
 
   @Throws fun resolveShallowUser(authData: Authentication, universalId: String): User
-
-  @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User
-
-  @Throws fun requestProjectAccess(authData: Authentication, targetProjectId: Long, privilege: Privilege): Project
 
   @Throws fun resolveUser(universalId: String, signature: String): User
 

@@ -1,29 +1,24 @@
 package com.appifyhub.monolith.service.admin
 
 import assertk.all
-import assertk.assertAll
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
-import assertk.assertions.isZero
+import assertk.assertions.isNotNull
+import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
-import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.repository.user.UserRepository
-import com.appifyhub.monolith.util.AuthTestHelper
+import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
+import com.nhaarman.mockitokotlin2.doThrow
+import com.nhaarman.mockitokotlin2.mock
 import java.time.temporal.ChronoUnit
-import javax.annotation.Resource
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -44,17 +39,9 @@ class AdminServiceImplTest {
   @Autowired lateinit var service: AdminService
   @Autowired lateinit var adminRepo: AdminRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
-  @Autowired lateinit var authHelper: AuthTestHelper
-
-  // for some reason this injection is problematic
-  @Resource(name = "userRepositoryImpl")
-  lateinit var userRepo: UserRepository
+  @Autowired lateinit var stubber: Stubber
 
   private val adminProject: Project by lazy { adminRepo.getAdminProject() }
-  private val adminAccount: Account by lazy {
-    // this way it fetches also owner data (it's not contained in project.account)
-    adminRepo.fetchAccountById(adminProject.account.id)
-  }
 
   @BeforeEach fun setup() {
     timeProvider.staticTime = { 0 }
@@ -64,66 +51,60 @@ class AdminServiceImplTest {
     timeProvider.staticTime = { null }
   }
 
-  @Test fun `add project fails with invalid account ID`() {
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `add a standard project fails if creator is null`() {
     assertThat {
-      service.addProject(
-        Stubs.projectCreator.copy(
-          account = Stubs.account.copy(id = -1),
-        ),
-      )
+      service.addProject(Stubs.projectCreator, null)
     }
       .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
+      .messageContains("must be provided")
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `add project succeeds with valid data`() {
+  @Test fun `add a standard project fails if creator is not from admin project`() {
+    val project = stubber.projects.new()
+    val creator = stubber.users(project).owner()
+
+    assertThat {
+      service.addProject(Stubs.projectCreator, creator)
+    }
+      .isFailure()
+      .messageContains("only by admin project users")
+  }
+
+  @Test fun `add admin project fails if creator is provided`() {
+    // mocking because the real one already contains the admin project after setup
+    val mockRepo = mock<AdminRepository> {
+      onGeneric { getAdminProject() } doThrow UninitializedPropertyAccessException("Not initialized")
+    }
+    val service: AdminService = AdminServiceImpl(mockRepo)
+
+    assertThat {
+      service.addProject(Stubs.projectCreator, stubber.creators.owner())
+    }
+      .isFailure()
+      .messageContains("must not be provided")
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `add project succeeds with valid data (with creator)`() {
     assertThat(
-      service.addProject(
-        Stubs.projectCreator.copy(account = adminAccount)
-      ).cleanDates()
+      service.addProject(Stubs.projectCreator, stubber.creators.owner()).cleanDates()
     ).isDataClassEqualTo(
       Stubs.project.copy(
-        id = 3,
-        account = adminAccount.copy(owners = emptyList()), // no ownership data here
+        id = Stubs.project.id + 1,
       ).cleanStubArtifacts()
     )
   }
 
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `add account succeeds`() {
-    assertThat(service.addAccount())
-      .isDataClassEqualTo(
-        Account(
-          id = 3,
-          owners = emptyList(),
-          createdAt = timeProvider.currentDate,
-        )
-      )
-  }
-
   @Test fun `get admin project succeeds`() {
     assertThat(service.getAdminProject())
-      .isDataClassEqualTo(adminProject)
+      .isNotNull()
   }
 
-  @Test fun `fetch account by ID fails with invalid account ID`() {
-    assertThat {
-      service.fetchAccountById(-1)
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
-  }
-
-  @Test fun `fetch account by ID succeeds with valid account ID`() {
-    assertThat(service.fetchAccountById(adminAccount.id))
-      .isDataClassEqualTo(adminAccount)
+  @Test fun `get admin owner succeeds`() {
+    assertThat(service.getAdminOwner())
+      .isNotNull()
   }
 
   @Test fun `fetch project by ID fails with invalid account ID`() {
@@ -142,27 +123,43 @@ class AdminServiceImplTest {
       .isDataClassEqualTo(adminProject)
   }
 
-  @Test fun `fetch all projects by account fails with invalid account ID`() {
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `fetch all projects by creator fails if creator's project is not admin project`() {
+    val project = stubber.projects.new()
+    val creator = stubber.users(project).owner()
+
     assertThat {
-      service.fetchAllProjectsByAccount(Stubs.account.copy(id = -1))
+      service.fetchAllProjectsByCreator(creator)
+    }
+      .isFailure()
+      .messageContains("don't have any projects")
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `fetch all projects by creator succeeds`() {
+    val project = stubber.projects.new()
+
+    assertThat(service.fetchAllProjectsByCreator(stubber.creators.owner()).map { it.cleanDates() })
+      .isEqualTo(listOf(project).map { it.cleanDates() })
+  }
+
+  @Test fun `fetch project creator fails with invalid project ID`() {
+    assertThat {
+      service.fetchProjectCreator(-1)
     }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
+        messageContains("Project ID")
       }
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `fetch all projects by account succeeds with valid account ID`() {
-    val account = service.addAccount()
-    val project1 = service.addProject(Stubs.projectCreator.copy(account = account)).cleanStubArtifacts()
-    val project2 = service.addProject(Stubs.projectCreator.copy(account = account)).cleanStubArtifacts()
+  @Test fun `fetch project creator succeeds`() {
+    val project = stubber.projects.new()
 
-    assertThat(
-      service.fetchAllProjectsByAccount(account).map { it.cleanStubArtifacts() }
-    )
-      .isEqualTo(listOf(project1, project2))
+    assertThat(service.fetchProjectCreator(project.id))
+      .isDataClassEqualTo(stubber.creators.owner())
   }
 
   @Test fun `update project fails with invalid project ID`() {
@@ -176,127 +173,15 @@ class AdminServiceImplTest {
       }
   }
 
-  @Test fun `update project fails with invalid account ID`() {
-    assertThat {
-      service.updateProject(
-        Stubs.projectUpdater.copy(
-          account = Settable(Stubs.account.copy(id = -1)),
-        )
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
-  }
-
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `update project succeeds with valid data`() {
-    val account = service.addAccount()
-    val project = service.addProject(Stubs.projectCreator.copy(account = account)).cleanStubArtifacts()
+    val project = stubber.projects.new().cleanStubArtifacts()
 
     assertThat(
-      service.updateProject(
-        Stubs.projectUpdater.copy(
-          id = project.id,
-          account = Settable(adminAccount),
-        )
-      ).cleanStubArtifacts()
+      service.updateProject(Stubs.projectUpdater.copy(id = project.id)).cleanStubArtifacts()
     ).isDataClassEqualTo(
-      Stubs.projectUpdated.copy(
-        id = project.id,
-        account = adminAccount.copy(owners = emptyList()), // no ownership data here,
-      ).cleanStubArtifacts()
+      Stubs.projectUpdated.copy(id = project.id).cleanStubArtifacts()
     )
-  }
-
-  @Test fun `update account fails with invalid account ID`() {
-    assertThat {
-      service.updateAccount(Stubs.accountUpdater.copy(id = -1))
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
-  }
-
-  @Test fun `update account fails with invalid added user ID`() {
-    assertThat {
-      service.updateAccount(
-        Stubs.accountUpdater.copy(
-          addedOwners = Settable(
-            listOf(
-              Stubs.user.copy(id = UserId("\t\n", -1)),
-            )
-          )
-        )
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Added User ID")
-      }
-  }
-
-  @Test fun `update account fails with invalid removed user ID`() {
-    assertThat {
-      service.updateAccount(
-        Stubs.accountUpdater.copy(
-          removedOwners = Settable(
-            listOf(
-              Stubs.user.copy(id = UserId("\t\n", -1)),
-            )
-          )
-        )
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Removed User ID")
-      }
-  }
-
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `update account succeeds with valid data`() {
-    val account = service.addAccount()
-    val randomModerator = authHelper.moderatorUser
-    val randomModeratorUpdated = randomModerator.copy(account = account)
-    val randomAdmin = authHelper.adminUser
-    val randomAdminUpdated = randomAdmin.copy(account = account)
-
-    assertAll {
-      // adding owners
-      assertThat(
-        service.updateAccount(
-          AccountUpdater(
-            id = account.id,
-            addedOwners = Settable(listOf(randomModerator)),
-          )
-        ).cleanDates()
-      ).isDataClassEqualTo(
-        account.copy(
-          owners = listOf(randomModeratorUpdated),
-        ).cleanDates()
-      )
-
-      // removing owners and adding new
-      assertThat(
-        service.updateAccount(
-          AccountUpdater(
-            id = account.id,
-            addedOwners = Settable(listOf(randomAdmin)),
-            removedOwners = Settable(listOf(randomModeratorUpdated)),
-          )
-        ).cleanDates()
-      ).isDataClassEqualTo(
-        account.copy(
-          owners = listOf(randomAdminUpdated),
-        ).cleanDates()
-      )
-    }
   }
 
   @Test fun `remove project by ID fails with invalid project ID`() {
@@ -308,6 +193,14 @@ class AdminServiceImplTest {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
       }
+  }
+
+  @Test fun `remove project by ID fails for admin project`() {
+    assertThat {
+      service.removeProjectById(stubber.projects.creator().id)
+    }
+      .isFailure()
+      .messageContains("Admin project can't")
   }
 
   @Test fun `remove project by ID fails with admin project ID`() {
@@ -323,83 +216,34 @@ class AdminServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `remove project by ID succeeds with valid data`() {
-    val account = service.addAccount().cleanDates()
-    val project = service.addProject(Stubs.projectCreator.copy(account = account)).cleanStubArtifacts()
-    userRepo.addUser(
-      creator = Stubs.userCreator.copy(projectId = project.id),
-      userIdType = project.userIdType,
-    )
+    val project = stubber.projects.new()
+    stubber.users(project).admin()
+    stubber.users(project).default()
 
-    assertAll {
-      assertThat(userRepo.fetchAllUsersByProjectId(project.id).size)
-        .isEqualTo(1)
-      assertThat(service.fetchAllProjectsByAccount(account).size)
-        .isEqualTo(1)
-
+    assertThat {
       service.removeProjectById(project.id)
-
-      assertThat(userRepo.fetchAllUsersByProjectId(project.id).size)
-        .isZero()
-      assertThat(service.fetchAllProjectsByAccount(account).size)
-        .isZero()
-    }
-  }
-
-  @Test fun `remove account by ID fails with invalid account ID`() {
-    assertThat {
-      service.removeAccountById(-1)
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
-  }
-
-  @Test fun `remove account by ID fails with admin account ID`() {
-    assertThat {
-      service.removeAccountById(adminAccount.id)
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Admin account")
-      }
+    }.isSuccess()
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `remove account by ID succeeds with valid data`() {
-    val account = service.addAccount().cleanDates()
-    val project = service.addProject(Stubs.projectCreator.copy(account = account)).cleanStubArtifacts()
-    val user = userRepo.addUser(
-      creator = Stubs.userCreator.copy(projectId = project.id),
-      userIdType = project.userIdType,
-    )
-    service.updateAccount(
-      AccountUpdater(
-        id = account.id,
-        addedOwners = Settable(listOf(user)),
-      )
-    )
+  @Test fun `remove all projects by creator fails with user outside of admin project`() {
+    val project = stubber.projects.new()
+    val creator = stubber.users(project).owner()
 
-    assertAll {
-      assertThat(service.fetchAccountById(account.id).id)
-        .isEqualTo(account.id)
-      assertThat(userRepo.fetchAllUsersByProjectId(project.id).size)
-        .isEqualTo(1)
-      assertThat(service.fetchAllProjectsByAccount(account).size)
-        .isEqualTo(1)
-
-      service.removeAccountById(account.id)
-
-      assertThat(userRepo.fetchAllUsersByProjectId(project.id).size)
-        .isZero()
-      assertThat(service.fetchAllProjectsByAccount(account).size)
-        .isZero()
-      assertThat { service.fetchAccountById(account.id) }
-        .isFailure()
-        .hasClass(NoSuchElementException::class)
+    assertThat {
+      service.removeAllProjectsByCreator(creator)
     }
+      .isFailure()
+      .messageContains("only by admin project users")
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `remove all projects by creator succeeds`() {
+    stubber.projects.new()
+
+    assertThat {
+      service.removeAllProjectsByCreator(stubber.creators.owner())
+    }.isSuccess()
   }
 
   // Helpers
@@ -411,22 +255,8 @@ class AdminServiceImplTest {
   ).cleanDates()
 
   private fun Project.cleanDates(): Project = copy(
-    account = account.cleanDates(),
     createdAt = createdAt.truncateTo(ChronoUnit.DAYS),
     updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
-  )
-
-  private fun Account.cleanDates(): Account = copy(
-    createdAt = createdAt.truncateTo(ChronoUnit.DAYS),
-    updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
-    owners = owners.map { it.cleanDates() },
-  )
-
-  private fun User.cleanDates(): User = copy(
-    birthday = birthday?.truncateTo(ChronoUnit.DAYS),
-    createdAt = createdAt.truncateTo(ChronoUnit.DAYS),
-    updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
-    account = account?.cleanDates(),
   )
 
 }

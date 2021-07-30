@@ -7,7 +7,6 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper
-import com.appifyhub.monolith.security.JwtHelper.Claims.ACCOUNT_ID
 import com.appifyhub.monolith.security.JwtHelper.Claims.AUTHORITIES
 import com.appifyhub.monolith.security.JwtHelper.Claims.AUTHORITY_DELIMITER
 import com.appifyhub.monolith.security.JwtHelper.Claims.CREATED_AT
@@ -53,7 +52,6 @@ fun JwtClaims.toTokenDetails(
   origin = get(ORIGIN)?.toString(),
   ipAddress = get(IP_ADDRESS)?.toString(),
   geo = get(GEO)?.toString(),
-  accountId = get(ACCOUNT_ID)?.toString()?.toLong(),
   isStatic = get(IS_STATIC).toString().toBoolean(),
 )
 

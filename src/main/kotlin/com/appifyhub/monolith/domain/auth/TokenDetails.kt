@@ -14,6 +14,5 @@ data class TokenDetails(
   val origin: String?,
   val ipAddress: String?,
   val geo: String?,
-  val accountId: Long?,
   val isStatic: Boolean,
 )

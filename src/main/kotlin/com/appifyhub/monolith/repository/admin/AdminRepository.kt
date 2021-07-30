@@ -1,33 +1,29 @@
 package com.appifyhub.monolith.repository.admin
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 
 interface AdminRepository {
 
-  @Throws fun addProject(creator: ProjectCreator): Project
-
-  @Throws fun addAccount(): Account
-
-  @Throws fun fetchAccountById(id: Long): Account
-
-  @Throws fun fetchProjectById(id: Long): Project
+  @Throws fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project
 
   @Throws fun getAdminProject(): Project
 
-  @Throws fun fetchAllProjectsByAccount(account: Account): List<Project>
+  @Throws fun getAdminOwner(): User
+
+  @Throws fun fetchProjectById(id: Long): Project
+
+  @Throws fun fetchAllProjectsByCreatorUserId(id: UserId): List<Project>
+
+  @Throws fun fetchProjectCreator(projectId: Long): User
 
   @Throws fun updateProject(updater: ProjectUpdater): Project
 
-  @Throws fun updateAccount(updater: AccountUpdater): Account
-
   @Throws fun removeProjectById(projectId: Long)
 
-  @Throws fun removeAllProjectsByAccount(account: Account)
-
-  @Throws fun removeAccountById(accountId: Long)
+  @Throws fun removeAllProjectsByCreator(creatorUserId: UserId)
 
 }

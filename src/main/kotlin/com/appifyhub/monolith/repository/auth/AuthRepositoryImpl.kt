@@ -3,16 +3,13 @@ package com.appifyhub.monolith.repository.auth
 import org.springframework.security.core.userdetails.User as SpringUser
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
-import com.appifyhub.monolith.domain.common.stubAccount
 import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.security.JwtHelper
-import com.appifyhub.monolith.security.JwtHelper.Claims.ACCOUNT_ID
 import com.appifyhub.monolith.security.JwtHelper.Claims.AUTHORITIES
 import com.appifyhub.monolith.security.JwtHelper.Claims.AUTHORITY_DELIMITER
 import com.appifyhub.monolith.security.JwtHelper.Claims.GEO
@@ -33,7 +30,6 @@ import org.springframework.stereotype.Repository
 class AuthRepositoryImpl(
   private val jwtHelper: JwtHelper,
   private val userRepository: UserRepository,
-  private val adminRepository: AdminRepository,
   private val tokenDetailsRepository: TokenDetailsRepository,
   private val timeProvider: TimeProvider,
 ) : AuthRepository {
@@ -73,9 +69,6 @@ class AuthRepositoryImpl(
     val currentCalendar = timeProvider.currentCalendar
     val expirationCalendar = timeProvider.currentCalendar.apply { add(Calendar.DAY_OF_MONTH, expDays) }
     val authoritiesEncoded = creator.authority.allAuthorities.joinToString(AUTHORITY_DELIMITER) { it.authority }
-    val accountId = adminRepository.getAdminProject()
-      .takeIf { adminProject -> adminProject.id == creator.id.projectId }
-      ?.let { userRepository.fetchUserByUserId(creator.id, withTokens = false).account?.id }
 
     // create claims
     val claims = mutableMapOf(
@@ -86,7 +79,6 @@ class AuthRepositoryImpl(
       IS_STATIC to creator.isStatic,
     ).apply {
       // put nullable properties only if available
-      accountId?.let { put(ACCOUNT_ID, it) }
       creator.ipAddress?.let { put(IP_ADDRESS, it) }
       creator.geo?.let { put(GEO, it) }
       creator.origin?.let { put(ORIGIN, it) }
@@ -110,7 +102,6 @@ class AuthRepositoryImpl(
         origin = creator.origin,
         ipAddress = creator.ipAddress,
         geo = creator.geo,
-        accountId = accountId,
         isStatic = creator.isStatic,
       )
     )
@@ -121,30 +112,13 @@ class AuthRepositoryImpl(
 
     val tokenDetails = jwtHelper.extractPropertiesFromJwt(jwt.token.tokenValue).toTokenDetails()
 
-    // prepare the base user model
-    var user = SpringUser.builder()
+    return SpringUser.builder()
       .username(tokenDetails.ownerId.toUniversalFormat())
       .password("spring-asks-for-it")
       .authorities(tokenDetails.authority.allAuthorities)
       .build()
       .toDomain(timeProvider)
-
-    // add the current token, have to assume it's not blocked for shallow fetch
-    user = user.copy(ownedTokens = listOf(tokenDetails))
-
-    // for users who are not from admin project just return
-    val isNotFromAdminProject = tokenDetails.ownerId.projectId != adminRepository.getAdminProject().id
-    if (tokenDetails.accountId == null || isNotFromAdminProject) return user
-
-    user = user.copy(
-      account = stubAccount().copy(
-        id = tokenDetails.accountId,
-        createdAt = timeProvider.currentDate,
-        updatedAt = timeProvider.currentDate,
-      ),
-    )
-
-    return user
+      .copy(ownedTokens = listOf(tokenDetails)) // assume the token is not blocked (because of shallow)
   }
 
   override fun fetchTokenDetails(jwt: JwtAuthenticationToken): TokenDetails {

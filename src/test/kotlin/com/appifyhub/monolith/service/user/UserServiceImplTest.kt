@@ -4,7 +4,6 @@ import assertk.all
 import assertk.assertAll
 import assertk.assertThat
 import assertk.assertions.hasClass
-import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
@@ -23,7 +22,6 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.init.AdminProjectConfig
-import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
 import com.appifyhub.monolith.util.Stubs
@@ -49,7 +47,6 @@ import org.springframework.web.server.ResponseStatusException
 class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
-  @Autowired lateinit var adminRepo: AdminRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var adminProjectConfig: AdminProjectConfig
 
@@ -201,7 +198,6 @@ class UserServiceImplTest {
           id = Stubs.userId.copy(userId = UserIdGenerator.nextId),
           verificationToken = TokenGenerator.nextEmailToken,
           ownedTokens = emptyList(),
-          account = null,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -219,7 +215,6 @@ class UserServiceImplTest {
           id = Stubs.userId.copy(userId = "username"),
           verificationToken = TokenGenerator.nextEmailToken,
           ownedTokens = emptyList(),
-          account = null,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -237,7 +232,6 @@ class UserServiceImplTest {
           id = Stubs.userId.copy(userId = "email@domain.com"),
           verificationToken = TokenGenerator.nextEmailToken,
           ownedTokens = emptyList(),
-          account = null,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -261,7 +255,6 @@ class UserServiceImplTest {
           ownedTokens = emptyList(),
           contactType = ContactType.PHONE,
           contact = "+491760000000",
-          account = null,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -281,7 +274,6 @@ class UserServiceImplTest {
           ownedTokens = emptyList(),
           contactType = ContactType.CUSTOM,
           contact = null,
-          account = null,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -322,7 +314,6 @@ class UserServiceImplTest {
           updatedAt = timeProvider.currentDate,
           company = null,
           ownedTokens = emptyList(),
-          account = null,
         )
       )
   }
@@ -401,28 +392,6 @@ class UserServiceImplTest {
 
     assertThat(fetchedUsers)
       .isEqualTo(listOf(storedUser))
-  }
-
-  @Test fun `fetching users fails with invalid account ID`() {
-    assertThat { service.fetchAllUsersByAccount(Stubs.account.copy(id = -1)) }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
-  }
-
-  @Test fun `fetching users works with an admin ID`() {
-    val adminAccount = adminRepo.getAdminProject().account
-    val fetchedUsers = service.fetchAllUsersByAccount(adminAccount)
-      .map { it.cleanDates() }
-
-    assertThat(fetchedUsers)
-      .all {
-        hasSize(1)
-        transform { it.first().name }
-          .isEqualTo(adminProjectConfig.ownerName)
-      }
   }
 
   // Updating
@@ -666,17 +635,6 @@ class UserServiceImplTest {
       }
   }
 
-  @Test fun `updating user fails with invalid account`() {
-    val updater = Stubs.userUpdater.copy(account = Settable(Stubs.account.copy(id = -1)))
-
-    assertThat { service.updateUser(updater, Stubs.project.userIdType) }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Account ID")
-      }
-  }
-
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `updating user works with changed data`() {
     stubGenerators()
@@ -686,10 +644,7 @@ class UserServiceImplTest {
     )
     val storedUser = service.addUser(creator, UserIdType.RANDOM).cleanDates()
 
-    val updater = Stubs.userUpdater.copy(
-      id = storedUser.id,
-      account = null,
-    )
+    val updater = Stubs.userUpdater.copy(id = storedUser.id)
     val updatedUser = service.updateUser(updater, UserIdType.RANDOM).cleanDates()
 
     assertThat(updatedUser)
@@ -698,7 +653,6 @@ class UserServiceImplTest {
           id = storedUser.id,
           verificationToken = TokenGenerator.nextPhoneToken,
           ownedTokens = emptyList(),
-          account = null,
           createdAt = storedUser.createdAt,
           updatedAt = timeProvider.currentDate,
         ).cleanDates()
@@ -726,7 +680,6 @@ class UserServiceImplTest {
       verificationToken = Settable(null),
       birthday = Settable(null),
       company = Settable(null),
-      account = Settable(null),
     )
     val updatedUser = service.updateUser(updater, UserIdType.USERNAME).cleanDates()
 
@@ -741,7 +694,6 @@ class UserServiceImplTest {
           verificationToken = null,
           birthday = null,
           company = null,
-          account = null,
           createdAt = storedUser.createdAt,
           updatedAt = timeProvider.currentDate,
         ).cleanDates()
@@ -824,7 +776,7 @@ class UserServiceImplTest {
     TokenGenerator.phoneInterceptor = { "phone_token" }
   }
 
-  fun User.cleanDates() = copy(
+  private fun User.cleanDates() = copy(
     birthday = birthday?.truncateTo(ChronoUnit.DAYS),
     createdAt = createdAt.truncateTo(ChronoUnit.SECONDS),
     updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS),

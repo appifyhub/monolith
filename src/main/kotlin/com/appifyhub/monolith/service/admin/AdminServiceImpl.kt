@@ -1,14 +1,14 @@
 package com.appifyhub.monolith.service.admin
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.util.ext.throwLocked
+import com.appifyhub.monolith.util.ext.throwNotFound
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -16,41 +16,36 @@ import org.springframework.stereotype.Service
 @Service
 class AdminServiceImpl(
   private val adminRepository: AdminRepository,
-  private val userRepository: UserService,
 ) : AdminService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addProject(creator: ProjectCreator): Project {
-    log.debug("Adding project $creator")
+  override fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project {
+    log.debug("Adding project $creationInfo with creator $creator")
 
-    val normalizeAccount = Normalizers.AccountId.run(creator.account.id).requireValid { "Account ID" }
-      .let { creator.account.copy(id = it) }
+    val adminProject = silent { getAdminProject() }
+    if (adminProject != null) {
+      // admin project is already created
+      if (creator == null) error("Project creator must be provided")
 
-    val normalizedCreator = ProjectCreator(
-      account = normalizeAccount,
-      type = creator.type,
-      status = creator.status,
-      userIdType = creator.userIdType,
-    )
+      if (creator.id.projectId != adminProject.id)
+        throwLocked { "Projects can be added only by admin project users" }
+    } else {
+      // looks like we're creating the admin project
+      if (creator != null) error("Project creator must not be provided for admin project")
+    }
 
-    return adminRepository.addProject(normalizedCreator)
-  }
-
-  override fun addAccount(): Account {
-    log.debug("Adding account")
-    return adminRepository.addAccount()
+    return adminRepository.addProject(creationInfo, creator)
   }
 
   override fun getAdminProject(): Project {
-    log.debug("Fetching admin project")
+    log.debug("Getting admin project")
     return adminRepository.getAdminProject()
   }
 
-  override fun fetchAccountById(id: Long): Account {
-    log.debug("Fetching account by id $id")
-    val normalizedAccountId = Normalizers.AccountId.run(id).requireValid { "Account ID" }
-    return adminRepository.fetchAccountById(normalizedAccountId)
+  override fun getAdminOwner(): User {
+    log.debug("Getting admin owner")
+    return adminRepository.getAdminOwner()
   }
 
   override fun fetchProjectById(id: Long): Project {
@@ -59,24 +54,30 @@ class AdminServiceImpl(
     return adminRepository.fetchProjectById(normalizedProjectId)
   }
 
-  override fun fetchAllProjectsByAccount(account: Account): List<Project> {
-    log.debug("Fetching all projects for account $account")
-    val normalizedAccount = Normalizers.AccountId.run(account.id).requireValid { "Account ID" }
-      .let { account.copy(id = it) }
-    return adminRepository.fetchAllProjectsByAccount(normalizedAccount)
+  override fun fetchAllProjectsByCreator(creator: User): List<Project> {
+    log.debug("Fetching all projects for creator $creator")
+
+    if (creator.id.projectId != getAdminProject().id)
+      throwNotFound { "Non-service creators don't have any projects" }
+
+    return adminRepository.fetchAllProjectsByCreatorUserId(creator.id)
+  }
+
+  override fun fetchProjectCreator(projectId: Long): User {
+    log.debug("Fetching project creator for $projectId")
+
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+
+    return adminRepository.fetchProjectCreator(normalizedProjectId)
   }
 
   override fun updateProject(updater: ProjectUpdater): Project {
     log.debug("Updating project $updater")
 
     val normalizedProjectId = Normalizers.ProjectId.run(updater.id).requireValid { "Project ID" }
-    updater.account?.value?.let {
-      Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
-    }
 
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,
-      account = updater.account,
       type = updater.type,
       status = updater.status,
     )
@@ -84,45 +85,26 @@ class AdminServiceImpl(
     return adminRepository.updateProject(normalizedUpdater)
   }
 
-  override fun updateAccount(updater: AccountUpdater): Account {
-    log.debug("Updating account $updater")
-
-    Normalizers.AccountId.run(updater.id).requireValid { "Account ID" }
-    updater.addedOwners?.value?.forEach { Normalizers.UserId.run(it.id).requireValid { "Added User ID" } }
-    updater.removedOwners?.value?.forEach { Normalizers.UserId.run(it.id).requireValid { "Removed User ID" } }
-
-    return adminRepository.updateAccount(updater)
-  }
-
   override fun removeProjectById(projectId: Long) {
     log.debug("Removing project $projectId")
 
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
 
-    // we can't delete the admin account
-    if (adminRepository.getAdminProject().id == projectId)
+    // we can't delete the admin project
+    if (getAdminProject().id == projectId)
       throwLocked { "Admin project can't be deleted" }
 
-    // cascade manually for now
-    userRepository.removeAllUsersByProjectId(normalizedProjectId)
     return adminRepository.removeProjectById(normalizedProjectId)
   }
 
-  override fun removeAccountById(accountId: Long) {
-    log.debug("Removing account $accountId")
+  override fun removeAllProjectsByCreator(creator: User) {
+    log.debug("Removing all projects for creator $creator")
 
-    val normalizedAccountId = Normalizers.AccountId.run(accountId).requireValid { "Account ID" }
+    // we can't delete the admin project
+    if (creator.id.projectId != getAdminProject().id)
+      throwLocked { "Projects can be removed only by admin project users" }
 
-    // we can't remove the admin account
-    if (adminRepository.getAdminProject().account.id == accountId)
-      throwLocked { "Admin account can't be deleted" }
-
-    // cascade manually for now
-    val account = adminRepository.fetchAccountById(normalizedAccountId)
-    val projects = adminRepository.fetchAllProjectsByAccount(account)
-    projects.forEach { userRepository.removeAllUsersByProjectId(it.id) }
-    adminRepository.removeAllProjectsByAccount(account)
-    return adminRepository.removeAccountById(account.id)
+    adminRepository.removeAllProjectsByCreator(creator.id)
   }
 
 }

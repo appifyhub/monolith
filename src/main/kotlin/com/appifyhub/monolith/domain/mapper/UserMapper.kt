@@ -24,7 +24,6 @@ fun UserDbm.toDomain(): User = User(
   updatedAt = updatedAt,
   company = company?.toDomain(),
   ownedTokens = emptyList(),
-  account = account?.toDomain(),
 )
 
 fun User.toData(
@@ -44,7 +43,6 @@ fun User.toData(
   createdAt = createdAt,
   updatedAt = updatedAt,
   company = company?.toData(),
-  account = account?.toData(),
 )
 
 fun UserIdDbm.toDomain(): UserId = UserId(

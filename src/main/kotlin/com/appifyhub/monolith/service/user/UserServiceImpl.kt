@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.service.user
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
@@ -88,12 +87,6 @@ class UserServiceImpl(
     return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
   }
 
-  override fun fetchAllUsersByAccount(account: Account): List<User> {
-    log.debug("Fetching all users for account $account")
-    Normalizers.AccountId.run(account.id).requireValid { "Account ID" }
-    return userRepository.fetchAllUsersByAccount(account)
-  }
-
   override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
     log.debug("Updating user by $updater")
 
@@ -167,9 +160,6 @@ class UserServiceImpl(
     val normalizedBirthday = updater.birthday?.mapValueNullable {
       Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
     }
-    updater.account?.value?.let {
-      Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
-    }
 
     val normalizedUpdater = UserUpdater(
       id = normalizedId,
@@ -183,7 +173,6 @@ class UserServiceImpl(
       verificationToken = normalizedVerificationToken,
       birthday = normalizedBirthday,
       company = normalizedCompany,
-      account = updater.account,
     )
 
     return userRepository.updateUser(normalizedUpdater, userIdType)

@@ -5,7 +5,7 @@ import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -17,6 +17,7 @@ import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -90,17 +91,13 @@ class SchemaInitializerTest {
       userIdType = Project.UserIdType.EMAIL,
       type = Project.Type.FREE,
     )
-    val account = Stubs.account.copy(
-      owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
-    )
     val user = Stubs.user.copy(
       id = UserId(Stubs.user.contact!!, project.id),
       ownedTokens = emptyList(),
     )
 
     adminService.stub {
-      on { addAccount() } doReturn account
-      on { addProject(any()) } doReturn project
+      on { addProject(any(), anyOrNull()) } doReturn project
     }
     userService.stub {
       on { addUser(any(), any()) } doReturn user
@@ -110,14 +107,13 @@ class SchemaInitializerTest {
     assertThat { runInitializer(adminOwnerSecret = "root secret") }
       .isSuccess()
 
-    verify(adminService).addAccount()
     verify(adminService).addProject(
-      ProjectCreator(
-        account = account,
+      creationInfo = ProjectCreationInfo(
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
-      )
+      ),
+      creator = null,
     )
     verify(userService).addUser(
       userIdType = project.userIdType,
@@ -140,7 +136,6 @@ class SchemaInitializerTest {
       updater = UserUpdater(
         id = UserId(user.contact!!, project.id),
         verificationToken = Settable(null),
-        account = Settable(account),
       )
     )
   }
@@ -150,17 +145,13 @@ class SchemaInitializerTest {
       userIdType = Project.UserIdType.EMAIL,
       type = Project.Type.FREE,
     )
-    val account = Stubs.account.copy(
-      owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
-    )
     val user = Stubs.user.copy(
       id = UserId(Stubs.user.contact!!, project.id),
       ownedTokens = emptyList(),
     )
 
     adminService.stub {
-      on { addAccount() } doReturn account
-      on { addProject(any()) } doReturn project
+      on { addProject(any(), anyOrNull()) } doReturn project
     }
     userService.stub {
       on { addUser(any(), any()) } doReturn user
@@ -172,14 +163,13 @@ class SchemaInitializerTest {
     assertThat { runInitializer(adminOwnerSecret = " \t\n ") }
       .isSuccess()
 
-    verify(adminService).addAccount()
     verify(adminService).addProject(
-      ProjectCreator(
-        account = account,
+      creationInfo = ProjectCreationInfo(
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
-      )
+      ),
+      creator = null,
     )
     verify(userService).addUser(
       userIdType = project.userIdType,
@@ -202,7 +192,6 @@ class SchemaInitializerTest {
       updater = UserUpdater(
         id = UserId(user.contact!!, project.id),
         verificationToken = Settable(null),
-        account = Settable(account),
       )
     )
   }

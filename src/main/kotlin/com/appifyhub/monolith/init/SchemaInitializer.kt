@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.init
 
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
@@ -67,17 +67,14 @@ class SchemaInitializer(
     val adminProjectName = Normalizers.PropProjectName.run(adminConfig.projectName)
       .requireValid { "Project Name" }
 
-    // create empty account for the admin owner
-    val account = adminService.addAccount()
-
     // create the admin project
     val project = adminService.addProject(
-      ProjectCreator(
-        account = account,
+      creationInfo = ProjectCreationInfo(
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,
-      )
+      ),
+      creator = null,
     )
 
     // create the owner's user in the admin project
@@ -103,7 +100,6 @@ class SchemaInitializer(
       userIdType = project.userIdType,
       updater = UserUpdater(
         id = owner.id,
-        account = Settable(account),
         verificationToken = Settable(null),
       )
     )

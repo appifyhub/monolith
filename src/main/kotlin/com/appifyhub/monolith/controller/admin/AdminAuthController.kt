@@ -11,8 +11,9 @@ import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
+import com.appifyhub.monolith.service.auth.AccessManager
+import com.appifyhub.monolith.service.auth.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.service.user.UserService.Privilege
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class AdminAuthController(
   private val authService: AuthService,
+  private val accessManager: AccessManager,
 ) : RequestIpAddressHolder {
 
   object Endpoints {
@@ -75,7 +77,7 @@ class AdminAuthController(
     log.debug("[GET] get all tokens for user $userId from project $projectId, [valid $valid]")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestUserAccess(
+    val targetUser = accessManager.requestUserAccess(
       authData = authentication,
       targetId = UserId(userId, projectId),
       privilege = Privilege.USER_READ,
@@ -99,7 +101,7 @@ class AdminAuthController(
     log.debug("[DELETE] unauth user $userId from project $projectId")
 
     val authUser = authService.resolveShallowSelf(authentication)
-    val targetUser = authService.requestUserAccess(
+    val targetUser = accessManager.requestUserAccess(
       authData = authentication,
       targetId = UserId(userId, projectId),
       privilege = Privilege.USER_WRITE,

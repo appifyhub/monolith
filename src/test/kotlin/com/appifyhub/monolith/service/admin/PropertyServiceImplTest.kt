@@ -22,9 +22,8 @@ import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJEC
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_LOGO_URL
 import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_USERS_MAX
 import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
-import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.admin.PropertyRepository
-import com.appifyhub.monolith.util.AuthTestHelper
+import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
 import java.time.temporal.ChronoUnit
@@ -44,12 +43,11 @@ import org.springframework.web.server.ResponseStatusException
 class PropertyServiceImplTest {
 
   @Autowired lateinit var service: PropertyService
-  @Autowired lateinit var adminRepo: AdminRepository
   @Autowired lateinit var propRepo: PropertyRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
-  @Autowired lateinit var authHelper: AuthTestHelper
+  @Autowired lateinit var stubber: Stubber
 
-  private val adminProject: Project by lazy { adminRepo.getAdminProject() }
+  private val adminProject: Project by lazy { stubber.projects.creator() }
 
   @BeforeEach fun setup() {
     timeProvider.staticTime = { 0 }
@@ -283,7 +281,7 @@ class PropertyServiceImplTest {
     val propStub1 = IntegerProp(PROJECT_USERS_MAX, project1.id, "100", timeProvider.currentDate)
     val prop1 = propRepo.saveProperty(project1, propStub1)
 
-    val project2 = authHelper.ensureProject(forceNewProject = true)
+    val project2 = stubber.projects.new()
     val propStub2 = IntegerProp(PROJECT_USERS_MAX, project2.id, "200", timeProvider.currentDate)
     val prop2 = propRepo.saveProperty(project2, propStub2)
 

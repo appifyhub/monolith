@@ -14,14 +14,19 @@ fun throwNormalization(
   message: () -> Any = { "Data is invalid" },
 ): Nothing = throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, message().toString())
 
-@Throws(IllegalArgumentException::class)
+@Throws(ResponseStatusException::class)
 fun throwPropertyNotFound(propName: String): Nothing =
   throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Property '$propName' not found")
 
-@Throws(IllegalArgumentException::class)
+@Throws(ResponseStatusException::class)
 fun throwLocked(
   message: () -> Any = { "Operation is not allowed" },
 ): Nothing = throw ResponseStatusException(HttpStatus.LOCKED, message().toString())
+
+@Throws(ResponseStatusException::class)
+fun throwNotFound(
+  message: () -> Any = { "Resource not found" },
+): Nothing = throw ResponseStatusException(HttpStatus.NOT_FOUND, message().toString())
 
 @Throws(ResponseStatusException::class)
 fun <T> Normalizer.Result<T>.requireValid(

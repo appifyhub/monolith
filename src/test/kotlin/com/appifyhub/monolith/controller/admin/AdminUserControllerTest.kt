@@ -6,12 +6,11 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.admin.AdminUserController.Endpoints.ANY_USER
-import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
-import com.appifyhub.monolith.util.AuthTestHelper
+import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
@@ -43,7 +42,7 @@ class AdminUserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authHelper: AuthTestHelper
+  @Autowired lateinit var stubber: Stubber
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -57,7 +56,8 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user fails when unauthorized`() {
-    val userId = authHelper.defaultUser.id
+    val project = stubber.projects.new()
+    val targetId = stubber.users(project).default().id
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -65,8 +65,8 @@ class AdminUserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
-          "projectId" to userId.projectId,
-          "userId" to userId.userId,
+          "projectId" to targetId.projectId,
+          "userId" to targetId.userId,
         ),
       )
     ).all {
@@ -75,8 +75,9 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user succeeds for self`() {
-    val user = authHelper.defaultUser
-    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
+    val project = stubber.projects.new()
+    val self = stubber.users(project).default()
+    val token = stubber.tokens(self).real().token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -84,19 +85,20 @@ class AdminUserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
-          "projectId" to user.id.projectId,
-          "userId" to user.id.userId,
+          "projectId" to self.id.projectId,
+          "userId" to self.id.userId,
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         Stubs.userResponse.copy(
-          userId = user.id.userId,
-          universalId = user.id.toUniversalFormat(),
-          type = user.type.name,
-          authority = user.authority.name,
-          birthday = DateTimeMapper.formatAsDate(user.birthday!!),
+          userId = self.id.userId,
+          projectId = project.id,
+          universalId = self.id.toUniversalFormat(),
+          type = self.type.name,
+          authority = self.authority.name,
+          birthday = DateTimeMapper.formatAsDate(self.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )
@@ -105,8 +107,9 @@ class AdminUserControllerTest {
   }
 
   @Test fun `get any user succeeds for lower rank`() {
-    val user = authHelper.defaultUser
-    val token = authHelper.newRealJwt(MODERATOR).token.tokenValue
+    val project = stubber.projects.new()
+    val target = stubber.users(project).default()
+    val token = stubber.tokens(project).real(MODERATOR).token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -114,19 +117,20 @@ class AdminUserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
-          "projectId" to user.id.projectId,
-          "userId" to user.id.userId,
+          "projectId" to target.id.projectId,
+          "userId" to target.id.userId,
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         Stubs.userResponse.copy(
-          userId = user.id.userId,
-          universalId = user.id.toUniversalFormat(),
-          type = user.type.name,
-          authority = user.authority.name,
-          birthday = DateTimeMapper.formatAsDate(user.birthday!!),
+          userId = target.id.userId,
+          projectId = project.id,
+          universalId = target.id.toUniversalFormat(),
+          type = target.type.name,
+          authority = target.authority.name,
+          birthday = DateTimeMapper.formatAsDate(target.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )

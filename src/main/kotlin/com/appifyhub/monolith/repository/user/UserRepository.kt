@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.repository.user
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -18,8 +17,6 @@ interface UserRepository : SpringSecurityUserManager {
   @Throws fun fetchAllUsersByContact(contact: String): List<User>
 
   @Throws fun fetchAllUsersByProjectId(projectId: Long): List<User>
-
-  @Throws fun fetchAllUsersByAccount(account: Account): List<User>
 
   @Throws fun updateUser(updater: UserUpdater, userIdType: Project.UserIdType): User
 

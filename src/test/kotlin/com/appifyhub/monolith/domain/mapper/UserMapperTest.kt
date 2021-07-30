@@ -12,7 +12,6 @@ class UserMapperTest {
     val result = Stubs.userDbm.toDomain().copy(
       // no info about this on data layer
       ownedTokens = Stubs.user.ownedTokens,
-      account = Stubs.user.account,
     )
 
     assertThat(result).isDataClassEqualTo(Stubs.user)

@@ -14,8 +14,8 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.storage.dao.ProjectDao
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
@@ -37,7 +37,7 @@ class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
   private val tokenDetailsRepo = mock<TokenDetailsRepository>()
-  private val adminRepo = mock<AdminRepository>()
+  private val projectDao = mock<ProjectDao>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
@@ -45,7 +45,7 @@ class UserRepositoryImplTest {
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
     tokenDetailsRepository = tokenDetailsRepo,
-    adminRepository = adminRepo,
+    projectDao = projectDao,
     passwordEncoder = passwordEncoder,
     timeProvider = timeProvider,
     springSecurityUserManager = springUserManager,
@@ -55,8 +55,8 @@ class UserRepositoryImplTest {
     userDao.stub {
       onGeneric { save(any()) } doAnswer { it.arguments.first() as UserDbm }
     }
-    adminRepo.stub {
-      on { fetchProjectById(Stubs.project.id) } doReturn Stubs.project
+    projectDao.stub {
+      on { findById(Stubs.project.id) } doReturn Optional.of(Stubs.projectDbm)
     }
     tokenDetailsRepo.stub {
       on { fetchAllTokens(Stubs.userDbm.toDomain(), Stubs.project) } doReturn Stubs.user.ownedTokens
@@ -107,7 +107,6 @@ class UserRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.user.copy(
           id = UserId("randomUserId", creator.projectId),
-          account = null,
           ownedTokens = emptyList(),
         )
       )
@@ -124,7 +123,6 @@ class UserRepositoryImplTest {
     assertThat(repository.addUser(creator, Stubs.project.userIdType))
       .isDataClassEqualTo(
         Stubs.user.copy(
-          account = null,
           ownedTokens = emptyList(),
         )
       )
@@ -142,7 +140,6 @@ class UserRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.user.copy(
           id = UserId(creator.userId!!, creator.projectId),
-          account = null,
           ownedTokens = emptyList(),
           verificationToken = "123456"
         )
@@ -287,36 +284,6 @@ class UserRepositoryImplTest {
 
   // endregion
 
-  // region Fetch by Account
-
-  @Test fun `fetching users by invalid account throws`() {
-    userDao.stub {
-      onGeneric { findAllByAccount(Stubs.accountDbm) } doThrow IllegalArgumentException("failed")
-    }
-
-    assertThat { repository.fetchAllUsersByAccount(Stubs.account) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        hasMessage("failed")
-      }
-  }
-
-  @Test fun `fetching users by account works`() {
-    userDao.stub {
-      onGeneric { findAllByAccount(Stubs.accountDbm) } doReturn listOf(Stubs.userDbm)
-    }
-
-    assertThat(repository.fetchAllUsersByAccount(Stubs.account))
-      .all {
-        hasSize(1)
-        transform { it.first() }
-          .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
-      }
-  }
-
-  // endregion
-
   // region Update user
 
   @Test fun `updating user with invalid ID throws`() {
@@ -343,7 +310,6 @@ class UserRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.userUpdated.copy(
           ownedTokens = emptyList(), // tokens are not pulled for updates
-          account = Stubs.accountUpdated.copy(owners = emptyList()), // dropped during storage for updates
         )
       )
   }
@@ -363,7 +329,6 @@ class UserRepositoryImplTest {
           verificationToken = "abcd12341",
           updatedAt = Date(0xA00001),
           ownedTokens = emptyList(), // tokens are not pulled for updates
-          account = Stubs.account.copy(owners = emptyList()), // dropped during storage for updates
         )
       )
   }
@@ -383,7 +348,6 @@ class UserRepositoryImplTest {
           contact = updater.contact!!.value,
           verificationToken = "abcd12342",
           ownedTokens = emptyList(), // tokens are not pulled for updates
-          account = Stubs.accountUpdated.copy(owners = emptyList()), // dropped during storage for updates
         )
       )
   }

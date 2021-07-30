@@ -27,7 +27,6 @@ fun UserUpdater.applyTo(
   .applySettable(verificationToken) { copy(verificationToken = it) }
   .applySettable(birthday) { copy(birthday = it) }
   .applySettable(company) { copy(company = it?.applyTo(company)) }
-  .applySettable(account) { copy(account = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun OrganizationUpdater.applyTo(organization: Organization?): Organization? =

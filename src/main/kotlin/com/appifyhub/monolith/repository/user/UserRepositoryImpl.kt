@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.repository.user
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project.UserIdType
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
@@ -11,8 +10,8 @@ import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.storage.dao.ProjectDao
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -24,7 +23,7 @@ import org.springframework.stereotype.Repository
 class UserRepositoryImpl(
   private val userDao: UserDao,
   private val tokenDetailsRepository: TokenDetailsRepository,
-  private val adminRepository: AdminRepository,
+  private val projectDao: ProjectDao,
   private val passwordEncoder: PasswordEncoder,
   private val timeProvider: TimeProvider,
   private val springSecurityUserManager: SpringSecurityUserManager,
@@ -70,11 +69,6 @@ class UserRepositoryImpl(
     return userDao.findAllByProject_ProjectId(projectId).map(UserDbm::toDomain)
   }
 
-  override fun fetchAllUsersByAccount(account: Account): List<User> {
-    log.debug("Fetching all users for account $account")
-    return userDao.findAllByAccount(account.toData()).map(UserDbm::toDomain)
-  }
-
   override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
     log.debug("Updating user $updater")
     val fetchedUser = fetchUser(updater.id, withTokens = false)
@@ -110,7 +104,7 @@ class UserRepositoryImpl(
   private fun fetchUser(id: UserId, withTokens: Boolean): User {
     val user = userDao.findById(id.toData()).get().toDomain()
     if (!withTokens) return user
-    val project = adminRepository.fetchProjectById(id.projectId)
+    val project = projectDao.findById(id.projectId).get().toDomain()
     val allTokenDetails = tokenDetailsRepository.fetchAllTokens(user, project)
     return user.copy(ownedTokens = allTokenDetails)
   }

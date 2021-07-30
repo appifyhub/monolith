@@ -1,9 +1,8 @@
 package com.appifyhub.monolith.domain.user
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.auth.TokenDetails
-import org.springframework.security.core.GrantedAuthority
 import java.util.Date
+import org.springframework.security.core.GrantedAuthority
 
 data class User(
   val id: UserId,
@@ -20,7 +19,6 @@ data class User(
   val updatedAt: Date = createdAt,
   val company: Organization? = null,
   val ownedTokens: List<TokenDetails> = emptyList(),
-  val account: Account? = null,
 ) {
 
   enum class Type {

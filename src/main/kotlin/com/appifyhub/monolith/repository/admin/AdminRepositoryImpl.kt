@@ -1,30 +1,30 @@
 package com.appifyhub.monolith.repository.admin
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.AccountUpdater
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
+import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
-import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.mapper.toProjectData
-import com.appifyhub.monolith.storage.dao.AccountDao
+import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.User.Authority
+import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.storage.dao.ProjectCreationDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
-import com.appifyhub.monolith.storage.dao.UserDao
-import com.appifyhub.monolith.storage.model.admin.AccountDbm
+import com.appifyhub.monolith.storage.model.admin.ProjectCreationDbm
+import com.appifyhub.monolith.storage.model.admin.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.admin.ProjectDbm
-import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 
 @Repository
 class AdminRepositoryImpl(
-  private val accountDao: AccountDao,
   private val projectDao: ProjectDao,
-  private val userDao: UserDao,
+  private val creationDao: ProjectCreationDao,
+  private val userRepository: UserRepository,
   private val timeProvider: TimeProvider,
 ) : AdminRepository {
 
@@ -32,38 +32,50 @@ class AdminRepositoryImpl(
 
   private val lazyAdminProject: Project by lazy {
     projectDao.findAll()
-      .map { it.toDomain() }
+      .map(ProjectDbm::toDomain)
       .minByOrNull { it.id }!!
   }
 
-  override fun addProject(creator: ProjectCreator): Project {
-    log.debug("Adding project by creator $creator")
-    val projectData = creator.toProjectData(timeProvider = timeProvider)
-    return projectDao.save(projectData).toDomain()
+  private val lazyAdminOwner: User by lazy {
+    userRepository.fetchAllUsersByProjectId(lazyAdminProject.id)
+      .filter { it.authority == Authority.OWNER }
+      .minByOrNull { it.createdAt.time }!!
   }
 
-  override fun addAccount(): Account {
-    log.debug("Adding account by creator")
+  override fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project {
+    log.debug("Adding project $creationInfo with creator $creator")
 
-    val accountData = AccountDbm(
-      accountId = null,
-      createdAt = timeProvider.currentDate,
-      updatedAt = timeProvider.currentDate,
-    )
-    return accountDao.save(accountData).toDomain()
-  }
+    // store the project itself
+    val project = projectDao.save(
+      creationInfo.toProjectData(timeProvider = timeProvider)
+    ).toDomain()
 
-  override fun fetchAccountById(id: Long): Account {
-    log.debug("Fetching account by id $id")
+    creator?.let {
+      // store creation record for ownership mapping
+      creationDao.save(
+        ProjectCreationDbm(
+          data = ProjectCreationKeyDbm(
+            creatorUserId = it.id.userId,
+            creatorProjectId = it.id.projectId,
+            createdProjectId = project.id,
+          ),
+          user = it.toData(),
+          project = project.toData(),
+        )
+      )
+    }
 
-    val account = accountDao.findById(id).get()
-    val owners = userDao.findAllByAccount(account)
-    return account.toDomain().copy(owners = owners.map(UserDbm::toDomain))
+    return project
   }
 
   override fun getAdminProject(): Project {
-    log.debug("Fetching admin project")
+    log.debug("Getting admin project")
     return lazyAdminProject
+  }
+
+  override fun getAdminOwner(): User {
+    log.debug("Getting admin owner")
+    return lazyAdminOwner
   }
 
   override fun fetchProjectById(id: Long): Project {
@@ -71,9 +83,19 @@ class AdminRepositoryImpl(
     return projectDao.findById(id).get().toDomain()
   }
 
-  override fun fetchAllProjectsByAccount(account: Account): List<Project> {
-    log.debug("Fetching all projects by account $account")
-    return projectDao.findAllByAccount(account.toData()).map(ProjectDbm::toDomain)
+  override fun fetchAllProjectsByCreatorUserId(id: UserId): List<Project> {
+    log.debug("Fetching all projects by creator $id")
+
+    return creationDao.findAllByData_CreatorUserIdAndData_CreatorProjectId(id.userId, id.projectId)
+      .map { it.data.createdProjectId }
+      .let(projectDao::findAllById)
+      .map(ProjectDbm::toDomain)
+  }
+
+  override fun fetchProjectCreator(projectId: Long): User {
+    log.debug("Fetching project creator for project $projectId")
+
+    return creationDao.findByData_CreatedProjectId(projectId).user.toDomain()
   }
 
   override fun updateProject(updater: ProjectUpdater): Project {
@@ -86,58 +108,32 @@ class AdminRepositoryImpl(
     return projectDao.save(updatedProject.toData()).toDomain()
   }
 
-  override fun updateAccount(updater: AccountUpdater): Account {
-    log.debug("Updating account $updater")
-    val fetchedAccount = fetchAccountById(updater.id)
-
-    // update user ownership first
-    val addedOwners = updater.addedOwners?.mapValueNonNull { owners ->
-      owners.map {
-        // don't override an existing ownership
-        if (it.account != null) return@map it
-        userDao.save(it.copy(account = fetchedAccount).toData()).toDomain()
-      }
-    }
-    val removedOwners = updater.removedOwners?.mapValueNonNull { owners ->
-      owners.map {
-        // don't remove someone who was not an owner
-        if (it.account?.id != fetchedAccount.id) return@map it
-        userDao.save(it.copy(account = null).toData()).toDomain()
-      }
-    }
-
-    // user ownership is updated, now update account data
-    return updater.copy(
-      addedOwners = addedOwners,
-      removedOwners = removedOwners,
-    ).applyTo(
-      account = fetchedAccount,
-      timeProvider = timeProvider,
-    ).let {
-      accountDao.save(it.toData())
-      // fetch again to add the missing ownership data
-      fetchAccountById(fetchedAccount.id)
-    }
-  }
-
   override fun removeProjectById(projectId: Long) {
     log.debug("Removing project $projectId")
+
+    // cascade manually for now
+    userRepository.removeAllUsersByProjectId(projectId)
+    creationDao.deleteAllByData_CreatedProjectId(projectId)
+
+    // remove the project itself
     projectDao.deleteById(projectId)
   }
 
-  override fun removeAllProjectsByAccount(account: Account) {
-    log.debug("Removing all projects for account $account")
-    projectDao.deleteAllByAccount(account.toData())
-  }
+  override fun removeAllProjectsByCreator(creatorUserId: UserId) {
+    log.debug("Removing all projects for creator $creatorUserId")
 
-  override fun removeAccountById(accountId: Long) {
-    log.debug("Removing account $accountId")
-    // delete user ownership data first
-    fetchAccountById(accountId).owners.forEach {
-      userDao.deleteById(it.id.toData())
-    }
-    // finally delete account data
-    accountDao.deleteById(accountId)
+    // find the projects marked for deletion
+    val projects = creationDao.findAllByData_CreatorUserIdAndData_CreatorProjectId(
+      userId = creatorUserId.userId,
+      projectId = creatorUserId.projectId,
+    ).map { it.project.toDomain() }
+
+    // cascade manually for now
+    projects.forEach { userRepository.removeAllUsersByProjectId(it.id) }
+    creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorUserId.userId, creatorUserId.projectId)
+
+    // remove the projects
+    projectDao.deleteAll(projects.map(Project::toData))
   }
 
 }

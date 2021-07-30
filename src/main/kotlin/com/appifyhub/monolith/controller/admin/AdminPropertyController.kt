@@ -11,8 +11,8 @@ import com.appifyhub.monolith.network.admin.property.ops.PropertySaveRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.admin.PropertyService
-import com.appifyhub.monolith.service.auth.AuthService
-import com.appifyhub.monolith.service.user.UserService.Privilege
+import com.appifyhub.monolith.service.auth.AccessManager
+import com.appifyhub.monolith.service.auth.AccessManager.Privilege
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -25,8 +25,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class AdminPropertyController(
-  private val authService: AuthService,
   private val propertyService: PropertyService,
+  private val accessManager: AccessManager,
 ) {
 
   object Endpoints {
@@ -45,7 +45,7 @@ class AdminPropertyController(
   ): List<PropertyConfigurationResponse> {
     log.debug("[GET] get configurations for project $projectId with query $query")
 
-    authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val configurations = propertyService.getConfigurationsFiltered(query)
 
     return configurations.map(PropertyConfiguration::toNetwork)
@@ -59,7 +59,7 @@ class AdminPropertyController(
   ): PropertyResponse {
     log.debug("[GET] get property $propertyName for project $projectId")
 
-    val project = authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val property = propertyService.fetchProperty<Any>(project.id, propertyName)
 
     return property.toNetwork()
@@ -74,7 +74,7 @@ class AdminPropertyController(
   ): List<PropertyResponse> {
     log.debug("[GET] get properties for project $projectId with query $query and names $names")
 
-    val project = authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val properties = if (names.isNullOrEmpty()) {
       propertyService.fetchPropertiesFiltered(project.id, query)
     } else {
@@ -93,7 +93,7 @@ class AdminPropertyController(
   ): PropertyResponse {
     log.debug("[GET] save property $propertyName for project $projectId")
 
-    val project = authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val property = propertyService.saveProperty<Any>(project.id, propertyName, propertyRequest.rawValue)
 
     return property.toNetwork()
@@ -107,7 +107,7 @@ class AdminPropertyController(
   ): List<PropertyResponse> {
     log.debug("[GET] save properties $propertiesRequest for project $projectId")
 
-    val project = authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val names = propertiesRequest.properties.map(PropertyDto::name)
     val values = propertiesRequest.properties.map(PropertyDto::rawValue)
     val properties = propertyService.saveProperties(project.id, names, values)
@@ -123,7 +123,7 @@ class AdminPropertyController(
   ): MessageResponse {
     log.debug("[GET] clear property $propertyName for project $projectId")
 
-    val project = authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     propertyService.clearProperty(project.id, propertyName)
 
     return MessageResponse.DONE
@@ -137,7 +137,7 @@ class AdminPropertyController(
   ): MessageResponse {
     log.debug("[GET] clear properties for project $projectId with query $query")
 
-    val project = authService.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     propertyService.clearPropertiesFiltered(project.id, query)
 
     return MessageResponse.DONE

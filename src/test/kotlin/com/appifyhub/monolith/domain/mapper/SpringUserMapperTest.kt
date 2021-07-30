@@ -11,10 +11,10 @@ import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
-import java.util.Date
 import org.junit.jupiter.api.Test
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
+import java.util.Date
 
 class SpringUserMapperTest {
 
@@ -58,7 +58,6 @@ class SpringUserMapperTest {
         updatedAt = Date(10L),
         company = null,
         ownedTokens = emptyList(),
-        account = null,
       )
     )
   }
