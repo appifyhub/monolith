@@ -2,7 +2,7 @@ package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.admin.property.PropertyTag
 import com.appifyhub.monolith.domain.admin.property.PropertyType
 import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
@@ -22,7 +22,7 @@ fun PropertyFilterQueryParams.toDomain(): PropertyFilter = PropertyFilter(
   hasAtLeastOneOfTags = has_at_least_one_of_tags?.map { PropertyTag.find(it)!! }?.takeIf { it.isNotEmpty() }?.toSet(),
 )
 
-fun PropertyConfiguration.toNetwork(): PropertyConfigurationResponse = PropertyConfigurationResponse(
+fun ProjectProperty.toNetwork(): PropertyConfigurationResponse = PropertyConfigurationResponse(
   name = name,
   type = type.name,
   category = category.name,

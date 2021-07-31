@@ -8,7 +8,7 @@ import com.appifyhub.monolith.domain.admin.property.Property.DecimalProp
 import com.appifyhub.monolith.domain.admin.property.Property.FlagProp
 import com.appifyhub.monolith.domain.admin.property.Property.IntegerProp
 import com.appifyhub.monolith.domain.admin.property.Property.StringProp
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.admin.property.PropertyType.DECIMAL
 import com.appifyhub.monolith.domain.admin.property.PropertyType.FLAG
 import com.appifyhub.monolith.domain.admin.property.PropertyType.INTEGER
@@ -58,7 +58,7 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
 )
 
 fun Property.Companion.instantiate(
-  config: PropertyConfiguration,
+  config: ProjectProperty,
   projectId: Long,
   rawValue: String,
   updatedAt: Date,
@@ -70,7 +70,7 @@ fun Property.Companion.instantiate(
 }
 
 fun PropertyDbm.toDomain(): Property<*> = Property.instantiate(
-  config = PropertyConfiguration.find(name = id.name)!!,
+  config = ProjectProperty.find(name = id.name)!!,
   projectId = id.projectId,
   rawValue = rawValue,
   updatedAt = updatedAt,

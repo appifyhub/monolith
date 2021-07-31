@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.controller.admin
 
 import com.appifyhub.monolith.domain.admin.property.Property
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.network.admin.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.admin.property.PropertyResponse
 import com.appifyhub.monolith.network.admin.property.ops.MultiplePropertiesSaveRequest
@@ -48,7 +48,7 @@ class AdminPropertyController(
     accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val configurations = propertyService.getConfigurationsFiltered(query)
 
-    return configurations.map(PropertyConfiguration::toNetwork)
+    return configurations.map(ProjectProperty::toNetwork)
   }
 
   @GetMapping(Endpoints.PROPERTY)

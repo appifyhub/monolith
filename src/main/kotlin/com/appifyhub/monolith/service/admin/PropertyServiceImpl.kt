@@ -3,7 +3,7 @@ package com.appifyhub.monolith.service.admin
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.admin.property.Property
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.mapper.instantiate
 import com.appifyhub.monolith.domain.mapper.withCast
 import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
@@ -27,10 +27,10 @@ class PropertyServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun getConfigurationsFiltered(params: PropertyFilterQueryParams?): List<PropertyConfiguration> {
+  override fun getConfigurationsFiltered(params: PropertyFilterQueryParams?): List<ProjectProperty> {
     log.debug("Getting property configurations for $params")
     val filter = requireFilter(params)
-    return PropertyConfiguration.filter(filter)
+    return ProjectProperty.filter(filter)
   }
 
   override fun <T : Any> fetchProperty(projectId: Long, propName: String): Property<T> {
@@ -57,7 +57,7 @@ class PropertyServiceImpl(
     val project = requireProject(projectId)
     val filter = requireFilter(params)
 
-    return PropertyConfiguration.filter(filter)
+    return ProjectProperty.filter(filter)
       .takeIf { it.isNotEmpty() }
       ?.let { repository.fetchProperties(project, it) }
       ?: emptyList()
@@ -115,7 +115,7 @@ class PropertyServiceImpl(
     val project = requireProject(projectId)
     val filter = requireFilter(params)
 
-    PropertyConfiguration.filter(filter)
+    ProjectProperty.filter(filter)
       .takeIf { it.isNotEmpty() }
       ?.let { repository.clearProperties(project, it) }
   }
@@ -128,7 +128,7 @@ class PropertyServiceImpl(
   }
 
   @Throws private fun requireConfig(propName: String) =
-    PropertyConfiguration.find(propName) ?: throwPropertyNotFound(propName)
+    ProjectProperty.find(propName) ?: throwPropertyNotFound(propName)
 
   @Throws private fun requireFilter(queryParams: PropertyFilterQueryParams?): PropertyFilter? = try {
     queryParams?.toDomain()

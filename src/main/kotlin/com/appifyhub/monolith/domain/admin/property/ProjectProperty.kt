@@ -17,7 +17,7 @@ import com.appifyhub.monolith.validation.impl.Normalizers
 
 @Suppress("unused")
 // most of these won't be used directly but located by name
-enum class PropertyConfiguration(
+enum class ProjectProperty(
   val type: PropertyType,
   val category: PropertyCategory,
   val normalizer: Normalizer<String>,
@@ -30,7 +30,7 @@ enum class PropertyConfiguration(
 
   // region Identity
 
-  PROJECT_NAME(
+  NAME(
     type = STRING,
     category = IDENTITY,
     normalizer = Normalizers.PropProjectName,
@@ -41,7 +41,7 @@ enum class PropertyConfiguration(
     isDeprecated = false,
   ),
 
-  PROJECT_DESCRIPTION(
+  DESCRIPTION(
     type = STRING,
     category = IDENTITY,
     normalizer = Normalizers.PropProjectDescription,
@@ -52,7 +52,7 @@ enum class PropertyConfiguration(
     isDeprecated = false,
   ),
 
-  PROJECT_LOGO_URL(
+  LOGO_URL(
     type = STRING,
     category = IDENTITY,
     normalizer = Normalizers.PropProjectLogoUrl,
@@ -63,7 +63,7 @@ enum class PropertyConfiguration(
     isDeprecated = false,
   ),
 
-  PROJECT_WEBSITE(
+  WEBSITE_URL(
     type = STRING,
     category = IDENTITY,
     normalizer = Normalizers.PropProjectWebsite,
@@ -78,7 +78,7 @@ enum class PropertyConfiguration(
 
   // region Operational
 
-  PROJECT_USERS_MAX(
+  MAX_USERS(
     type = INTEGER,
     category = OPERATIONAL,
     normalizer = Normalizers.CardinalAsString,
@@ -143,12 +143,12 @@ enum class PropertyConfiguration(
 
   companion object {
 
-    fun find(name: String): PropertyConfiguration? = values().firstOrNull { it.name == name }
+    fun find(name: String): ProjectProperty? = values().firstOrNull { it.name == name }
 
     fun filter(
       filter: PropertyFilter? = null,
       includeGeneric: Boolean = false,
-    ): List<PropertyConfiguration> =
+    ): List<ProjectProperty> =
       values()
         .asSequence()
         .filter { includeGeneric || it.category != GENERIC }
@@ -162,10 +162,10 @@ enum class PropertyConfiguration(
         .filterWith(filter?.hasAtLeastOneOfTags) { tags.any(it::contains) }
         .toList()
 
-    private inline fun <T : Any> Sequence<PropertyConfiguration>.filterWith(
+    private inline fun <T : Any> Sequence<ProjectProperty>.filterWith(
       filterValue: T?,
-      crossinline predicate: PropertyConfiguration.(T) -> Boolean,
-    ): Sequence<PropertyConfiguration> = filter { config ->
+      crossinline predicate: ProjectProperty.(T) -> Boolean,
+    ): Sequence<ProjectProperty> = filter { config ->
       filterValue?.let { config.predicate(it) } ?: true
     }
 

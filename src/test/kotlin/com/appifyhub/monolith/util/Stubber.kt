@@ -64,11 +64,14 @@ class Stubber(
   inner class Projects {
     fun creator() = adminRepo.getAdminProject()
 
-    fun new(creator: User = creators.owner()) = adminRepo.addProject(
+    fun new(
+      creator: User = creators.owner(),
+      userIdType: Project.UserIdType = Project.UserIdType.USERNAME,
+    ) = adminRepo.addProject(
       creationInfo = ProjectCreationInfo(
         type = Project.Type.COMMERCIAL,
         status = Project.Status.ACTIVE,
-        userIdType = Project.UserIdType.USERNAME,
+        userIdType = userIdType,
       ),
       creator = creator,
     )

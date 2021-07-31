@@ -2,7 +2,7 @@ package com.appifyhub.monolith.repository.admin
 
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.property.Property
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.mapper.withCast
@@ -21,12 +21,12 @@ class PropertyRepositoryImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun <T : Any> fetchProperty(project: Project, config: PropertyConfiguration): Property<T> {
+  override fun <T : Any> fetchProperty(project: Project, config: ProjectProperty): Property<T> {
     log.debug("Fetching property ${config.name} from $project")
     return propertyDao.findById(PropertyIdDbm(config.name, project.id)).get().toDomain().withCast()
   }
 
-  override fun fetchProperties(project: Project, configs: List<PropertyConfiguration>): List<Property<*>> {
+  override fun fetchProperties(project: Project, configs: List<ProjectProperty>): List<Property<*>> {
     log.debug("Fetching properties {${configs.joinToString { it.name }}} from $project")
     return propertyDao.findAllByIdIn(configs.map { PropertyIdDbm(it.name, project.id) }).map(PropertyDbm::toDomain)
   }
@@ -58,7 +58,7 @@ class PropertyRepositoryImpl(
     return propertyDao.deleteById(PropertyIdDbm(property.config.name, property.projectId))
   }
 
-  override fun clearProperty(project: Project, config: PropertyConfiguration) {
+  override fun clearProperty(project: Project, config: ProjectProperty) {
     log.debug("Clearing property ${config.name} from $project")
     return propertyDao.deleteById(PropertyIdDbm(config.name, project.id))
   }
@@ -68,7 +68,7 @@ class PropertyRepositoryImpl(
     return propertyDao.deleteAllByIdIn(properties.map { PropertyIdDbm(it.config.name, it.projectId) })
   }
 
-  override fun clearProperties(project: Project, configs: List<PropertyConfiguration>) {
+  override fun clearProperties(project: Project, configs: List<ProjectProperty>) {
     log.debug("Clearing properties ${configs.joinToString { it.name }} from $project")
     return propertyDao.deleteAllByIdIn(configs.map { PropertyIdDbm(it.name, project.id) })
   }

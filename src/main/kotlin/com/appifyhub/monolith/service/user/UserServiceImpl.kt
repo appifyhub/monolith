@@ -11,6 +11,7 @@ import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.service.admin.AdminService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.validation.impl.Normalizers
@@ -20,14 +21,16 @@ import org.springframework.stereotype.Service
 @Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
+  private val adminService: AdminService,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addUser(creator: UserCreator, userIdType: UserIdType): User {
+  override fun addUser(creator: UserCreator): User {
     log.debug("Adding user $creator")
 
+    val userIdType = adminService.fetchProjectById(creator.projectId).userIdType
     val normalizedId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(creator.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(creator.userId).requireValid { "Email ID" }
@@ -87,12 +90,12 @@ class UserServiceImpl(
     return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
   }
 
-  override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
+  override fun updateUser(updater: UserUpdater): User {
     log.debug("Updating user by $updater")
 
     // non-nullable properties
-
     Normalizers.UserId.run(updater.id).requireValid { "User ID" }
+    val userIdType = adminService.fetchProjectById(updater.id.projectId).userIdType
     val normalizedUserId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(updater.id.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(updater.id.userId).requireValid { "Email ID" }

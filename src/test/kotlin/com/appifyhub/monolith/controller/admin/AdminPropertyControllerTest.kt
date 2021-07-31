@@ -11,11 +11,13 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.admin.AdminPropertyController.Endpoints.CONFIGURATIONS
 import com.appifyhub.monolith.controller.admin.AdminPropertyController.Endpoints.PROPERTIES
 import com.appifyhub.monolith.controller.admin.AdminPropertyController.Endpoints.PROPERTY
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.DESCRIPTION
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.LOGO_URL
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.MAX_USERS
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.WEBSITE_URL
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_DESCRIPTION
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.PROJECT_USERS_MAX
 import com.appifyhub.monolith.domain.admin.property.PropertyType
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.admin.property.PropertyConfigurationResponse
@@ -106,8 +108,8 @@ class AdminPropertyControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { response -> response.body!!.map { PropertyConfiguration.find(it.name)!! }.sorted() }
-        .isEqualTo(PropertyConfiguration.filter().sorted())
+      transform { response -> response.body!!.map { ProjectProperty.find(it.name)!! }.sorted() }
+        .isEqualTo(ProjectProperty.filter().sorted())
     }
   }
 
@@ -117,7 +119,7 @@ class AdminPropertyControllerTest {
     val filter = PropertyFilterQueryParams(
       type = PropertyType.INTEGER.name,
       category = PropertyCategory.OPERATIONAL.name,
-      name_contains = PROJECT_USERS_MAX.name,
+      name_contains = MAX_USERS.name,
     )
 
     assertThat(
@@ -133,7 +135,7 @@ class AdminPropertyControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.all {
         hasSize(1)
-        isEqualTo(listOf(PROJECT_USERS_MAX.toNetwork()))
+        isEqualTo(listOf(MAX_USERS.toNetwork()))
       }
     }
   }
@@ -148,7 +150,7 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "propertyName" to PROJECT_USERS_MAX.name,
+          "propertyName" to MAX_USERS.name,
         ),
       )
     ).all {
@@ -159,7 +161,7 @@ class AdminPropertyControllerTest {
   @Test fun `get property succeeds`() {
     val project = stubber.projects.new()
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
-    val prop = propertyService.saveProperty<Int>(project.id, PROJECT_USERS_MAX.name, "20")
+    val prop = propertyService.saveProperty<Int>(project.id, MAX_USERS.name, "20")
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
@@ -168,7 +170,7 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "propertyName" to PROJECT_USERS_MAX.name,
+          "propertyName" to MAX_USERS.name,
         ),
       )
     ).all {
@@ -199,7 +201,7 @@ class AdminPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val props = propertyService.saveProperties(
       projectId = project.id,
-      propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
+      propNames = listOf(MAX_USERS.name, DESCRIPTION.name),
       propRawValues = listOf("20", "desc"),
     )
 
@@ -210,8 +212,8 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "name1" to PROJECT_USERS_MAX.name,
-          "name2" to PROJECT_DESCRIPTION.name,
+          "name1" to MAX_USERS.name,
+          "name2" to DESCRIPTION.name,
         ),
       )
     ).all {
@@ -225,7 +227,7 @@ class AdminPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val props = propertyService.saveProperties(
       projectId = project.id,
-      propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
+      propNames = listOf(MAX_USERS.name, DESCRIPTION.name),
       propRawValues = listOf("20", "desc"),
     )
 
@@ -249,13 +251,13 @@ class AdminPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val props = propertyService.saveProperties(
       projectId = project.id,
-      propNames = listOf(PROJECT_USERS_MAX.name),
+      propNames = listOf(MAX_USERS.name),
       propRawValues = listOf("20"),
     )
     val filter = PropertyFilterQueryParams(
       type = PropertyType.INTEGER.name,
       category = PropertyCategory.OPERATIONAL.name,
-      name_contains = PROJECT_USERS_MAX.name,
+      name_contains = MAX_USERS.name,
     )
 
     assertThat(
@@ -283,7 +285,7 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "propertyName" to PROJECT_USERS_MAX.name,
+          "propertyName" to MAX_USERS.name,
         ),
       )
     ).all {
@@ -302,14 +304,14 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBodyRequest(PropertySaveRequest("20"), token),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "propertyName" to PROJECT_USERS_MAX.name,
+          "propertyName" to MAX_USERS.name,
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         PropertyResponse(
-          config = PROJECT_USERS_MAX.toNetwork(),
+          config = MAX_USERS.toNetwork(),
           rawValue = "20",
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate)
         )
@@ -339,8 +341,8 @@ class AdminPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val values = MultiplePropertiesSaveRequest(
       properties = listOf(
-        PropertyDto(PROJECT_USERS_MAX.name, "20"),
-        PropertyDto(PROJECT_DESCRIPTION.name, "desc"),
+        PropertyDto(MAX_USERS.name, "20"),
+        PropertyDto(DESCRIPTION.name, "desc"),
       )
     )
 
@@ -358,12 +360,12 @@ class AdminPropertyControllerTest {
       transform { it.body!! }.isEqualTo(
         listOf(
           PropertyResponse(
-            config = PROJECT_USERS_MAX.toNetwork(),
+            config = MAX_USERS.toNetwork(),
             rawValue = "20",
             updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate)
           ),
           PropertyResponse(
-            config = PROJECT_DESCRIPTION.toNetwork(),
+            config = DESCRIPTION.toNetwork(),
             rawValue = "desc",
             updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate)
           ),
@@ -382,7 +384,7 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "propertyName" to PROJECT_USERS_MAX.name,
+          "propertyName" to MAX_USERS.name,
         ),
       )
     ).all {
@@ -393,7 +395,7 @@ class AdminPropertyControllerTest {
   @Test fun `clear property succeeds`() {
     val project = stubber.projects.new()
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
-    propertyService.saveProperty<Int>(project.id, PROJECT_USERS_MAX.name, "20")
+    propertyService.saveProperty<Int>(project.id, MAX_USERS.name, "20")
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -402,14 +404,14 @@ class AdminPropertyControllerTest {
         requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
-          "propertyName" to PROJECT_USERS_MAX.name,
+          "propertyName" to MAX_USERS.name,
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
 
-      assertThat { propertyService.fetchProperty<Int>(project.id, PROJECT_USERS_MAX.name) }
+      assertThat { propertyService.fetchProperty<Int>(project.id, MAX_USERS.name) }
         .isFailure()
     }
   }
@@ -436,7 +438,7 @@ class AdminPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     propertyService.saveProperties(
       projectId = project.id,
-      propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
+      propNames = listOf(MAX_USERS.name, DESCRIPTION.name),
       propRawValues = listOf("20", "desc"),
     )
 
@@ -454,7 +456,7 @@ class AdminPropertyControllerTest {
       transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
 
       assertThat(
-        propertyService.fetchProperties(project.id, listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name))
+        propertyService.fetchProperties(project.id, listOf(MAX_USERS.name, DESCRIPTION.name))
       ).isEmpty()
     }
   }
@@ -464,10 +466,10 @@ class AdminPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     propertyService.saveProperties(
       projectId = project.id,
-      propNames = listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name),
-      propRawValues = listOf("20", "desc"),
+      propNames = listOf(LOGO_URL.name, WEBSITE_URL.name),
+      propRawValues = listOf("https://photo.com/1.png", "https://website.com"),
     )
-    val filter = PropertyFilterQueryParams(name_contains = "PROJECT")
+    val filter = PropertyFilterQueryParams(name_contains = "URL")
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -483,7 +485,7 @@ class AdminPropertyControllerTest {
       transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
 
       assertThat(
-        propertyService.fetchProperties(project.id, listOf(PROJECT_USERS_MAX.name, PROJECT_DESCRIPTION.name))
+        propertyService.fetchProperties(project.id, listOf(LOGO_URL.name, WEBSITE_URL.name))
       ).isEmpty()
     }
   }

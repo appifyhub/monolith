@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.service.user
 
-import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -8,7 +7,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 
 interface UserService {
 
-  @Throws fun addUser(creator: UserCreator, userIdType: Project.UserIdType): User
+  @Throws fun addUser(creator: UserCreator): User
 
   @Throws fun fetchUserByUserId(id: UserId): User
 
@@ -18,7 +17,7 @@ interface UserService {
 
   @Throws fun fetchAllUsersByProjectId(projectId: Long): List<User>
 
-  @Throws fun updateUser(updater: UserUpdater, userIdType: Project.UserIdType): User
+  @Throws fun updateUser(updater: UserUpdater): User
 
   @Throws fun removeUserById(id: UserId)
 

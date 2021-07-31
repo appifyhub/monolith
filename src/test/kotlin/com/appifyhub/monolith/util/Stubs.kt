@@ -5,7 +5,7 @@ import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.admin.property.PropertyTag
 import com.appifyhub.monolith.domain.admin.property.PropertyType
 import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
@@ -169,28 +169,28 @@ object Stubs {
   )
 
   val propString = Property.StringProp(
-    config = PropertyConfiguration.GENERIC_STRING,
+    config = ProjectProperty.GENERIC_STRING,
     projectId = project.id,
     rawValue = "value",
     updatedAt = Date(0xFF0000),
   )
 
   val propInteger = Property.IntegerProp(
-    config = PropertyConfiguration.GENERIC_INTEGER,
+    config = ProjectProperty.GENERIC_INTEGER,
     projectId = project.id,
     rawValue = "1",
     updatedAt = Date(0xFF0000),
   )
 
   val propDecimal = Property.DecimalProp(
-    config = PropertyConfiguration.GENERIC_DECIMAL,
+    config = ProjectProperty.GENERIC_DECIMAL,
     projectId = project.id,
     rawValue = "1.1",
     updatedAt = Date(0xFF0000),
   )
 
   val propFlag = Property.FlagProp(
-    config = PropertyConfiguration.GENERIC_FLAG,
+    config = ProjectProperty.GENERIC_FLAG,
     projectId = project.id,
     rawValue = "true",
     updatedAt = Date(0xFF0000),
@@ -557,14 +557,14 @@ object Stubs {
   )
 
   val propertyConfigurationResponse = PropertyConfigurationResponse(
-    name = PropertyConfiguration.GENERIC_STRING.name,
-    type = PropertyConfiguration.GENERIC_STRING.type.name,
-    category = PropertyConfiguration.GENERIC_STRING.category.name,
-    tags = PropertyConfiguration.GENERIC_STRING.tags.map(PropertyTag::name).toSet(),
-    defaultValue = PropertyConfiguration.GENERIC_STRING.defaultValue,
-    isMandatory = PropertyConfiguration.GENERIC_STRING.isMandatory,
-    isSecret = PropertyConfiguration.GENERIC_STRING.isSecret,
-    isDeprecated = PropertyConfiguration.GENERIC_STRING.isDeprecated,
+    name = ProjectProperty.GENERIC_STRING.name,
+    type = ProjectProperty.GENERIC_STRING.type.name,
+    category = ProjectProperty.GENERIC_STRING.category.name,
+    tags = ProjectProperty.GENERIC_STRING.tags.map(PropertyTag::name).toSet(),
+    defaultValue = ProjectProperty.GENERIC_STRING.defaultValue,
+    isMandatory = ProjectProperty.GENERIC_STRING.isMandatory,
+    isSecret = ProjectProperty.GENERIC_STRING.isSecret,
+    isDeprecated = ProjectProperty.GENERIC_STRING.isDeprecated,
   )
 
   val propertyResponse = PropertyResponse(

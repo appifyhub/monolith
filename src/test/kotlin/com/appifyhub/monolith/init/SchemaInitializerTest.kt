@@ -6,6 +6,7 @@ import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -13,6 +14,7 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.admin.SignatureGenerator
 import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.service.admin.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
@@ -34,6 +36,7 @@ class SchemaInitializerTest {
 
   private val adminService = mock<AdminService>()
   private val userService = mock<UserService>()
+  private val propService = mock<PropertyService>()
   private val schemaService = mock<SchemaService>()
 
   @BeforeEach fun setup() {
@@ -54,8 +57,7 @@ class SchemaInitializerTest {
 
     runInitializer()
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(adminService, userService, propService)
     verify(schemaService, never()).update(any())
   }
 
@@ -64,8 +66,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Project Name")
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(adminService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
@@ -73,8 +74,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Owner Name")
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(adminService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
@@ -82,8 +82,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Owner Email")
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(adminService, userService, propService)
   }
 
   @Test fun `initial seed uses config signature if present`() {
@@ -97,8 +96,8 @@ class SchemaInitializerTest {
       on { addProject(any(), anyOrNull()) } doReturn project
     }
     userService.stub {
-      on { addUser(any(), any()) } doReturn user
-      on { updateUser(any(), any()) } doReturn user
+      on { addUser(any()) } doReturn user
+      on { updateUser(any()) } doReturn user
     }
 
     assertThat { runInitializer(adminOwnerSecret = "root secret") }
@@ -112,28 +111,33 @@ class SchemaInitializerTest {
       ),
       creator = null,
     )
-    verify(userService).addUser(
-      userIdType = project.userIdType,
-      creator = UserCreator(
-        userId = user.contact,
-        projectId = project.id,
-        rawSecret = "root secret",
-        name = user.name,
-        type = User.Type.ORGANIZATION,
-        authority = User.Authority.OWNER,
-        allowsSpam = true,
-        contact = user.contact,
-        contactType = User.ContactType.EMAIL,
-        birthday = null,
-        company = null,
+    verify(userService) {
+      mock.addUser(
+        creator = UserCreator(
+          userId = user.contact,
+          projectId = project.id,
+          rawSecret = "root secret",
+          name = user.name,
+          type = User.Type.ORGANIZATION,
+          authority = User.Authority.OWNER,
+          allowsSpam = true,
+          contact = user.contact,
+          contactType = User.ContactType.EMAIL,
+          birthday = null,
+          company = null,
+        )
       )
-    )
-    verify(userService).updateUser(
-      userIdType = project.userIdType,
-      updater = UserUpdater(
-        id = UserId(user.contact!!, project.id),
-        verificationToken = Settable(null),
+      mock.updateUser(
+        updater = UserUpdater(
+          id = UserId(user.contact!!, project.id),
+          verificationToken = Settable(null),
+        )
       )
+    }
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = ProjectProperty.NAME.name,
+      propRawValue = "Project Name",
     )
   }
 
@@ -148,8 +152,8 @@ class SchemaInitializerTest {
       on { addProject(any(), anyOrNull()) } doReturn project
     }
     userService.stub {
-      on { addUser(any(), any()) } doReturn user
-      on { updateUser(any(), any()) } doReturn user
+      on { addUser(any()) } doReturn user
+      on { updateUser(any()) } doReturn user
     }
 
     SignatureGenerator.interceptor = { "generated sig" }
@@ -165,28 +169,33 @@ class SchemaInitializerTest {
       ),
       creator = null,
     )
-    verify(userService).addUser(
-      userIdType = project.userIdType,
-      creator = UserCreator(
-        userId = user.contact,
-        projectId = project.id,
-        rawSecret = "generated sig",
-        name = user.name,
-        type = User.Type.ORGANIZATION,
-        authority = User.Authority.OWNER,
-        allowsSpam = true,
-        contact = user.contact,
-        contactType = User.ContactType.EMAIL,
-        birthday = null,
-        company = null,
+    verify(userService) {
+      mock.addUser(
+        creator = UserCreator(
+          userId = user.contact,
+          projectId = project.id,
+          rawSecret = "generated sig",
+          name = user.name,
+          type = User.Type.ORGANIZATION,
+          authority = User.Authority.OWNER,
+          allowsSpam = true,
+          contact = user.contact,
+          contactType = User.ContactType.EMAIL,
+          birthday = null,
+          company = null,
+        )
       )
-    )
-    verify(userService).updateUser(
-      userIdType = project.userIdType,
-      updater = UserUpdater(
-        id = UserId(user.contact!!, project.id),
-        verificationToken = Settable(null),
+      mock.updateUser(
+        updater = UserUpdater(
+          id = UserId(user.contact!!, project.id),
+          verificationToken = Settable(null),
+        )
       )
+    }
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = ProjectProperty.NAME.name,
+      propRawValue = "Project Name",
     )
   }
 
@@ -201,6 +210,7 @@ class SchemaInitializerTest {
   ) = SchemaInitializer(
     adminService = adminService,
     userService = userService,
+    propertyService = propService,
     schemaService = schemaService,
     adminConfig = AdminProjectConfig().apply {
       this.ownerName = adminOwnerName

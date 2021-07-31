@@ -2,6 +2,7 @@ package com.appifyhub.monolith.init
 
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
@@ -10,6 +11,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
 import com.appifyhub.monolith.repository.admin.SignatureGenerator
 import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.service.admin.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component
 class SchemaInitializer(
   private val adminService: AdminService,
   private val userService: UserService,
+  private val propertyService: PropertyService,
   private val schemaService: SchemaService,
   private val adminConfig: AdminProjectConfig,
 ) : ApplicationRunner {
@@ -63,23 +66,22 @@ class SchemaInitializer(
       .requireValid { "Owner Name" }
     val ownerEmail = Normalizers.Email.run(adminConfig.ownerEmail)
       .requireValid { "Owner Email" }
-    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
     val adminProjectName = Normalizers.PropProjectName.run(adminConfig.projectName)
       .requireValid { "Project Name" }
+    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
 
     // create the admin project
     val project = adminService.addProject(
+      creator = null,
       creationInfo = ProjectCreationInfo(
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,
       ),
-      creator = null,
     )
 
     // create the owner's user in the admin project
     var owner = userService.addUser(
-      userIdType = project.userIdType,
       creator = UserCreator(
         userId = ownerEmail,
         projectId = project.id,
@@ -95,13 +97,19 @@ class SchemaInitializer(
       )
     )
 
-    // set admin user as owner for the admin account
+    // clear the verification token
     owner = userService.updateUser(
-      userIdType = project.userIdType,
       updater = UserUpdater(
         id = owner.id,
         verificationToken = Settable(null),
       )
+    )
+
+    // save the project name
+    propertyService.saveProperty<String>(
+      projectId = project.id,
+      propName = ProjectProperty.NAME.name,
+      propRawValue = adminProjectName,
     )
 
     // prepare printable credentials

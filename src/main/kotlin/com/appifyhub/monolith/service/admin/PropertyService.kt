@@ -1,12 +1,12 @@
 package com.appifyhub.monolith.service.admin
 
 import com.appifyhub.monolith.domain.admin.property.Property
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
 
 interface PropertyService {
 
-  @Throws fun getConfigurationsFiltered(params: PropertyFilterQueryParams?): List<PropertyConfiguration>
+  @Throws fun getConfigurationsFiltered(params: PropertyFilterQueryParams?): List<ProjectProperty>
 
   @Throws fun <T : Any> fetchProperty(projectId: Long, propName: String): Property<T>
 

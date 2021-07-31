@@ -10,10 +10,10 @@ import com.appifyhub.monolith.domain.admin.property.Property.DecimalProp
 import com.appifyhub.monolith.domain.admin.property.Property.FlagProp
 import com.appifyhub.monolith.domain.admin.property.Property.IntegerProp
 import com.appifyhub.monolith.domain.admin.property.Property.StringProp
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_DECIMAL
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_FLAG
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_INTEGER
-import com.appifyhub.monolith.domain.admin.property.PropertyConfiguration.GENERIC_STRING
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.GENERIC_DECIMAL
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.GENERIC_FLAG
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.GENERIC_INTEGER
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.GENERIC_STRING
 import java.util.Date
 import org.junit.jupiter.api.Test
 

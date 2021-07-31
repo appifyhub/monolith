@@ -8,7 +8,7 @@ sealed interface Property<out T : Any> {
 
   // Shared properties
 
-  val config: PropertyConfiguration
+  val config: ProjectProperty
   val projectId: Long
   val rawValue: String
   val updatedAt: Date
@@ -18,7 +18,7 @@ sealed interface Property<out T : Any> {
   // Implementations
 
   data class StringProp(
-    override val config: PropertyConfiguration,
+    override val config: ProjectProperty,
     override val projectId: Long,
     override val rawValue: String,
     override val updatedAt: Date,
@@ -27,7 +27,7 @@ sealed interface Property<out T : Any> {
   }
 
   data class IntegerProp(
-    override val config: PropertyConfiguration,
+    override val config: ProjectProperty,
     override val projectId: Long,
     override val rawValue: String,
     override val updatedAt: Date,
@@ -36,7 +36,7 @@ sealed interface Property<out T : Any> {
   }
 
   data class DecimalProp(
-    override val config: PropertyConfiguration,
+    override val config: ProjectProperty,
     override val projectId: Long,
     override val rawValue: String,
     override val updatedAt: Date,
@@ -45,7 +45,7 @@ sealed interface Property<out T : Any> {
   }
 
   data class FlagProp(
-    override val config: PropertyConfiguration,
+    override val config: ProjectProperty,
     override val projectId: Long,
     override val rawValue: String,
     override val updatedAt: Date,
