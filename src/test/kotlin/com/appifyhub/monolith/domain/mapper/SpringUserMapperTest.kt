@@ -57,7 +57,6 @@ class SpringUserMapperTest {
         createdAt = Date(10L),
         updatedAt = Date(10L),
         company = null,
-        ownedTokens = emptyList(),
       )
     )
   }

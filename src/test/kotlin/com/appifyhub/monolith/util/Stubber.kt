@@ -121,8 +121,7 @@ class Stubber(
     idSuffix: String,
   ): User = when {
     authority == Authority.OWNER && project == projects.creator() -> creators.owner()
-    else -> {
-      val userId = "username_${authority.name.lowercase()}$idSuffix"
+    else -> "username_${authority.name.lowercase()}$idSuffix".let { userId ->
       silent {
         // silently return null on failure (to simplify things)
         userRepo.addUser(
@@ -134,10 +133,7 @@ class Stubber(
           ),
           userIdType = project.userIdType,
         )
-      } ?: userRepo.fetchUserByUserId(
-        id = UserId(userId, project.id),
-        withTokens = false,
-      )
+      } ?: userRepo.fetchUserByUserId(id = UserId(userId, project.id))
     }
   }
 

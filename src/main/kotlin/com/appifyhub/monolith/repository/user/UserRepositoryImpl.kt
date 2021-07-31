@@ -10,8 +10,6 @@ import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
-import com.appifyhub.monolith.storage.dao.ProjectDao
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -22,8 +20,6 @@ import org.springframework.stereotype.Repository
 @Repository
 class UserRepositoryImpl(
   private val userDao: UserDao,
-  private val tokenDetailsRepository: TokenDetailsRepository,
-  private val projectDao: ProjectDao,
   private val passwordEncoder: PasswordEncoder,
   private val timeProvider: TimeProvider,
   private val springSecurityUserManager: SpringSecurityUserManager,
@@ -34,6 +30,7 @@ class UserRepositoryImpl(
 
   override fun addUser(creator: UserCreator, userIdType: UserIdType): User {
     log.debug("Adding user by creator $creator")
+
     if (creator.userId == null && userIdType != UserIdType.RANDOM)
       throw IllegalArgumentException("Missing user ID for creator $creator")
     if (creator.userId != null && userIdType == UserIdType.RANDOM)
@@ -48,15 +45,15 @@ class UserRepositoryImpl(
     return userDao.save(user.toData()).toDomain()
   }
 
-  override fun fetchUserByUserId(id: UserId, withTokens: Boolean): User {
+  override fun fetchUserByUserId(id: UserId): User {
     log.debug("Fetching user $id")
-    return fetchUser(id, withTokens)
+    return userDao.findById(id.toData()).get().toDomain()
   }
 
-  override fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User {
+  override fun fetchUserByUniversalId(universalId: String): User {
     log.debug("Fetching user $universalId")
-    val userId = UserId.fromUniversalFormat(universalId)
-    return fetchUser(userId, withTokens)
+    val id = UserId.fromUniversalFormat(universalId)
+    return userDao.findById(id.toData()).get().toDomain()
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {
@@ -71,13 +68,13 @@ class UserRepositoryImpl(
 
   override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
     log.debug("Updating user $updater")
-    val fetchedUser = fetchUser(updater.id, withTokens = false)
 
+    val user = userDao.findById(updater.id.toData()).get().toDomain()
     val updatedUser = updater.applyTo(
-      user = fetchedUser,
+      user = user,
       passwordEncoder = passwordEncoder,
       timeProvider = timeProvider,
-    ).updateVerificationToken(userIdType, oldUser = fetchedUser)
+    ).updateVerificationToken(userIdType, oldUser = user)
 
     return userDao.save(updatedUser.toData()).toDomain()
   }
@@ -99,15 +96,6 @@ class UserRepositoryImpl(
   }
 
   // Helpers
-
-  @Throws
-  private fun fetchUser(id: UserId, withTokens: Boolean): User {
-    val user = userDao.findById(id.toData()).get().toDomain()
-    if (!withTokens) return user
-    val project = projectDao.findById(id.projectId).get().toDomain()
-    val allTokenDetails = tokenDetailsRepository.fetchAllTokens(user, project)
-    return user.copy(ownedTokens = allTokenDetails)
-  }
 
   private fun User.updateVerificationToken(userIdType: UserIdType, oldUser: User? = null): User = when {
     needsNewEmailToken(userIdType, oldUser) -> copy(verificationToken = TokenGenerator.nextEmailToken)

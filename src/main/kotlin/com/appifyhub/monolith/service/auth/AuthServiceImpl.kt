@@ -177,11 +177,8 @@ class AuthServiceImpl(
   // Helpers
 
   @Throws
-  private fun fetchUserByCredentials(
-    id: UserId,
-    signature: String,
-  ): User {
-    val user = userService.fetchUserByUserId(id, withTokens = false)
+  private fun fetchUserByCredentials(id: UserId, signature: String): User {
+    val user = userService.fetchUserByUserId(id)
     if (!passwordEncoder.matches(signature, user.signature)) {
       log.warn("Password mismatch for $id")
       throw IllegalArgumentException("Invalid credentials")

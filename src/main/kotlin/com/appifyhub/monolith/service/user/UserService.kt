@@ -10,9 +10,9 @@ interface UserService {
 
   @Throws fun addUser(creator: UserCreator, userIdType: Project.UserIdType): User
 
-  @Throws fun fetchUserByUserId(id: UserId, withTokens: Boolean): User
+  @Throws fun fetchUserByUserId(id: UserId): User
 
-  @Throws fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User
+  @Throws fun fetchUserByUniversalId(universalId: String): User
 
   @Throws fun fetchAllUsersByContact(contact: String): List<User>
 

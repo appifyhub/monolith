@@ -152,7 +152,6 @@ object Stubs {
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
     company = company,
-    ownedTokens = listOf(tokenDetails),
   )
 
   val project = Project(
@@ -357,7 +356,6 @@ object Stubs {
     company = companyUpdated,
     createdAt = user.createdAt,
     updatedAt = Date(0xA00001),
-    ownedTokens = listOf(tokenDetailsUpdated),
   )
 
   val userUpdatedDbm = UserDbm(

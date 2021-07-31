@@ -91,10 +91,7 @@ class SchemaInitializerTest {
       userIdType = Project.UserIdType.EMAIL,
       type = Project.Type.FREE,
     )
-    val user = Stubs.user.copy(
-      id = UserId(Stubs.user.contact!!, project.id),
-      ownedTokens = emptyList(),
-    )
+    val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
     adminService.stub {
       on { addProject(any(), anyOrNull()) } doReturn project
@@ -145,10 +142,7 @@ class SchemaInitializerTest {
       userIdType = Project.UserIdType.EMAIL,
       type = Project.Type.FREE,
     )
-    val user = Stubs.user.copy(
-      id = UserId(Stubs.user.contact!!, project.id),
-      ownedTokens = emptyList(),
-    )
+    val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
     adminService.stub {
       on { addProject(any(), anyOrNull()) } doReturn project

@@ -118,7 +118,6 @@ class AuthRepositoryImpl(
       .authorities(tokenDetails.authority.allAuthorities)
       .build()
       .toDomain(timeProvider)
-      .copy(ownedTokens = listOf(tokenDetails)) // assume the token is not blocked (because of shallow)
   }
 
   override fun fetchTokenDetails(jwt: JwtAuthenticationToken): TokenDetails {
@@ -129,7 +128,7 @@ class AuthRepositoryImpl(
   override fun fetchAllTokenDetails(jwt: JwtAuthenticationToken, valid: Boolean?): List<TokenDetails> {
     log.debug("Fetching all token details for $jwt [valid $valid]")
     val userId = UserId.fromUniversalFormat(jwt.name)
-    val user = userRepository.fetchUserByUserId(userId, withTokens = false)
+    val user = userRepository.fetchUserByUserId(userId)
     val project = stubProject().copy(id = userId.projectId)
     return when (valid) {
       true -> tokenDetailsRepository.fetchAllValidTokens(user, project)
@@ -140,7 +139,7 @@ class AuthRepositoryImpl(
 
   override fun fetchAllTokenDetailsFor(id: UserId, valid: Boolean?): List<TokenDetails> {
     log.debug("Fetching all token details for $id [valid $valid]")
-    val user = userRepository.fetchUserByUserId(id, withTokens = false)
+    val user = userRepository.fetchUserByUserId(id)
     val project = stubProject().copy(id = id.projectId)
     return when (valid) {
       true -> tokenDetailsRepository.fetchAllValidTokens(user, project)
@@ -156,15 +155,17 @@ class AuthRepositoryImpl(
 
   override fun unauthorizeAllTokens(jwt: JwtAuthenticationToken) {
     log.debug("Unauthorizing all tokens with $jwt")
-    val userId = UserId.fromUniversalFormat(jwt.name)
-    val user = userRepository.fetchUserByUserId(userId, withTokens = true)
-    tokenDetailsRepository.blockAllTokensFromModel(user)
+    val id = UserId.fromUniversalFormat(jwt.name)
+    val user = userRepository.fetchUserByUserId(id)
+    val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
+    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue))
   }
 
   override fun unauthorizeAllTokensFor(id: UserId) {
     log.debug("Unauthorizing all tokens for $id")
-    val user = userRepository.fetchUserByUserId(id, withTokens = true)
-    tokenDetailsRepository.blockAllTokensFromModel(user)
+    val user = userRepository.fetchUserByUserId(id)
+    val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
+    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue))
   }
 
   override fun unauthorizeAllTokens(tokenValues: List<String>) {

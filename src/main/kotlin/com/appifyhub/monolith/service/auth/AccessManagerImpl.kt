@@ -100,7 +100,7 @@ class AccessManagerImpl(
 
   private fun fetchCreator(projectId: Long) = silent { adminService.fetchProjectCreator(projectId) }
 
-  private fun fetchUser(id: UserId) = userService.fetchUserByUserId(id, withTokens = false)
+  private fun fetchUser(id: UserId) = userService.fetchUserByUserId(id)
 
   private fun fetchProject(id: Long) = adminService.fetchProjectById(id)
 

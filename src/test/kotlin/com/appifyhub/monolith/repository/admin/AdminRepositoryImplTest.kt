@@ -130,8 +130,8 @@ class AdminRepositoryImplTest {
     }
 
     // strip tokens for comparison as they're fetched lazily
-    assertThat(repository.fetchProjectCreator(Stubs.project.id).copy(ownedTokens = emptyList()))
-      .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
+    assertThat(repository.fetchProjectCreator(Stubs.project.id))
+      .isDataClassEqualTo(Stubs.user)
   }
 
   // Updating

@@ -218,7 +218,6 @@ class UserOpsMapperTest {
     ).isDataClassEqualTo(
       Stubs.user.copy(
         verificationToken = null,
-        ownedTokens = emptyList(),
         createdAt = Date(10L),
         updatedAt = Date(10L),
       )
@@ -249,7 +248,6 @@ class UserOpsMapperTest {
     ).isDataClassEqualTo(
       Stubs.user.copy(
         verificationToken = null,
-        ownedTokens = emptyList(),
         createdAt = Date(10L),
         updatedAt = Date(10L),
       )

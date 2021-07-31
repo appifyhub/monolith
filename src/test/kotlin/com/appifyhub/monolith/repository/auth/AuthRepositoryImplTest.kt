@@ -53,7 +53,7 @@ class AuthRepositoryImplTest {
       onGeneric { addToken(any()) } doAnswer { it.arguments.first() as TokenDetails }
     }
     userRepo.stub {
-      onGeneric { fetchUserByUserId(any(), any()) } doReturn Stubs.user
+      onGeneric { fetchUserByUserId(any()) } doReturn Stubs.user
     }
     jwtHelper.stub {
       onGeneric { createJwtForClaims(any(), any(), any(), any()) } doReturn Stubs.tokenValue
@@ -66,9 +66,6 @@ class AuthRepositoryImplTest {
   }
 
   @Test fun `create token succeeds with only mandatory properties`() {
-    userRepo.stub {
-      onGeneric { fetchUserByUserId(any(), any()) } doReturn Stubs.user
-    }
     val createTime = DateTimeMapper.parseAsDateTime("2020-10-20 14:45")
     val expireTime = DateTimeMapper.parseAsDateTime("2020-10-21 14:45")
     timeProvider.staticTime = { createTime.time }
@@ -138,9 +135,6 @@ class AuthRepositoryImplTest {
   }
 
   @Test fun `create static token succeeds with only mandatory properties`() {
-    userRepo.stub {
-      onGeneric { fetchUserByUserId(any(), any()) } doReturn Stubs.user
-    }
     val createTime = DateTimeMapper.parseAsDateTime("2020-10-20 14:45")
     val expireTime = DateTimeMapper.parseAsDateTime("2020-10-30 14:45")
     timeProvider.staticTime = { createTime.time }
@@ -304,7 +298,6 @@ class AuthRepositoryImplTest {
         verificationToken = null,
         createdAt = timeProvider.currentDate,
         updatedAt = timeProvider.currentDate,
-        ownedTokens = listOf(Stubs.tokenDetails.copy(isBlocked = false)),
       )
     )
   }
@@ -374,20 +367,22 @@ class AuthRepositoryImplTest {
 
   @Test fun `unauthorize all tokens succeeds`() {
     tokenDetailsRepo.stub {
-      onGeneric { blockAllTokensFromModel(any()) } doReturn listOf(Stubs.tokenDetails)
+      onGeneric { fetchAllValidTokens(Stubs.user, project = null) } doReturn listOf(Stubs.tokenDetails)
     }
 
     assertThat { repository.unauthorizeAllTokens(newJwt()) }
       .isSuccess()
+    verify(tokenDetailsRepo).blockAllTokens(listOf(Stubs.tokenDetails.tokenValue))
   }
 
   @Test fun `unauthorize all tokens for another user succeeds`() {
     tokenDetailsRepo.stub {
-      onGeneric { blockAllTokensFromModel(any()) } doReturn listOf(Stubs.tokenDetails)
+      onGeneric { fetchAllValidTokens(Stubs.user, project = null) } doReturn listOf(Stubs.tokenDetails)
     }
 
     assertThat { repository.unauthorizeAllTokensFor(Stubs.userId) }
       .isSuccess()
+    verify(tokenDetailsRepo).blockAllTokens(listOf(Stubs.tokenDetails.tokenValue))
   }
 
   @Test fun `unauthorize all tokens using a list succeeds`() {

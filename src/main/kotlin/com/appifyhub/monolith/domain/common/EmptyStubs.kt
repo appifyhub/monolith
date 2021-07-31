@@ -42,5 +42,4 @@ fun stubUser() = User(
   createdAt = Date(),
   updatedAt = Date(),
   company = stubOrganization(),
-  ownedTokens = emptyList(),
 )

@@ -197,7 +197,6 @@ class UserServiceImplTest {
         Stubs.user.copy(
           id = Stubs.userId.copy(userId = UserIdGenerator.nextId),
           verificationToken = TokenGenerator.nextEmailToken,
-          ownedTokens = emptyList(),
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -214,7 +213,6 @@ class UserServiceImplTest {
         Stubs.user.copy(
           id = Stubs.userId.copy(userId = "username"),
           verificationToken = TokenGenerator.nextEmailToken,
-          ownedTokens = emptyList(),
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -231,7 +229,6 @@ class UserServiceImplTest {
         Stubs.user.copy(
           id = Stubs.userId.copy(userId = "email@domain.com"),
           verificationToken = TokenGenerator.nextEmailToken,
-          ownedTokens = emptyList(),
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         )
@@ -252,7 +249,6 @@ class UserServiceImplTest {
         Stubs.user.copy(
           id = Stubs.userId.copy(userId = "+491760000000"),
           verificationToken = TokenGenerator.nextPhoneToken,
-          ownedTokens = emptyList(),
           contactType = ContactType.PHONE,
           contact = "+491760000000",
           createdAt = timeProvider.currentDate,
@@ -271,7 +267,6 @@ class UserServiceImplTest {
         Stubs.user.copy(
           id = Stubs.userId.copy(userId = "custom_id"),
           verificationToken = null,
-          ownedTokens = emptyList(),
           contactType = ContactType.CUSTOM,
           contact = null,
           createdAt = timeProvider.currentDate,
@@ -313,7 +308,6 @@ class UserServiceImplTest {
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
           company = null,
-          ownedTokens = emptyList(),
         )
       )
   }
@@ -321,7 +315,7 @@ class UserServiceImplTest {
   // Fetching
 
   @Test fun `fetching user fails with invalid user ID`() {
-    assertThat { service.fetchUserByUserId(Stubs.userId.copy(userId = " "), withTokens = true) }
+    assertThat { service.fetchUserByUserId(Stubs.userId.copy(userId = " ")) }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -331,14 +325,14 @@ class UserServiceImplTest {
 
   @Test fun `fetching user works with a user ID`() {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
-    val fetchedUser = service.fetchUserByUserId(storedUser.id, withTokens = true).cleanDates()
+    val fetchedUser = service.fetchUserByUserId(storedUser.id).cleanDates()
 
     assertThat(fetchedUser)
       .isDataClassEqualTo(storedUser)
   }
 
   @Test fun `fetching user fails with invalid universal ID`() {
-    assertThat { service.fetchUserByUniversalId(" ", withTokens = true) }
+    assertThat { service.fetchUserByUniversalId(" ") }
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
@@ -348,8 +342,7 @@ class UserServiceImplTest {
 
   @Test fun `fetching user works with a universal ID`() {
     val storedUser = service.addUser(Stubs.userCreator, UserIdType.RANDOM).cleanDates()
-    val fetchedUser = service.fetchUserByUniversalId(storedUser.id.toUniversalFormat(), withTokens = true)
-      .cleanDates()
+    val fetchedUser = service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()).cleanDates()
 
     assertThat(fetchedUser)
       .isDataClassEqualTo(storedUser)
@@ -652,7 +645,6 @@ class UserServiceImplTest {
         Stubs.userUpdated.copy(
           id = storedUser.id,
           verificationToken = TokenGenerator.nextPhoneToken,
-          ownedTokens = emptyList(),
           createdAt = storedUser.createdAt,
           updatedAt = timeProvider.currentDate,
         ).cleanDates()
@@ -687,7 +679,6 @@ class UserServiceImplTest {
       .isDataClassEqualTo(
         storedUser.copy(
           id = storedUser.id,
-          ownedTokens = emptyList(),
           name = null,
           contactType = ContactType.CUSTOM,
           contact = null,
@@ -716,11 +707,11 @@ class UserServiceImplTest {
     val storedUser = service.addUser(creator, UserIdType.RANDOM)
 
     assertAll {
-      assertThat { service.fetchUserByUserId(storedUser.id, withTokens = false) }
+      assertThat { service.fetchUserByUserId(storedUser.id) }
         .isSuccess() // user is there
       assertThat { service.removeUserById(storedUser.id) }
         .isSuccess()
-      assertThat { service.fetchUserByUserId(storedUser.id, withTokens = false) }
+      assertThat { service.fetchUserByUserId(storedUser.id) }
         .isFailure() // user is not there anymore
     }
   }
@@ -735,11 +726,11 @@ class UserServiceImplTest {
     val storedUser = service.addUser(creator, UserIdType.RANDOM)
 
     assertAll {
-      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat(), withTokens = false) }
+      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()) }
         .isSuccess() // user is there
       assertThat { service.removeUserByUniversalId(storedUser.id.toUniversalFormat()) }
         .isSuccess()
-      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat(), withTokens = false) }
+      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()) }
         .isFailure() // user is not there anymore
     }
   }

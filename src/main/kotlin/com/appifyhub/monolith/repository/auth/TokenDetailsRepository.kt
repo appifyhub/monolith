@@ -12,11 +12,11 @@ interface TokenDetailsRepository {
 
   @Throws fun fetchAllTokenDetails(tokenValues: List<String>): List<TokenDetails>
 
-  @Throws fun fetchAllBlockedTokens(owner: User, project: Project): List<TokenDetails>
+  @Throws fun fetchAllBlockedTokens(owner: User, project: Project?): List<TokenDetails>
 
-  @Throws fun fetchAllValidTokens(owner: User, project: Project): List<TokenDetails>
+  @Throws fun fetchAllValidTokens(owner: User, project: Project?): List<TokenDetails>
 
-  @Throws fun fetchAllTokens(owner: User, project: Project): List<TokenDetails>
+  @Throws fun fetchAllTokens(owner: User, project: Project?): List<TokenDetails>
 
   @Throws fun checkIsExpired(tokenValue: String): Boolean
 
@@ -27,7 +27,5 @@ interface TokenDetailsRepository {
   @Throws fun blockToken(tokenValue: String): TokenDetails
 
   @Throws fun blockAllTokens(tokenValues: List<String>): List<TokenDetails>
-
-  @Throws fun blockAllTokensFromModel(owner: User): List<TokenDetails>
 
 }

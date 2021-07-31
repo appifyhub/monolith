@@ -78,7 +78,6 @@ class AuthServiceImplTest {
 
     assertThat(
       service.resolveShallowSelf(token)
-        .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       stubber.creators.default().copy(
@@ -90,7 +89,6 @@ class AuthServiceImplTest {
         verificationToken = null,
         contactType = User.ContactType.CUSTOM,
         contact = null,
-        ownedTokens = emptyList(),
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -131,7 +129,6 @@ class AuthServiceImplTest {
 
     assertThat(
       service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat())
-        .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
@@ -146,7 +143,6 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
-        ownedTokens = emptyList(),
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -161,7 +157,6 @@ class AuthServiceImplTest {
 
     assertThat(
       service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat())
-        .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
@@ -176,7 +171,6 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
-        ownedTokens = emptyList(),
         createdAt = modernTime,
         updatedAt = modernTime,
       )

@@ -23,7 +23,6 @@ fun UserDbm.toDomain(): User = User(
   createdAt = createdAt,
   updatedAt = updatedAt,
   company = company?.toDomain(),
-  ownedTokens = emptyList(),
 )
 
 fun User.toData(

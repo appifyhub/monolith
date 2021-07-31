@@ -63,16 +63,16 @@ class UserServiceImpl(
     return userRepository.addUser(normalizedCreator, userIdType)
   }
 
-  override fun fetchUserByUserId(id: UserId, withTokens: Boolean): User {
+  override fun fetchUserByUserId(id: UserId): User {
     log.debug("Fetching user by $id")
     val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
-    return userRepository.fetchUserByUserId(normalizedUserId, withTokens = withTokens)
+    return userRepository.fetchUserByUserId(normalizedUserId)
   }
 
-  override fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User {
+  override fun fetchUserByUniversalId(universalId: String): User {
     log.debug("Fetching user by $universalId")
     val normalizedUniversalId = Normalizers.Dense.run(universalId).requireValid { "User ID" }
-    return userRepository.fetchUserByUniversalId(normalizedUniversalId, withTokens = withTokens)
+    return userRepository.fetchUserByUniversalId(normalizedUniversalId)
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {
