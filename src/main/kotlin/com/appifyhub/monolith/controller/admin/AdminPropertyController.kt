@@ -11,8 +11,8 @@ import com.appifyhub.monolith.network.admin.property.ops.PropertySaveRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.admin.PropertyService
-import com.appifyhub.monolith.service.auth.AccessManager
-import com.appifyhub.monolith.service.auth.AccessManager.Privilege
+import com.appifyhub.monolith.service.access.AccessManager
+import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping

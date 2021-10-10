@@ -6,7 +6,6 @@ import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.admin.Project
 import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -111,6 +110,16 @@ class SchemaInitializerTest {
       ),
       creator = null,
     )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "NAME",
+      propRawValue = "Project Name",
+    )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "ON_HOLD",
+      propRawValue = "false",
+    )
     verify(userService) {
       mock.addUser(
         creator = UserCreator(
@@ -134,11 +143,6 @@ class SchemaInitializerTest {
         )
       )
     }
-    verify(propService).saveProperty<String>(
-      projectId = project.id,
-      propName = ProjectProperty.NAME.name,
-      propRawValue = "Project Name",
-    )
   }
 
   @Test fun `initial seed generates a new signature if configured signature is blank`() {
@@ -169,6 +173,16 @@ class SchemaInitializerTest {
       ),
       creator = null,
     )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "NAME",
+      propRawValue = "Project Name",
+    )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "ON_HOLD",
+      propRawValue = "false",
+    )
     verify(userService) {
       mock.addUser(
         creator = UserCreator(
@@ -192,11 +206,6 @@ class SchemaInitializerTest {
         )
       )
     }
-    verify(propService).saveProperty<String>(
-      projectId = project.id,
-      propName = ProjectProperty.NAME.name,
-      propRawValue = "Project Name",
-    )
   }
 
   // Helpers

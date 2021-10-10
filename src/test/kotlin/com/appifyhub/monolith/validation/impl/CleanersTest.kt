@@ -3,12 +3,13 @@ package com.appifyhub.monolith.validation.impl
 import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isNull
+import assertk.assertions.isTrue
 import assertk.assertions.isZero
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
-import com.appifyhub.monolith.util.ext.empty
 import com.nhaarman.mockitokotlin2.mock
 import java.util.Date
 import org.junit.jupiter.api.Test
@@ -87,6 +88,36 @@ class CleanersTest {
       .isEqualTo(5)
   }
 
+  @Test fun `flag defaulting to false with null is false`() {
+    assertThat(Cleaners.FlagDefFalse.clean(null))
+      .isFalse()
+  }
+
+  @Test fun `flag defaulting to false with false is false`() {
+    assertThat(Cleaners.FlagDefFalse.clean(false))
+      .isFalse()
+  }
+
+  @Test fun `flag defaulting to false with true is true`() {
+    assertThat(Cleaners.FlagDefFalse.clean(true))
+      .isTrue()
+  }
+
+  @Test fun `flag defaulting to true with null is true`() {
+    assertThat(Cleaners.FlagDefTrue.clean(null))
+      .isTrue()
+  }
+
+  @Test fun `flag defaulting to true with false is false`() {
+    assertThat(Cleaners.FlagDefTrue.clean(false))
+      .isFalse()
+  }
+
+  @Test fun `flag defaulting to true with true is true`() {
+    assertThat(Cleaners.FlagDefTrue.clean(true))
+      .isTrue()
+  }
+
   // endregion
 
   // region Top level cleaners
@@ -127,7 +158,7 @@ class CleanersTest {
 
   @Test fun `user ID with space and negative is empty and zero`() {
     assertThat(Cleaners.UserId.clean(UserId("\t\n ", -1)))
-      .isEqualTo(UserId(String.empty, 0))
+      .isEqualTo(UserId("", 0))
   }
 
   @Test fun `user ID is removing spaces from identifier and making project ID cardinal`() {
@@ -160,13 +191,13 @@ class CleanersTest {
   }
 
   @Test fun `phone with no chars is empty`() {
-    assertThat(Cleaners.Phone.clean(String.empty))
+    assertThat(Cleaners.Phone.clean(""))
       .isEmpty()
   }
 
   @Test fun `phone with alpha chars only is empty`() {
     assertThat(Cleaners.Phone.clean("invalid"))
-      .isEqualTo(String.empty)
+      .isEqualTo("")
   }
 
   @Test fun `phone with alpha chars keeps only digits`() {
@@ -275,9 +306,9 @@ class CleanersTest {
       )
     ).isEqualTo(
       Organization(
-        name = String.empty,
+        name = "",
         street = "street",
-        postcode = String.empty,
+        postcode = "",
         city = null,
         countryCode = null,
       )
@@ -321,6 +352,36 @@ class CleanersTest {
   @Test fun `long to cardinal (as string) with positive works`() {
     assertThat(Cleaners.LongToCardinalAsString.clean("5"))
       .isEqualTo("5")
+  }
+
+  @Test fun `flag defaulting to false (as string) with null is false`() {
+    assertThat(Cleaners.FlagDefFalseAsString.clean(null))
+      .isEqualTo("false")
+  }
+
+  @Test fun `flag defaulting to false (as string) with false is false`() {
+    assertThat(Cleaners.FlagDefFalseAsString.clean("false"))
+      .isEqualTo("false")
+  }
+
+  @Test fun `flag defaulting to false (as string) with true is true`() {
+    assertThat(Cleaners.FlagDefFalseAsString.clean("true"))
+      .isEqualTo("true")
+  }
+
+  @Test fun `flag defaulting to true (as string) with null is false`() {
+    assertThat(Cleaners.FlagDefTrueAsString.clean(null))
+      .isEqualTo("true")
+  }
+
+  @Test fun `flag defaulting to true (as string) with false is false`() {
+    assertThat(Cleaners.FlagDefTrueAsString.clean("false"))
+      .isEqualTo("false")
+  }
+
+  @Test fun `flag defaulting to true (as string) with true is true`() {
+    assertThat(Cleaners.FlagDefTrueAsString.clean("true"))
+      .isEqualTo("true")
   }
 
   // endregion

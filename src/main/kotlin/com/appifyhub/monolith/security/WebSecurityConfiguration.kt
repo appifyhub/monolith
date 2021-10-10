@@ -20,15 +20,17 @@ class WebSecurityConfiguration(
 
   public override fun configure(httpSecurityConfigurator: HttpSecurity) {
     httpSecurityConfigurator
+      // enable CORS
       .cors()
       .and()
-
+      // disable CSRF
       .csrf()
       .disable()
-
+      // set up session management
       .sessionManagement()
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       .and()
+      // set up no-auth endpoints
       .authorizeRequests {
         it.antMatchers(
           UserAuthEndpoints.AUTH,
@@ -42,15 +44,16 @@ class WebSecurityConfiguration(
           .anyRequest()
           .authenticated()
       }
+      // enable smart error handling
       .exceptionHandling()
       .authenticationEntryPoint(exceptionHandler)
       .disable()
-
+      // enable other basic HTTP features
       .headers()
       .frameOptions()
       .sameOrigin()
       .and()
-
+      // enable JWT server
       .oauth2ResourceServer { it.jwt() }
   }
 

@@ -4,6 +4,8 @@ import com.appifyhub.monolith.validation.Normalizer
 import org.springframework.http.HttpStatus
 import org.springframework.web.server.ResponseStatusException
 
+// Throwing stuff
+
 @Throws(ResponseStatusException::class)
 fun throwUnauthorized(
   message: () -> Any = { "Not authorized to perform this action" },
@@ -27,6 +29,13 @@ fun throwLocked(
 fun throwNotFound(
   message: () -> Any = { "Resource not found" },
 ): Nothing = throw ResponseStatusException(HttpStatus.NOT_FOUND, message().toString())
+
+@Throws(ResponseStatusException::class)
+fun throwPreconditionFailed(
+  message: () -> Any = { "Resource not configured properly" },
+): Nothing = throw ResponseStatusException(HttpStatus.PRECONDITION_REQUIRED, message().toString())
+
+// Miscellaneous
 
 @Throws(ResponseStatusException::class)
 fun <T> Normalizer.Result<T>.requireValid(

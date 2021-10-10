@@ -5,6 +5,7 @@ enum class PropertyTag {
   IMPORTANT,
   COSMETIC,
   CONSTRAINTS,
+  CONTROL,
   GENERIC,
 
   ;

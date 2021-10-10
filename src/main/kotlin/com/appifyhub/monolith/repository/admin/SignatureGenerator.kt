@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.repository.admin
 
-import com.appifyhub.monolith.util.ext.empty
 import java.util.UUID
 
 object SignatureGenerator {
@@ -10,7 +9,7 @@ object SignatureGenerator {
   val nextSignature: String
     get() = interceptor() ?: UUID.randomUUID()
       .toString()
-      .replace(UUID_DELIMITER, String.empty)
+      .replace(UUID_DELIMITER, "")
       .uppercase()
 
   var interceptor: () -> String? = { null }

@@ -7,6 +7,10 @@ import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
+import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
+import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
+import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
+import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.admin.AdminRepository
 import com.appifyhub.monolith.repository.auth.AuthRepository
@@ -14,7 +18,6 @@ import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
-import com.appifyhub.monolith.util.ext.empty
 import com.appifyhub.monolith.util.ext.silent
 import com.auth0.jwt.JWT
 import java.util.Date
@@ -25,8 +28,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Component
 
 private const val EXPIRATION_DAYS_DELTA: Long = 1
-
-@Suppress("unused")
 
 @Component
 @Profile(TestAppifyHubApplication.PROFILE)
@@ -59,7 +60,7 @@ class Stubber(
 
   fun isAuthorized(tokenValue: String) = authRepo.isTokenValid(tokenValue.toJwt(), shallow = false)
 
-  // API helpers
+  // region API models
 
   inner class Projects {
     fun creator() = adminRepo.getAdminProject()
@@ -67,10 +68,11 @@ class Stubber(
     fun new(
       creator: User = creators.owner(),
       userIdType: Project.UserIdType = Project.UserIdType.USERNAME,
+      status: Project.Status = Project.Status.ACTIVE,
     ) = adminRepo.addProject(
       creationInfo = ProjectCreationInfo(
         type = Project.Type.COMMERCIAL,
-        status = Project.Status.ACTIVE,
+        status = status,
         userIdType = userIdType,
       ),
       creator = creator,
@@ -79,15 +81,14 @@ class Stubber(
 
   inner class Creators {
     fun owner() = adminRepo.getAdminOwner()
-    fun default(idSuffix: String = "") =
-      ensureUser(Authority.DEFAULT, project = projects.creator(), idSuffix = idSuffix)
+    fun default(idSuffix: String = "") = ensureUser(DEFAULT, project = projects.creator(), idSuffix = idSuffix)
   }
 
   inner class Users(private val project: Project) {
-    fun owner(idSuffix: String = "") = ensureUser(Authority.OWNER, project = project, idSuffix = idSuffix)
-    fun admin(idSuffix: String = "") = ensureUser(Authority.ADMIN, project = project, idSuffix = idSuffix)
-    fun moderator(idSuffix: String = "") = ensureUser(Authority.MODERATOR, project = project, idSuffix = idSuffix)
-    fun default(idSuffix: String = "") = ensureUser(Authority.DEFAULT, project = project, idSuffix = idSuffix)
+    fun owner(idSuffix: String = "") = ensureUser(OWNER, project = project, idSuffix = idSuffix)
+    fun admin(idSuffix: String = "") = ensureUser(ADMIN, project = project, idSuffix = idSuffix)
+    fun mod(idSuffix: String = "") = ensureUser(MODERATOR, project = project, idSuffix = idSuffix)
+    fun default(idSuffix: String = "") = ensureUser(DEFAULT, project = project, idSuffix = idSuffix)
   }
 
   inner class ProjectTokens(private val project: Project) {
@@ -103,7 +104,7 @@ class Stubber(
     fun real(
       authority: Authority,
       isStatic: Boolean = false,
-      idSuffix: String = String.empty,
+      idSuffix: String = "",
     ) = createToken(
       user = ensureUser(authority = authority, project = project, idSuffix = idSuffix),
       shouldStore = true,
@@ -116,14 +117,16 @@ class Stubber(
     fun real(isStatic: Boolean = false) = createToken(user = user, shouldStore = true, isStatic = isStatic).toJwt()
   }
 
-  // Helpers
+  // endregion
+
+  // region Helpers
 
   private fun ensureUser(
     authority: Authority,
     project: Project,
     idSuffix: String,
   ): User = when {
-    authority == Authority.OWNER && project == projects.creator() -> creators.owner()
+    authority == OWNER && project == projects.creator() -> creators.owner()
     else -> "username_${authority.name.lowercase()}$idSuffix".let { userId ->
       silent {
         // silently return null on failure (to simplify things)
@@ -145,8 +148,8 @@ class Stubber(
     user: User,
     shouldStore: Boolean,
     isStatic: Boolean,
-  ): String = with(timeProvider) {
-    val now = currentMillis
+  ): String {
+    val now = timeProvider.currentMillis
     val exp = now + TimeUnit.DAYS.toMillis(EXPIRATION_DAYS_DELTA)
 
     val tokenValue = jwtHelper.createJwtForClaims(
@@ -157,7 +160,7 @@ class Stubber(
         Claims.UNIVERSAL_ID to user.id.toUniversalFormat(),
         Claims.AUTHORITIES to user.allAuthorities.joinToString(",") { it.authority },
         Claims.ORIGIN to Stubs.userCredentialsRequest.origin!!,
-        Claims.IS_STATIC to (isStatic && user.authority == Authority.OWNER),
+        Claims.IS_STATIC to (isStatic && user.authority == OWNER),
       ),
       createdAt = Date(now),
       expiresAt = Date(exp),
@@ -180,7 +183,7 @@ class Stubber(
       )
     }
 
-    tokenValue
+    return tokenValue
   }
 
   private fun String.toJwt(): JwtAuthenticationToken =
@@ -194,10 +197,12 @@ class Stubber(
       )
       val authorities = jwt.claims[Claims.AUTHORITIES].toString()
         .split(",")
-        .map { Authority.find(it, Authority.DEFAULT) }
+        .map { Authority.find(it, DEFAULT) }
         .toSet() // to remove potential duplicates
         .sortedByDescending { it.ordinal }
       JwtAuthenticationToken(jwt, authorities, jwt.subject)
     }
+
+  // endregion
 
 }

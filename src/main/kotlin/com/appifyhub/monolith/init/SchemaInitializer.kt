@@ -80,6 +80,20 @@ class SchemaInitializer(
       ),
     )
 
+    // save the project name
+    propertyService.saveProperty<String>(
+      projectId = project.id,
+      propName = ProjectProperty.NAME.name,
+      propRawValue = adminProjectName,
+    )
+
+    // set that the project is not on hold
+    propertyService.saveProperty<Boolean>(
+      projectId = project.id,
+      propName = ProjectProperty.ON_HOLD.name,
+      propRawValue = false.toString(),
+    )
+
     // create the owner's user in the admin project
     var owner = userService.addUser(
       creator = UserCreator(
@@ -103,13 +117,6 @@ class SchemaInitializer(
         id = owner.id,
         verificationToken = Settable(null),
       )
-    )
-
-    // save the project name
-    propertyService.saveProperty<String>(
-      projectId = project.id,
-      propName = ProjectProperty.NAME.name,
-      propRawValue = adminProjectName,
     )
 
     // prepare printable credentials

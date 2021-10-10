@@ -5,6 +5,7 @@ import com.appifyhub.monolith.domain.admin.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.IDENTITY
 import com.appifyhub.monolith.domain.admin.property.PropertyCategory.OPERATIONAL
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.CONSTRAINTS
+import com.appifyhub.monolith.domain.admin.property.PropertyTag.CONTROL
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.COSMETIC
 import com.appifyhub.monolith.domain.admin.property.PropertyTag.IMPORTANT
 import com.appifyhub.monolith.domain.admin.property.PropertyType.DECIMAL
@@ -81,10 +82,21 @@ enum class ProjectProperty(
   MAX_USERS(
     type = INTEGER,
     category = OPERATIONAL,
-    normalizer = Normalizers.CardinalAsString,
+    normalizer = Normalizers.PropMaxUsers,
     tags = setOf(CONSTRAINTS, IMPORTANT),
     defaultValue = "100 000",
     isMandatory = false,
+    isSecret = false,
+    isDeprecated = false,
+  ),
+
+  ON_HOLD(
+    type = FLAG,
+    category = OPERATIONAL,
+    normalizer = Normalizers.PropOnHold,
+    tags = setOf(CONTROL, IMPORTANT),
+    defaultValue = "true",
+    isMandatory = true,
     isSecret = false,
     isDeprecated = false,
   ),
@@ -142,6 +154,8 @@ enum class ProjectProperty(
   ;
 
   companion object {
+
+    fun names() = values().map(ProjectProperty::name)
 
     fun find(name: String): ProjectProperty? = values().firstOrNull { it.name == name }
 

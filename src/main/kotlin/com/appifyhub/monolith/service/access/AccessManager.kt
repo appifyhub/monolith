@@ -1,6 +1,10 @@
-package com.appifyhub.monolith.service.auth
+package com.appifyhub.monolith.service.access
 
+import com.appifyhub.monolith.domain.access.ProjectStatus
 import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.NAME
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty.ON_HOLD
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
@@ -18,8 +22,20 @@ interface AccessManager {
     PROJECT_WRITE(OWNER),
   }
 
+  enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {
+    BASIC(isRequired = true, NAME, ON_HOLD),
+    AUTH(isRequired = true),
+    DEMO(isRequired = false),
+  }
+
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User
 
   @Throws fun requestProjectAccess(authData: Authentication, targetId: Long, privilege: Privilege): Project
+
+  @Throws fun fetchProjectStatus(targetId: Long): ProjectStatus
+
+  @Throws fun requireProjectFunctional(targetId: Long)
+
+  @Throws fun requireProjectFeaturesFunctional(targetId: Long, vararg features: Feature)
 
 }

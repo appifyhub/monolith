@@ -16,8 +16,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 class DaoTest {
 
   @Autowired lateinit var geolocationDao: GeolocationDao
-  @Autowired lateinit var projectDao: ProjectDao
   @Autowired lateinit var creationDao: ProjectCreationDao
+  @Autowired lateinit var projectDao: ProjectDao
   @Autowired lateinit var propertyDao: PropertyDao
   @Autowired lateinit var schemaDao: SchemaDao
   @Autowired lateinit var tokenDetailsDao: TokenDetailsDao
@@ -25,8 +25,8 @@ class DaoTest {
 
   @Test fun `DAO autowiring works`() {
     assertThat(geolocationDao).isNotNull()
-    assertThat(projectDao).isNotNull()
     assertThat(creationDao).isNotNull()
+    assertThat(projectDao).isNotNull()
     assertThat(propertyDao).isNotNull()
     assertThat(schemaDao).isNotNull()
     assertThat(tokenDetailsDao).isNotNull()

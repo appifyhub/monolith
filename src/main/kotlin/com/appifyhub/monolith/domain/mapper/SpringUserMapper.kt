@@ -3,7 +3,6 @@ package com.appifyhub.monolith.domain.mapper
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.TimeProvider
-import com.appifyhub.monolith.util.ext.empty
 import org.springframework.security.core.userdetails.UserDetails
 
 fun User.toSecurityUser(): UserDetails =
@@ -17,15 +16,15 @@ fun User.toSecurityUser(): UserDetails =
     .build()
 
 fun UserDetails.toDomain(timeProvider: TimeProvider): User = User(
-  id = UserId.fromUniversalFormat(username ?: String.empty),
-  signature = password ?: String.empty,
+  id = UserId.fromUniversalFormat(username ?: ""),
+  signature = password ?: "",
   name = null,
   type = User.Type.PERSONAL,
   authority = User.Authority.find(authorities, User.Authority.DEFAULT),
   allowsSpam = false,
   contact = null,
   contactType = User.ContactType.CUSTOM,
-  verificationToken = if (isAccountNonLocked) null else String.empty,
+  verificationToken = if (isAccountNonLocked) null else "",
   birthday = null,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,

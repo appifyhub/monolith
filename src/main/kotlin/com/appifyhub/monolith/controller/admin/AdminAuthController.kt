@@ -11,8 +11,8 @@ import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
-import com.appifyhub.monolith.service.auth.AccessManager
-import com.appifyhub.monolith.service.auth.AccessManager.Privilege
+import com.appifyhub.monolith.service.access.AccessManager
+import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication

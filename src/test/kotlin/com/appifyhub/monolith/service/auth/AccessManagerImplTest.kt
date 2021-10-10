@@ -4,20 +4,29 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
+import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
+import com.appifyhub.monolith.domain.access.ProjectStatus
 import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.admin.Project.Status
+import com.appifyhub.monolith.domain.admin.property.ProjectProperty
+import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.service.auth.AccessManager.Privilege.PROJECT_READ
-import com.appifyhub.monolith.service.auth.AccessManager.Privilege.PROJECT_WRITE
-import com.appifyhub.monolith.service.auth.AccessManager.Privilege.USER_READ
-import com.appifyhub.monolith.service.auth.AccessManager.Privilege.USER_WRITE
+import com.appifyhub.monolith.service.access.AccessManager
+import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_READ
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE
+import com.appifyhub.monolith.service.admin.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
@@ -42,6 +51,7 @@ import org.springframework.web.server.ResponseStatusException
 class AccessManagerImplTest {
 
   @Autowired lateinit var manager: AccessManager
+  @Autowired lateinit var propService: PropertyService
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var stubber: Stubber
 
@@ -364,6 +374,165 @@ class AccessManagerImplTest {
 
   // endregion
 
+  // region Project Status
+
+  @Test fun `fetching project status fails with invalid project ID`() {
+    assertThat {
+      manager.fetchProjectStatus(-1)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `fetching project status, unusable features are resolved without properties`() {
+    assertThat(
+      manager.fetchProjectStatus(stubber.projects.new(status = Status.SUSPENDED).id)
+    )
+      .isEqualTo(
+        ProjectStatus(
+          status = Status.SUSPENDED,
+          usableFeatures = listOf(Feature.AUTH, Feature.DEMO), // because of no properties
+          unusableFeatures = listOf(Feature.BASIC),
+          properties = emptyList(),
+        )
+      )
+  }
+
+  @Test fun `fetching project status, unusable features are resolved without some properties`() {
+    val project = stubber.projects.new()
+    val nameProp = propService.saveProperty<Boolean>(
+      projectId = project.id,
+      propName = ProjectProperty.NAME.name,
+      propRawValue = "Some name",
+    ).cleanStubArtifacts()
+
+    assertThat(
+      manager.fetchProjectStatus(project.id)
+        .cleanStubArtifacts()
+    )
+      .isEqualTo(
+        ProjectStatus(
+          status = Status.ACTIVE,
+          usableFeatures = listOf(Feature.AUTH, Feature.DEMO), // because of no properties
+          unusableFeatures = listOf(Feature.BASIC),
+          properties = listOf(nameProp),
+        )
+      )
+  }
+
+  @Test fun `fetching project status, basic is resolved with all properties`() {
+    val project = stubber.projects.new()
+    val props = propService.saveProperties(
+      projectId = project.id,
+      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
+      propRawValues = listOf("Some name", false.toString()),
+    ).map { it.cleanStubArtifacts() }
+
+    assertThat(
+      manager.fetchProjectStatus(project.id)
+        .cleanStubArtifacts()
+    )
+      .isEqualTo(
+        ProjectStatus(
+          status = Status.ACTIVE,
+          usableFeatures = listOf(Feature.BASIC, Feature.AUTH, Feature.DEMO),
+          unusableFeatures = emptyList(),
+          properties = props,
+        )
+      )
+  }
+
+  @Test fun `requiring functional project fails on non-active project`() {
+    assertThat {
+      manager.requireProjectFunctional(stubber.projects.new(status = Status.SUSPENDED).id)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project is set to")
+      }
+  }
+
+  @Test fun `requiring functional project fails when required feature is not configured`() {
+    assertThat {
+      manager.requireProjectFunctional(stubber.projects.new().id)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("is not configured")
+      }
+  }
+
+  @Test fun `requiring functional project fails when 'on hold' is true`() {
+    val project = stubber.projects.new()
+    propService.saveProperties(
+      projectId = project.id,
+      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
+      propRawValues = listOf("Some name", true.toString()),
+    )
+
+    assertThat {
+      manager.requireProjectFunctional(project.id)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("on hold")
+      }
+  }
+
+  @Test fun `requiring functional project succeeds when configured`() {
+    val project = stubber.projects.new()
+    propService.saveProperties(
+      projectId = project.id,
+      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
+      propRawValues = listOf("Some name", false.toString()),
+    )
+
+    assertThat {
+      manager.requireProjectFunctional(project.id)
+    }
+      .isSuccess()
+  }
+
+  @Test fun `requiring functional features fails when required property is not configured`() {
+    assertThat {
+      manager.requireProjectFeaturesFunctional(stubber.projects.new().id, Feature.BASIC)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Not configured")
+      }
+  }
+
+  @Test fun `requiring functional features succeeds with no-property features`() {
+    assertThat {
+      manager.requireProjectFeaturesFunctional(stubber.projects.new().id, Feature.AUTH, Feature.DEMO)
+    }
+      .isSuccess()
+  }
+
+  @Test fun `requiring functional features succeeds with configured features`() {
+    val project = stubber.projects.new()
+    propService.saveProperties(
+      projectId = project.id,
+      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
+      propRawValues = listOf("Some name", false.toString()),
+    )
+
+    assertThat {
+      manager.requireProjectFeaturesFunctional(project.id, Feature.BASIC)
+    }
+      .isSuccess()
+  }
+
+  // endregion
+
   // region Helpers
 
   // leftovers from hacking in auth utils need to be removed
@@ -378,15 +547,25 @@ class AccessManagerImplTest {
     updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS),
   )
 
-  private fun Project.cleanStubArtifacts(): Project = copy(
+  private fun Project.cleanStubArtifacts() = copy(
     createdAt = timeProvider.currentDate,
     updatedAt = timeProvider.currentDate,
   ).cleanDates()
 
-  private fun Project.cleanDates(): Project = copy(
+  private fun Project.cleanDates() = copy(
     createdAt = createdAt.truncateTo(ChronoUnit.DAYS),
     updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
   )
+
+  private fun <T : Any> Property<T>.cleanStubArtifacts() = when (this) {
+    is Property.DecimalProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
+    is Property.FlagProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
+    is Property.IntegerProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
+    is Property.StringProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
+    else -> throw IllegalStateException("What is this type? ${this::class.simpleName}")
+  }
+
+  private fun ProjectStatus.cleanStubArtifacts() = copy(properties = properties.map { it.cleanStubArtifacts() })
 
   // endregion
 
