@@ -145,11 +145,16 @@ tasks {
 
   withType<Test> {
     useJUnitPlatform()
+
     with(testLogging) {
       showStandardStreams = true
       exceptionFormat = TestExceptionFormat.FULL
       events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
     }
+
+    jvmArgs = listOf("-XX:MaxPermSize=512m")
+    minHeapSize = "512m"
+    maxHeapSize = "1024m"
   }
 
   named("githubRelease") {
