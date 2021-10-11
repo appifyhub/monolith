@@ -36,6 +36,7 @@ repositories {
   mavenCentral()
 }
 
+@Suppress("GradlePackageUpdate")
 dependencies {
 
   // language essentials
