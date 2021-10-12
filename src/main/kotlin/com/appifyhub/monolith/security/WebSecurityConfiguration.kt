@@ -34,7 +34,7 @@ class WebSecurityConfiguration(
       .authorizeRequests {
         it.antMatchers(
           UserAuthEndpoints.AUTH,
-          UserAuthEndpoints.ADMIN_AUTH,
+          UserAuthEndpoints.CREATOR_AUTH,
           HeartbeatEndpoints.HEARTBEAT,
           CommonEndpoints.ERROR,
           CommonEndpoints.H2_CONSOLE,

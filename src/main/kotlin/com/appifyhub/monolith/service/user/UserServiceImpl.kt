@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.service.user
 
-import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
@@ -11,7 +11,7 @@ import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.user.UserRepository
-import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.validation.impl.Normalizers
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service
 @Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
-  private val adminService: AdminService,
+  private val creatorService: CreatorService,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
@@ -30,7 +30,7 @@ class UserServiceImpl(
   override fun addUser(creator: UserCreator): User {
     log.debug("Adding user $creator")
 
-    val userIdType = adminService.fetchProjectById(creator.projectId).userIdType
+    val userIdType = creatorService.fetchProjectById(creator.projectId).userIdType
     val normalizedId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(creator.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(creator.userId).requireValid { "Email ID" }
@@ -95,7 +95,7 @@ class UserServiceImpl(
 
     // non-nullable properties
     Normalizers.UserId.run(updater.id).requireValid { "User ID" }
-    val userIdType = adminService.fetchProjectById(updater.id.projectId).userIdType
+    val userIdType = creatorService.fetchProjectById(updater.id.projectId).userIdType
     val normalizedUserId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(updater.id.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(updater.id.userId).requireValid { "Email ID" }

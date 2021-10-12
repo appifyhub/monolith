@@ -4,16 +4,16 @@ import assertk.assertThat
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.admin.SignatureGenerator
-import com.appifyhub.monolith.service.admin.AdminService
-import com.appifyhub.monolith.service.admin.PropertyService
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
+import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
@@ -33,7 +33,7 @@ import org.springframework.boot.ApplicationArguments
 
 class SchemaInitializerTest {
 
-  private val adminService = mock<AdminService>()
+  private val creatorService = mock<CreatorService>()
   private val userService = mock<UserService>()
   private val propService = mock<PropertyService>()
   private val schemaService = mock<SchemaService>()
@@ -56,32 +56,32 @@ class SchemaInitializerTest {
 
     runInitializer()
 
-    verifyZeroInteractions(adminService, userService, propService)
+    verifyZeroInteractions(creatorService, userService, propService)
     verify(schemaService, never()).update(any())
   }
 
   @Test fun `initial seed fails if project name is blank`() {
-    assertThat { runInitializer(adminProjectName = " ") }
+    assertThat { runInitializer(creatorProjectName = " ") }
       .isFailure()
       .messageContains("Project Name")
 
-    verifyZeroInteractions(adminService, userService, propService)
+    verifyZeroInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
-    assertThat { runInitializer(adminOwnerName = " ") }
+    assertThat { runInitializer(creatorOwnerName = " ") }
       .isFailure()
       .messageContains("Owner Name")
 
-    verifyZeroInteractions(adminService, userService, propService)
+    verifyZeroInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
-    assertThat { runInitializer(adminOwnerEmail = " ") }
+    assertThat { runInitializer(creatorOwnerEmail = " ") }
       .isFailure()
       .messageContains("Owner Email")
 
-    verifyZeroInteractions(adminService, userService, propService)
+    verifyZeroInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed uses config signature if present`() {
@@ -91,7 +91,7 @@ class SchemaInitializerTest {
     )
     val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
-    adminService.stub {
+    creatorService.stub {
       on { addProject(any(), anyOrNull()) } doReturn project
     }
     userService.stub {
@@ -99,10 +99,10 @@ class SchemaInitializerTest {
       on { updateUser(any()) } doReturn user
     }
 
-    assertThat { runInitializer(adminOwnerSecret = "root secret") }
+    assertThat { runInitializer(creatorOwnerSecret = "root secret") }
       .isSuccess()
 
-    verify(adminService).addProject(
+    verify(creatorService).addProject(
       creationInfo = ProjectCreationInfo(
         type = project.type,
         status = project.status,
@@ -152,7 +152,7 @@ class SchemaInitializerTest {
     )
     val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
-    adminService.stub {
+    creatorService.stub {
       on { addProject(any(), anyOrNull()) } doReturn project
     }
     userService.stub {
@@ -162,10 +162,10 @@ class SchemaInitializerTest {
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(adminOwnerSecret = " \t\n ") }
+    assertThat { runInitializer(creatorOwnerSecret = " \t\n ") }
       .isSuccess()
 
-    verify(adminService).addProject(
+    verify(creatorService).addProject(
       creationInfo = ProjectCreationInfo(
         type = project.type,
         status = project.status,
@@ -211,21 +211,21 @@ class SchemaInitializerTest {
   // Helpers
 
   private fun runInitializer(
-    adminOwnerName: String = Stubs.user.name!!,
-    adminOwnerSecret: String = Stubs.userCreator.rawSecret,
-    adminOwnerEmail: String = Stubs.user.contact!!,
-    adminProjectName: String = "Project Name",
+    creatorOwnerName: String = Stubs.user.name!!,
+    creatorOwnerSecret: String = Stubs.userCreator.rawSecret,
+    creatorOwnerEmail: String = Stubs.user.contact!!,
+    creatorProjectName: String = "Project Name",
     args: ApplicationArguments? = null,
   ) = SchemaInitializer(
-    adminService = adminService,
+    creatorService = creatorService,
     userService = userService,
     propertyService = propService,
     schemaService = schemaService,
-    adminConfig = AdminProjectConfig().apply {
-      this.ownerName = adminOwnerName
-      this.ownerSecret = adminOwnerSecret
-      this.ownerEmail = adminOwnerEmail
-      this.projectName = adminProjectName
+    creatorConfig = CreatorProjectConfig().apply {
+      this.ownerName = creatorOwnerName
+      this.ownerSecret = creatorOwnerSecret
+      this.ownerEmail = creatorOwnerEmail
+      this.projectName = creatorProjectName
     },
   ).run(args)
 

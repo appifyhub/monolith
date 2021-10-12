@@ -8,7 +8,7 @@ import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.repository.geo.GeolocationRepository
-import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.throwUnauthorized
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service
 class AuthServiceImpl(
   private val authRepository: AuthRepository,
   private val userService: UserService,
-  private val adminService: AdminService,
+  private val creatorService: CreatorService,
   private val geoRepository: GeolocationRepository,
   private val passwordEncoder: PasswordEncoder,
 ) : AuthService {
@@ -63,14 +63,14 @@ class AuthServiceImpl(
     return fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
   }
 
-  override fun resolveAdmin(universalId: String, signature: String): User {
-    log.debug("Fetching admin by id $universalId, signature $signature")
+  override fun resolveCreator(universalId: String, signature: String): User {
+    log.debug("Fetching creator by id $universalId, signature $signature")
 
     val userId = UserId.fromUniversalFormat(universalId)
     val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
     val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
 
-    val project = adminService.getAdminProject()
+    val project = creatorService.getCreatorProject()
     val user = fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
 
     if (user.id.projectId != project.id) throwUnauthorized { "Project ID" }
@@ -203,7 +203,7 @@ class AuthServiceImpl(
     val normalizedIp = Normalizers.IpAddress.run(ipAddress).requireValid { "IP Address" }
     val geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString()
 
-    val isCreator = adminService.getAdminProject().id == user.id.projectId
+    val isCreator = creatorService.getCreatorProject().id == user.id.projectId
     val isOwner = user.canActAs(Authority.OWNER)
     val isAllowedToCreateStaticTokens = isCreator || isOwner
     if (isStatic && !isAllowedToCreateStaticTokens)

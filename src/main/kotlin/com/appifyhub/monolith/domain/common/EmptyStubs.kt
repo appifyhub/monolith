@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.domain.common
 
-import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId

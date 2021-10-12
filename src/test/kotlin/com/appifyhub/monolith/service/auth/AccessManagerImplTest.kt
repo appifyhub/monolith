@@ -9,11 +9,11 @@ import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.access.ProjectStatus
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.Project.Status
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty
-import com.appifyhub.monolith.domain.admin.property.Property
+import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.Project.Status
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.property.Property
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
@@ -26,7 +26,7 @@ import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_REA
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE
-import com.appifyhub.monolith.service.admin.PropertyService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo

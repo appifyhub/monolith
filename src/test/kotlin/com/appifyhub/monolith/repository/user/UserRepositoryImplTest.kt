@@ -9,7 +9,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater

@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.service.access
 
-import com.appifyhub.monolith.domain.access.ProjectStatus
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty.NAME
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty.ON_HOLD
+import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty.NAME
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty.ON_HOLD
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN

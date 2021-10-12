@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.storage.model.user
 
-import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import java.io.Serializable
 import java.util.Date
 import javax.persistence.Column

@@ -238,7 +238,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth owner fails with invalid universal ID`() {
     assertThat {
-      service.resolveAdmin("invalid", "signature")
+      service.resolveCreator("invalid", "signature")
     }
       .isFailure()
       .hasClass(NumberFormatException::class)
@@ -246,7 +246,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth owner fails with invalid user ID`() {
     assertThat {
-      service.resolveAdmin(UserId("\na b\t", -1).toUniversalFormat(), "signature")
+      service.resolveCreator(UserId("\na b\t", -1).toUniversalFormat(), "signature")
     }
       .isFailure()
       .all {
@@ -257,7 +257,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth owner fails with invalid signature`() {
     assertThat {
-      service.resolveAdmin(stubber.creators.owner().id.toUniversalFormat(), "\n\t")
+      service.resolveCreator(stubber.creators.owner().id.toUniversalFormat(), "\n\t")
     }
       .isFailure()
       .all {
@@ -268,7 +268,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth owner fails with wrong signature`() {
     assertThat {
-      service.resolveAdmin(
+      service.resolveCreator(
         universalId = stubber.creators.owner().id.toUniversalFormat(),
         signature = "pass",
       )
@@ -370,9 +370,9 @@ class AuthServiceImplTest {
 
   @Test fun `create static token fails with non-owner user`() {
     val project = stubber.projects.new()
-    val admin = stubber.users(project).admin()
+    val adminUser = stubber.users(project).admin()
     assertThat {
-      service.createStaticTokenFor(admin, origin = null, ipAddress = null)
+      service.createStaticTokenFor(adminUser, origin = null, ipAddress = null)
     }
       .isFailure()
       .all {

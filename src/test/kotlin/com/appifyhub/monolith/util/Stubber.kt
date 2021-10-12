@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
@@ -12,7 +12,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.repository.admin.AdminRepository
+import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.repository.user.UserRepository
@@ -33,7 +33,7 @@ private const val EXPIRATION_DAYS_DELTA: Long = 1
 @Profile(TestAppifyHubApplication.PROFILE)
 class Stubber(
   private val userRepo: UserRepository,
-  private val adminRepo: AdminRepository,
+  private val creatorRepo: CreatorRepository,
   private val authRepo: AuthRepository,
   private val tokenDetailsRepo: TokenDetailsRepository,
   private val timeProvider: TimeProvider,
@@ -50,7 +50,7 @@ class Stubber(
 
   fun latestTokenOf(user: User): TokenDetails = tokenDetailsRepo.fetchAllTokens(
     owner = user,
-    project = adminRepo.fetchProjectById(user.id.projectId),
+    project = creatorRepo.fetchProjectById(user.id.projectId),
   ).maxByOrNull { it.createdAt }!!
 
   fun tokenDetailsOf(tokenValue: String): TokenDetails =
@@ -63,13 +63,13 @@ class Stubber(
   // region API models
 
   inner class Projects {
-    fun creator() = adminRepo.getAdminProject()
+    fun creator() = creatorRepo.getCreatorProject()
 
     fun new(
       creator: User = creators.owner(),
       userIdType: Project.UserIdType = Project.UserIdType.USERNAME,
       status: Project.Status = Project.Status.ACTIVE,
-    ) = adminRepo.addProject(
+    ) = creatorRepo.addProject(
       creationInfo = ProjectCreationInfo(
         type = Project.Type.COMMERCIAL,
         status = status,
@@ -80,7 +80,7 @@ class Stubber(
   }
 
   inner class Creators {
-    fun owner() = adminRepo.getAdminOwner()
+    fun owner() = creatorRepo.getCreatorOwner()
     fun default(idSuffix: String = "") = ensureUser(DEFAULT, project = projects.creator(), idSuffix = idSuffix)
   }
 

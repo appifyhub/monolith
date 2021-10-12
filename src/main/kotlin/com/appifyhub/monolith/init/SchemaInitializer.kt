@@ -1,17 +1,17 @@
 package com.appifyhub.monolith.init
 
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
-import com.appifyhub.monolith.repository.admin.SignatureGenerator
-import com.appifyhub.monolith.service.admin.AdminService
-import com.appifyhub.monolith.service.admin.PropertyService
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
+import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
@@ -23,11 +23,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class SchemaInitializer(
-  private val adminService: AdminService,
+  private val creatorService: CreatorService,
   private val userService: UserService,
   private val propertyService: PropertyService,
   private val schemaService: SchemaService,
-  private val adminConfig: AdminProjectConfig,
+  private val creatorConfig: CreatorProjectConfig,
 ) : ApplicationRunner {
 
   private enum class Seed(val version: Long) { INITIAL(1L) }
@@ -60,18 +60,18 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val configuredSignature = Normalizers.RawSignatureNullified.run(adminConfig.ownerSecret)
+    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSecret)
       .requireValid { "Owner Signature" }
-    val ownerName = Normalizers.Name.run(adminConfig.ownerName)
+    val ownerName = Normalizers.Name.run(creatorConfig.ownerName)
       .requireValid { "Owner Name" }
-    val ownerEmail = Normalizers.Email.run(adminConfig.ownerEmail)
+    val ownerEmail = Normalizers.Email.run(creatorConfig.ownerEmail)
       .requireValid { "Owner Email" }
-    val adminProjectName = Normalizers.PropProjectName.run(adminConfig.projectName)
+    val creatorProjectName = Normalizers.PropProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
     val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
 
-    // create the admin project
-    val project = adminService.addProject(
+    // create the creator project
+    val project = creatorService.addProject(
       creator = null,
       creationInfo = ProjectCreationInfo(
         type = Project.Type.FREE,
@@ -84,7 +84,7 @@ class SchemaInitializer(
     propertyService.saveProperty<String>(
       projectId = project.id,
       propName = ProjectProperty.NAME.name,
-      propRawValue = adminProjectName,
+      propRawValue = creatorProjectName,
     )
 
     // set that the project is not on hold
@@ -94,7 +94,7 @@ class SchemaInitializer(
       propRawValue = false.toString(),
     )
 
-    // create the owner's user in the admin project
+    // create the owner's user in the creator project
     var owner = userService.addUser(
       creator = UserCreator(
         userId = ownerEmail,
@@ -121,7 +121,7 @@ class SchemaInitializer(
 
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
-      ?.let { "<see \$env.ADMIN_OWNER_SECRET>" }
+      ?.let { "<see \$env.CREATOR_OWNER_SECRET>" }
       ?: rawOwnerSecret
 
     // print credentials
@@ -133,7 +133,7 @@ class SchemaInitializer(
         
         [[ SECRET SECTION START: PRINTED ONLY ONCE ]]
         
-        Admin project '$adminProjectName' is now set up. 
+        Creator project '$creatorProjectName' is now set up. 
         Project owner is '${owner.name} <${owner.contact}>'.
         
         Project ID     = ${project.id}

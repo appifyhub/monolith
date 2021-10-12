@@ -1,14 +1,14 @@
 package com.appifyhub.monolith.util
 
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreationInfo
-import com.appifyhub.monolith.domain.admin.ops.ProjectUpdater
-import com.appifyhub.monolith.domain.admin.property.Property
-import com.appifyhub.monolith.domain.admin.property.PropertyCategory
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty
-import com.appifyhub.monolith.domain.admin.property.PropertyTag
-import com.appifyhub.monolith.domain.admin.property.PropertyType
-import com.appifyhub.monolith.domain.admin.property.ops.PropertyFilter
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.creator.property.Property
+import com.appifyhub.monolith.domain.creator.property.PropertyCategory
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.property.PropertyTag
+import com.appifyhub.monolith.domain.creator.property.PropertyType
+import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
@@ -20,10 +20,10 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.network.admin.property.PropertyConfigurationResponse
-import com.appifyhub.monolith.network.admin.property.PropertyResponse
-import com.appifyhub.monolith.network.admin.property.ops.PropertyFilterQueryParams
-import com.appifyhub.monolith.network.auth.AdminCredentialsRequest
+import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
+import com.appifyhub.monolith.network.creator.property.PropertyResponse
+import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
@@ -35,11 +35,11 @@ import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
-import com.appifyhub.monolith.storage.model.admin.ProjectCreationDbm
-import com.appifyhub.monolith.storage.model.admin.ProjectCreationKeyDbm
-import com.appifyhub.monolith.storage.model.admin.ProjectDbm
-import com.appifyhub.monolith.storage.model.admin.PropertyDbm
-import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectDbm
+import com.appifyhub.monolith.storage.model.creator.PropertyDbm
+import com.appifyhub.monolith.storage.model.creator.PropertyIdDbm
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
@@ -539,7 +539,7 @@ object Stubs {
     origin = "Token Origin",
   )
 
-  val adminCredentialsRequest = AdminCredentialsRequest(
+  val creatorCredentialsRequest = CreatorCredentialsRequest(
     universalId = universalUserId,
     secret = "password",
     origin = "Token Origin",

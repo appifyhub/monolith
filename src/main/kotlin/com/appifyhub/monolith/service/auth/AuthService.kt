@@ -16,7 +16,7 @@ interface AuthService {
 
   @Throws fun resolveUser(universalId: String, signature: String): User
 
-  @Throws fun resolveAdmin(universalId: String, signature: String): User
+  @Throws fun resolveCreator(universalId: String, signature: String): User
 
   @Throws fun createTokenFor(user: User, origin: String?, ipAddress: String?): String
 

@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.storage.dao
 
-import com.appifyhub.monolith.storage.model.admin.ProjectCreationDbm
-import com.appifyhub.monolith.storage.model.admin.ProjectCreationKeyDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import javax.transaction.Transactional
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.rest.core.annotation.RepositoryRestResource

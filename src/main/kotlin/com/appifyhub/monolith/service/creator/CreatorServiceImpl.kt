@@ -1,0 +1,110 @@
+package com.appifyhub.monolith.service.creator
+
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.repository.creator.CreatorRepository
+import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.silent
+import com.appifyhub.monolith.util.ext.throwLocked
+import com.appifyhub.monolith.util.ext.throwNotFound
+import com.appifyhub.monolith.validation.impl.Normalizers
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+
+@Service
+class CreatorServiceImpl(
+  private val creatorRepository: CreatorRepository,
+) : CreatorService {
+
+  private val log = LoggerFactory.getLogger(this::class.java)
+
+  override fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project {
+    log.debug("Adding project $creationInfo with creator $creator")
+
+    val creatorProject = silent(log = false) { getCreatorProject() }
+    if (creatorProject != null) {
+      // creator project is already created
+      if (creator == null) error("Project creator must be provided")
+
+      if (creator.id.projectId != creatorProject.id)
+        throwLocked { "Projects can be added only by creator project users" }
+    } else {
+      // looks like we're creating the creator project
+      if (creator != null) error("Project's future owner must not be provided for creator project")
+    }
+
+    return creatorRepository.addProject(creationInfo, creator)
+  }
+
+  override fun getCreatorProject(): Project {
+    log.debug("Getting creator project")
+    return creatorRepository.getCreatorProject()
+  }
+
+  override fun getCreatorOwner(): User {
+    log.debug("Getting creator owner")
+    return creatorRepository.getCreatorOwner()
+  }
+
+  override fun fetchProjectById(id: Long): Project {
+    log.debug("Fetching project by id $id")
+    val normalizedProjectId = Normalizers.ProjectId.run(id).requireValid { "Project ID" }
+    return creatorRepository.fetchProjectById(normalizedProjectId)
+  }
+
+  override fun fetchAllProjectsByCreator(creator: User): List<Project> {
+    log.debug("Fetching all projects for creator $creator")
+
+    if (creator.id.projectId != getCreatorProject().id)
+      throwNotFound { "Non-service creators don't have any projects" }
+
+    return creatorRepository.fetchAllProjectsByCreatorUserId(creator.id)
+  }
+
+  override fun fetchProjectCreator(projectId: Long): User {
+    log.debug("Fetching project creator for $projectId")
+
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+
+    return creatorRepository.fetchProjectCreator(normalizedProjectId)
+  }
+
+  override fun updateProject(updater: ProjectUpdater): Project {
+    log.debug("Updating project $updater")
+
+    val normalizedProjectId = Normalizers.ProjectId.run(updater.id).requireValid { "Project ID" }
+
+    val normalizedUpdater = ProjectUpdater(
+      id = normalizedProjectId,
+      type = updater.type,
+      status = updater.status,
+    )
+
+    return creatorRepository.updateProject(normalizedUpdater)
+  }
+
+  override fun removeProjectById(projectId: Long) {
+    log.debug("Removing project $projectId")
+
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+
+    // we can't delete the creator project
+    if (getCreatorProject().id == projectId)
+      throwLocked { "Creator project can't be deleted" }
+
+    return creatorRepository.removeProjectById(normalizedProjectId)
+  }
+
+  override fun removeAllProjectsByCreator(creator: User) {
+    log.debug("Removing all projects for creator $creator")
+
+    // we can't delete the creator project
+    if (creator.id.projectId != getCreatorProject().id)
+      throwLocked { "Projects can be removed only by creator project users" }
+
+    creatorRepository.removeAllProjectsByCreator(creator.id)
+  }
+
+}

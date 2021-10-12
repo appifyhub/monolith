@@ -1,17 +1,17 @@
 package com.appifyhub.monolith.service.access
 
-import com.appifyhub.monolith.domain.access.ProjectStatus
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.property.ProjectProperty
-import com.appifyhub.monolith.domain.admin.property.Property
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.property.Property
+import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
-import com.appifyhub.monolith.service.admin.AdminService
-import com.appifyhub.monolith.service.admin.PropertyService
 import com.appifyhub.monolith.service.auth.AuthService
+import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component
 class AccessManagerImpl(
   private val authService: AuthService,
   private val userService: UserService,
-  private val adminService: AdminService,
+  private val creatorService: CreatorService,
   private val propService: PropertyService,
 ) : AccessManager {
 
@@ -42,7 +42,7 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterProjectCreator = fetchCreator(normalizedTargetId.projectId)?.id == tokenDetails.ownerId
-    val isRequesterSuperOwner = getAdminOwner().id == tokenDetails.ownerId
+    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
     if (isRequesterProjectCreator || isRequesterSuperOwner) return fetchUser(normalizedTargetId)
 
     // not project creator; validate that the project matches
@@ -55,7 +55,7 @@ class AccessManagerImpl(
     if (requesterUser.id == normalizedTargetId) return requesterUser
 
     // static tokens are always allowed (unless it's creators looking for other creators)
-    val isCreatorRequest = getAdminProject().id == requesterUser.id.projectId
+    val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
     val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
     if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchUser(normalizedTargetId)
 
@@ -81,7 +81,7 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterProjectCreator = fetchCreator(normalizedTargetId)?.id == tokenDetails.ownerId
-    val isRequesterSuperOwner = getAdminOwner().id == tokenDetails.ownerId
+    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
     if (isRequesterProjectCreator || isRequesterSuperOwner) return fetchProject(normalizedTargetId)
 
     // not project creator; validate that the project matches
@@ -90,7 +90,7 @@ class AccessManagerImpl(
 
     // static tokens are always allowed (unless it's creators looking for other creators)
     val requesterUser = fetchUser(tokenDetails.ownerId)
-    val isCreatorRequest = getAdminProject().id == requesterUser.id.projectId
+    val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
     val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
     if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchProject(normalizedTargetId)
 
@@ -162,15 +162,15 @@ class AccessManagerImpl(
     )
   }
 
-  private fun getAdminProject() = adminService.getAdminProject()
+  private fun getCreatorProject() = creatorService.getCreatorProject()
 
-  private fun getAdminOwner() = adminService.getAdminOwner()
+  private fun getCreatorOwner() = creatorService.getCreatorOwner()
 
-  private fun fetchCreator(projectId: Long) = silent { adminService.fetchProjectCreator(projectId) }
+  private fun fetchCreator(projectId: Long) = silent(log = false) { creatorService.fetchProjectCreator(projectId) }
 
   private fun fetchUser(id: UserId) = userService.fetchUserByUserId(id)
 
-  private fun fetchProject(id: Long) = adminService.fetchProjectById(id)
+  private fun fetchProject(id: Long) = creatorService.fetchProjectById(id)
 
   private fun fetchProps(id: Long) = propService.fetchProperties(id, ProjectProperty.names())
 

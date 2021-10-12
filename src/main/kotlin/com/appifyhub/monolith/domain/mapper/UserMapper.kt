@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.domain.mapper
 
-import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
