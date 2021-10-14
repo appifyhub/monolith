@@ -6,5 +6,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 @JsonInclude(Include.NON_NULL)
 data class MultiplePropertiesSaveRequest(
-  @JsonProperty("properties") val properties: List<PropertyDto>,
+  @JsonProperty("properties") val properties: List<PropertyValueDto>,
 )

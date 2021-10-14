@@ -1,14 +1,14 @@
 package com.appifyhub.monolith.repository.creator
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 
 interface CreatorRepository {
 
-  @Throws fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project
+  @Throws fun addProject(projectInfo: ProjectCreator): Project
 
   @Throws fun getCreatorProject(): Project
 

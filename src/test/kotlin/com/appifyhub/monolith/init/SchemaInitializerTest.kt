@@ -6,7 +6,7 @@ import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -18,7 +18,6 @@ import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.anyOrNull
 import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -92,7 +91,7 @@ class SchemaInitializerTest {
     val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
     creatorService.stub {
-      on { addProject(any(), anyOrNull()) } doReturn project
+      on { addProject(any()) } doReturn project
     }
     userService.stub {
       on { addUser(any()) } doReturn user
@@ -103,12 +102,12 @@ class SchemaInitializerTest {
       .isSuccess()
 
     verify(creatorService).addProject(
-      creationInfo = ProjectCreationInfo(
+      projectInfo = ProjectCreator(
+        owner = null,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
       ),
-      creator = null,
     )
     verify(propService).saveProperty<String>(
       projectId = project.id,
@@ -153,7 +152,7 @@ class SchemaInitializerTest {
     val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
     creatorService.stub {
-      on { addProject(any(), anyOrNull()) } doReturn project
+      on { addProject(any()) } doReturn project
     }
     userService.stub {
       on { addUser(any()) } doReturn user
@@ -166,12 +165,12 @@ class SchemaInitializerTest {
       .isSuccess()
 
     verify(creatorService).addProject(
-      creationInfo = ProjectCreationInfo(
+      projectInfo = ProjectCreator(
+        owner = null,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
       ),
-      creator = null,
     )
     verify(propService).saveProperty<String>(
       projectId = project.id,

@@ -1,17 +1,18 @@
 package com.appifyhub.monolith.util
 
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
-import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
-import com.appifyhub.monolith.domain.creator.property.Property
-import com.appifyhub.monolith.domain.creator.property.PropertyCategory
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
-import com.appifyhub.monolith.domain.creator.property.PropertyTag
-import com.appifyhub.monolith.domain.creator.property.PropertyType
-import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.property.Property
+import com.appifyhub.monolith.domain.creator.property.PropertyCategory
+import com.appifyhub.monolith.domain.creator.property.PropertyTag
+import com.appifyhub.monolith.domain.creator.property.PropertyType
+import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
+import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
@@ -20,14 +21,18 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
-import com.appifyhub.monolith.network.creator.property.PropertyResponse
-import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.network.creator.ProjectFeatureDto
+import com.appifyhub.monolith.network.creator.ProjectResponse
+import com.appifyhub.monolith.network.creator.ProjectStatusDto
+import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
+import com.appifyhub.monolith.network.creator.property.PropertyResponse
+import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
@@ -35,12 +40,13 @@ import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
+import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.storage.model.creator.PropertyDbm
 import com.appifyhub.monolith.storage.model.creator.PropertyIdDbm
-import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
@@ -175,6 +181,13 @@ object Stubs {
     updatedAt = Date(0xFF0000),
   )
 
+  val propStringName = Property.StringProp(
+    config = ProjectProperty.NAME,
+    projectId = project.id,
+    rawValue = "name",
+    updatedAt = Date(0xFF0000),
+  )
+
   val propInteger = Property.IntegerProp(
     config = ProjectProperty.GENERIC_INTEGER,
     projectId = project.id,
@@ -196,6 +209,13 @@ object Stubs {
     updatedAt = Date(0xFF0000),
   )
 
+  val propFlagOnHold = Property.FlagProp(
+    config = ProjectProperty.ON_HOLD,
+    projectId = project.id,
+    rawValue = "false",
+    updatedAt = Date(0xFF0000),
+  )
+
   val propertyFilter = PropertyFilter(
     type = PropertyType.STRING,
     category = PropertyCategory.GENERIC,
@@ -207,9 +227,16 @@ object Stubs {
     hasAtLeastOneOfTags = setOf(PropertyTag.GENERIC),
   )
 
+  val projectStatus = ProjectStatus(
+    status = Project.Status.ACTIVE,
+    usableFeatures = listOf(Feature.BASIC),
+    unusableFeatures = emptyList(),
+    properties = listOf(propStringName, propFlagOnHold),
+  )
+
   // endregion
 
-  // region Data Models
+  // region Database Models
 
   val userIdDbm = UserIdDbm(
     userId = "username",
@@ -474,7 +501,8 @@ object Stubs {
     company = Settable(companyUpdater),
   )
 
-  val projectCreator = ProjectCreationInfo(
+  val projectCreator = ProjectCreator(
+    owner = null,
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
@@ -567,10 +595,78 @@ object Stubs {
     isDeprecated = ProjectProperty.GENERIC_STRING.isDeprecated,
   )
 
+  val propertyConfigurationResponseName = PropertyConfigurationResponse(
+    name = ProjectProperty.NAME.name,
+    type = ProjectProperty.NAME.type.name,
+    category = ProjectProperty.NAME.category.name,
+    tags = ProjectProperty.NAME.tags.map(PropertyTag::name).toSet(),
+    defaultValue = ProjectProperty.NAME.defaultValue,
+    isMandatory = ProjectProperty.NAME.isMandatory,
+    isSecret = ProjectProperty.NAME.isSecret,
+    isDeprecated = ProjectProperty.NAME.isDeprecated,
+  )
+
+  val propertyConfigurationResponseOnHold = PropertyConfigurationResponse(
+    name = ProjectProperty.ON_HOLD.name,
+    type = ProjectProperty.ON_HOLD.type.name,
+    category = ProjectProperty.ON_HOLD.category.name,
+    tags = ProjectProperty.ON_HOLD.tags.map(PropertyTag::name).toSet(),
+    defaultValue = ProjectProperty.ON_HOLD.defaultValue,
+    isMandatory = ProjectProperty.ON_HOLD.isMandatory,
+    isSecret = ProjectProperty.ON_HOLD.isSecret,
+    isDeprecated = ProjectProperty.ON_HOLD.isDeprecated,
+  )
+
   val propertyResponse = PropertyResponse(
     config = propertyConfigurationResponse,
     rawValue = propString.rawValue,
     updatedAt = "1970-01-01 04:38",
+  )
+
+  val propertyResponseName = PropertyResponse(
+    config = propertyConfigurationResponseName,
+    rawValue = "name",
+    updatedAt = "1970-01-01 04:38",
+  )
+
+  val propertyResponseOnHold = PropertyResponse(
+    config = propertyConfigurationResponseOnHold,
+    rawValue = "false",
+    updatedAt = "1970-01-01 04:38",
+  )
+
+  val projectFeatureDto = ProjectFeatureDto(
+    name = Feature.BASIC.name,
+    isRequired = true,
+    properties = listOf(
+      ProjectProperty.NAME.name,
+      ProjectProperty.ON_HOLD.name,
+    ),
+  )
+
+  val projectStatusDto = ProjectStatusDto(
+    status = project.status.name,
+    usableFeatures = listOf(projectFeatureDto),
+    unusableFeatures = emptyList(),
+    properties = listOf(
+      propertyResponseName,
+      propertyResponseOnHold,
+    ),
+  )
+
+  val projectResponse = ProjectResponse(
+    projectId = userId.projectId,
+    type = project.type.name,
+    status = projectStatusDto,
+    userIdType = project.userIdType.name,
+    createdAt = "1970-01-01 03:31",
+    updatedAt = "1970-01-01 02:56",
+  )
+
+  val projectCreateRequest = ProjectCreateRequest(
+    ownerUniversalId = universalUserId,
+    type = "OPENSOURCE",
+    userIdType = "USERNAME",
   )
 
   // endregion

@@ -101,6 +101,20 @@ class AccessManagerImpl(
     return fetchProject(normalizedTargetId)
   }
 
+  override fun requestSuperCreator(authData: Authentication): User {
+    log.debug("Authentication $authData requesting super creator access")
+
+    // validate request data and token
+    val jwt = authService.requireValidJwt(authData, shallow = false)
+    val tokenDetails = authService.fetchTokenDetails(jwt)
+
+    // allow request if it's the project creator requesting
+    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
+    require(isRequesterSuperOwner) { "Only requests from super owner are allowed" }
+
+    return fetchUser(tokenDetails.ownerId)
+  }
+
   override fun fetchProjectStatus(targetId: Long): ProjectStatus {
     log.debug("Fetching project status for $targetId")
 

@@ -54,7 +54,7 @@ class CreatorServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `add a standard project fails if creator is null`() {
     assertThat {
-      service.addProject(Stubs.projectCreator, null)
+      service.addProject(Stubs.projectCreator)
     }
       .isFailure()
       .messageContains("must be provided")
@@ -63,10 +63,10 @@ class CreatorServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `add a standard project fails if creator is not from creator project`() {
     val project = stubber.projects.new()
-    val creator = stubber.users(project).owner()
+    val owner = stubber.users(project).owner()
 
     assertThat {
-      service.addProject(Stubs.projectCreator, creator)
+      service.addProject(Stubs.projectCreator.copy(owner = owner))
     }
       .isFailure()
       .messageContains("only by creator project users")
@@ -80,7 +80,7 @@ class CreatorServiceImplTest {
     val service: CreatorService = CreatorServiceImpl(mockRepo)
 
     assertThat {
-      service.addProject(Stubs.projectCreator, stubber.creators.owner())
+      service.addProject(Stubs.projectCreator.copy(owner = stubber.creators.owner()))
     }
       .isFailure()
       .messageContains("must not be provided")
@@ -89,7 +89,7 @@ class CreatorServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `add project succeeds with valid data (with creator)`() {
     assertThat(
-      service.addProject(Stubs.projectCreator, stubber.creators.owner()).cleanDates()
+      service.addProject(Stubs.projectCreator.copy(owner = stubber.creators.owner())).cleanDates()
     ).isDataClassEqualTo(
       Stubs.project.copy(
         id = Stubs.project.id + 1,

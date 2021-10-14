@@ -5,7 +5,7 @@ import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.MultiplePropertiesSaveRequest
-import com.appifyhub.monolith.network.creator.property.ops.PropertyDto
+import com.appifyhub.monolith.network.creator.property.ops.PropertyValueDto
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.creator.property.ops.PropertySaveRequest
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -108,8 +108,8 @@ class CreatorPropertyController(
     log.debug("[GET] save properties $propertiesRequest for project $projectId")
 
     val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
-    val names = propertiesRequest.properties.map(PropertyDto::name)
-    val values = propertiesRequest.properties.map(PropertyDto::rawValue)
+    val names = propertiesRequest.properties.map(PropertyValueDto::name)
+    val values = propertiesRequest.properties.map(PropertyValueDto::rawValue)
     val properties = propertyService.saveProperties(project.id, names, values)
 
     return properties.map(Property<*>::toNetwork)

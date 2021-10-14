@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.init
 
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -72,8 +72,8 @@ class SchemaInitializer(
 
     // create the creator project
     val project = creatorService.addProject(
-      creator = null,
-      creationInfo = ProjectCreationInfo(
+      projectInfo = ProjectCreator(
+        owner = null,
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,

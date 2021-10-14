@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.property.Property
 import com.appifyhub.monolith.domain.creator.property.Property.DecimalProp
@@ -28,7 +28,7 @@ fun ProjectUpdater.applyTo(
   .applySettable(status) { copy(status = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
-fun ProjectCreationInfo.toProjectData(
+fun ProjectCreator.toProjectData(
   timeProvider: TimeProvider,
 ): ProjectDbm = ProjectDbm(
   projectId = null,

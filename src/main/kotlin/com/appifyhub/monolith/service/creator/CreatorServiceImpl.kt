@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.service.creator
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.repository.creator.CreatorRepository
@@ -20,22 +20,22 @@ class CreatorServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project {
-    log.debug("Adding project $creationInfo with creator $creator")
+  override fun addProject(projectInfo: ProjectCreator): Project {
+    log.debug("Adding project $projectInfo")
 
     val creatorProject = silent(log = false) { getCreatorProject() }
     if (creatorProject != null) {
       // creator project is already created
-      if (creator == null) error("Project creator must be provided")
+      if (projectInfo.owner == null) error("Project creator must be provided")
 
-      if (creator.id.projectId != creatorProject.id)
+      if (projectInfo.owner.id.projectId != creatorProject.id)
         throwLocked { "Projects can be added only by creator project users" }
     } else {
       // looks like we're creating the creator project
-      if (creator != null) error("Project's future owner must not be provided for creator project")
+      if (projectInfo.owner != null) error("Project's future owner must not be provided for creator project")
     }
 
-    return creatorRepository.addProject(creationInfo, creator)
+    return creatorRepository.addProject(projectInfo)
   }
 
   override fun getCreatorProject(): Project {

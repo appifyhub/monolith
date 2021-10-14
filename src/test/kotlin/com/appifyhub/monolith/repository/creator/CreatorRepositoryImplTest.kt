@@ -66,18 +66,18 @@ class CreatorRepositoryImplTest {
     SignatureGenerator.interceptor = { "signature" }
 
     verifyZeroInteractions(creationDao)
-    assertThat(repository.addProject(Stubs.projectCreator, null))
+    assertThat(repository.addProject(Stubs.projectCreator))
       .isDataClassEqualTo(Stubs.project)
   }
 
   @Test fun `adding a project works (with creator)`() {
     // create & update times come from the stub
     val timesIterator = listOf(Stubs.project.createdAt, Stubs.project.updatedAt).iterator()
-    val creator = Stubs.user.copy(id = UserId(userId = "uid", projectId = 100))
+    val owner = Stubs.user.copy(id = UserId(userId = "uid", projectId = 100))
     timeProvider.staticTime = { timesIterator.next().time }
     SignatureGenerator.interceptor = { "signature" }
 
-    assertThat(repository.addProject(Stubs.projectCreator, creator))
+    assertThat(repository.addProject(Stubs.projectCreator.copy(owner = owner)))
       .isDataClassEqualTo(Stubs.project)
     verify(creationDao).save(anyVararg())
   }

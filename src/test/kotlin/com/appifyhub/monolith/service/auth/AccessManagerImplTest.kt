@@ -9,11 +9,11 @@ import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.Project.Status
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.Property
+import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
@@ -362,7 +362,7 @@ class AccessManagerImplTest {
 
   @Test fun `requesting project access succeeds with creator requesting WRITE`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(creator = creator)
+    val project = stubber.projects.new(owner = creator)
     assertThat(
       manager.requestProjectAccess(
         authData = stubber.tokens(creator).real(),
@@ -371,6 +371,63 @@ class AccessManagerImplTest {
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
+
+  // endregion
+
+  // region Super creator access
+
+  @Test fun `requesting super creator fails with expired token`() {
+    val token = stubber.creatorTokens().real(OWNER)
+    timeProvider.advanceBy(Duration.ofDays(2))
+
+    assertThat {
+      manager.requestSuperCreator(token)
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalAccessException::class)
+        messageContains("Invalid token for")
+      }
+  }
+
+  @Test fun `requesting super creator fails with mismatching requester`() {
+    val creator = stubber.creators.default()
+    val token = stubber.tokens(creator).real()
+
+    assertThat {
+      manager.requestSuperCreator(token)
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("super owner are allowed")
+      }
+  }
+
+  @Test fun `requesting super creator succeeds with correct requester`() {
+    val creator = stubber.creators.owner()
+    val token = stubber.tokens(creator).real()
+
+    assertThat(
+      manager.requestSuperCreator(token)
+    ).isDataClassEqualTo(creator)
+  }
+
+  /*
+  override fun requestSuperCreator(authData: Authentication): User {
+    log.debug("Authentication $authData requesting super creator access")
+
+    // validate request data and token
+    val jwt = authService.requireValidJwt(authData, shallow = false)
+    val tokenDetails = authService.fetchTokenDetails(jwt)
+
+    // allow request if it's the project creator requesting
+    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
+    require(isRequesterSuperOwner) { "Only requests from super owner are allowed" }
+
+    return fetchUser(tokenDetails.ownerId)
+  }
+  */
 
   // endregion
 

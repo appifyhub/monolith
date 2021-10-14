@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.repository.creator
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
@@ -42,24 +42,24 @@ class CreatorRepositoryImpl(
       .minByOrNull { it.createdAt.time }!!
   }
 
-  override fun addProject(creationInfo: ProjectCreationInfo, creator: User?): Project {
-    log.debug("Adding project $creationInfo with creator $creator")
+  override fun addProject(projectInfo: ProjectCreator): Project {
+    log.debug("Adding project $projectInfo")
 
     // store the project itself
     val project = projectDao.save(
-      creationInfo.toProjectData(timeProvider = timeProvider)
+      projectInfo.toProjectData(timeProvider = timeProvider)
     ).toDomain()
 
-    creator?.let {
+    projectInfo.owner?.let { owner ->
       // store creation record for ownership mapping
       creationDao.save(
         ProjectCreationDbm(
           data = ProjectCreationKeyDbm(
-            creatorUserId = it.id.userId,
-            creatorProjectId = it.id.projectId,
+            creatorUserId = owner.id.userId,
+            creatorProjectId = owner.id.projectId,
             createdProjectId = project.id,
           ),
-          user = it.toData(),
+          user = owner.toData(),
           project = project.toData(),
         )
       )

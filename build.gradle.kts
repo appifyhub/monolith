@@ -152,7 +152,6 @@ tasks {
       events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
     }
 
-    jvmArgs = listOf("-XX:MaxPermSize=512m")
     minHeapSize = "512m"
     maxHeapSize = "1024m"
   }

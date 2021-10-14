@@ -23,7 +23,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.MultiplePropertiesSaveRequest
-import com.appifyhub.monolith.network.creator.property.ops.PropertyDto
+import com.appifyhub.monolith.network.creator.property.ops.PropertyValueDto
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.creator.property.ops.PropertySaveRequest
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -341,8 +341,8 @@ class CreatorPropertyControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
     val values = MultiplePropertiesSaveRequest(
       properties = listOf(
-        PropertyDto(MAX_USERS.name, "20"),
-        PropertyDto(DESCRIPTION.name, "desc"),
+        PropertyValueDto(MAX_USERS.name, "20"),
+        PropertyValueDto(DESCRIPTION.name, "desc"),
       )
     )
 

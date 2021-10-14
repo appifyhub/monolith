@@ -4,7 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.storage.model.creator.PropertyDbm
@@ -61,7 +61,8 @@ class CreatorMapperTest {
     val timeIncrement = Stubs.projectDbm.updatedAt.time - startTime
     val timeProvider = TimeProviderFake(incrementalTime = startTime, timeIncrement = timeIncrement)
 
-    val projectCreator = ProjectCreationInfo(
+    val projectCreator = ProjectCreator(
+      owner = null,
       type = Project.Type.OPENSOURCE,
       status = Project.Status.ACTIVE,
       userIdType = Project.UserIdType.USERNAME,

@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreationInfo
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -12,9 +12,9 @@ import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
@@ -66,16 +66,16 @@ class Stubber(
     fun creator() = creatorRepo.getCreatorProject()
 
     fun new(
-      creator: User = creators.owner(),
+      owner: User = creators.owner(),
       userIdType: Project.UserIdType = Project.UserIdType.USERNAME,
       status: Project.Status = Project.Status.ACTIVE,
     ) = creatorRepo.addProject(
-      creationInfo = ProjectCreationInfo(
+      ProjectCreator(
+        owner = owner,
         type = Project.Type.COMMERCIAL,
         status = status,
         userIdType = userIdType,
-      ),
-      creator = creator,
+      )
     )
   }
 

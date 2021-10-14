@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.service.access
 
-import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.NAME
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.ON_HOLD
+import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
@@ -20,6 +20,7 @@ interface AccessManager {
     USER_WRITE(ADMIN),
     PROJECT_READ(OWNER),
     PROJECT_WRITE(OWNER),
+    PROJECT_CREATE(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {
@@ -31,6 +32,8 @@ interface AccessManager {
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User
 
   @Throws fun requestProjectAccess(authData: Authentication, targetId: Long, privilege: Privilege): Project
+
+  @Throws fun requestSuperCreator(authData: Authentication): User
 
   @Throws fun fetchProjectStatus(targetId: Long): ProjectStatus
 
