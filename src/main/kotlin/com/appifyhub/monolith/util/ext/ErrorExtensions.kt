@@ -35,6 +35,11 @@ fun throwPreconditionFailed(
   message: () -> Any = { "Resource not configured properly" },
 ): Nothing = throw ResponseStatusException(HttpStatus.PRECONDITION_REQUIRED, message().toString())
 
+@Throws(ResponseStatusException::class)
+fun throwNotVerified(
+  message: () -> Any = { "User is not verified" },
+): Nothing = throw ResponseStatusException(HttpStatus.UNAUTHORIZED, message().toString())
+
 // Miscellaneous
 
 @Throws(ResponseStatusException::class)

@@ -16,6 +16,7 @@ import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.util.ext.throwLocked
+import com.appifyhub.monolith.util.ext.throwNotVerified
 import com.appifyhub.monolith.util.ext.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
@@ -54,6 +55,9 @@ class AccessManagerImpl(
     val requesterUser = fetchUser(tokenDetails.ownerId)
     if (requesterUser.id == normalizedTargetId) return requesterUser
 
+    // fail if user is not verified
+    if (!requesterUser.isVerified) throwNotVerified()
+
     // static tokens are always allowed (unless it's creators looking for other creators)
     val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
     val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
@@ -88,8 +92,11 @@ class AccessManagerImpl(
     val isSameProjectRequest = tokenDetails.projectId == normalizedTargetId
     require(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
-    // static tokens are always allowed (unless it's creators looking for other creators)
+    // fail if user is not verified
     val requesterUser = fetchUser(tokenDetails.ownerId)
+    if (!requesterUser.isVerified) throwNotVerified()
+
+    // static tokens are always allowed (unless it's creators looking for other creators)
     val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
     val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
     if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchProject(normalizedTargetId)

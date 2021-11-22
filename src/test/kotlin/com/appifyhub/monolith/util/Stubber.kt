@@ -2,6 +2,7 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
@@ -12,6 +13,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.auth.AuthRepository
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.repository.creator.CreatorRepository
@@ -81,14 +83,32 @@ class Stubber(
 
   inner class Creators {
     fun owner() = creatorRepo.getCreatorOwner()
-    fun default(idSuffix: String = "") = ensureUser(DEFAULT, project = projects.creator(), idSuffix = idSuffix)
+    fun default(
+      idSuffix: String = "",
+      autoVerified: Boolean = true,
+    ) = ensureUser(DEFAULT, project = projects.creator(), idSuffix = idSuffix, autoVerified = autoVerified)
   }
 
   inner class Users(private val project: Project) {
-    fun owner(idSuffix: String = "") = ensureUser(OWNER, project = project, idSuffix = idSuffix)
-    fun admin(idSuffix: String = "") = ensureUser(ADMIN, project = project, idSuffix = idSuffix)
-    fun mod(idSuffix: String = "") = ensureUser(MODERATOR, project = project, idSuffix = idSuffix)
-    fun default(idSuffix: String = "") = ensureUser(DEFAULT, project = project, idSuffix = idSuffix)
+    fun owner(
+      idSuffix: String = "",
+      autoVerified: Boolean = true,
+    ) = ensureUser(OWNER, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+
+    fun admin(
+      idSuffix: String = "",
+      autoVerified: Boolean = true,
+    ) = ensureUser(ADMIN, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+
+    fun mod(
+      idSuffix: String = "",
+      autoVerified: Boolean = true,
+    ) = ensureUser(MODERATOR, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+
+    fun default(
+      idSuffix: String = "",
+      autoVerified: Boolean = true,
+    ) = ensureUser(DEFAULT, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
   }
 
   inner class ProjectTokens(private val project: Project) {
@@ -105,8 +125,9 @@ class Stubber(
       authority: Authority,
       isStatic: Boolean = false,
       idSuffix: String = "",
+      autoVerified: Boolean = true,
     ) = createToken(
-      user = ensureUser(authority = authority, project = project, idSuffix = idSuffix),
+      user = ensureUser(authority = authority, project = project, idSuffix = idSuffix, autoVerified = autoVerified),
       shouldStore = true,
       isStatic = isStatic,
     ).toJwt()
@@ -125,6 +146,7 @@ class Stubber(
     authority: Authority,
     project: Project,
     idSuffix: String,
+    autoVerified: Boolean,
   ): User = when {
     authority == OWNER && project == projects.creator() -> creators.owner()
     else -> "username_${authority.name.lowercase()}$idSuffix".let { userId ->
@@ -138,7 +160,17 @@ class Stubber(
             authority = authority,
           ),
           userIdType = project.userIdType,
-        )
+        ).let { user ->
+          if (autoVerified) {
+            userRepo.updateUser(
+              userIdType = project.userIdType,
+              updater = UserUpdater(
+                id = user.id,
+                verificationToken = Settable(null),
+              )
+            )
+          } else user
+        }
       } ?: userRepo.fetchUserByUserId(id = UserId(userId, project.id))
     }
   }

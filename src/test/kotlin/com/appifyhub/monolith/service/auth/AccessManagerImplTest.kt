@@ -164,6 +164,22 @@ class AccessManagerImplTest {
       }
   }
 
+  @Test fun `requesting user access fails when unverified`() {
+    val project = stubber.projects.new()
+    assertThat {
+      manager.requestUserAccess(
+        authData = stubber.tokens(project).real(OWNER, isStatic = true, autoVerified = false),
+        targetId = stubber.users(project).default().id,
+        privilege = USER_READ,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("not verified")
+      }
+  }
+
   @Test fun `requesting user access succeeds with requesting READ for self`() {
     assertThat(
       manager.requestUserAccess(
@@ -279,6 +295,22 @@ class AccessManagerImplTest {
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Only requests within the same project are allowed")
+      }
+  }
+
+  @Test fun `requesting project access fails when creator is unverified`() {
+    val project = stubber.projects.new()
+    assertThat {
+      manager.requestProjectAccess(
+        authData = stubber.tokens(project).real(OWNER, isStatic = true, autoVerified = false),
+        targetId = project.id,
+        privilege = PROJECT_READ,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("not verified")
       }
   }
 
@@ -412,22 +444,6 @@ class AccessManagerImplTest {
       manager.requestSuperCreator(token)
     ).isDataClassEqualTo(creator)
   }
-
-  /*
-  override fun requestSuperCreator(authData: Authentication): User {
-    log.debug("Authentication $authData requesting super creator access")
-
-    // validate request data and token
-    val jwt = authService.requireValidJwt(authData, shallow = false)
-    val tokenDetails = authService.fetchTokenDetails(jwt)
-
-    // allow request if it's the project creator requesting
-    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
-    require(isRequesterSuperOwner) { "Only requests from super owner are allowed" }
-
-    return fetchUser(tokenDetails.ownerId)
-  }
-  */
 
   // endregion
 
