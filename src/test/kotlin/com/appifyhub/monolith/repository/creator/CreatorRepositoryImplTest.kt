@@ -84,6 +84,11 @@ class CreatorRepositoryImplTest {
 
   // Getting
 
+  @Test fun `getting all creator projects works`() {
+    assertThat(repository.fetchAllProjects())
+      .isEqualTo(listOf(Stubs.project))
+  }
+
   @Test fun `getting creator project works`() {
     assertThat(repository.getCreatorProject())
       .isDataClassEqualTo(Stubs.project)

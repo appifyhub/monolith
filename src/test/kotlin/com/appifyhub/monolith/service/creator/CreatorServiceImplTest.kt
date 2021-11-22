@@ -3,6 +3,7 @@ package com.appifyhub.monolith.service.creator
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.hasClass
+import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
@@ -105,6 +106,11 @@ class CreatorServiceImplTest {
   @Test fun `get creator owner succeeds`() {
     assertThat(service.getCreatorOwner())
       .isNotNull()
+  }
+
+  @Test fun `fetching all creator projects succeeds`() {
+    assertThat(service.fetchAllProjects())
+      .hasSize(1)
   }
 
   @Test fun `fetch project by ID fails with invalid account ID`() {

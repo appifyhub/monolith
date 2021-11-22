@@ -431,8 +431,8 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("super owner are allowed")
+        hasClass(ResponseStatusException::class)
+        messageContains("from super owner are allowed")
       }
   }
 

@@ -13,6 +13,8 @@ interface CreatorService {
 
   @Throws fun getCreatorOwner(): User
 
+  @Throws fun fetchAllProjects(): List<Project>
+
   @Throws fun fetchProjectById(id: Long): Project
 
   @Throws fun fetchAllProjectsByCreator(creator: User): List<Project>

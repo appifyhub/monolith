@@ -78,6 +78,11 @@ class CreatorRepositoryImpl(
     return lazyCreatorOwner
   }
 
+  override fun fetchAllProjects(): List<Project> {
+    log.debug("Getting all creator projects")
+    return projectDao.findAll().map(ProjectDbm::toDomain)
+  }
+
   override fun fetchProjectById(id: Long): Project {
     log.debug("Fetching project by id $id")
     return projectDao.findById(id).get().toDomain()

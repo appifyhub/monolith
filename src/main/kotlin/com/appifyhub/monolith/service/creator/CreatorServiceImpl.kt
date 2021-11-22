@@ -38,6 +38,11 @@ class CreatorServiceImpl(
     return creatorRepository.addProject(projectInfo)
   }
 
+  override fun fetchAllProjects(): List<Project> {
+    log.debug("Getting all creator projects")
+    return creatorRepository.fetchAllProjects()
+  }
+
   override fun getCreatorProject(): Project {
     log.debug("Getting creator project")
     return creatorRepository.getCreatorProject()

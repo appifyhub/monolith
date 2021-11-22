@@ -18,6 +18,7 @@ import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.util.ext.throwLocked
 import com.appifyhub.monolith.util.ext.throwNotVerified
 import com.appifyhub.monolith.util.ext.throwPreconditionFailed
+import com.appifyhub.monolith.util.ext.throwUnauthorized
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -117,7 +118,7 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
-    require(isRequesterSuperOwner) { "Only requests from super owner are allowed" }
+    if (!isRequesterSuperOwner) throwUnauthorized { "Only requests from super owner are allowed" }
 
     return fetchUser(tokenDetails.ownerId)
   }

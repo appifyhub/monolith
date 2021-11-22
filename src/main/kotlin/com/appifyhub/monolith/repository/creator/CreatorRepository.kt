@@ -14,6 +14,8 @@ interface CreatorRepository {
 
   @Throws fun getCreatorOwner(): User
 
+  @Throws fun fetchAllProjects(): List<Project>
+
   @Throws fun fetchProjectById(id: Long): Project
 
   @Throws fun fetchAllProjectsByCreatorUserId(id: UserId): List<Project>
