@@ -2,7 +2,6 @@ package com.appifyhub.monolith.network.mapper
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
-import com.appifyhub.monolith.domain.creator.Project.Status
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
@@ -37,16 +36,6 @@ class CreatorMapperTest {
   @Test fun `project - domain to network`() {
     assertThat(Stubs.project.toNetwork(projectStatus = Stubs.projectStatus))
       .isDataClassEqualTo(Stubs.projectResponse)
-  }
-
-  @Test fun `project creator - network to domain (with user)`() {
-    assertThat(Stubs.projectCreateRequest.toDomain(owner = Stubs.user))
-      .isDataClassEqualTo(Stubs.projectCreator.copy(owner = Stubs.user, status = Status.REVIEW))
-  }
-
-  @Test fun `project creator - network to domain (without user)`() {
-    assertThat(Stubs.projectCreateRequest.toDomain())
-      .isDataClassEqualTo(Stubs.projectCreator.copy(status = Status.REVIEW))
   }
 
 }

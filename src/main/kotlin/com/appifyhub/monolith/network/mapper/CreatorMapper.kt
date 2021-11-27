@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.Property
 import com.appifyhub.monolith.domain.creator.property.PropertyCategory
@@ -9,11 +8,9 @@ import com.appifyhub.monolith.domain.creator.property.PropertyTag
 import com.appifyhub.monolith.domain.creator.property.PropertyType
 import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
-import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.network.creator.ProjectFeatureDto
 import com.appifyhub.monolith.network.creator.ProjectResponse
 import com.appifyhub.monolith.network.creator.ProjectStatusDto
-import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
@@ -70,13 +67,4 @@ fun Project.toNetwork(
   userIdType = userIdType.name,
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
   updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
-)
-
-fun ProjectCreateRequest.toDomain(
-  owner: User? = null,
-): ProjectCreator = ProjectCreator(
-  owner = owner,
-  type = Project.Type.find(type, Project.Type.COMMERCIAL),
-  status = Project.Status.REVIEW,
-  userIdType = Project.UserIdType.find(userIdType, Project.UserIdType.RANDOM),
 )

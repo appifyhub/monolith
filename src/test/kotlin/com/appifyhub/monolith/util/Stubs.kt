@@ -664,9 +664,9 @@ object Stubs {
   )
 
   val projectCreateRequest = ProjectCreateRequest(
-    ownerUniversalId = universalUserId,
     type = "OPENSOURCE",
     userIdType = "USERNAME",
+    ownerUniversalId = universalUserId,
   )
 
   // endregion

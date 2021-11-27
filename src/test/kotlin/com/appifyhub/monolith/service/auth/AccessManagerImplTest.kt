@@ -406,6 +406,64 @@ class AccessManagerImplTest {
 
   // endregion
 
+  // region Creator access
+
+  @Test fun `requesting creator fails with expired token`() {
+    val token = stubber.creatorTokens().real(OWNER)
+    timeProvider.advanceBy(Duration.ofDays(2))
+
+    assertThat {
+      manager.requestCreator(token, isMatchingId = null)
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalAccessException::class)
+        messageContains("Invalid token for")
+      }
+  }
+
+  @Test fun `requesting creator fails with mismatching project`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).owner()
+    val token = stubber.tokens(user).real()
+
+    assertThat {
+      manager.requestCreator(token, isMatchingId = null)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("from creators are allowed")
+      }
+  }
+
+  @Test fun `requesting creator fails with mismatching user ID`() {
+    val creator1 = stubber.creators.default()
+    val creator2 = stubber.creators.default(idSuffix = "_other")
+    val token = stubber.tokens(creator1).real()
+
+    assertThat {
+      manager.requestCreator(token, isMatchingId = creator2.id)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("${creator2.id.toUniversalFormat()} are allowed")
+      }
+  }
+
+  @Test fun `requesting creator succeeds with correct requester`() {
+    val creator = stubber.creators.owner()
+    val token = stubber.tokens(creator).real()
+
+    assertThat(
+      manager.requestCreator(token, isMatchingId = null)
+    ).isDataClassEqualTo(creator)
+  }
+
+  // endregion
+
   // region Super creator access
 
   @Test fun `requesting super creator fails with expired token`() {
@@ -422,7 +480,7 @@ class AccessManagerImplTest {
       }
   }
 
-  @Test fun `requesting super creator fails with mismatching requester`() {
+  @Test fun `requesting super creator fails with mismatching authority`() {
     val creator = stubber.creators.default()
     val token = stubber.tokens(creator).real()
 
@@ -432,7 +490,21 @@ class AccessManagerImplTest {
       .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
-        messageContains("from super owner are allowed")
+        messageContains("from super creator are allowed")
+      }
+  }
+
+  @Test fun `requesting super creator fails with mismatching user ID`() {
+    val creator = stubber.creators.default()
+    val token = stubber.tokens(creator).real()
+
+    assertThat {
+      manager.requestSuperCreator(token)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("from super creator are allowed")
       }
   }
 

@@ -20,7 +20,6 @@ interface AccessManager {
     USER_WRITE(ADMIN),
     PROJECT_READ(OWNER),
     PROJECT_WRITE(OWNER),
-    PROJECT_CREATE(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {
@@ -32,6 +31,8 @@ interface AccessManager {
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User
 
   @Throws fun requestProjectAccess(authData: Authentication, targetId: Long, privilege: Privilege): Project
+
+  @Throws fun requestCreator(authData: Authentication, isMatchingId: UserId?): User
 
   @Throws fun requestSuperCreator(authData: Authentication): User
 

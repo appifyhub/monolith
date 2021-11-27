@@ -109,6 +109,25 @@ class AccessManagerImpl(
     return fetchProject(normalizedTargetId)
   }
 
+  override fun requestCreator(authData: Authentication, isMatchingId: UserId?): User {
+    log.debug("Authentication $authData requesting creator access, matchingId = $isMatchingId")
+
+    // validate request data and token
+    val jwt = authService.requireValidJwt(authData, shallow = false)
+    val tokenDetails = authService.fetchTokenDetails(jwt)
+
+    val isRequesterCreator = getCreatorProject().id != tokenDetails.ownerId.projectId
+    if (isRequesterCreator)
+      throwUnauthorized { "Only requests from creators are allowed" }
+
+    isMatchingId?.let {
+      if (it != tokenDetails.ownerId)
+        throwUnauthorized { "Only requests from ${it.toUniversalFormat()} are allowed" }
+    }
+
+    return fetchUser(tokenDetails.ownerId)
+  }
+
   override fun requestSuperCreator(authData: Authentication): User {
     log.debug("Authentication $authData requesting super creator access")
 
@@ -118,7 +137,7 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
-    if (!isRequesterSuperOwner) throwUnauthorized { "Only requests from super owner are allowed" }
+    if (!isRequesterSuperOwner) throwUnauthorized { "Only requests from super creator are allowed" }
 
     return fetchUser(tokenDetails.ownerId)
   }

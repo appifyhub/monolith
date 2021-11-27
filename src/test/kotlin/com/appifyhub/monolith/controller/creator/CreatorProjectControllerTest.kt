@@ -3,18 +3,22 @@ package com.appifyhub.monolith.controller.creator
 import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNotEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.creator.CreatorProjectController.Endpoints.ANY_PROJECT
 import com.appifyhub.monolith.controller.creator.CreatorProjectController.Endpoints.PROJECTS
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.creator.ProjectResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.util.Stubber
+import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.blankUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -56,6 +60,86 @@ class CreatorProjectControllerTest {
   @AfterEach fun teardown() {
     timeProvider.staticTime = { null }
   }
+
+  // region Create a project
+
+  @Test fun `create a project fails when unauthorized`() {
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS",
+        method = HttpMethod.POST,
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `create a project fails when not creator`() {
+    val project = stubber.projects.new()
+    val user = stubber.users(project).owner()
+    val token = stubber.tokens(user).real().token.tokenValue
+    val request = Stubs.projectCreateRequest.copy(ownerUniversalId = user.id.toUniversalFormat())
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS",
+        method = HttpMethod.POST,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `create a project fails when mismatching owner`() {
+    val creator1 = stubber.creators.default()
+    val creator2 = stubber.creators.default(idSuffix = "_other")
+    val token = stubber.tokens(creator1).real().token.tokenValue
+    val request = Stubs.projectCreateRequest.copy(ownerUniversalId = creator2.id.toUniversalFormat())
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS",
+        method = HttpMethod.POST,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `create a project succeeds`() {
+    val creator = stubber.creators.default()
+    val token = stubber.tokens(creator).real().token.tokenValue
+    val request = Stubs.projectCreateRequest.copy(ownerUniversalId = creator.id.toUniversalFormat())
+
+    assertThat(
+      restTemplate.exchange<ProjectResponse>(
+        url = "$baseUrl$PROJECTS",
+        method = HttpMethod.POST,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!!.status.status }
+        .isEqualTo(Project.Status.REVIEW.toString())
+      transform { it.body!!.userIdType }
+        .isEqualTo(Stubs.projectResponse.userIdType)
+      transform { it.body!!.projectId }
+        .isNotEqualTo(stubber.projects.creator().id)
+    }
+  }
+
+  // endregion
+
+  // region Get all projects
 
   @Test fun `get all projects fails when unauthorized`() {
     assertThat(
@@ -106,12 +190,21 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       // list ordering is problematic for comparisons, so just comparing the basics
-      transform { it.body!!.first().projectId to it.body!!.first().status.status }
-        .isEqualTo(creatorProjectResponse.projectId to creatorProjectResponse.status.status)
-      transform { it.body!![1].projectId to it.body!![1].status.status }
-        .isEqualTo(projectResponse.projectId to projectResponse.status.status)
+      transform { it.body!!.first().projectId }
+        .isEqualTo(creatorProjectResponse.projectId)
+      transform { it.body!!.first().status.status }
+        .isEqualTo(creatorProjectResponse.status.status)
+
+      transform { it.body!![1].projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!![1].status.status }
+        .isEqualTo(projectResponse.status.status)
     }
   }
+
+  // endregion
+
+  // region Get any project
 
   @Test fun `get any project fails when unauthorized`() {
     val project = stubber.projects.new()
@@ -148,9 +241,13 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       // list ordering is problematic for comparisons, so just comparing the basics
-      transform { it.body!!.projectId to it.body!!.status.status }
-        .isEqualTo(projectResponse.projectId to projectResponse.status.status)
+      transform { it.body!!.projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.status.status }
+        .isEqualTo(projectResponse.status.status)
     }
   }
+
+  // endregion
 
 }
