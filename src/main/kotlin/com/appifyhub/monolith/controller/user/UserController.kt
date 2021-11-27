@@ -32,6 +32,11 @@ class UserController(
   ): UserResponse {
     log.debug("[GET] universal user $universalId")
 
+    // FIXME missing checks
+    //   - project is active
+    //   - user is verified (maybe here for 'self' access is allowed?)
+    //   - READ permissions allowed
+
     // get auth data
     val shallowUser = authService.resolveShallowUser(
       authData = authentication,

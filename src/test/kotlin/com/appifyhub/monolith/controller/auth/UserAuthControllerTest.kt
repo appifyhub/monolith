@@ -12,7 +12,9 @@ import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.auth.UserAuthController.Endpoints.AUTH
 import com.appifyhub.monolith.controller.auth.UserAuthController.Endpoints.TOKENS
+import com.appifyhub.monolith.domain.creator.Project.Status
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
+import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
@@ -85,6 +87,25 @@ class UserAuthControllerTest {
     }
   }
 
+  @Test fun `auth user fails for non-functional project`() {
+    val project = stubber.projects.new(status = Status.REVIEW)
+    val user = stubber.users(project).owner()
+    val credentials = Stubs.userCredentialsRequest.copy(
+      universalId = user.id.toUniversalFormat(),
+    )
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$AUTH",
+        method = HttpMethod.POST,
+        requestEntity = bodyRequest(credentials),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = UserCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
@@ -118,7 +139,23 @@ class UserAuthControllerTest {
     }
   }
 
-  @Test fun `get token succeeds with valid authorization`() {
+  @Test fun `get current token fails for non-functional project`() {
+    val project = stubber.projects.new(status = Status.REVIEW)
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$AUTH",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `get current token succeeds with valid authorization`() {
     val user = stubber.creators.default()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -147,6 +184,22 @@ class UserAuthControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `get all tokens fails for non-functional project`() {
+    val project = stubber.projects.new(status = Status.REVIEW)
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$TOKENS",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
   }
 
@@ -186,6 +239,22 @@ class UserAuthControllerTest {
     }
   }
 
+  @Test fun `refresh user fails for non-functional project`() {
+    val project = stubber.projects.new(status = Status.REVIEW)
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$AUTH",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = blankUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
   @Test fun `refresh user succeeds with valid authorization`() {
     val token = stubber.creatorTokens().real(DEFAULT).token.tokenValue
 
@@ -215,6 +284,22 @@ class UserAuthControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `unauth user fails for non-functional project`() {
+    val project = stubber.projects.new(status = Status.REVIEW)
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$AUTH?all={all}",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("all" to null),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
   }
 
@@ -275,6 +360,25 @@ class UserAuthControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `unauth tokens fails for non-functional project`() {
+    val project = stubber.projects.new(status = Status.REVIEW)
+    val token = stubber.tokens(project).real(OWNER).token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf(
+          "token1" to null,
+          "token2" to null,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
   }
 

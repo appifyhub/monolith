@@ -61,8 +61,6 @@ class CreatorProjectControllerTest {
     timeProvider.staticTime = { null }
   }
 
-  // region Create a project
-
   @Test fun `create a project fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -137,10 +135,6 @@ class CreatorProjectControllerTest {
     }
   }
 
-  // endregion
-
-  // region Get all projects
-
   @Test fun `get all projects fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -202,10 +196,6 @@ class CreatorProjectControllerTest {
     }
   }
 
-  // endregion
-
-  // region Get any project
-
   @Test fun `get any project fails when unauthorized`() {
     val project = stubber.projects.new()
 
@@ -247,7 +237,5 @@ class CreatorProjectControllerTest {
         .isEqualTo(projectResponse.status.status)
     }
   }
-
-  // endregion
 
 }

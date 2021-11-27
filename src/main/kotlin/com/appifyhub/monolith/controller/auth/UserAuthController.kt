@@ -8,6 +8,7 @@ import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
+import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.auth.AuthService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class UserAuthController(
   private val authService: AuthService,
+  private val accessManager: AccessManager,
 ) : RequestIpAddressHolder {
 
   object Endpoints {
@@ -43,6 +45,8 @@ class UserAuthController(
     log.debug("[POST] auth user with $creds")
 
     val user = authService.resolveUser(creds.universalId, creds.secret)
+      .also { accessManager.requireProjectFunctional(it.id.projectId) }
+
     val tokenValue = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
 
     return tokenResponseOf(tokenValue)
@@ -54,6 +58,7 @@ class UserAuthController(
   ): TokenDetailsResponse {
     log.debug("[GET] get current token")
     val currentToken = authService.fetchTokenDetails(authentication)
+      .also { accessManager.requireProjectFunctional(it.ownerId.projectId) }
     return currentToken.toNetwork()
   }
 
@@ -64,12 +69,18 @@ class UserAuthController(
   ): List<TokenDetailsResponse> {
     log.debug("[GET] get all tokens, [valid $valid]")
     val tokens = authService.fetchAllTokenDetails(authentication, valid)
+      .also { accessManager.requireProjectFunctional(it.first().ownerId.projectId) }
     return tokens.map(TokenDetails::toNetwork)
   }
 
   @PutMapping(Endpoints.AUTH)
   fun refreshUser(authentication: Authentication): TokenResponse {
     log.debug("[PUT] refresh user with $authentication")
+
+    accessManager.requireProjectFunctional(
+      targetId = authService.fetchTokenDetails(authentication).ownerId.projectId
+    )
+
     val tokenValue = authService.refreshAuth(authentication, getRequestIpAddress())
     return tokenResponseOf(tokenValue)
   }
@@ -80,6 +91,10 @@ class UserAuthController(
     @RequestParam(required = false) all: Boolean? = false,
   ): MessageResponse {
     log.debug("[DELETE] unauth user with $authentication, [all $all]")
+
+    accessManager.requireProjectFunctional(
+      targetId = authService.fetchTokenDetails(authentication).ownerId.projectId
+    )
 
     if (all == true) {
       authService.unauthorizeAll(authentication)
@@ -96,6 +111,11 @@ class UserAuthController(
     @RequestParam tokenIds: List<String>,
   ): MessageResponse {
     log.debug("[DELETE] unauth tokens $tokenIds")
+
+    accessManager.requireProjectFunctional(
+      targetId = authService.fetchTokenDetails(authentication).ownerId.projectId
+    )
+
     authService.unauthorizeTokens(authentication, tokenIds)
     return MessageResponse.DONE
   }
