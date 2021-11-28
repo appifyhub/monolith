@@ -15,8 +15,10 @@ data class Project(
     USERNAME, EMAIL, PHONE, RANDOM, CUSTOM;
 
     companion object {
-      fun find(name: String, default: UserIdType) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: UserIdType? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 
@@ -24,8 +26,10 @@ data class Project(
     OPENSOURCE, COMMERCIAL, FREE;
 
     companion object {
-      fun find(name: String, default: Type) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: Type? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 
@@ -33,8 +37,10 @@ data class Project(
     REVIEW, ACTIVE, BLOCKED, SUSPENDED;
 
     companion object {
-      fun find(name: String, default: Status) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: Status? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 

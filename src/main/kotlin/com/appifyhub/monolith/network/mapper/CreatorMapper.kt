@@ -17,16 +17,18 @@ import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryPa
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 
+// @formatter:off
 fun PropertyFilterQueryParams.toDomain(): PropertyFilter = PropertyFilter(
-  type = type?.let { PropertyType.find(it)!! },
-  category = category?.let { PropertyCategory.find(it)!! },
+  type = type?.let { PropertyType.findOrNull(it)!! },
+  category = category?.let { PropertyCategory.findOrNull(it)!! },
   nameContains = name_contains,
   isMandatory = mandatory,
   isSecret = secret,
   isDeprecated = deprecated,
-  mustHaveTags = must_have_tags?.map { PropertyTag.find(it)!! }?.takeIf { it.isNotEmpty() }?.toSet(),
-  hasAtLeastOneOfTags = has_at_least_one_of_tags?.map { PropertyTag.find(it)!! }?.takeIf { it.isNotEmpty() }?.toSet(),
+  mustHaveTags = must_have_tags?.map { PropertyTag.findOrNull(it)!! }?.takeIf { it.isNotEmpty() }?.toSet(),
+  hasAtLeastOneOfTags = has_at_least_one_of_tags?.map { PropertyTag.findOrNull(it)!! }?.takeIf { it.isNotEmpty() }?.toSet(), // ktlint-disable max-line-length
 )
+// @formatter:on
 
 fun ProjectProperty.toNetwork(): PropertyConfigurationResponse = PropertyConfigurationResponse(
   name = name,

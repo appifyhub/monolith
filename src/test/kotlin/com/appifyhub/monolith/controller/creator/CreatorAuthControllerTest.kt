@@ -9,14 +9,14 @@ import assertk.assertions.isFalse
 import assertk.assertions.isNotEmpty
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.creator.CreatorAuthController.Endpoints.CREATOR_API_KEY
-import com.appifyhub.monolith.controller.creator.CreatorAuthController.Endpoints.CREATOR_AUTH
-import com.appifyhub.monolith.controller.creator.CreatorAuthController.Endpoints.ANY_USER_AUTH
-import com.appifyhub.monolith.controller.creator.CreatorAuthController.Endpoints.ANY_USER_TOKENS
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_AUTH
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_TOKENS
+import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_API_KEY
+import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_AUTH
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.ApiKeyRequest
+import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -74,7 +74,7 @@ class CreatorAuthControllerTest {
     val credentials = CreatorCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
       secret = "invalid",
-      origin = Stubs.userCredentialsRequest.origin,
+      origin = Stubs.creatorCredentialsRequest.origin,
     )
 
     assertThat(
@@ -92,8 +92,8 @@ class CreatorAuthControllerTest {
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = CreatorCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
-      secret = Stubs.userCredentialsRequest.secret,
-      origin = Stubs.userCredentialsRequest.origin,
+      secret = Stubs.creatorCredentialsRequest.secret,
+      origin = Stubs.creatorCredentialsRequest.origin,
     )
 
     assertThat(
@@ -125,7 +125,7 @@ class CreatorAuthControllerTest {
   @Test fun `create api key succeeds with valid credentials`() {
     val ownerToken = stubber.creatorTokens().real(OWNER).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
-    val keyData = ApiKeyRequest(origin = Stubs.userCredentialsRequest.origin)
+    val keyData = ApiKeyRequest(origin = Stubs.creatorCredentialsRequest.origin)
 
     assertThat(
       restTemplate.exchange<TokenResponse>(

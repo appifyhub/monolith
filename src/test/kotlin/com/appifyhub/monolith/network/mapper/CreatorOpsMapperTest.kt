@@ -18,4 +18,9 @@ class CreatorOpsMapperTest {
       .isDataClassEqualTo(Stubs.projectCreator.copy(status = Project.Status.REVIEW))
   }
 
+  @Test fun `project updater - network to domain`() {
+    assertThat(Stubs.projectUpdateRequest.toDomain(Stubs.project.id))
+      .isDataClassEqualTo(Stubs.projectUpdater.copy())
+  }
+
 }

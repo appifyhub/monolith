@@ -5,7 +5,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.creator.CreatorUserController.Endpoints.ANY_USER
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper

@@ -104,7 +104,7 @@ class CreatorServiceImplTest {
   }
 
   @Test fun `get creator owner succeeds`() {
-    assertThat(service.getCreatorOwner())
+    assertThat(service.getSuperCreator())
       .isNotNull()
   }
 

@@ -70,7 +70,7 @@ fun Property.Companion.instantiate(
 }
 
 fun PropertyDbm.toDomain(): Property<*> = Property.instantiate(
-  config = ProjectProperty.find(name = id.name)!!,
+  config = ProjectProperty.findOrNull(name = id.name)!!,
   projectId = id.projectId,
   rawValue = rawValue,
   updatedAt = updatedAt,

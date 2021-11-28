@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.controller.creator
 
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.creator.ProjectResponse
 import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -21,11 +23,6 @@ class CreatorProjectController(
   private val creatorService: CreatorService,
   private val accessManager: AccessManager,
 ) {
-
-  object Endpoints {
-    const val PROJECTS = "/v1/projects"
-    const val ANY_PROJECT = "/v1/projects/{projectId}"
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -37,7 +34,7 @@ class CreatorProjectController(
     log.debug("[POST] create a new project with $projectRequest")
 
     val ownerId = UserId.fromUniversalFormat(projectRequest.ownerUniversalId)
-    val requester = accessManager.requestCreator(authentication, isMatchingId = ownerId)
+    val requester = accessManager.requestCreator(authentication, matchesId = ownerId, requireVerified = true)
     val projectData = projectRequest.toDomain(owner = requester)
     val project = creatorService.addProject(projectData)
     val status = accessManager.fetchProjectStatus(project.id)
@@ -46,17 +43,25 @@ class CreatorProjectController(
   }
 
   @GetMapping(Endpoints.PROJECTS)
-  fun getAllProjects(
+  fun getProjects(
     authentication: Authentication,
+    @RequestParam(required = false) universalCreatorId: String? = null,
   ): List<ProjectResponse> {
-    log.debug("[GET] get all creator projects")
+    log.debug("[GET] get creator projects, universalCreatorId = $universalCreatorId")
 
-    accessManager.requestSuperCreator(authentication)
+    val creatorId = universalCreatorId?.let { UserId.fromUniversalFormat(it) }
+    val creator = accessManager.requestCreator(authentication, matchesId = creatorId, requireVerified = true)
 
-    val projects = creatorService.fetchAllProjects()
-    return projects.map { project ->
-      val status = accessManager.fetchProjectStatus(project.id)
-      project.toNetwork(status)
+    val projects = if (universalCreatorId != null) {
+      creatorService.fetchAllProjectsByCreator(creator)
+    } else {
+      creatorService.fetchAllProjects()
+    }
+
+    return projects.map {
+      it.toNetwork(
+        projectStatus = accessManager.fetchProjectStatus(it.id),
+      )
     }
   }
 

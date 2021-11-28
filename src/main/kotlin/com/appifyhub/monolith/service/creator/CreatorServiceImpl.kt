@@ -48,9 +48,9 @@ class CreatorServiceImpl(
     return creatorRepository.getCreatorProject()
   }
 
-  override fun getCreatorOwner(): User {
+  override fun getSuperCreator(): User {
     log.debug("Getting creator owner")
-    return creatorRepository.getCreatorOwner()
+    return creatorRepository.getSuperCreator()
   }
 
   override fun fetchProjectById(id: Long): Project {

@@ -32,7 +32,7 @@ interface AccessManager {
 
   @Throws fun requestProjectAccess(authData: Authentication, targetId: Long, privilege: Privilege): Project
 
-  @Throws fun requestCreator(authData: Authentication, isMatchingId: UserId?): User
+  @Throws fun requestCreator(authData: Authentication, matchesId: UserId?, requireVerified: Boolean): User
 
   @Throws fun requestSuperCreator(authData: Authentication): User
 

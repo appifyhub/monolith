@@ -44,7 +44,7 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterProjectCreator = fetchCreator(normalizedTargetId.projectId)?.id == tokenDetails.ownerId
-    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
+    val isRequesterSuperOwner = getSuperCreator().id == tokenDetails.ownerId
     if (isRequesterProjectCreator || isRequesterSuperOwner) return fetchUser(normalizedTargetId)
 
     // not project creator; validate that the project matches
@@ -86,7 +86,7 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterProjectCreator = fetchCreator(normalizedTargetId)?.id == tokenDetails.ownerId
-    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
+    val isRequesterSuperOwner = getSuperCreator().id == tokenDetails.ownerId
     if (isRequesterProjectCreator || isRequesterSuperOwner) return fetchProject(normalizedTargetId)
 
     // not project creator; validate that the project matches
@@ -109,8 +109,11 @@ class AccessManagerImpl(
     return fetchProject(normalizedTargetId)
   }
 
-  override fun requestCreator(authData: Authentication, isMatchingId: UserId?): User {
-    log.debug("Authentication $authData requesting creator access, matchingId = $isMatchingId")
+  override fun requestCreator(authData: Authentication, matchesId: UserId?, requireVerified: Boolean): User {
+    log.debug(
+      "Authentication $authData requesting creator access," +
+        " matchingId = $matchesId, mustBeVerified = $requireVerified"
+    )
 
     // validate request data and token
     val jwt = authService.requireValidJwt(authData, shallow = false)
@@ -120,12 +123,18 @@ class AccessManagerImpl(
     if (isRequesterCreator)
       throwUnauthorized { "Only requests from creators are allowed" }
 
-    isMatchingId?.let {
-      if (it != tokenDetails.ownerId)
+    matchesId?.let {
+      val isSuperCreator = getSuperCreator().id == tokenDetails.ownerId
+      val isMatchingId = it == tokenDetails.ownerId
+      if (!isSuperCreator && !isMatchingId)
         throwUnauthorized { "Only requests from ${it.toUniversalFormat()} are allowed" }
     }
 
-    return fetchUser(tokenDetails.ownerId)
+    val creator = fetchUser(matchesId ?: tokenDetails.ownerId)
+    if (requireVerified && !creator.isVerified)
+      throwUnauthorized { "Requester must be verified" }
+
+    return creator
   }
 
   override fun requestSuperCreator(authData: Authentication): User {
@@ -136,7 +145,7 @@ class AccessManagerImpl(
     val tokenDetails = authService.fetchTokenDetails(jwt)
 
     // allow request if it's the project creator requesting
-    val isRequesterSuperOwner = getCreatorOwner().id == tokenDetails.ownerId
+    val isRequesterSuperOwner = getSuperCreator().id == tokenDetails.ownerId
     if (!isRequesterSuperOwner) throwUnauthorized { "Only requests from super creator are allowed" }
 
     return fetchUser(tokenDetails.ownerId)
@@ -205,7 +214,7 @@ class AccessManagerImpl(
 
   private fun getCreatorProject() = creatorService.getCreatorProject()
 
-  private fun getCreatorOwner() = creatorService.getCreatorOwner()
+  private fun getSuperCreator() = creatorService.getSuperCreator()
 
   private fun fetchCreator(projectId: Long) = silent(log = false) { creatorService.fetchProjectCreator(projectId) }
 

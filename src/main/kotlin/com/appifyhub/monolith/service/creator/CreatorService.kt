@@ -11,7 +11,7 @@ interface CreatorService {
 
   @Throws fun getCreatorProject(): Project
 
-  @Throws fun getCreatorOwner(): User
+  @Throws fun getSuperCreator(): User
 
   @Throws fun fetchAllProjects(): List<Project>
 

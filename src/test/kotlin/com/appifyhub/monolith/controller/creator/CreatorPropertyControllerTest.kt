@@ -8,9 +8,9 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.creator.CreatorPropertyController.Endpoints.CONFIGURATIONS
-import com.appifyhub.monolith.controller.creator.CreatorPropertyController.Endpoints.PROPERTIES
-import com.appifyhub.monolith.controller.creator.CreatorPropertyController.Endpoints.PROPERTY
+import com.appifyhub.monolith.controller.common.Endpoints.CONFIGURATIONS
+import com.appifyhub.monolith.controller.common.Endpoints.PROPERTIES
+import com.appifyhub.monolith.controller.common.Endpoints.PROPERTY
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.DESCRIPTION
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.LOGO_URL
@@ -20,13 +20,13 @@ import com.appifyhub.monolith.domain.creator.property.Property
 import com.appifyhub.monolith.domain.creator.property.PropertyCategory
 import com.appifyhub.monolith.domain.creator.property.PropertyType
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
+import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.MultiplePropertiesSaveRequest
-import com.appifyhub.monolith.network.creator.property.ops.PropertyValueDto
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.creator.property.ops.PropertySaveRequest
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.creator.property.ops.PropertyValueDto
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.service.creator.PropertyService
@@ -108,7 +108,7 @@ class CreatorPropertyControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { response -> response.body!!.map { ProjectProperty.find(it.name)!! }.sorted() }
+      transform { response -> response.body!!.map { ProjectProperty.findOrNull(it.name)!! }.sorted() }
         .isEqualTo(ProjectProperty.filter().sorted())
     }
   }

@@ -99,7 +99,7 @@ class CreatorRepositoryImplTest {
       onGeneric { fetchAllUsersByProjectId(Stubs.project.id) } doReturn listOf(Stubs.user.copy(authority = OWNER))
     }
 
-    assertThat(repository.getCreatorOwner())
+    assertThat(repository.getSuperCreator())
       .isDataClassEqualTo(Stubs.user.copy(authority = OWNER))
   }
 

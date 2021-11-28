@@ -131,7 +131,7 @@ class PropertyServiceImpl(
   }
 
   @Throws private fun requireConfig(propName: String) =
-    ProjectProperty.find(propName) ?: throwPropertyNotFound(propName)
+    ProjectProperty.findOrNull(propName) ?: throwPropertyNotFound(propName)
 
   @Throws private fun requireFilter(queryParams: PropertyFilterQueryParams?): PropertyFilter? = try {
     queryParams?.toDomain()

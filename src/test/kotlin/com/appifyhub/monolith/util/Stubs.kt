@@ -30,6 +30,7 @@ import com.appifyhub.monolith.network.creator.ProjectFeatureDto
 import com.appifyhub.monolith.network.creator.ProjectResponse
 import com.appifyhub.monolith.network.creator.ProjectStatusDto
 import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
@@ -54,7 +55,7 @@ import com.appifyhub.monolith.storage.model.user.UserIdDbm
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-@Suppress("MemberVisibilityCanBePrivate", "unused", "MayBeConstant")
+@Suppress("MayBeConstant")
 object Stubs {
 
   // region Auth Models
@@ -131,6 +132,7 @@ object Stubs {
     isStatic = false,
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   var tokenDetailsStatic = TokenDetails(
     tokenValue = tokenValueStatic,
     isBlocked = true,
@@ -181,6 +183,7 @@ object Stubs {
     updatedAt = Date(0xFF0000),
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propStringName = Property.StringProp(
     config = ProjectProperty.NAME,
     projectId = project.id,
@@ -209,6 +212,7 @@ object Stubs {
     updatedAt = Date(0xFF0000),
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propFlagOnHold = Property.FlagProp(
     config = ProjectProperty.ON_HOLD,
     projectId = project.id,
@@ -277,6 +281,7 @@ object Stubs {
     company = companyDbm,
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val projectCreationKeyDbm = ProjectCreationKeyDbm(
     creatorUserId = user.id.userId,
     creatorProjectId = user.id.projectId,
@@ -304,8 +309,10 @@ object Stubs {
 
   val propIntegerIdDbm = PropertyIdDbm(propInteger.config.name, propInteger.projectId)
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propDecimalIdDbm = PropertyIdDbm(propDecimal.config.name, propDecimal.projectId)
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propFlagIdDbm = PropertyIdDbm(propFlag.config.name, propFlag.projectId)
 
   val propStringDbm = PropertyDbm(
@@ -340,19 +347,7 @@ object Stubs {
 
   // region Domain Models (with updated values)
 
-  var tokenDetailsUpdated = TokenDetails(
-    tokenValue = tokenValue + "1",
-    isBlocked = true,
-    createdAt = Date(0xC30001),
-    expiresAt = Date(0xE00001),
-    ownerId = userId,
-    authority = User.Authority.ADMIN,
-    origin = "Token Origin 1",
-    ipAddress = ipAddress.reversed(),
-    geo = "$geoMerged 1",
-    isStatic = false,
-  )
-
+  @Suppress("MemberVisibilityCanBePrivate")
   val companyUpdated = company.copy(
     name = "Company 1",
     street = "Street Name 11",
@@ -361,6 +356,7 @@ object Stubs {
     countryCode = "DF",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val companyUpdatedDbm = OrganizationDbm(
     name = "Company 1",
     street = "Street Name 11",
@@ -408,15 +404,6 @@ object Stubs {
     status = Project.Status.SUSPENDED,
     userIdType = project.userIdType,
     createdAt = project.createdAt,
-    updatedAt = Date(0xA20001),
-  )
-
-  val projectUpdatedDbm = ProjectDbm(
-    projectId = project.id,
-    type = "FREE",
-    status = "SUSPENDED",
-    userIdType = projectDbm.userIdType,
-    createdAt = projectDbm.createdAt,
     updatedAt = Date(0xA20001),
   )
 
@@ -568,9 +555,9 @@ object Stubs {
   )
 
   val creatorCredentialsRequest = CreatorCredentialsRequest(
-    universalId = universalUserId,
-    secret = "password",
-    origin = "Token Origin",
+    universalId = userCredentialsRequest.universalId,
+    secret = userCredentialsRequest.secret,
+    origin = userCredentialsRequest.origin,
   )
 
   val propertyFilterQueryParams = PropertyFilterQueryParams(
@@ -595,6 +582,7 @@ object Stubs {
     isDeprecated = ProjectProperty.GENERIC_STRING.isDeprecated,
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propertyConfigurationResponseName = PropertyConfigurationResponse(
     name = ProjectProperty.NAME.name,
     type = ProjectProperty.NAME.type.name,
@@ -606,6 +594,7 @@ object Stubs {
     isDeprecated = ProjectProperty.NAME.isDeprecated,
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propertyConfigurationResponseOnHold = PropertyConfigurationResponse(
     name = ProjectProperty.ON_HOLD.name,
     type = ProjectProperty.ON_HOLD.type.name,
@@ -623,12 +612,14 @@ object Stubs {
     updatedAt = "1970-01-01 04:38",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propertyResponseName = PropertyResponse(
     config = propertyConfigurationResponseName,
     rawValue = "name",
     updatedAt = "1970-01-01 04:38",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val propertyResponseOnHold = PropertyResponse(
     config = propertyConfigurationResponseOnHold,
     rawValue = "false",
@@ -661,12 +652,6 @@ object Stubs {
     userIdType = project.userIdType.name,
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
-  )
-
-  val projectCreateRequest = ProjectCreateRequest(
-    type = "OPENSOURCE",
-    userIdType = "USERNAME",
-    ownerUniversalId = universalUserId,
   )
 
   // endregion
@@ -706,16 +691,15 @@ object Stubs {
     company = SettableRequest(companyUpdaterDto),
   )
 
-  // endregion
+  val projectCreateRequest = ProjectCreateRequest(
+    type = "OPENSOURCE",
+    userIdType = "USERNAME",
+    ownerUniversalId = universalUserId,
+  )
 
-  // region Network Models Updated
-
-  val companyDtoUpdated = companyDto.copy(
-    name = "Company 1",
-    street = "Street Name 11",
-    postcode = "123451",
-    city = "City 1",
-    countryCode = "DF",
+  val projectUpdateRequest = ProjectUpdateRequest(
+    type = SettableRequest("FREE"),
+    status = SettableRequest("SUSPENDED"),
   )
 
   // endregion

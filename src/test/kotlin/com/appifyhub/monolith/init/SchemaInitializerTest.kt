@@ -68,7 +68,7 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
-    assertThat { runInitializer(creatorOwnerName = " ") }
+    assertThat { runInitializer(superCreatorName = " ") }
       .isFailure()
       .messageContains("Owner Name")
 
@@ -76,7 +76,7 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
-    assertThat { runInitializer(creatorOwnerEmail = " ") }
+    assertThat { runInitializer(superCreatorEmail = " ") }
       .isFailure()
       .messageContains("Owner Email")
 
@@ -98,7 +98,7 @@ class SchemaInitializerTest {
       on { updateUser(any()) } doReturn user
     }
 
-    assertThat { runInitializer(creatorOwnerSecret = "root secret") }
+    assertThat { runInitializer(superCreatorSecret = "root secret") }
       .isSuccess()
 
     verify(creatorService).addProject(
@@ -161,7 +161,7 @@ class SchemaInitializerTest {
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(creatorOwnerSecret = " \t\n ") }
+    assertThat { runInitializer(superCreatorSecret = " \t\n ") }
       .isSuccess()
 
     verify(creatorService).addProject(
@@ -210,9 +210,9 @@ class SchemaInitializerTest {
   // Helpers
 
   private fun runInitializer(
-    creatorOwnerName: String = Stubs.user.name!!,
-    creatorOwnerSecret: String = Stubs.userCreator.rawSecret,
-    creatorOwnerEmail: String = Stubs.user.contact!!,
+    superCreatorName: String = Stubs.user.name!!,
+    superCreatorSecret: String = Stubs.userCreator.rawSecret,
+    superCreatorEmail: String = Stubs.user.contact!!,
     creatorProjectName: String = "Project Name",
     args: ApplicationArguments? = null,
   ) = SchemaInitializer(
@@ -221,9 +221,9 @@ class SchemaInitializerTest {
     propertyService = propService,
     schemaService = schemaService,
     creatorConfig = CreatorProjectConfig().apply {
-      this.ownerName = creatorOwnerName
-      this.ownerSecret = creatorOwnerSecret
-      this.ownerEmail = creatorOwnerEmail
+      this.ownerName = superCreatorName
+      this.ownerSecret = superCreatorSecret
+      this.ownerEmail = superCreatorEmail
       this.projectName = creatorProjectName
     },
   ).run(args)

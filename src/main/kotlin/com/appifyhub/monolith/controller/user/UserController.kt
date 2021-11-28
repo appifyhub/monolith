@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.controller.user
 
-import com.appifyhub.monolith.controller.user.UserController.Endpoints.ONE_USER
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.service.auth.AuthService
@@ -17,15 +17,9 @@ class UserController(
   private val authService: AuthService,
 ) {
 
-  object Endpoints {
-    const val ONE_USER = "/v1/universal/users/{universalId}"
-
-    const val ANY_USER = "/v1/projects/{projectId}/users/{userId}"
-  }
-
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @GetMapping(ONE_USER)
+  @GetMapping(Endpoints.ONE_USER)
   fun getUser(
     authentication: Authentication,
     @PathVariable universalId: String,

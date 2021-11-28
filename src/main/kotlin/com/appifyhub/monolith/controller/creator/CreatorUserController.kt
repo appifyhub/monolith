@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.controller.creator
 
-import com.appifyhub.monolith.controller.user.UserController
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
@@ -16,10 +16,6 @@ import org.springframework.web.bind.annotation.RestController
 class CreatorUserController(
   private val accessManager: AccessManager,
 ) {
-
-  object Endpoints {
-    const val ANY_USER = UserController.Endpoints.ANY_USER
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

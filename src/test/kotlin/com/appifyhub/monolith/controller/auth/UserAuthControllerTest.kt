@@ -10,8 +10,8 @@ import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.auth.UserAuthController.Endpoints.AUTH
-import com.appifyhub.monolith.controller.auth.UserAuthController.Endpoints.TOKENS
+import com.appifyhub.monolith.controller.common.Endpoints.AUTH
+import com.appifyhub.monolith.controller.common.Endpoints.TOKENS
 import com.appifyhub.monolith.domain.creator.Project.Status
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER

@@ -1,11 +1,11 @@
 package com.appifyhub.monolith.controller.creator
 
-import com.appifyhub.monolith.controller.auth.UserAuthController
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.ApiKeyRequest
+import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -29,14 +29,6 @@ class CreatorAuthController(
   private val authService: AuthService,
   private val accessManager: AccessManager,
 ) : RequestIpAddressHolder {
-
-  object Endpoints {
-    const val CREATOR_AUTH = UserAuthController.Endpoints.CREATOR_AUTH
-    const val CREATOR_API_KEY = UserAuthController.Endpoints.CREATOR_API_KEY
-
-    const val ANY_USER_AUTH = UserAuthController.Endpoints.ANY_USER_AUTH
-    const val ANY_USER_TOKENS = UserAuthController.Endpoints.ANY_USER_TOKENS
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

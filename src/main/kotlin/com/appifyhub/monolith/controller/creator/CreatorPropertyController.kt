@@ -1,18 +1,19 @@
 package com.appifyhub.monolith.controller.creator
 
-import com.appifyhub.monolith.domain.creator.property.Property
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty
+import com.appifyhub.monolith.domain.creator.property.Property
+import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.MultiplePropertiesSaveRequest
-import com.appifyhub.monolith.network.creator.property.ops.PropertyValueDto
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.creator.property.ops.PropertySaveRequest
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.creator.property.ops.PropertyValueDto
 import com.appifyhub.monolith.network.mapper.toNetwork
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
+import com.appifyhub.monolith.service.creator.PropertyService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -28,12 +29,6 @@ class CreatorPropertyController(
   private val propertyService: PropertyService,
   private val accessManager: AccessManager,
 ) {
-
-  object Endpoints {
-    const val CONFIGURATIONS = "/v1/projects/{projectId}/configurations"
-    const val PROPERTIES = "/v1/projects/{projectId}/properties"
-    const val PROPERTY = "/v1/projects/{projectId}/properties/{propertyName}"
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

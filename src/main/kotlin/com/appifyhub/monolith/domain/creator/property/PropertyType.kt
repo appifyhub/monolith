@@ -10,7 +10,7 @@ enum class PropertyType {
   ;
 
   companion object {
-    fun find(name: String) = values().firstOrNull { it.name == name }
+    fun findOrNull(name: String) = values().firstOrNull { it.name == name }
   }
 
 }

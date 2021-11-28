@@ -2,11 +2,12 @@ package com.appifyhub.monolith.controller.creator
 
 import assertk.all
 import assertk.assertThat
+import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.creator.CreatorProjectController.Endpoints.ANY_PROJECT
-import com.appifyhub.monolith.controller.creator.CreatorProjectController.Endpoints.PROJECTS
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -148,7 +149,7 @@ class CreatorProjectControllerTest {
     }
   }
 
-  @Test fun `get all projects fails when not super owner`() {
+  @Test fun `get all projects fails when not super-creator`() {
     val project = stubber.projects.new()
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
@@ -192,6 +193,98 @@ class CreatorProjectControllerTest {
       transform { it.body!![1].projectId }
         .isEqualTo(projectResponse.projectId)
       transform { it.body!![1].status.status }
+        .isEqualTo(projectResponse.status.status)
+    }
+  }
+
+  @Test fun `get creator's projects fails when unauthorized`() {
+    val creator = stubber.creators.default()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `get creator's projects fails when not owner or super-creator`() {
+    val creator1 = stubber.creators.default()
+    val creator2 = stubber.creators.default(idSuffix = "_other")
+    val token = stubber.tokens(creator1).real().token.tokenValue
+    stubber.projects.new(owner = creator1)
+    stubber.projects.new(owner = creator2)
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("universalCreatorId" to creator2.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `get creator's projects succeeds when requester is owner`() {
+    val superCreator = stubber.creators.owner()
+    stubber.projects.new(owner = superCreator)
+    val creator = stubber.creators.default()
+    val projectResponse = stubber.projects.new(owner = creator).let {
+      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+    }
+    val token = stubber.tokens(creator).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<List<ProjectResponse>>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!! }
+        .hasSize(1)
+      transform { it.body!!.first().projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.first().status.status }
+        .isEqualTo(projectResponse.status.status)
+    }
+  }
+
+  @Test fun `get creator's projects succeeds when requester is super-creator`() {
+    val superCreator = stubber.creators.owner()
+    stubber.projects.new(owner = superCreator)
+    val creator = stubber.creators.default()
+    val projectResponse = stubber.projects.new(owner = creator).let {
+      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+    }
+    val token = stubber.tokens(superCreator).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<List<ProjectResponse>>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!! }
+        .hasSize(1)
+      transform { it.body!!.first().projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.first().status.status }
         .isEqualTo(projectResponse.status.status)
     }
   }

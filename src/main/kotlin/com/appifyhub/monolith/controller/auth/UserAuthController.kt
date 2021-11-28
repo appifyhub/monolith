@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.controller.auth
 
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
@@ -25,16 +26,6 @@ class UserAuthController(
   private val authService: AuthService,
   private val accessManager: AccessManager,
 ) : RequestIpAddressHolder {
-
-  object Endpoints {
-    const val AUTH = "/v1/universal/auth"
-    const val CREATOR_AUTH = "/v1/creator/auth"
-    const val ANY_USER_AUTH = "/v1/projects/{projectId}/users/{userId}/auth"
-    const val CREATOR_API_KEY = "/v1/creator/apikey"
-
-    const val TOKENS = "/v1/universal/auth/tokens"
-    const val ANY_USER_TOKENS = "/v1/projects/{projectId}/users/{userId}/auth/tokens"
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 

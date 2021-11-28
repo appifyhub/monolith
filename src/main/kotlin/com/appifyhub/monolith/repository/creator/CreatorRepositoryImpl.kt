@@ -36,7 +36,7 @@ class CreatorRepositoryImpl(
       .minByOrNull { it.id }!!
   }
 
-  private val lazyCreatorOwner: User by lazy {
+  private val lazySuperCreator: User by lazy {
     userRepository.fetchAllUsersByProjectId(lazyCreatorProject.id)
       .filter { it.authority == Authority.OWNER }
       .minByOrNull { it.createdAt.time }!!
@@ -73,9 +73,9 @@ class CreatorRepositoryImpl(
     return lazyCreatorProject
   }
 
-  override fun getCreatorOwner(): User {
+  override fun getSuperCreator(): User {
     log.debug("Getting creator owner")
-    return lazyCreatorOwner
+    return lazySuperCreator
   }
 
   override fun fetchAllProjects(): List<Project> {

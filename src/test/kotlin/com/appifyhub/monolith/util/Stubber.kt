@@ -82,7 +82,7 @@ class Stubber(
   }
 
   inner class Creators {
-    fun owner() = creatorRepo.getCreatorOwner()
+    fun owner() = creatorRepo.getSuperCreator()
     fun default(
       idSuffix: String = "",
       autoVerified: Boolean = true,

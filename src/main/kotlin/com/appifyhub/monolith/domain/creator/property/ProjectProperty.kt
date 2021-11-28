@@ -156,7 +156,7 @@ enum class ProjectProperty(
 
     fun names() = values().map(ProjectProperty::name)
 
-    fun find(name: String): ProjectProperty? = values().firstOrNull { it.name == name }
+    fun findOrNull(name: String): ProjectProperty? = values().firstOrNull { it.name == name }
 
     fun filter(
       filter: PropertyFilter? = null,

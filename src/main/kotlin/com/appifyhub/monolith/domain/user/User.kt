@@ -23,8 +23,10 @@ data class User(
     PERSONAL, ORGANIZATION;
 
     companion object {
-      fun find(name: String, default: Type) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: Type? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 
@@ -32,8 +34,10 @@ data class User(
     EMAIL, PHONE, CUSTOM;
 
     companion object {
-      fun find(name: String, default: ContactType) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: ContactType? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 
@@ -42,14 +46,17 @@ data class User(
 
     companion object {
 
-      fun find(name: String, default: Authority) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: Authority? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
 
-      fun find(granted: Collection<GrantedAuthority>, default: Authority) =
+      fun find(granted: Collection<GrantedAuthority>, default: Authority? = null) =
         ArrayList(granted)
           .map { find(it.authority, default = DEFAULT) }
           .maxByOrNull { it.ordinal }
           ?: default
+          ?: throw IllegalArgumentException("Not found")
 
     }
 

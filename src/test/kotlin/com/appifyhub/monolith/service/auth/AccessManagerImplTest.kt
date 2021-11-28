@@ -413,7 +413,7 @@ class AccessManagerImplTest {
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      manager.requestCreator(token, isMatchingId = null)
+      manager.requestCreator(token, matchesId = null, requireVerified = false)
     }
       .isFailure()
       .all {
@@ -429,7 +429,7 @@ class AccessManagerImplTest {
     val token = stubber.tokens(user).real()
 
     assertThat {
-      manager.requestCreator(token, isMatchingId = null)
+      manager.requestCreator(token, matchesId = null, requireVerified = false)
     }
       .isFailure()
       .all {
@@ -444,7 +444,7 @@ class AccessManagerImplTest {
     val token = stubber.tokens(creator1).real()
 
     assertThat {
-      manager.requestCreator(token, isMatchingId = creator2.id)
+      manager.requestCreator(token, matchesId = creator2.id, requireVerified = false)
     }
       .isFailure()
       .all {
@@ -453,13 +453,49 @@ class AccessManagerImplTest {
       }
   }
 
-  @Test fun `requesting creator succeeds with correct requester`() {
-    val creator = stubber.creators.owner()
+  @Test fun `requesting creator fails with unverified user`() {
+    val creator = stubber.creators.default(autoVerified = false)
+    val token = stubber.tokens(creator).real()
+
+    assertThat {
+      manager.requestCreator(token, matchesId = creator.id, requireVerified = true)
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("must be verified")
+      }
+  }
+
+  @Test fun `requesting creator succeeds with matching requester`() {
+    val creator = stubber.creators.default()
     val token = stubber.tokens(creator).real()
 
     assertThat(
-      manager.requestCreator(token, isMatchingId = null)
-    ).isDataClassEqualTo(creator)
+      manager.requestCreator(token, matchesId = creator.id, requireVerified = true)
+        .cleanDates()
+    ).isDataClassEqualTo(creator.cleanDates())
+  }
+
+  @Test fun `requesting creator succeeds with no match required`() {
+    val creator = stubber.creators.default()
+    val token = stubber.tokens(creator).real()
+
+    assertThat(
+      manager.requestCreator(token, matchesId = null, requireVerified = true)
+        .cleanDates()
+    ).isDataClassEqualTo(creator.cleanDates())
+  }
+
+  @Test fun `requesting creator succeeds with super-creator requester`() {
+    val superCreator = stubber.creators.owner()
+    val creator = stubber.creators.default()
+    val token = stubber.tokens(superCreator).real()
+
+    assertThat(
+      manager.requestCreator(token, matchesId = creator.id, requireVerified = false)
+        .cleanDates()
+    ).isDataClassEqualTo(creator.cleanDates())
   }
 
   // endregion
