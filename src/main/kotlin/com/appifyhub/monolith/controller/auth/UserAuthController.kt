@@ -36,7 +36,7 @@ class UserAuthController(
     log.debug("[POST] auth user with $creds")
 
     val user = authService.resolveUser(creds.universalId, creds.secret)
-      .also { accessManager.requireProjectFunctional(it.id.projectId) }
+    accessManager.requireProjectFunctional(user.id.projectId)
 
     val tokenValue = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
 
@@ -48,8 +48,10 @@ class UserAuthController(
     authentication: Authentication,
   ): TokenDetailsResponse {
     log.debug("[GET] get current token")
+
     val currentToken = authService.fetchTokenDetails(authentication)
-      .also { accessManager.requireProjectFunctional(it.ownerId.projectId) }
+    accessManager.requireProjectFunctional(currentToken.ownerId.projectId)
+
     return currentToken.toNetwork()
   }
 
@@ -59,8 +61,10 @@ class UserAuthController(
     @RequestParam(required = false) valid: Boolean?,
   ): List<TokenDetailsResponse> {
     log.debug("[GET] get all tokens, [valid $valid]")
+
     val tokens = authService.fetchAllTokenDetails(authentication, valid)
-      .also { accessManager.requireProjectFunctional(it.first().ownerId.projectId) }
+    accessManager.requireProjectFunctional(tokens.first().ownerId.projectId)
+
     return tokens.map(TokenDetails::toNetwork)
   }
 
@@ -68,9 +72,8 @@ class UserAuthController(
   fun refresh(authentication: Authentication): TokenResponse {
     log.debug("[PUT] refresh user with $authentication")
 
-    accessManager.requireProjectFunctional(
-      targetId = authService.fetchTokenDetails(authentication).ownerId.projectId
-    )
+    val token = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(token.ownerId.projectId)
 
     val tokenValue = authService.refreshAuth(authentication, getRequestIpAddress())
     return tokenResponseOf(tokenValue)
@@ -83,9 +86,8 @@ class UserAuthController(
   ): MessageResponse {
     log.debug("[DELETE] unauth user with $authentication, [all $all]")
 
-    accessManager.requireProjectFunctional(
-      targetId = authService.fetchTokenDetails(authentication).ownerId.projectId
-    )
+    val token = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(token.ownerId.projectId)
 
     if (all == true) {
       authService.unauthorizeAll(authentication)
@@ -103,9 +105,8 @@ class UserAuthController(
   ): MessageResponse {
     log.debug("[DELETE] unauth tokens $tokenIds")
 
-    accessManager.requireProjectFunctional(
-      targetId = authService.fetchTokenDetails(authentication).ownerId.projectId
-    )
+    val token = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(token.ownerId.projectId)
 
     authService.unauthorizeTokens(authentication, tokenIds)
     return MessageResponse.DONE

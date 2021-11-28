@@ -225,6 +225,22 @@ class AuthServiceImplTest {
       }
   }
 
+  @Test fun `auth user fails with unverified user`() {
+    val user = stubber.creators.default(autoVerified = false)
+
+    assertThat {
+      service.resolveUser(
+        universalId = user.id.toUniversalFormat(),
+        signature = "password",
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("not verified")
+      }
+  }
+
   @Test fun `auth user succeeds with correct signature`() {
     assertThat(
       service.resolveUser(
@@ -236,7 +252,7 @@ class AuthServiceImplTest {
     )
   }
 
-  @Test fun `auth owner fails with invalid universal ID`() {
+  @Test fun `auth creator fails with invalid universal ID`() {
     assertThat {
       service.resolveCreator("invalid", "signature")
     }
@@ -244,7 +260,7 @@ class AuthServiceImplTest {
       .hasClass(NumberFormatException::class)
   }
 
-  @Test fun `auth owner fails with invalid user ID`() {
+  @Test fun `auth creator fails with invalid user ID`() {
     assertThat {
       service.resolveCreator(UserId("\na b\t", -1).toUniversalFormat(), "signature")
     }
@@ -255,7 +271,7 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `auth owner fails with invalid signature`() {
+  @Test fun `auth creator fails with invalid signature`() {
     assertThat {
       service.resolveCreator(stubber.creators.owner().id.toUniversalFormat(), "\n\t")
     }
@@ -266,7 +282,7 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `auth owner fails with wrong signature`() {
+  @Test fun `auth creator fails with wrong signature`() {
     assertThat {
       service.resolveCreator(
         universalId = stubber.creators.owner().id.toUniversalFormat(),
@@ -280,7 +296,23 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `auth owner succeeds with correct signature`() {
+  @Test fun `auth creator fails with unverified user`() {
+    val creator = stubber.creators.default(autoVerified = false)
+
+    assertThat {
+      service.resolveUser(
+        universalId = creator.id.toUniversalFormat(),
+        signature = "password",
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("not verified")
+      }
+  }
+
+  @Test fun `auth creator succeeds with correct signature`() {
     assertThat(
       service.resolveUser(
         universalId = stubber.creators.default().id.toUniversalFormat(),

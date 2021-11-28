@@ -11,6 +11,7 @@ import com.appifyhub.monolith.repository.geo.GeolocationRepository
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.throwNotVerified
 import com.appifyhub.monolith.util.ext.throwUnauthorized
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
@@ -60,7 +61,10 @@ class AuthServiceImpl(
     val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
     val normalizedRawSignature = Normalizers.RawSignature.run(signature).requireValid { "Signature" }
 
-    return fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
+    val user = fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
+    if (!user.isVerified) throwNotVerified()
+
+    return user
   }
 
   override fun resolveCreator(universalId: String, signature: String): User {
@@ -74,6 +78,7 @@ class AuthServiceImpl(
     val user = fetchUserByCredentials(normalizedUserId, normalizedRawSignature)
 
     if (user.id.projectId != project.id) throwUnauthorized { "Project ID" }
+    if (!user.isVerified) throwNotVerified()
 
     return user
   }
