@@ -79,6 +79,9 @@ class Stubber(
         userIdType = userIdType,
       )
     )
+
+    val all: List<Project>
+      get() = creatorRepo.fetchAllProjects()
   }
 
   inner class Creators {

@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.hasSize
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
+import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
@@ -529,6 +530,134 @@ class CreatorProjectControllerTest {
         .isEqualTo(Project.Status.ACTIVE.toString())
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())
+    }
+  }
+
+  @Test fun `remove project fails when unauthorized`() {
+    val project = stubber.projects.new()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `remove project succeeds when requester is owner`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val token = stubber.tokens(creator).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      transform { it.body!! }
+        .isEqualTo(MessageResponse.DONE)
+      assertThat(stubber.projects.all.firstOrNull { it.id == project.id })
+        .isNull()
+    }
+  }
+
+  @Test fun `remove project succeeds when requester is super-creator`() {
+    val creator = stubber.creators.default()
+    val superCreator = stubber.creators.owner()
+    val project = stubber.projects.new(owner = creator)
+    val token = stubber.tokens(superCreator).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      transform { it.body!! }
+        .isEqualTo(MessageResponse.DONE)
+      assertThat(stubber.projects.all.firstOrNull { it.id == project.id })
+        .isNull()
+    }
+  }
+
+  @Test fun `remove all creator's projects fails when unauthorized`() {
+    val creator = stubber.creators.default()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `remove all creator's projects succeeds when requester is owner`() {
+    val creator = stubber.creators.default()
+    val project1 = stubber.projects.new(owner = creator)
+    val project2 = stubber.projects.new(owner = creator)
+    val token = stubber.tokens(creator).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      transform { it.body!! }
+        .isEqualTo(MessageResponse.DONE)
+      assertThat(stubber.projects.all.firstOrNull { it.id in setOf(project1.id, project2.id) })
+        .isNull()
+    }
+  }
+
+  @Test fun `remove all creator's projects succeeds when requester is super-creator`() {
+    val creator = stubber.creators.default()
+    val superCreator = stubber.creators.owner()
+    val project1 = stubber.projects.new(owner = creator)
+    val project2 = stubber.projects.new(owner = creator)
+    val token = stubber.tokens(superCreator).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      transform { it.body!! }
+        .isEqualTo(MessageResponse.DONE)
+      assertThat(stubber.projects.all.firstOrNull { it.id in setOf(project1.id, project2.id) })
+        .isNull()
     }
   }
 

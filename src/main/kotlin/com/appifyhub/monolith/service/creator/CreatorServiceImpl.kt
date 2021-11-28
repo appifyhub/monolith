@@ -4,6 +4,7 @@ import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
@@ -102,14 +103,14 @@ class CreatorServiceImpl(
     return creatorRepository.removeProjectById(normalizedProjectId)
   }
 
-  override fun removeAllProjectsByCreator(creator: User) {
-    log.debug("Removing all projects for creator $creator")
+  override fun removeAllProjectsByCreator(creatorId: UserId) {
+    log.debug("Removing all projects for creator $creatorId")
 
     // we can't delete the creator project
-    if (creator.id.projectId != getCreatorProject().id)
+    if (creatorId.projectId != getCreatorProject().id)
       throwLocked { "Projects can be removed only by creator project users" }
 
-    creatorRepository.removeAllProjectsByCreator(creator.id)
+    creatorRepository.removeAllProjectsByCreator(creatorId)
   }
 
 }

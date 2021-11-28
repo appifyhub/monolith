@@ -4,6 +4,7 @@ import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 
 interface CreatorService {
 
@@ -25,6 +26,6 @@ interface CreatorService {
 
   @Throws fun removeProjectById(projectId: Long)
 
-  @Throws fun removeAllProjectsByCreator(creator: User)
+  @Throws fun removeAllProjectsByCreator(creatorId: UserId)
 
 }

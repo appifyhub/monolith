@@ -237,7 +237,7 @@ class CreatorServiceImplTest {
     val creator = stubber.users(project).owner()
 
     assertThat {
-      service.removeAllProjectsByCreator(creator)
+      service.removeAllProjectsByCreator(creator.id)
     }
       .isFailure()
       .messageContains("only by creator project users")
@@ -248,7 +248,7 @@ class CreatorServiceImplTest {
     stubber.projects.new()
 
     assertThat {
-      service.removeAllProjectsByCreator(stubber.creators.owner())
+      service.removeAllProjectsByCreator(stubber.creators.owner().id)
     }.isSuccess()
   }
 

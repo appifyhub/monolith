@@ -4,6 +4,7 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.creator.ProjectResponse
 import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
@@ -14,6 +15,7 @@ import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.creator.CreatorService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -74,7 +76,7 @@ class CreatorProjectController(
     authentication: Authentication,
     @PathVariable projectId: Long,
   ): ProjectResponse {
-    log.debug("[GET] get creator project")
+    log.debug("[GET] get creator project $projectId")
 
     val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
     val status = accessManager.fetchProjectStatus(projectId)
@@ -88,7 +90,7 @@ class CreatorProjectController(
     @PathVariable projectId: Long,
     @RequestBody updateRequest: ProjectUpdateRequest,
   ): ProjectResponse {
-    log.debug("[PUT] update creator project")
+    log.debug("[PUT] update creator project $projectId with request $updateRequest")
 
     var projectUpdater = updateRequest.toDomain(projectId)
 
@@ -114,6 +116,34 @@ class CreatorProjectController(
     val status = accessManager.fetchProjectStatus(projectId)
 
     return project.toNetwork(projectStatus = status)
+  }
+
+  @DeleteMapping(Endpoints.ANY_PROJECT)
+  fun removeProject(
+    authentication: Authentication,
+    @PathVariable projectId: Long,
+  ): MessageResponse {
+    log.debug("[DELETE] remove creator project $projectId")
+
+    accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_WRITE)
+    creatorService.removeProjectById(projectId)
+
+    return MessageResponse.DONE
+  }
+
+  @DeleteMapping(Endpoints.PROJECTS)
+  fun removeProjectsByCreator(
+    authentication: Authentication,
+    @RequestParam universalCreatorId: String,
+  ): MessageResponse {
+    log.debug("[DELETE] remove all creator projects for $universalCreatorId")
+
+    val creatorId = UserId.fromUniversalFormat(universalCreatorId)
+    accessManager.requestCreator(authentication, matchesId = creatorId, requireVerified = true)
+
+    creatorService.removeAllProjectsByCreator(creatorId)
+
+    return MessageResponse.DONE
   }
 
 }
