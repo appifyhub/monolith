@@ -11,7 +11,9 @@ import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SettableRequest
 import com.appifyhub.monolith.network.creator.ProjectResponse
+import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.util.Stubber
@@ -328,6 +330,205 @@ class CreatorProjectControllerTest {
         .isEqualTo(projectResponse.projectId)
       transform { it.body!!.status.status }
         .isEqualTo(projectResponse.status.status)
+    }
+  }
+
+  @Test fun `update project fails when unauthorized`() {
+    val project = stubber.projects.new()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBlankRequest("invalid"),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `update project fails when status changes and not super-creator`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator, status = Project.Status.REVIEW)
+    val token = stubber.tokens(creator).real().token.tokenValue
+    val request = ProjectUpdateRequest(
+      type = null,
+      status = SettableRequest(Project.Status.ACTIVE.toString()),
+    )
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `update project fails when type changes and not the owner`() {
+    val creator1 = stubber.creators.default()
+    val creator2 = stubber.creators.default(idSuffix = "_other")
+    val project = stubber.projects.new(owner = creator1, status = Project.Status.REVIEW)
+    val token = stubber.tokens(creator2).real().token.tokenValue
+    val request = ProjectUpdateRequest(
+      type = SettableRequest(Project.Type.FREE.toString()),
+      status = null,
+    )
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+    }
+  }
+
+  @Test fun `update project succeeds when owner changes type`() {
+    val creator = stubber.creators.default()
+    val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
+      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+    }
+    val token = stubber.tokens(creator).real().token.tokenValue
+    val request = ProjectUpdateRequest(
+      type = SettableRequest(Project.Type.FREE.toString()),
+      status = null,
+    )
+
+    assertThat(
+      restTemplate.exchange<ProjectResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf(
+          "projectId" to projectResponse.projectId,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!!.projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.status.status }
+        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.type }
+        .isEqualTo(Project.Type.FREE.toString())
+    }
+  }
+
+  @Test fun `update project succeeds when super-creator changes type`() {
+    val creator = stubber.creators.default()
+    val superCreator = stubber.creators.owner()
+    val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
+      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+    }
+    val token = stubber.tokens(superCreator).real().token.tokenValue
+    val request = ProjectUpdateRequest(
+      type = SettableRequest(Project.Type.FREE.toString()),
+      status = null,
+    )
+
+    assertThat(
+      restTemplate.exchange<ProjectResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf(
+          "projectId" to projectResponse.projectId,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!!.projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.status.status }
+        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.type }
+        .isEqualTo(Project.Type.FREE.toString())
+    }
+  }
+
+  @Test fun `update project succeeds when super-creator changes status`() {
+    val creator = stubber.creators.default()
+    val superCreator = stubber.creators.owner()
+    val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
+      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+    }
+    val token = stubber.tokens(superCreator).real().token.tokenValue
+    val request = ProjectUpdateRequest(
+      type = null,
+      status = SettableRequest(Project.Status.ACTIVE.toString()),
+    )
+
+    assertThat(
+      restTemplate.exchange<ProjectResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf(
+          "projectId" to projectResponse.projectId,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!!.projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.status.status }
+        .isEqualTo(Project.Status.ACTIVE.toString())
+      transform { it.body!!.type }
+        .isEqualTo(projectResponse.type)
+    }
+  }
+
+  @Test fun `update project succeeds when super-creator changes type and status`() {
+    val creator = stubber.creators.default()
+    val superCreator = stubber.creators.owner()
+    val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
+      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+    }
+    val token = stubber.tokens(superCreator).real().token.tokenValue
+    val request = ProjectUpdateRequest(
+      type = SettableRequest(Project.Type.FREE.toString()),
+      status = SettableRequest(Project.Status.ACTIVE.toString()),
+    )
+
+    assertThat(
+      restTemplate.exchange<ProjectResponse>(
+        url = "$baseUrl$ANY_PROJECT",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf(
+          "projectId" to projectResponse.projectId,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+
+      // list ordering is problematic for comparisons, so just comparing the basics
+      transform { it.body!!.projectId }
+        .isEqualTo(projectResponse.projectId)
+      transform { it.body!!.status.status }
+        .isEqualTo(Project.Status.ACTIVE.toString())
+      transform { it.body!!.type }
+        .isEqualTo(Project.Type.FREE.toString())
     }
   }
 

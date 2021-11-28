@@ -30,7 +30,7 @@ class UserAuthController(
   private val log = LoggerFactory.getLogger(this::class.java)
 
   @PostMapping(Endpoints.AUTH)
-  fun authUser(
+  fun authenticate(
     @RequestBody creds: UserCredentialsRequest,
   ): TokenResponse {
     log.debug("[POST] auth user with $creds")
@@ -65,7 +65,7 @@ class UserAuthController(
   }
 
   @PutMapping(Endpoints.AUTH)
-  fun refreshUser(authentication: Authentication): TokenResponse {
+  fun refresh(authentication: Authentication): TokenResponse {
     log.debug("[PUT] refresh user with $authentication")
 
     accessManager.requireProjectFunctional(
@@ -77,7 +77,7 @@ class UserAuthController(
   }
 
   @DeleteMapping(Endpoints.AUTH)
-  fun unauthUser(
+  fun unauthenticate(
     authentication: Authentication,
     @RequestParam(required = false) all: Boolean? = false,
   ): MessageResponse {
@@ -97,7 +97,7 @@ class UserAuthController(
   }
 
   @DeleteMapping(Endpoints.TOKENS)
-  fun unauthTokens(
+  fun unauthenticateTokens(
     authentication: Authentication,
     @RequestParam tokenIds: List<String>,
   ): MessageResponse {

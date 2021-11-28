@@ -1,9 +1,12 @@
 package com.appifyhub.monolith.controller.creator
 
 import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.creator.ProjectResponse
 import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.access.AccessManager
@@ -14,6 +17,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -73,6 +77,40 @@ class CreatorProjectController(
     log.debug("[GET] get creator project")
 
     val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
+    val status = accessManager.fetchProjectStatus(projectId)
+
+    return project.toNetwork(projectStatus = status)
+  }
+
+  @PutMapping(Endpoints.ANY_PROJECT)
+  fun updateProject(
+    authentication: Authentication,
+    @PathVariable projectId: Long,
+    @RequestBody updateRequest: ProjectUpdateRequest,
+  ): ProjectResponse {
+    log.debug("[PUT] update creator project")
+
+    var projectUpdater = updateRequest.toDomain(projectId)
+
+    // only super-creator can change the project status
+    if (updateRequest.status != null)
+      accessManager.requestSuperCreator(authentication)
+
+    // only owner and super-creator can change the project type
+    if (updateRequest.type != null) {
+      accessManager.requestProjectAccess(
+        authData = authentication,
+        targetId = projectId,
+        privilege = Privilege.PROJECT_WRITE,
+      )
+
+      // force REVIEW state after type change  
+      if (updateRequest.status == null) {
+        projectUpdater = projectUpdater.copy(status = Settable(Project.Status.REVIEW))
+      }
+    }
+
+    val project = creatorService.updateProject(projectUpdater)
     val status = accessManager.fetchProjectStatus(projectId)
 
     return project.toNetwork(projectStatus = status)

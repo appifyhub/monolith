@@ -35,7 +35,7 @@ class CreatorAuthController(
   // For self
 
   @PostMapping(Endpoints.CREATOR_AUTH)
-  fun authCreator(
+  fun authenticate(
     @RequestBody creds: CreatorCredentialsRequest,
   ): TokenResponse {
     log.debug("[POST] auth creator with $creds")
@@ -85,7 +85,7 @@ class CreatorAuthController(
   }
 
   @DeleteMapping(Endpoints.ANY_USER_AUTH)
-  fun unauthAnyUser(
+  fun unauthenticateAnyUser(
     authentication: Authentication,
     @PathVariable projectId: Long,
     @PathVariable userId: String,
