@@ -1,5 +1,6 @@
 # noinspection EditorConfigKeyCorrectness
 [*]
+# also update in build.gradle
 disabled_rules = no-blank-line-before-rbrace, import-ordering
 
 charset = utf-8

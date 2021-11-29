@@ -29,7 +29,6 @@ class UserOpsMapperTest {
       verificationToken = null,
       birthday = null,
       company = null,
-      account = null,
     )
 
     val result = userUpdater.applyTo(
@@ -66,7 +65,6 @@ class UserOpsMapperTest {
           countryCode = Settable("NL"),
         )
       ),
-      account = Settable(Stubs.account.copy(id = 20)),
     )
 
     val result = userUpdater.applyTo(
@@ -93,7 +91,6 @@ class UserOpsMapperTest {
           countryCode = "NL",
         ),
         birthday = Date(0xB10000),
-        account = Stubs.account.copy(id = 20),
         updatedAt = Date(10L),
       )
     )
@@ -107,7 +104,6 @@ class UserOpsMapperTest {
       verificationToken = Settable(null),
       birthday = Settable(null),
       company = Settable(null),
-      account = Settable(null),
     )
 
     val result = userUpdater.applyTo(
@@ -123,7 +119,6 @@ class UserOpsMapperTest {
         verificationToken = null,
         company = null,
         birthday = null,
-        account = null,
         updatedAt = Date(10L),
       )
     )
@@ -223,8 +218,6 @@ class UserOpsMapperTest {
     ).isDataClassEqualTo(
       Stubs.user.copy(
         verificationToken = null,
-        ownedTokens = emptyList(),
-        account = null,
         createdAt = Date(10L),
         updatedAt = Date(10L),
       )
@@ -255,8 +248,6 @@ class UserOpsMapperTest {
     ).isDataClassEqualTo(
       Stubs.user.copy(
         verificationToken = null,
-        ownedTokens = emptyList(),
-        account = null,
         createdAt = Date(10L),
         updatedAt = Date(10L),
       )

@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.domain.mapper
 
-import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
@@ -23,8 +23,6 @@ fun UserDbm.toDomain(): User = User(
   createdAt = createdAt,
   updatedAt = updatedAt,
   company = company?.toDomain(),
-  ownedTokens = emptyList(),
-  account = account?.toDomain(),
 )
 
 fun User.toData(
@@ -44,7 +42,6 @@ fun User.toData(
   createdAt = createdAt,
   updatedAt = updatedAt,
   company = company?.toData(),
-  account = account?.toData(),
 )
 
 fun UserIdDbm.toDomain(): UserId = UserId(

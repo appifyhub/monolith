@@ -38,6 +38,7 @@ object Validators {
     it == null || (it.isNotBlank() && it.hasNoSpaces())
   }
   val PositiveLong = validatesAs<Long>("PositiveLong") { it != null && it > 0L }
+  val Flag = validatesAs<Boolean>("Flag") { it != null }
 
   // Top level domain validators
 
@@ -99,6 +100,9 @@ object Validators {
   }
   val PositiveLongAsString = validatesAs<String>("PositiveLongAsString") {
     it != null && (it.toLongOrNull() ?: 0L) > 0L
+  }
+  val FlagAsString = validatesAs<String>("FlagAsString") {
+    it?.toBooleanStrictOrNull() != null
   }
 
   // Other validators

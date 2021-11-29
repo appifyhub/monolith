@@ -16,6 +16,8 @@ object Normalizers {
   val Dense = normalizesNonNull(Validators.NoSpaces, Cleaners.RemoveSpaces)
   val DenseNullable = normalizesNullable(Validators.NoSpacesNullable, Cleaners.RemoveSpacesNullable)
   val Cardinal = normalizesNonNull(Validators.PositiveLong, Cleaners.LongToCardinal)
+  val FlagDefFalse = normalizesNonNull(Validators.Flag, Cleaners.FlagDefFalse)
+  val FlagDefTrue = normalizesNonNull(Validators.Flag, Cleaners.FlagDefTrue)
 
   // Top level normalizers
 
@@ -52,7 +54,8 @@ object Normalizers {
   val PropProjectDescription = normalizesNonNull(Validators.NotBlank, Cleaners.Trim)
   val PropProjectLogoUrl = normalizesNonNull(Validators.Url, Cleaners.Url)
   val PropProjectWebsite = normalizesNonNull(Validators.Url, Cleaners.Url)
-  val CardinalAsString = normalizesNonNull(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
+  val PropMaxUsers = normalizesNonNull(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
+  val PropOnHold = normalizesNonNull(Validators.FlagAsString, Cleaners.FlagDefTrueAsString)
 
   // Other normalizers
 

@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.storage.dao
 
-import com.appifyhub.monolith.storage.model.admin.PropertyDbm
-import com.appifyhub.monolith.storage.model.admin.PropertyIdDbm
+import com.appifyhub.monolith.storage.model.creator.PropertyDbm
+import com.appifyhub.monolith.storage.model.creator.PropertyIdDbm
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import org.springframework.transaction.annotation.Transactional

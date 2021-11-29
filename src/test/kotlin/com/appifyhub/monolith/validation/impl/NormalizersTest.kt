@@ -37,6 +37,16 @@ class NormalizersTest {
       .consistsOf(Validators.PositiveLong, Cleaners.LongToCardinal)
   }
 
+  @Test fun `flag def false = flag + flag def false`() {
+    assertThat(Normalizers.FlagDefFalse)
+      .consistsOf(Validators.Flag, Cleaners.FlagDefFalse)
+  }
+
+  @Test fun `flag def true = flag + flag def true`() {
+    assertThat(Normalizers.FlagDefTrue)
+      .consistsOf(Validators.Flag, Cleaners.FlagDefTrue)
+  }
+
   // endregion
 
   // region Top level normalizers
@@ -162,9 +172,14 @@ class NormalizersTest {
       .consistsOf(Validators.Url, Cleaners.Url)
   }
 
-  @Test fun `cardinal as string = positive long as string + long to cardinal as string`() {
-    assertThat(Normalizers.CardinalAsString)
+  @Test fun `prop max users = positive long as string + long to cardinal as string`() {
+    assertThat(Normalizers.PropMaxUsers)
       .consistsOf(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
+  }
+
+  @Test fun `prop on hold = flag as string + flag def true as string`() {
+    assertThat(Normalizers.PropOnHold)
+      .consistsOf(Validators.FlagAsString, Cleaners.FlagDefTrueAsString)
   }
 
   // endregion

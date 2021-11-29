@@ -51,6 +51,7 @@ class TimeProviderFake(
     incrementalTime += amount.toMillis()
   }
 
+  @Suppress("unused")
   fun reverseBy(amount: Duration) = staticTime()?.let {
     staticTime = { it - amount.toMillis() }
   } ?: run {

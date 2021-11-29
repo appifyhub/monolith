@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.repository.auth
 
-import com.appifyhub.monolith.domain.admin.Project
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
@@ -36,7 +36,7 @@ class TokenDetailsRepositoryImpl(
     return tokenDetailsDao.findAllById(tokenValues).map { it.toDomain(jwtHelper) }
   }
 
-  override fun fetchAllBlockedTokens(owner: User, project: Project): List<TokenDetails> {
+  override fun fetchAllBlockedTokens(owner: User, project: Project?): List<TokenDetails> {
     log.debug("Finding all blocked tokens for user $owner")
     return tokenDetailsDao.findAllByOwnerAndBlocked(
       owner = owner.toData(project),
@@ -44,7 +44,7 @@ class TokenDetailsRepositoryImpl(
     ).map { it.toDomain(jwtHelper) }
   }
 
-  override fun fetchAllValidTokens(owner: User, project: Project): List<TokenDetails> {
+  override fun fetchAllValidTokens(owner: User, project: Project?): List<TokenDetails> {
     log.debug("Finding all valid tokens for user $owner")
     return tokenDetailsDao.findAllByOwnerAndBlocked(
       owner = owner.toData(project),
@@ -52,7 +52,7 @@ class TokenDetailsRepositoryImpl(
     ).map { it.toDomain(jwtHelper) }
   }
 
-  override fun fetchAllTokens(owner: User, project: Project): List<TokenDetails> {
+  override fun fetchAllTokens(owner: User, project: Project?): List<TokenDetails> {
     log.debug("Finding all tokens for user $owner")
     return tokenDetailsDao.findAllByOwner(owner.toData(project)).map { it.toDomain(jwtHelper) }
   }
@@ -89,18 +89,6 @@ class TokenDetailsRepositoryImpl(
     val toBlock = valid.map { it.copy(isBlocked = true) }
 
     return tokenDetailsDao.saveAll(toBlock.map(TokenDetails::toData)).map { it.toDomain(jwtHelper) }
-  }
-
-  override fun blockAllTokensFromModel(owner: User): List<TokenDetails> {
-    log.debug("Blocking tokens for $owner")
-
-    val valid = owner.ownedTokens.filter { !it.isExpired && !it.isBlocked }
-    val toBlock = valid.map { it.copy(isBlocked = true) }
-
-    return tokenDetailsDao.saveAll(toBlock.map(TokenDetails::toData)).also {
-      val expired = owner.ownedTokens.filter { it.isExpired }
-      tokenDetailsDao.deleteAll(expired.map(TokenDetails::toData)) // housekeeping
-    }.map { it.toDomain(jwtHelper) }
   }
 
   // Helpers

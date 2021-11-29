@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.controller.heartbeat
 
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
-import com.appifyhub.monolith.controller.heartbeat.HeartbeatController.Endpoints.HEARTBEAT
 import com.appifyhub.monolith.domain.mapper.mergeToString
 import com.appifyhub.monolith.network.heartbeat.HeartbeatResponse
 import com.appifyhub.monolith.repository.geo.GeolocationRepository
@@ -18,13 +18,9 @@ class HeartbeatController(
   private val geoRepo: GeolocationRepository,
 ) : RequestIpAddressHolder {
 
-  object Endpoints {
-    const val HEARTBEAT = "/heartbeat"
-  }
-
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @GetMapping(HEARTBEAT)
+  @GetMapping(Endpoints.HEARTBEAT)
   fun beat(): HeartbeatResponse {
     log.debug("[GET] heartbeat")
 

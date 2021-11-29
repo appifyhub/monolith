@@ -4,15 +4,16 @@ import assertk.assertThat
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.admin.SignatureGenerator
-import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
+import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
@@ -31,8 +32,9 @@ import org.springframework.boot.ApplicationArguments
 
 class SchemaInitializerTest {
 
-  private val adminService = mock<AdminService>()
+  private val creatorService = mock<CreatorService>()
   private val userService = mock<UserService>()
+  private val propService = mock<PropertyService>()
   private val schemaService = mock<SchemaService>()
 
   @BeforeEach fun setup() {
@@ -53,36 +55,32 @@ class SchemaInitializerTest {
 
     runInitializer()
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(creatorService, userService, propService)
     verify(schemaService, never()).update(any())
   }
 
   @Test fun `initial seed fails if project name is blank`() {
-    assertThat { runInitializer(adminProjectName = " ") }
+    assertThat { runInitializer(creatorProjectName = " ") }
       .isFailure()
       .messageContains("Project Name")
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
-    assertThat { runInitializer(adminOwnerName = " ") }
+    assertThat { runInitializer(superCreatorName = " ") }
       .isFailure()
       .messageContains("Owner Name")
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
-    assertThat { runInitializer(adminOwnerEmail = " ") }
+    assertThat { runInitializer(superCreatorEmail = " ") }
       .isFailure()
       .messageContains("Owner Email")
 
-    verifyZeroInteractions(adminService)
-    verifyZeroInteractions(userService)
+    verifyZeroInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed uses config signature if present`() {
@@ -90,59 +88,60 @@ class SchemaInitializerTest {
       userIdType = Project.UserIdType.EMAIL,
       type = Project.Type.FREE,
     )
-    val account = Stubs.account.copy(
-      owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
-    )
-    val user = Stubs.user.copy(
-      id = UserId(Stubs.user.contact!!, project.id),
-      ownedTokens = emptyList(),
-    )
+    val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
-    adminService.stub {
-      on { addAccount() } doReturn account
+    creatorService.stub {
       on { addProject(any()) } doReturn project
     }
     userService.stub {
-      on { addUser(any(), any()) } doReturn user
-      on { updateUser(any(), any()) } doReturn user
+      on { addUser(any()) } doReturn user
+      on { updateUser(any()) } doReturn user
     }
 
-    assertThat { runInitializer(adminOwnerSecret = "root secret") }
+    assertThat { runInitializer(superCreatorSecret = "root secret") }
       .isSuccess()
 
-    verify(adminService).addAccount()
-    verify(adminService).addProject(
-      ProjectCreator(
-        account = account,
+    verify(creatorService).addProject(
+      projectInfo = ProjectCreator(
+        owner = null,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
-      )
+      ),
     )
-    verify(userService).addUser(
-      userIdType = project.userIdType,
-      creator = UserCreator(
-        userId = user.contact,
-        projectId = project.id,
-        rawSecret = "root secret",
-        name = user.name,
-        type = User.Type.ORGANIZATION,
-        authority = User.Authority.OWNER,
-        allowsSpam = true,
-        contact = user.contact,
-        contactType = User.ContactType.EMAIL,
-        birthday = null,
-        company = null,
-      )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "NAME",
+      propRawValue = "Project Name",
     )
-    verify(userService).updateUser(
-      userIdType = project.userIdType,
-      updater = UserUpdater(
-        id = UserId(user.contact!!, project.id),
-        verificationToken = Settable(null),
-        account = Settable(account),
-      )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "ON_HOLD",
+      propRawValue = "false",
     )
+    verify(userService) {
+      mock.addUser(
+        creator = UserCreator(
+          userId = user.contact,
+          projectId = project.id,
+          rawSecret = "root secret",
+          name = user.name,
+          type = User.Type.ORGANIZATION,
+          authority = User.Authority.OWNER,
+          allowsSpam = true,
+          contact = user.contact,
+          contactType = User.ContactType.EMAIL,
+          birthday = null,
+          company = null,
+        )
+      )
+      mock.updateUser(
+        updater = UserUpdater(
+          id = UserId(user.contact!!, project.id),
+          verificationToken = Settable(null),
+        )
+      )
+    }
   }
 
   @Test fun `initial seed generates a new signature if configured signature is blank`() {
@@ -150,80 +149,82 @@ class SchemaInitializerTest {
       userIdType = Project.UserIdType.EMAIL,
       type = Project.Type.FREE,
     )
-    val account = Stubs.account.copy(
-      owners = Stubs.account.owners.map { it.copy(ownedTokens = emptyList()) },
-    )
-    val user = Stubs.user.copy(
-      id = UserId(Stubs.user.contact!!, project.id),
-      ownedTokens = emptyList(),
-    )
+    val user = Stubs.user.copy(id = UserId(Stubs.user.contact!!, project.id))
 
-    adminService.stub {
-      on { addAccount() } doReturn account
+    creatorService.stub {
       on { addProject(any()) } doReturn project
     }
     userService.stub {
-      on { addUser(any(), any()) } doReturn user
-      on { updateUser(any(), any()) } doReturn user
+      on { addUser(any()) } doReturn user
+      on { updateUser(any()) } doReturn user
     }
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(adminOwnerSecret = " \t\n ") }
+    assertThat { runInitializer(superCreatorSecret = " \t\n ") }
       .isSuccess()
 
-    verify(adminService).addAccount()
-    verify(adminService).addProject(
-      ProjectCreator(
-        account = account,
+    verify(creatorService).addProject(
+      projectInfo = ProjectCreator(
+        owner = null,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
-      )
+      ),
     )
-    verify(userService).addUser(
-      userIdType = project.userIdType,
-      creator = UserCreator(
-        userId = user.contact,
-        projectId = project.id,
-        rawSecret = "generated sig",
-        name = user.name,
-        type = User.Type.ORGANIZATION,
-        authority = User.Authority.OWNER,
-        allowsSpam = true,
-        contact = user.contact,
-        contactType = User.ContactType.EMAIL,
-        birthday = null,
-        company = null,
-      )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "NAME",
+      propRawValue = "Project Name",
     )
-    verify(userService).updateUser(
-      userIdType = project.userIdType,
-      updater = UserUpdater(
-        id = UserId(user.contact!!, project.id),
-        verificationToken = Settable(null),
-        account = Settable(account),
-      )
+    verify(propService).saveProperty<String>(
+      projectId = project.id,
+      propName = "ON_HOLD",
+      propRawValue = "false",
     )
+    verify(userService) {
+      mock.addUser(
+        creator = UserCreator(
+          userId = user.contact,
+          projectId = project.id,
+          rawSecret = "generated sig",
+          name = user.name,
+          type = User.Type.ORGANIZATION,
+          authority = User.Authority.OWNER,
+          allowsSpam = true,
+          contact = user.contact,
+          contactType = User.ContactType.EMAIL,
+          birthday = null,
+          company = null,
+        )
+      )
+      mock.updateUser(
+        updater = UserUpdater(
+          id = UserId(user.contact!!, project.id),
+          verificationToken = Settable(null),
+        )
+      )
+    }
   }
 
   // Helpers
 
   private fun runInitializer(
-    adminOwnerName: String = Stubs.user.name!!,
-    adminOwnerSecret: String = Stubs.userCreator.rawSecret,
-    adminOwnerEmail: String = Stubs.user.contact!!,
-    adminProjectName: String = "Project Name",
+    superCreatorName: String = Stubs.user.name!!,
+    superCreatorSecret: String = Stubs.userCreator.rawSecret,
+    superCreatorEmail: String = Stubs.user.contact!!,
+    creatorProjectName: String = "Project Name",
     args: ApplicationArguments? = null,
   ) = SchemaInitializer(
-    adminService = adminService,
+    creatorService = creatorService,
     userService = userService,
+    propertyService = propService,
     schemaService = schemaService,
-    adminConfig = AdminProjectConfig().apply {
-      this.ownerName = adminOwnerName
-      this.ownerSecret = adminOwnerSecret
-      this.ownerEmail = adminOwnerEmail
-      this.projectName = adminProjectName
+    creatorConfig = CreatorProjectConfig().apply {
+      this.ownerName = superCreatorName
+      this.ownerSecret = superCreatorSecret
+      this.ownerEmail = superCreatorEmail
+      this.projectName = creatorProjectName
     },
   ).run(args)
 

@@ -8,14 +8,14 @@ import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class UserCreatorRequest(
-  @JsonProperty("user_id") val userId: String?,
+  @JsonProperty("user_id") val userId: String? = null,
   @JsonProperty("raw_signature") val rawSignature: String,
-  @JsonProperty("name") val name: String?,
-  @JsonProperty("type") val type: String?,
-  @JsonProperty("authority") val authority: String?,
+  @JsonProperty("name") val name: String? = null,
+  @JsonProperty("type") val type: String? = null,
+  @JsonProperty("authority") val authority: String? = null,
   @JsonProperty("allows_spam") val allowsSpam: Boolean?,
-  @JsonProperty("contact") val contact: String?,
-  @JsonProperty("contact_type") val contactType: String?,
-  @JsonProperty("birthday") val birthday: String?,
+  @JsonProperty("contact") val contact: String? = null,
+  @JsonProperty("contact_type") val contactType: String? = null,
+  @JsonProperty("birthday") val birthday: String? = null,
   @JsonProperty("company") val company: OrganizationDto?,
 ) : Serializable

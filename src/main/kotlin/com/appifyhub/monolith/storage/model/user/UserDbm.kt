@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.storage.model.user
 
-import com.appifyhub.monolith.storage.model.admin.AccountDbm
-import com.appifyhub.monolith.storage.model.admin.ProjectDbm
+import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import java.io.Serializable
 import java.util.Date
 import javax.persistence.Column
@@ -24,7 +23,7 @@ class UserDbm(
   @MapsId("projectId")
   @JoinColumn(referencedColumnName = "projectId", nullable = false, updatable = false)
   @ManyToOne(fetch = FetchType.EAGER)
-  val project: ProjectDbm,
+  var project: ProjectDbm,
 
   @Column(nullable = false, length = 1024)
   var signature: String,
@@ -65,9 +64,6 @@ class UserDbm(
   @Embedded
   var company: OrganizationDbm?,
 
-  @ManyToOne(fetch = FetchType.EAGER, optional = true)
-  var account: AccountDbm?,
-
 ) : Serializable {
 
   @Suppress("DuplicatedCode")
@@ -89,7 +85,6 @@ class UserDbm(
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
     if (company != other.company) return false
-    if (account != other.account) return false
 
     return true
   }
@@ -109,7 +104,6 @@ class UserDbm(
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
     result = 31 * result + (company?.hashCode() ?: 0)
-    result = 31 * result + (account?.hashCode() ?: 0)
     return result
   }
 
@@ -128,8 +122,7 @@ class UserDbm(
       "birthday=$birthday, " +
       "createdAt=$createdAt, " +
       "updatedAt=$updatedAt, " +
-      "company=$company, " +
-      "account=$account" +
+      "company=$company " +
       ")"
   }
 

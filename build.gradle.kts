@@ -36,6 +36,7 @@ repositories {
   mavenCentral()
 }
 
+@Suppress("GradlePackageUpdate")
 dependencies {
 
   // language essentials
@@ -101,7 +102,7 @@ version = prop("version")
 val artifact = prop("artifact")
 
 java.sourceCompatibility = JavaVersion.VERSION_11
-java.targetCompatibility = JavaVersion.VERSION_11
+java.targetCompatibility = java.sourceCompatibility
 
 // endregion
 
@@ -133,22 +134,26 @@ tasks {
     archiveFileName.set("$artifact.jar")
   }
 
-  withType<KotlinCompile> {
+  withType<KotlinCompile>().all {
     dependsOn("propertyGenerator")
 
     kotlinOptions {
       freeCompilerArgs = listOf("-Xjsr305=strict")
-      jvmTarget = "11"
+      jvmTarget = java.sourceCompatibility.majorVersion
     }
   }
 
   withType<Test> {
     useJUnitPlatform()
+
     with(testLogging) {
       showStandardStreams = true
       exceptionFormat = TestExceptionFormat.FULL
       events = setOf(TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.SKIPPED)
     }
+
+    minHeapSize = "512m"
+    maxHeapSize = "1024m"
   }
 
   named("githubRelease") {
@@ -229,6 +234,7 @@ apply(plugin = "com.github.breadmoirai.github-release")
 apply(plugin = "org.jlleitschuh.gradle.ktlint")
 configure<KtlintExtension> {
   verbose.set(true)
+  // also update in .editorconfig
   disabledRules.set(setOf("import-ordering", "no-blank-line-before-rbrace"))
 }
 

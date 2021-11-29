@@ -9,11 +9,7 @@ import org.junit.jupiter.api.Test
 class UserMapperTest {
 
   @Test fun `user data to domain`() {
-    val result = Stubs.userDbm.toDomain().copy(
-      // no info about this on data layer
-      ownedTokens = Stubs.user.ownedTokens,
-      account = Stubs.user.account,
-    )
+    val result = Stubs.userDbm.toDomain()
 
     assertThat(result).isDataClassEqualTo(Stubs.user)
   }
