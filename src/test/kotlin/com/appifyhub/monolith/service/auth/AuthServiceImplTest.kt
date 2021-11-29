@@ -9,12 +9,9 @@ import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
-import assertk.assertions.isFalse
 import assertk.assertions.isSuccess
-import assertk.assertions.isTrue
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
@@ -23,8 +20,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.user.DateTimeMapper
-import com.appifyhub.monolith.service.user.UserService.Privilege
-import com.appifyhub.monolith.util.AuthTestHelper
+import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
@@ -40,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.ClassMode
-import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
@@ -52,8 +47,8 @@ import org.springframework.web.server.ResponseStatusException
 class AuthServiceImplTest {
 
   @Autowired lateinit var service: AuthService
-  @Autowired lateinit var authHelper: AuthTestHelper
   @Autowired lateinit var timeProvider: TimeProviderFake
+  @Autowired lateinit var stubber: Stubber
 
   @BeforeEach fun setup() {
     timeProvider.staticTime = { 0 }
@@ -65,179 +60,27 @@ class AuthServiceImplTest {
 
   // region Auth Verifications
 
-  @Test fun `is authorized is false for expired token with default authority`() {
-    val token = authHelper.newStubJwt()
-    timeProvider.advanceBy(Duration.ofDays(2))
-
+  @Test fun `requiring JWT succeeds`() {
+    // just the basic happy case, all others are tested within the other tests
+    val authData = stubber.creatorTokens().real(DEFAULT)
     assertThat(
-      service.hasSelfAuthority(
-        authData = token,
-        authority = DEFAULT,
-        shallow = true,
-      )
-    ).isFalse()
-  }
-
-  @Test fun `is authorized is true for valid token with default authority`() {
-    assertThat(
-      service.hasSelfAuthority(
-        authData = authHelper.newStubJwt(),
-        authority = DEFAULT,
-        shallow = true,
-      )
-    ).isTrue()
-  }
-
-  @Test fun `is authorized is false for expired token (shallow)`() {
-    val token = authHelper.newStubJwt()
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat(
-      service.hasSelfAuthority(
-        authData = token,
-        authority = DEFAULT,
-        shallow = true,
-      )
-    ).isFalse()
-  }
-
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `is authorized is false for expired token (non-shallow)`() {
-    val token = authHelper.newStubJwt()
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat(
-      service.hasSelfAuthority(
-        authData = token,
-        authority = DEFAULT,
+      service.requireValidJwt(
+        authData = authData,
         shallow = false,
       )
-    ).isFalse()
+    ).isEqualTo(authData)
   }
 
-  @Test fun `is authorized is false for valid token with low authority (shallow)`() {
-    assertThat(
-      service.hasSelfAuthority(
-        authData = authHelper.newRealJwt(DEFAULT),
-        authority = MODERATOR,
-        shallow = true,
-      )
-    ).isFalse()
-  }
-
-  @Test fun `is authorized is false for valid token with low authority (non-shallow)`() {
-    assertThat(
-      service.hasSelfAuthority(
-        authData = authHelper.newRealJwt(DEFAULT),
-        authority = MODERATOR,
-        shallow = false,
-      )
-    ).isFalse()
-  }
-
-  @Test fun `is authorized is false for invalid user token`() {
-    assertThat(
-      service.hasSelfAuthority(
-        authData = authHelper.newStubJwt(),
-        authority = MODERATOR,
-        shallow = false, // shallow is already tested in expired test case
-      )
-    ).isFalse()
-  }
-
-  @Test fun `is authorized is true for valid token with admin authority (shallow)`() {
-    assertThat(
-      service.hasSelfAuthority(
-        authData = authHelper.newRealJwt(ADMIN),
-        authority = ADMIN,
-        shallow = true,
-      )
-    ).isTrue()
-  }
-
-  @Test fun `is authorized is true for valid token with admin authority (non-shallow)`() {
-    assertThat(
-      service.hasSelfAuthority(
-        authData = authHelper.newRealJwt(ADMIN),
-        authority = ADMIN,
-        shallow = true,
-      )
-    ).isTrue()
-  }
-
-  @Test fun `is project owner is false for expired token (shallow)`() {
-    val token = authHelper.newRealJwt(OWNER)
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat(
-      service.isProjectOwner(
-        authData = token,
-        shallow = true,
-      )
-    ).isFalse()
-  }
-
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `is project owner is false for expired token (non-shallow)`() {
-    val token = authHelper.newRealJwt(OWNER)
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat(
-      service.isProjectOwner(
-        authData = token,
-        shallow = false,
-      )
-    ).isFalse()
-  }
-
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `is project owner is false for non-owner (shallow)`() {
-    assertThat(
-      service.isProjectOwner(
-        authData = authHelper.newRealJwt(DEFAULT),
-        shallow = true,
-      )
-    ).isFalse()
-  }
-
-  @Test fun `is project owner is false for non-owner (non-shallow)`() {
-    assertThat(
-      service.isProjectOwner(
-        authData = authHelper.newRealJwt(DEFAULT),
-        shallow = true,
-      )
-    ).isFalse()
-  }
-
-  @Test fun `is project owner is true for owner (shallow)`() {
-    assertThat(
-      service.isProjectOwner(
-        authData = authHelper.newRealJwt(OWNER),
-        shallow = true,
-      )
-    ).isTrue()
-  }
-
-  @Test fun `is project owner is true for owner (non-shallow)`() {
-    assertThat(
-      service.isProjectOwner(
-        authData = authHelper.newRealJwt(OWNER),
-        shallow = false,
-      )
-    ).isTrue()
-  }
-
-  @Test fun `resolving shallow user from token works()`() {
+  @Test fun `resolving shallow user from token works`() {
     val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
     timeProvider.staticTime = { modernTime.time }
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat(
       service.resolveShallowSelf(token)
-        .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
-      authHelper.defaultUser.copy(
+      stubber.creators.default().copy(
         name = null,
         signature = "spring-asks-for-it",
         allowsSpam = false,
@@ -246,7 +89,6 @@ class AuthServiceImplTest {
         verificationToken = null,
         contactType = User.ContactType.CUSTOM,
         contact = null,
-        ownedTokens = emptyList(),
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -254,7 +96,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `resolving shallow user with invalid universal ID fails (default authority)`() {
-    val moderatorToken = authHelper.newRealJwt(MODERATOR)
+    val moderatorToken = stubber.creatorTokens().real(MODERATOR)
 
     assertThat {
       service.resolveShallowUser(authData = moderatorToken, universalId = "invalid")
@@ -266,11 +108,11 @@ class AuthServiceImplTest {
   }
 
   @Test fun `resolving shallow user with mismatched ID fails (default authority)`() {
-    val moderatorToken = authHelper.newRealJwt(MODERATOR)
-    val user = authHelper.defaultUser
+    val moderatorToken = stubber.creatorTokens().real(MODERATOR)
+    val targetId = stubber.creators.default().id.toUniversalFormat()
 
     assertThat {
-      service.resolveShallowUser(authData = moderatorToken, universalId = user.id.toUniversalFormat())
+      service.resolveShallowUser(authData = moderatorToken, universalId = targetId)
     }
       .isFailure()
       .all {
@@ -282,16 +124,15 @@ class AuthServiceImplTest {
   @Test fun `resolving shallow user from token works (default authority)`() {
     val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
     timeProvider.staticTime = { modernTime.time }
-    val defaultUser = authHelper.defaultUser
-    val token = authHelper.newRealJwt(DEFAULT)
+    val defaultUser = stubber.creators.default()
+    val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat(
       service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat())
-        .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
-        id = authHelper.defaultUser.id,
+        id = stubber.creators.default().id,
         name = null,
         signature = "spring-asks-for-it",
         type = User.Type.PERSONAL,
@@ -302,8 +143,6 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
-        ownedTokens = emptyList(),
-        account = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -313,16 +152,15 @@ class AuthServiceImplTest {
   @Test fun `resolving shallow user from token works (owner authority)`() {
     val modernTime = DateTimeMapper.parseAsDate("2021-02-03 04:05")
     timeProvider.staticTime = { modernTime.time }
-    val owner = authHelper.ownerUser
-    val token = authHelper.newRealJwt(OWNER)
+    val owner = stubber.creators.owner()
+    val token = stubber.tokens(owner).real()
 
     assertThat(
       service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat())
-        .copy(ownedTokens = emptyList()) // doesn't matter for this test
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
-        id = authHelper.ownerUser.id,
+        id = stubber.creators.owner().id,
         name = null,
         signature = "spring-asks-for-it",
         type = User.Type.PERSONAL,
@@ -333,259 +171,10 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
-        ownedTokens = emptyList(),
-        account = Account(
-          id = authHelper.ownerUser.account!!.id,
-          createdAt = modernTime,
-          updatedAt = modernTime,
-        ),
         createdAt = modernTime,
         updatedAt = modernTime,
       )
     )
-  }
-
-  // endregion
-
-  // region Requesting Access
-
-  @Test fun `requesting user access with invalid user ID fails`() {
-    assertThat {
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(OWNER),
-        targetId = UserId("", authHelper.adminProject.id),
-        privilege = Privilege.USER_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("User ID")
-      }
-  }
-
-  @Test fun `requesting user access fails with expired token`() {
-    val token = authHelper.newRealJwt(OWNER)
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat {
-      service.requestUserAccess(
-        authData = token,
-        targetId = authHelper.ownerUser.id,
-        privilege = Privilege.USER_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalAccessException::class)
-        messageContains("Invalid token for")
-      }
-  }
-
-  @Test fun `requesting user access fails with requesting READ for superiors`() {
-    assertThat {
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(DEFAULT),
-        targetId = authHelper.moderatorUser.id,
-        privilege = Privilege.USER_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only moderators are authorized")
-      }
-  }
-
-  @Test fun `requesting user access fails with requesting WRITE for superiors`() {
-    assertThat {
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(ADMIN),
-        targetId = authHelper.ownerUser.id,
-        privilege = Privilege.USER_WRITE,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only gods are authorized")
-      }
-  }
-
-  @Test fun `requesting user access fails with mismatching projects`() {
-    val anotherProject = authHelper.ensureProject(forceNewProject = true)
-    assertThat {
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(ADMIN, isStatic = true),
-        targetId = authHelper.ownerUser.id.copy(projectId = anotherProject.id),
-        privilege = Privilege.USER_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only requests within the same project are allowed")
-      }
-  }
-
-  @Test fun `requesting user access succeeds with requesting READ for self`() {
-    assertThat(
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(DEFAULT),
-        targetId = authHelper.defaultUser.id,
-        privilege = Privilege.USER_READ,
-      ).cleanStubArtifacts()
-    ).isDataClassEqualTo(authHelper.defaultUser.cleanStubArtifacts())
-  }
-
-  @Test fun `requesting user access succeeds with requesting WRITE for self`() {
-    assertThat(
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(OWNER),
-        targetId = authHelper.ownerUser.id,
-        privilege = Privilege.USER_WRITE,
-      ).cleanStubArtifacts()
-    ).isDataClassEqualTo(authHelper.ownerUser.cleanStubArtifacts())
-  }
-
-  @Test fun `requesting user access succeeds with requesting READ for inferiors`() {
-    assertThat(
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(MODERATOR),
-        targetId = authHelper.defaultUser.id,
-        privilege = Privilege.USER_READ,
-      ).cleanStubArtifacts()
-    ).isDataClassEqualTo(authHelper.defaultUser.cleanStubArtifacts())
-  }
-
-  @Test fun `requesting user access succeeds with requesting WRITE for inferiors`() {
-    assertThat(
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(ADMIN),
-        targetId = authHelper.moderatorUser.id,
-        privilege = Privilege.USER_WRITE,
-      ).cleanStubArtifacts()
-    ).isDataClassEqualTo(authHelper.moderatorUser.cleanStubArtifacts())
-  }
-
-  @Test fun `requesting user access succeeds with requesting WRITE for another owner with static token`() {
-    val anotherOwner = authHelper.ensureUser(OWNER, forceNewOwner = true)
-    assertThat(
-      service.requestUserAccess(
-        authData = authHelper.newRealJwt(OWNER, isStatic = true),
-        targetId = anotherOwner.id,
-        privilege = Privilege.USER_WRITE,
-      ).cleanStubArtifacts()
-    ).isDataClassEqualTo(anotherOwner.cleanStubArtifacts())
-  }
-
-  @Test fun `requesting project access with invalid project ID fails`() {
-    assertThat {
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(OWNER),
-        targetProjectId = -1,
-        privilege = Privilege.PROJECT_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Project ID")
-      }
-  }
-
-  @Test fun `requesting project access fails with expired token`() {
-    val token = authHelper.newRealJwt(OWNER)
-    timeProvider.advanceBy(Duration.ofDays(2))
-
-    assertThat {
-      service.requestProjectAccess(
-        authData = token,
-        targetProjectId = authHelper.ownerUser.id.projectId,
-        privilege = Privilege.PROJECT_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalAccessException::class)
-        messageContains("Invalid token for")
-      }
-  }
-
-  @Test fun `requesting project access fails with mismatching projects`() {
-    val anotherProject = authHelper.ensureProject(forceNewProject = true)
-    assertThat {
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(OWNER, isStatic = true),
-        targetProjectId = anotherProject.id,
-        privilege = Privilege.PROJECT_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only requests within the same project are allowed")
-      }
-  }
-
-  @Test fun `requesting project access fails with insufficient READ privileges`() {
-    assertThat {
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(ADMIN, isStatic = false),
-        targetProjectId = authHelper.adminUser.id.projectId,
-        privilege = Privilege.PROJECT_READ,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only owners are authorized")
-      }
-  }
-
-  @Test fun `requesting project access fails with insufficient WRITE privileges`() {
-    assertThat {
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(ADMIN, isStatic = false),
-        targetProjectId = authHelper.adminUser.id.projectId,
-        privilege = Privilege.PROJECT_WRITE,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only owners are authorized")
-      }
-  }
-
-  @Test fun `requesting project access succeeds with requesting READ`() {
-    assertThat(
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(OWNER),
-        targetProjectId = authHelper.ownerUser.id.projectId,
-        privilege = Privilege.PROJECT_READ,
-      )
-    ).isDataClassEqualTo(authHelper.adminProject)
-  }
-
-  @Test fun `requesting project access succeeds with requesting WRITE (static token)`() {
-    assertThat(
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(OWNER),
-        targetProjectId = authHelper.ownerUser.id.projectId,
-        privilege = Privilege.PROJECT_WRITE,
-      )
-    ).isDataClassEqualTo(authHelper.adminProject)
-  }
-
-  @Test fun `requesting project access succeeds with requesting WRITE (non-static token)`() {
-    assertThat(
-      service.requestProjectAccess(
-        authData = authHelper.newRealJwt(OWNER),
-        targetProjectId = authHelper.ownerUser.id.projectId,
-        privilege = Privilege.PROJECT_WRITE,
-      )
-    ).isDataClassEqualTo(authHelper.adminProject)
   }
 
   // endregion
@@ -613,7 +202,7 @@ class AuthServiceImplTest {
 
   @Test fun `auth user fails with invalid signature`() {
     assertThat {
-      service.resolveUser(authHelper.ensureUser(DEFAULT).id.toUniversalFormat(), "\n\t")
+      service.resolveUser(stubber.creators.default().id.toUniversalFormat(), "\n\t")
     }
       .isFailure()
       .all {
@@ -625,7 +214,7 @@ class AuthServiceImplTest {
   @Test fun `auth user fails with wrong signature`() {
     assertThat {
       service.resolveUser(
-        universalId = authHelper.ensureUser(DEFAULT).id.toUniversalFormat(),
+        universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "pass",
       )
     }
@@ -636,28 +225,44 @@ class AuthServiceImplTest {
       }
   }
 
+  @Test fun `auth user fails with unverified user`() {
+    val user = stubber.creators.default(autoVerified = false)
+
+    assertThat {
+      service.resolveUser(
+        universalId = user.id.toUniversalFormat(),
+        signature = "password",
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("not verified")
+      }
+  }
+
   @Test fun `auth user succeeds with correct signature`() {
     assertThat(
       service.resolveUser(
-        universalId = authHelper.ensureUser(MODERATOR).id.toUniversalFormat(),
+        universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "password",
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(
-      authHelper.moderatorUser.cleanStubArtifacts()
+      stubber.creators.default().cleanStubArtifacts()
     )
   }
 
-  @Test fun `auth admin fails with invalid universal ID`() {
+  @Test fun `auth creator fails with invalid universal ID`() {
     assertThat {
-      service.resolveAdmin("invalid", "signature")
+      service.resolveCreator("invalid", "signature")
     }
       .isFailure()
       .hasClass(NumberFormatException::class)
   }
 
-  @Test fun `auth admin fails with invalid user ID`() {
+  @Test fun `auth creator fails with invalid user ID`() {
     assertThat {
-      service.resolveAdmin(UserId("\na b\t", -1).toUniversalFormat(), "signature")
+      service.resolveCreator(UserId("\na b\t", -1).toUniversalFormat(), "signature")
     }
       .isFailure()
       .all {
@@ -666,9 +271,9 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `auth admin fails with invalid signature`() {
+  @Test fun `auth creator fails with invalid signature`() {
     assertThat {
-      service.resolveAdmin(authHelper.ensureUser(ADMIN).id.toUniversalFormat(), "\n\t")
+      service.resolveCreator(stubber.creators.owner().id.toUniversalFormat(), "\n\t")
     }
       .isFailure()
       .all {
@@ -677,10 +282,10 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `auth admin fails with wrong signature`() {
+  @Test fun `auth creator fails with wrong signature`() {
     assertThat {
-      service.resolveAdmin(
-        universalId = authHelper.ensureUser(ADMIN).id.toUniversalFormat(),
+      service.resolveCreator(
+        universalId = stubber.creators.owner().id.toUniversalFormat(),
         signature = "pass",
       )
     }
@@ -691,14 +296,30 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `auth admin succeeds with correct signature`() {
+  @Test fun `auth creator fails with unverified user`() {
+    val creator = stubber.creators.default(autoVerified = false)
+
+    assertThat {
+      service.resolveUser(
+        universalId = creator.id.toUniversalFormat(),
+        signature = "password",
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("not verified")
+      }
+  }
+
+  @Test fun `auth creator succeeds with correct signature`() {
     assertThat(
       service.resolveUser(
-        universalId = authHelper.ensureUser(ADMIN).id.toUniversalFormat(),
+        universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "password",
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(
-      authHelper.adminUser.cleanStubArtifacts()
+      stubber.creators.default().cleanStubArtifacts()
     )
   }
 
@@ -708,7 +329,7 @@ class AuthServiceImplTest {
 
   @Test fun `create token fails with invalid origin`() {
     assertThat {
-      service.createTokenFor(authHelper.defaultUser, origin = "\n\t", ipAddress = null)
+      service.createTokenFor(stubber.creators.default(), origin = "\n\t", ipAddress = null)
     }
       .isFailure()
       .all {
@@ -719,7 +340,7 @@ class AuthServiceImplTest {
 
   @Test fun `create token fails with invalid IP address`() {
     assertThat {
-      service.createTokenFor(authHelper.defaultUser, origin = "origin", ipAddress = "abc")
+      service.createTokenFor(stubber.creators.default(), origin = "origin", ipAddress = "abc")
     }
       .isFailure()
       .all {
@@ -729,7 +350,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `create token succeeds with valid user data and non-empty optionals`() {
-    assertThat(service.createTokenFor(authHelper.defaultUser, origin = "Some Origin", ipAddress = Stubs.ipAddress))
+    assertThat(service.createTokenFor(stubber.creators.default(), origin = "Some Origin", ipAddress = Stubs.ipAddress))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
@@ -737,12 +358,12 @@ class AuthServiceImplTest {
         contains(Stubs.ipAddress)
         contains(Stubs.geoMerged)
         contains(DEFAULT.name)
-        contains(authHelper.defaultUser.id.toUniversalFormat())
+        contains(stubber.creators.default().id.toUniversalFormat())
       }
   }
 
   @Test fun `create token succeeds with valid user data and null optionals`() {
-    assertThat(service.createTokenFor(authHelper.ownerUser, origin = null, ipAddress = null))
+    assertThat(service.createTokenFor(stubber.creators.owner(), origin = null, ipAddress = null))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
@@ -753,13 +374,13 @@ class AuthServiceImplTest {
         contains(MODERATOR.name)
         contains(ADMIN.name)
         contains(OWNER.name)
-        contains(authHelper.ownerUser.id.toUniversalFormat())
+        contains(stubber.creators.owner().id.toUniversalFormat())
       }
   }
 
   @Test fun `create static token fails with invalid origin`() {
     assertThat {
-      service.createStaticTokenFor(authHelper.ownerUser, origin = "\n\t", ipAddress = null)
+      service.createStaticTokenFor(stubber.creators.owner(), origin = "\n\t", ipAddress = null)
     }
       .isFailure()
       .all {
@@ -770,7 +391,7 @@ class AuthServiceImplTest {
 
   @Test fun `create static token fails with invalid IP address`() {
     assertThat {
-      service.createStaticTokenFor(authHelper.ownerUser, origin = "origin", ipAddress = "abc")
+      service.createStaticTokenFor(stubber.creators.owner(), origin = "origin", ipAddress = "abc")
     }
       .isFailure()
       .all {
@@ -780,8 +401,10 @@ class AuthServiceImplTest {
   }
 
   @Test fun `create static token fails with non-owner user`() {
+    val project = stubber.projects.new()
+    val adminUser = stubber.users(project).admin()
     assertThat {
-      service.createStaticTokenFor(authHelper.adminUser, origin = null, ipAddress = null)
+      service.createStaticTokenFor(adminUser, origin = null, ipAddress = null)
     }
       .isFailure()
       .all {
@@ -790,8 +413,16 @@ class AuthServiceImplTest {
       }
   }
 
-  @Test fun `create static token succeeds with valid user data and non-empty optionals`() {
-    assertThat(service.createStaticTokenFor(authHelper.ownerUser, origin = "Some Origin", ipAddress = Stubs.ipAddress))
+  @Test fun `create static token succeeds with valid (user) data and non-empty optionals`() {
+    val project = stubber.projects.new()
+    val owner = stubber.users(project).owner()
+    assertThat(
+      service.createStaticTokenFor(
+        user = owner,
+        origin = "Some Origin",
+        ipAddress = Stubs.ipAddress
+      )
+    )
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
@@ -802,12 +433,14 @@ class AuthServiceImplTest {
         contains(MODERATOR.name)
         contains(ADMIN.name)
         contains(OWNER.name)
-        contains(authHelper.ownerUser.id.toUniversalFormat())
+        contains(owner.id.toUniversalFormat())
       }
   }
 
-  @Test fun `create static token succeeds with valid user data and null optionals`() {
-    assertThat(service.createStaticTokenFor(authHelper.ownerUser, origin = null, ipAddress = null))
+  @Test fun `create static token succeeds with valid (user) data and null optionals`() {
+    val project = stubber.projects.new()
+    val owner = stubber.users(project).owner()
+    assertThat(service.createStaticTokenFor(owner, origin = null, ipAddress = null))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
@@ -818,12 +451,26 @@ class AuthServiceImplTest {
         contains(MODERATOR.name)
         contains(ADMIN.name)
         contains(OWNER.name)
-        contains(authHelper.ownerUser.id.toUniversalFormat())
+        contains(owner.id.toUniversalFormat())
+      }
+  }
+
+  @Test fun `create static token succeeds with valid (creator) data and null optionals`() {
+    val user = stubber.creators.default()
+    assertThat(service.createStaticTokenFor(user, origin = null, ipAddress = null))
+      .transform { it.split(".")[1] } // take the token content
+      .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
+      .all {
+        doesNotContain("origin", ignoreCase = true)
+        doesNotContain("ip_address", ignoreCase = true)
+        doesNotContain("geo", ignoreCase = true)
+        contains(DEFAULT.name)
+        contains(user.id.toUniversalFormat())
       }
   }
 
   @Test fun `refresh token fails with invalid token`() {
-    val token = authHelper.newStubJwt()
+    val token = stubber.creatorTokens().stub()
 
     assertThat {
       service.refreshAuth(token, ipAddress = null)
@@ -836,7 +483,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `refresh token fails with invalid IP address`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat {
       service.refreshAuth(token, ipAddress = "abc")
@@ -849,7 +496,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `refresh token fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
@@ -863,7 +510,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `refresh token fails with static token`() {
-    val token = authHelper.newRealJwt(OWNER, isStatic = true)
+    val token = stubber.creatorTokens().real(OWNER, isStatic = true)
 
     assertThat {
       service.refreshAuth(token, ipAddress = null)
@@ -876,19 +523,19 @@ class AuthServiceImplTest {
   }
 
   @Test fun `refresh token grants a new token with valid auth data`() {
-    assertThat(service.refreshAuth(authHelper.newRealJwt(DEFAULT), ipAddress = "1.2.3.4"))
+    assertThat(service.refreshAuth(stubber.creatorTokens().real(DEFAULT), ipAddress = "1.2.3.4"))
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
       .all {
         contains(Stubs.userCredentialsRequest.origin!!)
         contains("1.2.3.4")
         contains(DEFAULT.name)
-        contains(authHelper.defaultUser.id.toUniversalFormat())
+        contains(stubber.creators.default().id.toUniversalFormat())
       }
   }
 
   @Test fun `fetching token details fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
@@ -901,10 +548,9 @@ class AuthServiceImplTest {
       }
   }
 
-  @Suppress("SpellCheckingInspection")
   @Test fun `fetching token details succeeds with valid data`() {
-    val jwt = authHelper.newRealJwt(DEFAULT)
-    val defaultUser = authHelper.defaultUser
+    val jwt = stubber.creatorTokens().real(DEFAULT)
+    val defaultUser = stubber.creators.default()
 
     assertThat(
       service.fetchTokenDetails(jwt).cleanStubArtifacts()
@@ -920,14 +566,13 @@ class AuthServiceImplTest {
           authority = defaultUser.authority,
           ipAddress = null,
           geo = null,
-          accountId = null,
           isStatic = false,
         ).cleanStubArtifacts()
       )
   }
 
   @Test fun `fetching all token details fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
@@ -942,8 +587,8 @@ class AuthServiceImplTest {
 
   @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token details succeeds with valid data`() {
-    val jwt = authHelper.newRealJwt(DEFAULT)
-    val defaultUser = authHelper.defaultUser
+    val jwt = stubber.creatorTokens().real(DEFAULT)
+    val defaultUser = stubber.creators.default()
 
     assertThat(
       service.fetchAllTokenDetails(jwt, valid = null).map { it.cleanStubArtifacts() }
@@ -960,7 +605,6 @@ class AuthServiceImplTest {
             authority = defaultUser.authority,
             ipAddress = null,
             geo = null,
-            accountId = null,
             isStatic = false,
           ).cleanStubArtifacts(),
         )
@@ -968,11 +612,12 @@ class AuthServiceImplTest {
   }
 
   @Test fun `fetching all token details for others fails with expired token`() {
-    val token = authHelper.newRealJwt(OWNER)
+    val owner = stubber.creators.owner()
+    val token = stubber.tokens(owner).real()
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.fetchAllTokenDetailsFor(token, valid = true, targetId = authHelper.defaultUser.id)
+      service.fetchAllTokenDetailsFor(token, valid = true, targetId = stubber.creators.default().id)
     }
       .isFailure()
       .all {
@@ -982,7 +627,8 @@ class AuthServiceImplTest {
   }
 
   @Test fun `fetching all token details for others fails with invalid user ID`() {
-    val token = authHelper.newRealJwt(OWNER)
+    val owner = stubber.creators.owner()
+    val token = stubber.tokens(owner).real()
 
     assertThat {
       service.fetchAllTokenDetailsFor(token, valid = true, targetId = UserId("\t\n", -1))
@@ -996,12 +642,13 @@ class AuthServiceImplTest {
 
   @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token for others details succeeds with valid data`() {
-    val defaultJwt = authHelper.newRealJwt(DEFAULT)
-    val defaultUser = authHelper.defaultUser
-    val ownerJwt = authHelper.newRealJwt(OWNER)
+    val defaultJwt = stubber.creatorTokens().real(DEFAULT)
+    val defaultUser = stubber.creators.default()
+    val owner = stubber.creators.owner()
+    val ownerJwt = stubber.tokens(owner).real()
 
     assertThat(
-      service.fetchAllTokenDetailsFor(ownerJwt, valid = true, targetId = authHelper.defaultUser.id)
+      service.fetchAllTokenDetailsFor(ownerJwt, valid = true, targetId = defaultUser.id)
         .map { it.cleanStubArtifacts() }
     )
       .isEqualTo(
@@ -1016,7 +663,6 @@ class AuthServiceImplTest {
             authority = defaultUser.authority,
             ipAddress = null,
             geo = null,
-            accountId = null,
             isStatic = false,
           ).cleanStubArtifacts(),
         )
@@ -1028,7 +674,7 @@ class AuthServiceImplTest {
   // region Unauth
 
   @Test fun `unauthorize fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
@@ -1042,7 +688,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize succeeds with valid auth data`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
 
     assertAll {
       // unauth with the token
@@ -1056,7 +702,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize all fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
@@ -1070,8 +716,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize all succeeds with valid auth data`() {
-    val token1 = authHelper.newRealJwt(DEFAULT)
-    val token2 = authHelper.newRealJwt(DEFAULT)
+    val token1 = stubber.creatorTokens().real(DEFAULT)
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token2 = stubber.creatorTokens().real(DEFAULT)
 
     assertAll {
       // unauth with the token
@@ -1087,11 +734,11 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize all for others fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
-      service.unauthorizeAllFor(token, targetId = authHelper.defaultUser.id)
+      service.unauthorizeAllFor(token, targetId = stubber.creators.default().id)
     }
       .isFailure()
       .all {
@@ -1101,7 +748,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize all for others fails with invalid ID`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat {
       service.unauthorizeAllFor(token, targetId = UserId("\t\n", -1))
@@ -1114,13 +761,14 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize all for others succeeds with valid auth data`() {
-    val token1 = authHelper.newRealJwt(DEFAULT)
-    val token2 = authHelper.newRealJwt(DEFAULT)
-    val tokenAdmin = authHelper.newRealJwt(ADMIN)
+    val token1 = stubber.creatorTokens().real(DEFAULT)
+    val token2 = stubber.creatorTokens().real(DEFAULT)
+    val owner = stubber.creators.owner()
+    val ownerToken = stubber.tokens(owner).real()
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorizeAllFor(tokenAdmin, targetId = authHelper.defaultUser.id) }
+      assertThat { service.unauthorizeAllFor(ownerToken, targetId = stubber.creators.default().id) }
         .isSuccess()
 
       // and then try to re-auth
@@ -1128,16 +776,11 @@ class AuthServiceImplTest {
         .isFailure()
       assertThat { service.refreshAuth(token2, ipAddress = null) }
         .isFailure()
-
-      // admin token should still work
-      assertThat(
-        service.hasSelfAuthority(tokenAdmin, authority = DEFAULT, shallow = false)
-      ).isTrue()
     }
   }
 
   @Test fun `unauthorize tokens fails with expired token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
     assertThat {
@@ -1151,7 +794,7 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize tokens fails with invalid token`() {
-    val token = authHelper.newRealJwt(DEFAULT)
+    val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat {
       service.unauthorizeTokens(token, tokenValues = listOf("\t\n"))
@@ -1164,8 +807,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `unauthorize tokens succeeds with valid auth data`() {
-    val token1 = authHelper.newRealJwt(DEFAULT)
-    val token2 = authHelper.newRealJwt(DEFAULT)
+    val token1 = stubber.creatorTokens().real(DEFAULT)
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token2 = stubber.creatorTokens().real(DEFAULT)
     val tokensToUnauth = listOf(token1, token2)
       .map { service.fetchTokenDetails(it).tokenValue }
 
@@ -1192,7 +836,7 @@ class AuthServiceImplTest {
     verificationToken = null,
   ).cleanDates()
 
-  fun User.cleanDates() = copy(
+  private fun User.cleanDates() = copy(
     birthday = birthday?.truncateTo(ChronoUnit.DAYS),
     createdAt = createdAt.truncateTo(ChronoUnit.SECONDS),
     updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS),

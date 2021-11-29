@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.service.user
 
-import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
@@ -12,6 +11,7 @@ import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.validation.impl.Normalizers
@@ -21,14 +21,16 @@ import org.springframework.stereotype.Service
 @Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
+  private val creatorService: CreatorService,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addUser(creator: UserCreator, userIdType: UserIdType): User {
+  override fun addUser(creator: UserCreator): User {
     log.debug("Adding user $creator")
 
+    val userIdType = creatorService.fetchProjectById(creator.projectId).userIdType
     val normalizedId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(creator.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(creator.userId).requireValid { "Email ID" }
@@ -64,16 +66,16 @@ class UserServiceImpl(
     return userRepository.addUser(normalizedCreator, userIdType)
   }
 
-  override fun fetchUserByUserId(id: UserId, withTokens: Boolean): User {
+  override fun fetchUserByUserId(id: UserId): User {
     log.debug("Fetching user by $id")
     val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
-    return userRepository.fetchUserByUserId(normalizedUserId, withTokens = withTokens)
+    return userRepository.fetchUserByUserId(normalizedUserId)
   }
 
-  override fun fetchUserByUniversalId(universalId: String, withTokens: Boolean): User {
+  override fun fetchUserByUniversalId(universalId: String): User {
     log.debug("Fetching user by $universalId")
     val normalizedUniversalId = Normalizers.Dense.run(universalId).requireValid { "User ID" }
-    return userRepository.fetchUserByUniversalId(normalizedUniversalId, withTokens = withTokens)
+    return userRepository.fetchUserByUniversalId(normalizedUniversalId)
   }
 
   override fun fetchAllUsersByContact(contact: String): List<User> {
@@ -88,18 +90,12 @@ class UserServiceImpl(
     return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
   }
 
-  override fun fetchAllUsersByAccount(account: Account): List<User> {
-    log.debug("Fetching all users for account $account")
-    Normalizers.AccountId.run(account.id).requireValid { "Account ID" }
-    return userRepository.fetchAllUsersByAccount(account)
-  }
-
-  override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
+  override fun updateUser(updater: UserUpdater): User {
     log.debug("Updating user by $updater")
 
     // non-nullable properties
-
     Normalizers.UserId.run(updater.id).requireValid { "User ID" }
+    val userIdType = creatorService.fetchProjectById(updater.id.projectId).userIdType
     val normalizedUserId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(updater.id.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(updater.id.userId).requireValid { "Email ID" }
@@ -167,9 +163,6 @@ class UserServiceImpl(
     val normalizedBirthday = updater.birthday?.mapValueNullable {
       Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
     }
-    updater.account?.value?.let {
-      Normalizers.AccountId.run(it.id).requireValid { "Account ID" }
-    }
 
     val normalizedUpdater = UserUpdater(
       id = normalizedId,
@@ -183,7 +176,6 @@ class UserServiceImpl(
       verificationToken = normalizedVerificationToken,
       birthday = normalizedBirthday,
       company = normalizedCompany,
-      account = updater.account,
     )
 
     return userRepository.updateUser(normalizedUpdater, userIdType)

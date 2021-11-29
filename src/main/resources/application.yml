@@ -23,13 +23,13 @@ app:
       private-key-passphrase: ${KEYSTORE_KEY_PASS:debug!}
       default-expiration-days: ${JWT_EXPIRATION_DAYS:90}
       static-expiration-days: ${API_KEY_EXPIRATION_DAYS:700}
-  adminProject:
+  creator:
     owner:
-      name: ${ADMIN_OWNER_NAME:Owner}
-      secret: ${ADMIN_OWNER_SECRET:}
-      email: ${ADMIN_OWNER_EMAIL:admin@appifyhub.com}
+      name: ${CREATOR_OWNER_NAME:Owner}
+      secret: ${CREATOR_OWNER_SECRET:}
+      email: ${CREATOR_OWNER_EMAIL:creator@appifyhub.com}
     properties:
-      name: ${ADMIN_PROP_PROJECT_NAME:AppifyHub}
+      name: ${CREATOR_PROP_PROJECT_NAME:AppifyHub}
   ip2location:
     file: ${IP_2_LOCATION_FILE:}
 

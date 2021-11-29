@@ -5,12 +5,11 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.user.UserController.Endpoints.ONE_USER
-import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
+import com.appifyhub.monolith.controller.common.Endpoints.ONE_USER
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
-import com.appifyhub.monolith.util.AuthTestHelper
+import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
@@ -43,7 +42,7 @@ class UserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
-  @Autowired lateinit var authHelper: AuthTestHelper
+  @Autowired lateinit var stubber: Stubber
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -57,7 +56,8 @@ class UserControllerTest {
   }
 
   @Test fun `get user fails when unauthorized`() {
-    val universalId = authHelper.defaultUser.id.toUniversalFormat()
+    val project = stubber.projects.new()
+    val universalId = stubber.users(project).default().id.toUniversalFormat()
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
@@ -72,9 +72,10 @@ class UserControllerTest {
   }
 
   @Test fun `get user succeeds with valid authorization`() {
-    val user = authHelper.defaultUser
-    val universalId = user.id.toUniversalFormat()
-    val token = authHelper.newRealJwt(DEFAULT).token.tokenValue
+    val project = stubber.projects.new()
+    val self = stubber.users(project).default()
+    val universalId = self.id.toUniversalFormat()
+    val token = stubber.tokens(self).real().token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -87,11 +88,12 @@ class UserControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
         Stubs.userResponse.copy(
-          userId = user.id.userId,
+          userId = self.id.userId,
+          projectId = project.id,
           universalId = universalId,
-          type = user.type.name,
-          authority = user.authority.name,
-          birthday = DateTimeMapper.formatAsDate(user.birthday!!),
+          type = self.type.name,
+          authority = self.authority.name,
+          birthday = DateTimeMapper.formatAsDate(self.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )

@@ -234,23 +234,4 @@ class TokenDetailsRepositoryImplTest {
       .isEqualTo(listOf(Stubs.tokenDetails))
   }
 
-  @Test fun `blocking all user's tokens works`() {
-    tokenDetailsDao.stub {
-      onGeneric { saveAll(any<List<TokenDetailsDbm>>()) } doAnswer {
-        @Suppress("UNCHECKED_CAST")
-        it.arguments.first() as List<TokenDetailsDbm>
-      }
-
-      onGeneric { deleteAll(any<List<TokenDetailsDbm>>()) } doAnswer { }
-    }
-
-    val user = Stubs.user.copy(
-      ownedTokens = Stubs.user.ownedTokens.map {
-        it.copy(isBlocked = false)
-      },
-    )
-    assertThat(repository.blockAllTokensFromModel(user))
-      .isEqualTo(listOf(Stubs.tokenDetails))
-  }
-
 }

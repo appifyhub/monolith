@@ -7,7 +7,6 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.util.Stubs
-import com.appifyhub.monolith.util.ext.empty
 import com.ip2location.IPResult
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.mock
@@ -88,7 +87,7 @@ class GeoMapperTest {
     )
 
     assertThat(geo.mergeToString())
-      .isEqualTo(String.empty)
+      .isEqualTo("")
   }
 
 }

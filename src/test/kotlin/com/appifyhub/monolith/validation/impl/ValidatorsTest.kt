@@ -8,7 +8,6 @@ import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import com.appifyhub.monolith.util.ext.empty
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import org.junit.jupiter.api.Test
@@ -53,7 +52,7 @@ class ValidatorsTest {
   }
 
   @Test fun `no spaces fails with empty`() {
-    assertThat(Validators.NoSpaces.isValid(String.empty))
+    assertThat(Validators.NoSpaces.isValid(""))
       .isFalse()
   }
 
@@ -78,7 +77,7 @@ class ValidatorsTest {
   }
 
   @Test fun `nullable no spaces fails with empty`() {
-    assertThat(Validators.NoSpacesNullable.isValid(String.empty))
+    assertThat(Validators.NoSpacesNullable.isValid(""))
       .isFalse()
   }
 
@@ -109,6 +108,21 @@ class ValidatorsTest {
 
   @Test fun `positive long succeeds with positive`() {
     assertThat(Validators.PositiveLong.isValid(1L))
+      .isTrue()
+  }
+
+  @Test fun `flag fails with null`() {
+    assertThat(Validators.Flag.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `flag succeeds with false`() {
+    assertThat(Validators.Flag.isValid(false))
+      .isTrue()
+  }
+
+  @Test fun `flag succeeds with true`() {
+    assertThat(Validators.Flag.isValid(true))
       .isTrue()
   }
 
@@ -412,6 +426,26 @@ class ValidatorsTest {
 
   @Test fun `positive long (as string) succeeds with positive`() {
     assertThat(Validators.PositiveLongAsString.isValid("1"))
+      .isTrue()
+  }
+
+  @Test fun `flag (as string) fails with null`() {
+    assertThat(Validators.FlagAsString.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `flag (as string) fails with invalid input`() {
+    assertThat(Validators.FlagAsString.isValid("invalid"))
+      .isFalse()
+  }
+
+  @Test fun `flag (as string) succeeds with true`() {
+    assertThat(Validators.FlagAsString.isValid("true"))
+      .isTrue()
+  }
+
+  @Test fun `flag (as string) succeeds with false`() {
+    assertThat(Validators.FlagAsString.isValid("false"))
       .isTrue()
   }
 

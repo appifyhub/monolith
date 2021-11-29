@@ -1,15 +1,17 @@
 package com.appifyhub.monolith.init
 
-import com.appifyhub.monolith.domain.admin.Project
-import com.appifyhub.monolith.domain.admin.ops.ProjectCreator
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
-import com.appifyhub.monolith.repository.admin.SignatureGenerator
-import com.appifyhub.monolith.service.admin.AdminService
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
+import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
@@ -21,10 +23,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class SchemaInitializer(
-  private val adminService: AdminService,
+  private val creatorService: CreatorService,
   private val userService: UserService,
+  private val propertyService: PropertyService,
   private val schemaService: SchemaService,
-  private val adminConfig: AdminProjectConfig,
+  private val creatorConfig: CreatorProjectConfig,
 ) : ApplicationRunner {
 
   private enum class Seed(val version: Long) { INITIAL(1L) }
@@ -57,32 +60,42 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val configuredSignature = Normalizers.RawSignatureNullified.run(adminConfig.ownerSecret)
+    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSecret)
       .requireValid { "Owner Signature" }
-    val ownerName = Normalizers.Name.run(adminConfig.ownerName)
+    val ownerName = Normalizers.Name.run(creatorConfig.ownerName)
       .requireValid { "Owner Name" }
-    val ownerEmail = Normalizers.Email.run(adminConfig.ownerEmail)
+    val ownerEmail = Normalizers.Email.run(creatorConfig.ownerEmail)
       .requireValid { "Owner Email" }
-    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
-    val adminProjectName = Normalizers.PropProjectName.run(adminConfig.projectName)
+    val creatorProjectName = Normalizers.PropProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
+    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
 
-    // create empty account for the admin owner
-    val account = adminService.addAccount()
-
-    // create the admin project
-    val project = adminService.addProject(
-      ProjectCreator(
-        account = account,
+    // create the creator project
+    val project = creatorService.addProject(
+      projectInfo = ProjectCreator(
+        owner = null,
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,
-      )
+      ),
     )
 
-    // create the owner's user in the admin project
+    // save the project name
+    propertyService.saveProperty<String>(
+      projectId = project.id,
+      propName = ProjectProperty.NAME.name,
+      propRawValue = creatorProjectName,
+    )
+
+    // set that the project is not on hold
+    propertyService.saveProperty<Boolean>(
+      projectId = project.id,
+      propName = ProjectProperty.ON_HOLD.name,
+      propRawValue = false.toString(),
+    )
+
+    // create the owner's user in the creator project
     var owner = userService.addUser(
-      userIdType = project.userIdType,
       creator = UserCreator(
         userId = ownerEmail,
         projectId = project.id,
@@ -98,19 +111,17 @@ class SchemaInitializer(
       )
     )
 
-    // set admin user as owner for the admin account
+    // clear the verification token
     owner = userService.updateUser(
-      userIdType = project.userIdType,
       updater = UserUpdater(
         id = owner.id,
-        account = Settable(account),
         verificationToken = Settable(null),
       )
     )
 
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
-      ?.let { "<see \$env.ADMIN_OWNER_SECRET>" }
+      ?.let { "<see \$env.CREATOR_OWNER_SECRET>" }
       ?: rawOwnerSecret
 
     // print credentials
@@ -122,7 +133,7 @@ class SchemaInitializer(
         
         [[ SECRET SECTION START: PRINTED ONLY ONCE ]]
         
-        Admin project '$adminProjectName' is now set up. 
+        Creator project '$creatorProjectName' is now set up. 
         Project owner is '${owner.name} <${owner.contact}>'.
         
         Project ID     = ${project.id}

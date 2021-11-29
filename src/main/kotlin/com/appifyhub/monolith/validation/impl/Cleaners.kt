@@ -2,7 +2,6 @@ package com.appifyhub.monolith.validation.impl
 
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.util.ext.empty
 import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import com.appifyhub.monolith.validation.cleansToNonNull
 import com.appifyhub.monolith.validation.cleansToNullable
@@ -21,6 +20,8 @@ object Cleaners {
     it?.filter { char -> !char.isWhitespace() }
   }
   val LongToCardinal = cleansToNonNull<Long>("LongToCardinal") { it?.takeIf { num -> num > 0L } ?: 0L }
+  val FlagDefFalse = cleansToNonNull<Boolean>("FlagDefaultFalse") { it ?: false }
+  val FlagDefTrue = cleansToNonNull<Boolean>("FlagDefaultTrue") { it ?: true }
 
   // Top level cleaners
 
@@ -47,14 +48,14 @@ object Cleaners {
   val Email = RemoveSpaces
   val Phone = cleansToNonNull<String>("Phone") cleaner@{ phone ->
     var result = phone?.trim()
-    if (result.isNullOrBlank()) return@cleaner String.empty
+    if (result.isNullOrBlank()) return@cleaner ""
     // remove non-numeric chars
     result = result.filter { it.isDigit() }
-    if (result.length < 3) return@cleaner String.empty
+    if (result.length < 3) return@cleaner ""
     // 0123456789 (local) -> make it international
     if (result[0] == '0' && result[1] != '0') result = "0$result"
     // 00123456789 (international) -> convert to plus format
-    if (result.startsWith("00")) result = result.replaceFirst("00", String.empty)
+    if (result.startsWith("00")) result = result.replaceFirst("00", "")
     // 123456789 (international, no zeros) -> add the plus in front
     "+$result"
   }
@@ -92,6 +93,12 @@ object Cleaners {
   val UrlNullified = TrimNullified
   val LongToCardinalAsString = cleansToNonNull<String>("LongToCardinalAsString") {
     (it?.toLongOrNull()?.takeIf { num -> num > 0L } ?: 0L).toString()
+  }
+  val FlagDefFalseAsString = cleansToNonNull<String>("FlagDefFalseAsString") {
+    it?.toBooleanStrictOrNull()?.toString() ?: "false"
+  }
+  val FlagDefTrueAsString = cleansToNonNull<String>("FlagDefTrueAsString") {
+    it?.toBooleanStrictOrNull()?.toString() ?: "true"
   }
 
   // Other cleaners

@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.repository.user
 
-import com.appifyhub.monolith.util.ext.empty
 import java.util.UUID
 import kotlin.math.pow
 
@@ -15,7 +14,7 @@ object TokenGenerator {
   val nextEmailToken: String
     get() = emailInterceptor() ?: UUID.randomUUID()
       .toString()
-      .replace(UUID_DELIMITER, String.empty)
+      .replace(UUID_DELIMITER, "")
       .uppercase()
       .take(EMAIL_TOKEN_LENGTH)
 

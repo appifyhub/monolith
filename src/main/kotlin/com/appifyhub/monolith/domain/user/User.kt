@@ -1,9 +1,7 @@
 package com.appifyhub.monolith.domain.user
 
-import com.appifyhub.monolith.domain.admin.Account
-import com.appifyhub.monolith.domain.auth.TokenDetails
-import org.springframework.security.core.GrantedAuthority
 import java.util.Date
+import org.springframework.security.core.GrantedAuthority
 
 data class User(
   val id: UserId,
@@ -19,16 +17,16 @@ data class User(
   val createdAt: Date,
   val updatedAt: Date = createdAt,
   val company: Organization? = null,
-  val ownedTokens: List<TokenDetails> = emptyList(),
-  val account: Account? = null,
 ) {
 
   enum class Type {
     PERSONAL, ORGANIZATION;
 
     companion object {
-      fun find(name: String, default: Type) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: Type? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 
@@ -36,8 +34,10 @@ data class User(
     EMAIL, PHONE, CUSTOM;
 
     companion object {
-      fun find(name: String, default: ContactType) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: ContactType? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
     }
   }
 
@@ -46,14 +46,17 @@ data class User(
 
     companion object {
 
-      fun find(name: String, default: Authority) =
-        values().firstOrNull { it.name == name } ?: default
+      fun find(name: String, default: Authority? = null) =
+        values().firstOrNull { it.name == name }
+          ?: default
+          ?: throw IllegalArgumentException("Not found")
 
-      fun find(granted: Collection<GrantedAuthority>, default: Authority) =
+      fun find(granted: Collection<GrantedAuthority>, default: Authority? = null) =
         ArrayList(granted)
           .map { find(it.authority, default = DEFAULT) }
           .maxByOrNull { it.ordinal }
           ?: default
+          ?: throw IllegalArgumentException("Not found")
 
     }
 
@@ -72,6 +75,8 @@ data class User(
   }
 
   val allAuthorities = authority.allAuthorities
+
+  val isVerified = verificationToken.isNullOrBlank()
 
   fun canActAs(authority: Authority) = this.authority.ordinal >= authority.ordinal
 

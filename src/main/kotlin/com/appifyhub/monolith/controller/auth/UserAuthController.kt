@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.controller.auth
 
+import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
@@ -8,6 +9,7 @@ import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
+import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.auth.AuthService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -22,27 +24,20 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class UserAuthController(
   private val authService: AuthService,
+  private val accessManager: AccessManager,
 ) : RequestIpAddressHolder {
-
-  object Endpoints {
-    const val AUTH = "/v1/universal/auth"
-    const val ADMIN_AUTH = "/v1/admin/auth"
-    const val ANY_USER_AUTH = "/v1/projects/{projectId}/users/{userId}/auth"
-    const val ADMIN_API_KEY = "/v1/admin/apikey"
-
-    const val TOKENS = "/v1/universal/auth/tokens"
-    const val ANY_USER_TOKENS = "/v1/projects/{projectId}/users/{userId}/auth/tokens"
-  }
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
   @PostMapping(Endpoints.AUTH)
-  fun authUser(
+  fun authenticate(
     @RequestBody creds: UserCredentialsRequest,
   ): TokenResponse {
     log.debug("[POST] auth user with $creds")
 
     val user = authService.resolveUser(creds.universalId, creds.secret)
+    accessManager.requireProjectFunctional(user.id.projectId)
+
     val tokenValue = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
 
     return tokenResponseOf(tokenValue)
@@ -53,7 +48,10 @@ class UserAuthController(
     authentication: Authentication,
   ): TokenDetailsResponse {
     log.debug("[GET] get current token")
+
     val currentToken = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(currentToken.ownerId.projectId)
+
     return currentToken.toNetwork()
   }
 
@@ -63,23 +61,33 @@ class UserAuthController(
     @RequestParam(required = false) valid: Boolean?,
   ): List<TokenDetailsResponse> {
     log.debug("[GET] get all tokens, [valid $valid]")
+
     val tokens = authService.fetchAllTokenDetails(authentication, valid)
+    accessManager.requireProjectFunctional(tokens.first().ownerId.projectId)
+
     return tokens.map(TokenDetails::toNetwork)
   }
 
   @PutMapping(Endpoints.AUTH)
-  fun refreshUser(authentication: Authentication): TokenResponse {
+  fun refresh(authentication: Authentication): TokenResponse {
     log.debug("[PUT] refresh user with $authentication")
+
+    val token = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(token.ownerId.projectId)
+
     val tokenValue = authService.refreshAuth(authentication, getRequestIpAddress())
     return tokenResponseOf(tokenValue)
   }
 
   @DeleteMapping(Endpoints.AUTH)
-  fun unauthUser(
+  fun unauthenticate(
     authentication: Authentication,
     @RequestParam(required = false) all: Boolean? = false,
   ): MessageResponse {
     log.debug("[DELETE] unauth user with $authentication, [all $all]")
+
+    val token = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(token.ownerId.projectId)
 
     if (all == true) {
       authService.unauthorizeAll(authentication)
@@ -91,11 +99,15 @@ class UserAuthController(
   }
 
   @DeleteMapping(Endpoints.TOKENS)
-  fun unauthTokens(
+  fun unauthenticateTokens(
     authentication: Authentication,
     @RequestParam tokenIds: List<String>,
   ): MessageResponse {
     log.debug("[DELETE] unauth tokens $tokenIds")
+
+    val token = authService.fetchTokenDetails(authentication)
+    accessManager.requireProjectFunctional(token.ownerId.projectId)
+
     authService.unauthorizeTokens(authentication, tokenIds)
     return MessageResponse.DONE
   }

@@ -31,7 +31,6 @@ class JwtHelper(
     const val ORIGIN = "origin"
     const val IP_ADDRESS = "ip_address"
     const val GEO = "geo"
-    const val ACCOUNT_ID = "account_id"
     const val IS_STATIC = "is_static"
 
     const val AUTHORITY_DELIMITER = ","

@@ -18,7 +18,6 @@ class UserOpsMapperTest {
     assertThat(updater).isDataClassEqualTo(
       Stubs.userUpdater.copy(
         verificationToken = null,
-        account = null,
         birthday = Settable(DateTimeMapper.parseAsDateTime("1970-05-15 00:00")), // from the stub
       )
     )

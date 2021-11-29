@@ -9,13 +9,10 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.domain.admin.Project.UserIdType
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.admin.AdminRepository
-import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
@@ -36,16 +33,12 @@ import org.junit.jupiter.api.Test
 class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
-  private val tokenDetailsRepo = mock<TokenDetailsRepository>()
-  private val adminRepo = mock<AdminRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
 
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
-    tokenDetailsRepository = tokenDetailsRepo,
-    adminRepository = adminRepo,
     passwordEncoder = passwordEncoder,
     timeProvider = timeProvider,
     springSecurityUserManager = springUserManager,
@@ -54,12 +47,6 @@ class UserRepositoryImplTest {
   @BeforeEach fun setup() {
     userDao.stub {
       onGeneric { save(any()) } doAnswer { it.arguments.first() as UserDbm }
-    }
-    adminRepo.stub {
-      on { fetchProjectById(Stubs.project.id) } doReturn Stubs.project
-    }
-    tokenDetailsRepo.stub {
-      on { fetchAllTokens(Stubs.userDbm.toDomain(), Stubs.project) } doReturn Stubs.user.ownedTokens
     }
   }
 
@@ -105,11 +92,7 @@ class UserRepositoryImplTest {
 
     assertThat(repository.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
-        Stubs.user.copy(
-          id = UserId("randomUserId", creator.projectId),
-          account = null,
-          ownedTokens = emptyList(),
-        )
+        Stubs.user.copy(id = UserId("randomUserId", creator.projectId))
       )
   }
 
@@ -122,12 +105,7 @@ class UserRepositoryImplTest {
     TokenGenerator.emailInterceptor = { "abcd1234" }
 
     assertThat(repository.addUser(creator, Stubs.project.userIdType))
-      .isDataClassEqualTo(
-        Stubs.user.copy(
-          account = null,
-          ownedTokens = emptyList(),
-        )
-      )
+      .isDataClassEqualTo(Stubs.user)
   }
 
   @Test fun `adding user with phone ID generates a phone-friendly verification token`() {
@@ -142,8 +120,6 @@ class UserRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.user.copy(
           id = UserId(creator.userId!!, creator.projectId),
-          account = null,
-          ownedTokens = emptyList(),
           verificationToken = "123456"
         )
       )
@@ -158,7 +134,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUserId(Stubs.userId, withTokens = false) }
+    assertThat { repository.fetchUserByUserId(Stubs.userId) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -166,21 +142,12 @@ class UserRepositoryImplTest {
       }
   }
 
-  @Test fun `fetching user by ID with no tokens works`() {
+  @Test fun `fetching user by ID works`() {
     userDao.stub {
       onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
     }
 
-    assertThat(repository.fetchUserByUserId(Stubs.userId, withTokens = false))
-      .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
-  }
-
-  @Test fun `fetching user by ID with tokens works`() {
-    userDao.stub {
-      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
-    }
-
-    assertThat(repository.fetchUserByUserId(Stubs.userId, withTokens = true))
+    assertThat(repository.fetchUserByUserId(Stubs.userId))
       .isDataClassEqualTo(Stubs.user)
   }
 
@@ -189,7 +156,7 @@ class UserRepositoryImplTest {
   // region Fetch by universal ID
 
   @Test fun `fetching user by malformed universal ID throws`() {
-    assertThat { repository.fetchUserByUniversalId("malformed", withTokens = false) }
+    assertThat { repository.fetchUserByUniversalId("malformed") }
       .isFailure()
       .hasClass(NumberFormatException::class)
   }
@@ -199,7 +166,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUniversalId(Stubs.universalUserId, withTokens = false) }
+    assertThat { repository.fetchUserByUniversalId(Stubs.universalUserId) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -207,21 +174,12 @@ class UserRepositoryImplTest {
       }
   }
 
-  @Test fun `fetching user by universal ID with no tokens works`() {
+  @Test fun `fetching user by universal ID works`() {
     userDao.stub {
       onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
     }
 
-    assertThat(repository.fetchUserByUniversalId(Stubs.universalUserId, withTokens = false))
-      .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
-  }
-
-  @Test fun `fetching user by universal ID with tokens works`() {
-    userDao.stub {
-      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
-    }
-
-    assertThat(repository.fetchUserByUniversalId(Stubs.universalUserId, withTokens = true))
+    assertThat(repository.fetchUserByUniversalId(Stubs.universalUserId))
       .isDataClassEqualTo(Stubs.user)
   }
 
@@ -250,8 +208,7 @@ class UserRepositoryImplTest {
     assertThat(repository.fetchAllUsersByContact(Stubs.user.contact!!))
       .all {
         hasSize(1)
-        transform { it.first() }
-          .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
       }
   }
 
@@ -280,38 +237,7 @@ class UserRepositoryImplTest {
     assertThat(repository.fetchAllUsersByProjectId(Stubs.project.id))
       .all {
         hasSize(1)
-        transform { it.first() }
-          .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
-      }
-  }
-
-  // endregion
-
-  // region Fetch by Account
-
-  @Test fun `fetching users by invalid account throws`() {
-    userDao.stub {
-      onGeneric { findAllByAccount(Stubs.accountDbm) } doThrow IllegalArgumentException("failed")
-    }
-
-    assertThat { repository.fetchAllUsersByAccount(Stubs.account) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        hasMessage("failed")
-      }
-  }
-
-  @Test fun `fetching users by account works`() {
-    userDao.stub {
-      onGeneric { findAllByAccount(Stubs.accountDbm) } doReturn listOf(Stubs.userDbm)
-    }
-
-    assertThat(repository.fetchAllUsersByAccount(Stubs.account))
-      .all {
-        hasSize(1)
-        transform { it.first() }
-          .isDataClassEqualTo(Stubs.user.copy(ownedTokens = emptyList()))
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
       }
   }
 
@@ -340,12 +266,7 @@ class UserRepositoryImplTest {
     TokenGenerator.phoneInterceptor = { "abcd12341" }
 
     assertThat(repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType))
-      .isDataClassEqualTo(
-        Stubs.userUpdated.copy(
-          ownedTokens = emptyList(), // tokens are not pulled for updates
-          account = Stubs.accountUpdated.copy(owners = emptyList()), // dropped during storage for updates
-        )
-      )
+      .isDataClassEqualTo(Stubs.userUpdated)
   }
 
   @Test fun `updating user's email contact generates a new verification token`() {
@@ -362,8 +283,6 @@ class UserRepositoryImplTest {
           contact = updater.contact!!.value,
           verificationToken = "abcd12341",
           updatedAt = Date(0xA00001),
-          ownedTokens = emptyList(), // tokens are not pulled for updates
-          account = Stubs.account.copy(owners = emptyList()), // dropped during storage for updates
         )
       )
   }
@@ -382,8 +301,6 @@ class UserRepositoryImplTest {
         Stubs.userUpdated.copy(
           contact = updater.contact!!.value,
           verificationToken = "abcd12342",
-          ownedTokens = emptyList(), // tokens are not pulled for updates
-          account = Stubs.accountUpdated.copy(owners = emptyList()), // dropped during storage for updates
         )
       )
   }
@@ -433,7 +350,7 @@ class UserRepositoryImplTest {
       }
   }
 
-  @Test fun `removing user by universal ID with tokens works`() {
+  @Test fun `removing user by universal ID works`() {
     userDao.stub {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }

@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.domain.user.ops
 
-import com.appifyhub.monolith.domain.admin.Account
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
@@ -24,5 +23,4 @@ data class UserUpdater(
   val verificationToken: Settable<String?>? = null,
   val birthday: Settable<Date?>? = null,
   val company: Settable<OrganizationUpdater?>? = null,
-  val account: Settable<Account?>? = null,
 )

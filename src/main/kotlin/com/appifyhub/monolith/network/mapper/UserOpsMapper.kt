@@ -29,7 +29,6 @@ fun UserUpdaterRequest.toDomain(
   verificationToken = null,
   birthday = birthday.mapToDomainNullable { DateTimeMapper.parseAsDate(it) },
   company = company.mapToDomainNullable { it.toDomain() },
-  account = null,
 )
 
 fun OrganizationUpdaterDto.toDomain(): OrganizationUpdater = OrganizationUpdater(
