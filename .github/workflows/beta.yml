@@ -120,10 +120,10 @@ jobs:
           DEPLOY_SPEC: ${{ secrets.DEPLOY_SPEC }}
           DEPLOY_TAGS: ${{ secrets.DEPLOY_TAGS }}
         run: |
-          CMD=${DEPLOY_SPEC}$(date +'%s')${DEPLOY_TAGS}
+          CMD="${DEPLOY_SPEC}$(date +'%s')${DEPLOY_TAGS}"
           URL_STG="${DEPLOY_API}/${DEPLOY_SPACE_STG}/deployments/${DEPLOY_APP}?${DEPLOY_ARGS}"
-          curl -s --location --request PATCH $URL_STG --insecure \
-          --header $DEPLOY_MODE \
-          --header $DEPLOY_AUTH_STG \
-          --data-raw $CMD \
+          curl -s --location --request PATCH "${URL_STG}" --insecure \
+          --header "${DEPLOY_MODE}" \
+          --header "${DEPLOY_AUTH_STG}" \
+          --data-raw "${CMD}" \
           > /dev/null
