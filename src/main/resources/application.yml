@@ -1,5 +1,8 @@
 # IMPORTANT: Keep environment variables in sync with docker configurations
 
+server:
+  shutdown: graceful
+
 spring:
   jpa:
     hibernate:
@@ -13,6 +16,8 @@ spring:
     url: "jdbc:${DB_TYPE:postgresql}://${POSTGRES_HOST:localhost}:5432/${POSTGRES_DB:appifyhub}"
     username: ${POSTGRES_USER:appifyhub}
     password: ${POSTGRES_PASS:appifyhub}
+  lifecycle:
+    timeout-per-shutdown-phase: 1m
 
 app:
   security:

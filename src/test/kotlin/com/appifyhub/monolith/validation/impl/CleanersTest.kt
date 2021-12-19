@@ -10,9 +10,9 @@ import assertk.assertions.isZero
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
-import com.nhaarman.mockitokotlin2.mock
 import java.util.Date
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
 
 class CleanersTest {
 
