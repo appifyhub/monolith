@@ -9,7 +9,7 @@ ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
 RUN echo "[Conditionally] starting the build JAR..." && \
   sh /app/scripts/conditional_build.sh "/app/build/libs/monolith.jar" && \
   echo "Copying the service JAR..." && \
-  cp /app/build/libs/monolith.jar /service.jar && \
+  cp /app/build/libs/monolith.jar /monolith.jar && \
   echo "Creating the external IP2Location directory..." && \
   mkdir /ip2location && \
   echo "Copying the IP2Location file..." && \
@@ -24,4 +24,4 @@ WORKDIR /
 
 EXPOSE 8080
 
-ENTRYPOINT [ "java", "-jar", "/service.jar" ]
+ENTRYPOINT [ "java", "-jar", "/monolith.jar" ]
