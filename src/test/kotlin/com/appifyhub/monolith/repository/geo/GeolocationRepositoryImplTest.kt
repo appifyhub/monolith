@@ -6,12 +6,12 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import com.appifyhub.monolith.storage.dao.GeolocationDao
 import com.appifyhub.monolith.util.Stubs
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.doThrow
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.stub
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 
 class GeolocationRepositoryImplTest {
 

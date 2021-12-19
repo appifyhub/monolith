@@ -6,13 +6,13 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.prop
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import org.junit.jupiter.api.Test
 import org.mockito.Answers.RETURNS_DEEP_STUBS
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
@@ -34,7 +34,7 @@ class GlobalExceptionHandlerTest {
 
     handler.commence(request, response, exception)
 
-    verifyZeroInteractions(request)
+    verifyNoMoreInteractions(request)
     verify(response).status = HttpStatus.UNAUTHORIZED.value()
     verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
     verify(response.outputStream).println(
