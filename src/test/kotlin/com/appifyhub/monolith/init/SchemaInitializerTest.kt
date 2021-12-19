@@ -17,17 +17,17 @@ import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doAnswer
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.never
-import com.nhaarman.mockitokotlin2.stub
-import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.stub
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.boot.ApplicationArguments
 
 class SchemaInitializerTest {
@@ -55,7 +55,7 @@ class SchemaInitializerTest {
 
     runInitializer()
 
-    verifyZeroInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService, propService)
     verify(schemaService, never()).update(any())
   }
 
@@ -64,7 +64,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Project Name")
 
-    verifyZeroInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
@@ -72,7 +72,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Owner Name")
 
-    verifyZeroInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
@@ -80,7 +80,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Owner Email")
 
-    verifyZeroInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService, propService)
   }
 
   @Test fun `initial seed uses config signature if present`() {

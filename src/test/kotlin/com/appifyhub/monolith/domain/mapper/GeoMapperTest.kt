@@ -8,9 +8,9 @@ import assertk.assertions.isNull
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.util.Stubs
 import com.ip2location.IPResult
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
 
 class GeoMapperTest {
 

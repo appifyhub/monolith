@@ -4,8 +4,8 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.errors.GlobalExceptionHandler
 import com.appifyhub.monolith.repository.user.UserRepository
-import com.nhaarman.mockitokotlin2.mock
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
 
 class WebSecurityConfigurationTest {
 
