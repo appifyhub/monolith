@@ -102,6 +102,7 @@ dependencies {
 group = prop("group")
 version = prop("version")
 val artifact = prop("artifact")
+val packageName = "$group.$artifact"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = java.sourceCompatibility
@@ -132,7 +133,8 @@ tasks {
     }
   }
 
-  withType<Jar> {
+  bootJar {
+    mainClass.set("$packageName.AppifyHubApplicationKt")
     archiveFileName.set("$artifact.jar")
   }
 
