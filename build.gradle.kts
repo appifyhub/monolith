@@ -204,18 +204,31 @@ githubRelease {
   targetCommitish(commitish)
   prerelease(quality != "GA")
 
-  val maxChanges = 5
+  val maxFetched = 20
+  val maxReported = 7
   val bullet = "\n* "
   val changelogConfig = closureOf<ChangeLogSupplier> {
     currentCommit("HEAD")
-    lastCommit("HEAD~$maxChanges")
-    options("--format=oneline", "--abbrev-commit", "--max-count=$maxChanges")
+    lastCommit("HEAD~$maxFetched")
+    options("--format=oneline", "--abbrev-commit", "--max-count=$maxFetched")
   }
+  val ignoredMessagesRegex = setOf(
+    "(?i).*bump.*version.*",
+    "(?i).*increase.*version.*",
+    "(?i).*version.*bump.*",
+    "(?i).*version.*increase.*",
+    "(?i).*merge.*request.*",
+    "(?i).*request.*merge.*",
+  ).map(String::toRegex)
+
   val changes = try {
-    changelog(changelogConfig).call()
+    changelog(changelogConfig)
+      .call()
       .trim()
       .split("\n")
       .map { it.trim() }
+      .filterNot { ignoredMessagesRegex.any(it::matches) }
+      .take(maxReported)
   } catch (t: Throwable) {
     System.err.println("Failed to fetch history")
     t.printStackTrace(System.err)
@@ -224,7 +237,7 @@ githubRelease {
 
   body(
     when {
-      changes.isNotEmpty() -> "## Last $maxChanges changes\n$bullet${changes.joinToString(bullet)}"
+      changes.isNotEmpty() -> "## Latest changes\n${changes.joinToString(separator = bullet, prefix = bullet)}"
       else -> "See commit history for latest changes."
     }
   )
