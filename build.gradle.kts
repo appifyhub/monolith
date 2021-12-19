@@ -19,7 +19,7 @@ buildscript {
 }
 
 plugins {
-  val kotlinVersion = "1.5.20"
+  val kotlinVersion = "1.6.10"
   kotlin("jvm") version kotlinVersion
   kotlin("plugin.spring") version kotlinVersion
   kotlin("plugin.jpa") version kotlinVersion
@@ -27,8 +27,8 @@ plugins {
   kotlin("plugin.allopen") version kotlinVersion
   kotlin("kapt") version kotlinVersion
 
-  id("org.springframework.boot") version "2.4.5"
-  id("io.spring.dependency-management") version "1.0.10.RELEASE"
+  id("org.springframework.boot") version "2.6.1"
+  id("io.spring.dependency-management") version "1.0.11.RELEASE"
   id("com.github.breadmoirai.github-release") version "2.2.12"
 }
 
@@ -64,7 +64,7 @@ dependencies {
   implementation("org.hibernate:hibernate-core")
 
   // helpers
-  implementation("com.ip2location:ip2location-java:8.5.+")
+  implementation("com.ip2location:ip2location-java:8.+")
   implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
 
   // annotation processors
@@ -88,9 +88,11 @@ dependencies {
   testImplementation("org.hibernate:hibernate-testing")
   testImplementation("com.h2database:h2")
   testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
-  testImplementation("org.mockito:mockito-core:3.+")
-  testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2+")
+  testImplementation("org.mockito:mockito-core:4.+")
+  testImplementation("org.mockito.kotlin:mockito-kotlin:4.+")
 
+  // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
+  extra["slf4j.version"] = "2.+"
 }
 
 // endregion
@@ -100,6 +102,7 @@ dependencies {
 group = prop("group")
 version = prop("version")
 val artifact = prop("artifact")
+val packageName = "$group.$artifact"
 
 java.sourceCompatibility = JavaVersion.VERSION_11
 java.targetCompatibility = java.sourceCompatibility
@@ -130,7 +133,8 @@ tasks {
     }
   }
 
-  withType<Jar> {
+  bootJar {
+    mainClass.set("$packageName.AppifyHubApplicationKt")
     archiveFileName.set("$artifact.jar")
   }
 
@@ -154,6 +158,10 @@ tasks {
 
     minHeapSize = "512m"
     maxHeapSize = "1024m"
+
+    // as per https://stackoverflow.com/a/39753210/2102748
+    val desiredForks = Runtime.getRuntime()?.availableProcessors()?.div(2) ?: 1
+    maxParallelForks = desiredForks.coerceAtLeast(1)
   }
 
   named("githubRelease") {
@@ -198,18 +206,31 @@ githubRelease {
   targetCommitish(commitish)
   prerelease(quality != "GA")
 
-  val maxChanges = 5
+  val maxFetched = 20
+  val maxReported = 7
   val bullet = "\n* "
   val changelogConfig = closureOf<ChangeLogSupplier> {
     currentCommit("HEAD")
-    lastCommit("HEAD~$maxChanges")
-    options("--format=oneline", "--abbrev-commit", "--max-count=$maxChanges")
+    lastCommit("HEAD~$maxFetched")
+    options("--format=oneline", "--abbrev-commit", "--max-count=$maxFetched")
   }
+  val ignoredMessagesRegex = setOf(
+    "(?i).*bump.*version.*",
+    "(?i).*increase.*version.*",
+    "(?i).*version.*bump.*",
+    "(?i).*version.*increase.*",
+    "(?i).*merge.*request.*",
+    "(?i).*request.*merge.*",
+  ).map(String::toRegex)
+
   val changes = try {
-    changelog(changelogConfig).call()
+    changelog(changelogConfig)
+      .call()
       .trim()
       .split("\n")
       .map { it.trim() }
+      .filterNot { ignoredMessagesRegex.any(it::matches) }
+      .take(maxReported)
   } catch (t: Throwable) {
     System.err.println("Failed to fetch history")
     t.printStackTrace(System.err)
@@ -218,7 +239,7 @@ githubRelease {
 
   body(
     when {
-      changes.isNotEmpty() -> "## Last $maxChanges changes\n$bullet${changes.joinToString(bullet)}"
+      changes.isNotEmpty() -> "## Latest changes\n${changes.joinToString(separator = bullet, prefix = bullet)}"
       else -> "See commit history for latest changes."
     }
   )
