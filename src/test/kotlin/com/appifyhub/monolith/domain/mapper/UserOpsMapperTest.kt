@@ -12,6 +12,7 @@ import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import java.util.Date
+import java.util.Locale
 import org.junit.jupiter.api.Test
 
 class UserOpsMapperTest {
@@ -29,6 +30,7 @@ class UserOpsMapperTest {
       verificationToken = null,
       birthday = null,
       company = null,
+      languageTag = null,
     )
 
     val result = userUpdater.applyTo(
@@ -65,12 +67,13 @@ class UserOpsMapperTest {
           countryCode = Settable("NL"),
         )
       ),
+      languageTag = Settable(Locale.UK.toLanguageTag()),
     )
 
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(incrementalTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L),
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -83,6 +86,7 @@ class UserOpsMapperTest {
         name = "User's Name 2",
         contact = "user2@example.com",
         verificationToken = "abcd1234 2",
+        birthday = Date(0xB10000),
         company = Organization(
           name = "Company 2",
           street = "Street Name 2",
@@ -90,7 +94,7 @@ class UserOpsMapperTest {
           city = "City 2",
           countryCode = "NL",
         ),
-        birthday = Date(0xB10000),
+        languageTag = Locale.UK.toLanguageTag(),
         updatedAt = Date(10L),
       )
     )
@@ -104,12 +108,13 @@ class UserOpsMapperTest {
       verificationToken = Settable(null),
       birthday = Settable(null),
       company = Settable(null),
+      languageTag = Settable(null),
     )
 
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(incrementalTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L),
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -117,8 +122,9 @@ class UserOpsMapperTest {
         name = null,
         contact = null,
         verificationToken = null,
-        company = null,
         birthday = null,
+        company = null,
+        languageTag = null,
         updatedAt = Date(10L),
       )
     )
@@ -141,7 +147,7 @@ class UserOpsMapperTest {
     val result = userUpdater.applyTo(
       user = Stubs.user,
       passwordEncoder = PasswordEncoderFake(),
-      timeProvider = TimeProviderFake(incrementalTime = 10L)
+      timeProvider = TimeProviderFake(incrementalTime = 10L),
     )
 
     assertThat(result).isDataClassEqualTo(
@@ -207,6 +213,7 @@ class UserOpsMapperTest {
       contactType = User.ContactType.EMAIL,
       birthday = Date(0xB00000),
       company = Stubs.company,
+      languageTag = Locale.US.toLanguageTag(),
     )
 
     assertThat(
@@ -237,6 +244,7 @@ class UserOpsMapperTest {
       contactType = User.ContactType.EMAIL,
       birthday = Date(0xB00000),
       company = Stubs.company,
+      languageTag = Locale.US.toLanguageTag(),
     )
 
     assertThat(

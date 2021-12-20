@@ -12,8 +12,8 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
@@ -29,6 +29,7 @@ import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -258,6 +259,7 @@ class UserServiceImplTest {
       contactType = ContactType.PHONE,
       contact = "+491760000000",
       projectId = project.id,
+      languageTag = Locale.US.toLanguageTag(),
     )
     stubGenerators()
 
@@ -313,6 +315,7 @@ class UserServiceImplTest {
       contactType = ContactType.CUSTOM,
       birthday = null,
       company = null,
+      languageTag = null,
     )
     stubGenerators()
 
@@ -332,6 +335,7 @@ class UserServiceImplTest {
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
           company = null,
+          languageTag = null,
         )
       )
   }

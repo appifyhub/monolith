@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.domain.mapper
 
-import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.common.stubProject
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -20,9 +20,10 @@ fun UserDbm.toDomain(): User = User(
   contactType = User.ContactType.find(contactType, default = User.ContactType.CUSTOM),
   verificationToken = verificationToken,
   birthday = birthday,
+  company = company?.toDomain(),
+  languageTag = languageTag,
   createdAt = createdAt,
   updatedAt = updatedAt,
-  company = company?.toDomain(),
 )
 
 fun User.toData(
@@ -39,9 +40,10 @@ fun User.toData(
   contactType = contactType.name,
   verificationToken = verificationToken,
   birthday = birthday,
+  company = company?.toData(),
+  languageTag = languageTag,
   createdAt = createdAt,
   updatedAt = updatedAt,
-  company = company?.toData(),
 )
 
 fun UserIdDbm.toDomain(): UserId = UserId(

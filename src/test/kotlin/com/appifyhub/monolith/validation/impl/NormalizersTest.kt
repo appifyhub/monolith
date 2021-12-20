@@ -201,6 +201,11 @@ class NormalizersTest {
       .consistsOf(Validators.BDay, Cleaners.BDay)
   }
 
+  @Test fun `language tag = language tag + language tag`() {
+    assertThat(Normalizers.LanguageTag)
+      .consistsOf(Validators.LanguageTag, Cleaners.LanguageTag)
+  }
+
   // endregion
 
   // region Helpers

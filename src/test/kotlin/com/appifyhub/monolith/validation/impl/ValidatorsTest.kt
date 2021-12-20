@@ -10,6 +10,7 @@ import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.Locale
 import org.junit.jupiter.api.Test
 
 class ValidatorsTest {
@@ -343,17 +344,17 @@ class ValidatorsTest {
   }
 
   @Test fun `orga succeeds with all null properties`() {
-    assertThat(Validators.Organization.isValid(Organization()))
+    assertThat(Validators.Organization.isValid(Organization.EMPTY))
       .isTrue()
   }
 
   @Test fun `orga fails with at least one invalid property`() {
     listOf(
-      Organization(name = " "),
-      Organization(street = " "),
-      Organization(postcode = " "),
-      Organization(city = " "),
-      Organization(countryCode = " "),
+      Organization.EMPTY.copy(name = " "),
+      Organization.EMPTY.copy(street = " "),
+      Organization.EMPTY.copy(postcode = " "),
+      Organization.EMPTY.copy(city = " "),
+      Organization.EMPTY.copy(countryCode = " "),
     ).forEach {
       assertThat(Validators.Organization.isValid(it))
         .isFalse()
@@ -520,6 +521,26 @@ class ValidatorsTest {
     val birthday: BDay = Date(0) to timeProvider
 
     assertThat(Validators.BDay.isValid(birthday))
+      .isTrue()
+  }
+
+  @Test fun `language tag fails if blank`() {
+    assertThat(Validators.LanguageTag.isValid(" \n\t "))
+      .isFalse()
+  }
+
+  @Test fun `language tag fails if invalid code`() {
+    assertThat(Validators.LanguageTag.isValid("asdasdasdasd"))
+      .isFalse()
+  }
+
+  @Test fun `language tag succeeds if null`() {
+    assertThat(Validators.LanguageTag.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `language tag succeeds if valid code`() {
+    assertThat(Validators.LanguageTag.isValid(Locale.US.toLanguageTag()))
       .isTrue()
   }
 

@@ -5,6 +5,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import com.appifyhub.monolith.validation.cleansToNonNull
 import com.appifyhub.monolith.validation.cleansToNullable
+import java.util.Locale
 
 object Cleaners {
 
@@ -104,9 +105,12 @@ object Cleaners {
   // Other cleaners
 
   val Origin = TrimNullable
-
   val IpAddress = RemoveSpacesNullable
-
   val BDay = cleansToNullable<BDay>("BDay") { it }
+  val LanguageTag = cleansToNullable<String>("LanguageTag") {
+    if (it == null) return@cleansToNullable null
+    Locale.forLanguageTag(it.trim()).toLanguageTag()
+      ?.takeIf { tag -> tag.isNotBlank() && tag != "und" }
+  }
 
 }

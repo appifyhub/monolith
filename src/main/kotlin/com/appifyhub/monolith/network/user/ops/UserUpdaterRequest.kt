@@ -20,4 +20,5 @@ data class UserUpdaterRequest(
   @JsonProperty("contact") val contact: SettableRequest<String?>?,
   @JsonProperty("birthday") val birthday: SettableRequest<String?>?,
   @JsonProperty("company") val company: SettableRequest<OrganizationUpdaterDto?>?,
+  @JsonProperty("language_tag") val languageTag: SettableRequest<String?>?,
 ) : Serializable
