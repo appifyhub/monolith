@@ -17,6 +17,7 @@ import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
+import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -133,6 +134,7 @@ class SchemaInitializerTest {
           contactType = User.ContactType.EMAIL,
           birthday = null,
           company = null,
+          languageTag = Locale.US.toLanguageTag(),
         )
       )
       mock.updateUser(
@@ -196,6 +198,7 @@ class SchemaInitializerTest {
           contactType = User.ContactType.EMAIL,
           birthday = null,
           company = null,
+          languageTag = Locale.US.toLanguageTag(),
         )
       )
       mock.updateUser(

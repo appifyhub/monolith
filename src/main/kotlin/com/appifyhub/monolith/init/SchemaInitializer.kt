@@ -16,6 +16,7 @@ import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.validation.impl.Normalizers
+import java.util.Locale
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -108,6 +109,7 @@ class SchemaInitializer(
         contactType = User.ContactType.EMAIL,
         birthday = null,
         company = null,
+        languageTag = Locale.US.toLanguageTag(),
       )
     )
 

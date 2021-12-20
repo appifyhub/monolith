@@ -29,6 +29,7 @@ fun UserUpdaterRequest.toDomain(
   verificationToken = null,
   birthday = birthday.mapToDomainNullable { DateTimeMapper.parseAsDate(it) },
   company = company.mapToDomainNullable { it.toDomain() },
+  languageTag = languageTag.toDomainNullable(),
 )
 
 fun OrganizationUpdaterDto.toDomain(): OrganizationUpdater = OrganizationUpdater(
@@ -53,6 +54,7 @@ fun UserCreatorRequest.toDomain(
   contactType = User.ContactType.find(contactType.orEmpty(), default = CUSTOM),
   birthday = birthday?.let { DateTimeMapper.parseAsDate(it) },
   company = company?.toDomain(),
+  languageTag = languageTag,
 )
 
 fun <T : Any?> SettableRequest<T?>?.toDomainNullable(): Settable<T?>? = this?.let { Settable(it.value) }

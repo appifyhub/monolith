@@ -84,11 +84,12 @@ class AuthServiceImplTest {
         name = null,
         signature = "spring-asks-for-it",
         allowsSpam = false,
-        birthday = null,
-        company = null,
         verificationToken = null,
         contactType = User.ContactType.CUSTOM,
         contact = null,
+        birthday = null,
+        company = null,
+        languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -143,6 +144,7 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
+        languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -171,6 +173,7 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
+        languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )

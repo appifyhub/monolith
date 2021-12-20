@@ -10,6 +10,7 @@ import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FR
 import java.sql.Timestamp
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
+import java.util.Locale
 import java.util.regex.Pattern
 import java.util.regex.Pattern.CASE_INSENSITIVE
 import org.slf4j.LoggerFactory
@@ -108,12 +109,10 @@ object Validators {
   // Other validators
 
   val Origin = NotBlankNullable
-
   val IpAddress = validatesAs<String>("IpAddress") {
     if (it == null) return@validatesAs true
     NotBlank.isValid(it) && (REGEX_IP_4.matcher(it).matches() || REGEX_IP_6.matcher(it).matches())
   }
-
   val BDay = validatesAs<BDay>("BDay") validator@{
     val rawBirthday = it?.first ?: return@validator true
     val birthday = Timestamp(rawBirthday.time).toLocalDateTime().atZone(ZoneId.of("UTC"))
@@ -121,6 +120,11 @@ object Validators {
     if (!today.isAfter(birthday)) return@validator false
     val age = ChronoUnit.YEARS.between(birthday, today)
     return@validator age in AGE_MIN..AGE_MAX
+  }
+  val LanguageTag = validatesAs<String>("LanguageTag") {
+    if (it == null) return@validatesAs true
+    val tag = Locale.forLanguageTag(it.trim()).toLanguageTag()
+    NotBlank.isValid(tag) && tag != "und"
   }
 
 }

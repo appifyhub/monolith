@@ -39,7 +39,8 @@ fun stubUser() = User(
   contactType = User.ContactType.CUSTOM,
   verificationToken = "verificationToken",
   birthday = Date(),
+  company = stubOrganization(),
+  languageTag = null,
   createdAt = Date(),
   updatedAt = Date(),
-  company = stubOrganization(),
 )

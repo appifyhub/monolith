@@ -40,6 +40,7 @@ class UserOpsMapperTest {
       contactType = null,
       birthday = null,
       company = null,
+      languageTag = null,
     ).toDomain(projectId = Stubs.project.id)
 
     assertThat(creator).isDataClassEqualTo(
@@ -55,6 +56,7 @@ class UserOpsMapperTest {
         contactType = User.ContactType.CUSTOM,
         birthday = null,
         company = null,
+        languageTag = null,
       )
     )
   }

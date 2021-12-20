@@ -54,9 +54,10 @@ class SpringUserMapperTest {
         contactType = User.ContactType.CUSTOM,
         verificationToken = null,
         birthday = null,
+        company = null,
+        languageTag = null,
         createdAt = Date(10L),
         updatedAt = Date(10L),
-        company = null,
       )
     )
   }

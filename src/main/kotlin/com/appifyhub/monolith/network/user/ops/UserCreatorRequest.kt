@@ -18,4 +18,5 @@ data class UserCreatorRequest(
   @JsonProperty("contact_type") val contactType: String? = null,
   @JsonProperty("birthday") val birthday: String? = null,
   @JsonProperty("company") val company: OrganizationDto?,
+  @JsonProperty("language_tag") val languageTag: String? = null,
 ) : Serializable

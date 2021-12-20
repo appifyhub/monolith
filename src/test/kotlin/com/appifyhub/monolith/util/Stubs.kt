@@ -53,6 +53,7 @@ import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @Suppress("MayBeConstant")
@@ -157,9 +158,10 @@ object Stubs {
     contactType = User.ContactType.EMAIL,
     verificationToken = "abcd1234",
     birthday = Date(0xB00000),
+    company = company,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
-    company = company,
   )
 
   val project = Project(
@@ -276,9 +278,10 @@ object Stubs {
     contactType = "EMAIL",
     verificationToken = "abcd1234",
     birthday = Date(0xB00000),
+    company = companyDbm,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
-    company = companyDbm,
   )
 
   @Suppress("MemberVisibilityCanBePrivate")
@@ -377,6 +380,7 @@ object Stubs {
     verificationToken = "abcd12341",
     birthday = Date(0x10B00001),
     company = companyUpdated,
+    languageTag = Locale.UK.toLanguageTag(),
     createdAt = user.createdAt,
     updatedAt = Date(0xA00001),
   )
@@ -393,9 +397,10 @@ object Stubs {
     contactType = "PHONE",
     verificationToken = "abcd12341",
     birthday = Date(0x10B00001),
+    company = companyUpdatedDbm,
+    languageTag = Locale.UK.toLanguageTag(),
     createdAt = userDbm.createdAt,
     updatedAt = Date(0xA00001),
-    company = companyUpdatedDbm,
   )
 
   val projectUpdated = Project(
@@ -464,6 +469,7 @@ object Stubs {
     contactType = User.ContactType.EMAIL,
     birthday = Date(0xB00000),
     company = company,
+    languageTag = Locale.US.toLanguageTag(),
   )
 
   val companyUpdater = OrganizationUpdater(
@@ -486,6 +492,7 @@ object Stubs {
     verificationToken = Settable("abcd12341"),
     birthday = Settable(Date(0x10B00001)),
     company = Settable(companyUpdater),
+    languageTag = Settable(Locale.UK.toLanguageTag()),
   )
 
   val projectCreator = ProjectCreator(
@@ -525,6 +532,7 @@ object Stubs {
     contactType = "EMAIL",
     birthday = "1970-05-15",
     company = companyDto,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = "1970-05-14 03:04",
     updatedAt = "1970-05-15 05:06",
   )
@@ -669,6 +677,7 @@ object Stubs {
     contactType = "EMAIL",
     birthday = "1970-05-14",
     company = companyDto,
+    languageTag = Locale.US.toLanguageTag(),
   )
 
   val companyUpdaterDto = OrganizationUpdaterDto(
@@ -689,6 +698,7 @@ object Stubs {
     contact = SettableRequest("+491760000001"),
     birthday = SettableRequest("1970-05-15"),
     company = SettableRequest(companyUpdaterDto),
+    languageTag = SettableRequest(Locale.UK.toLanguageTag())
   )
 
   val projectCreateRequest = ProjectCreateRequest(

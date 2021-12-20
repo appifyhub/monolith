@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.service.user
 
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
@@ -48,6 +48,7 @@ class UserServiceImpl(
     val normalizedContactType = if (normalizedContact == null) ContactType.CUSTOM else creator.contactType
     val normalizedCompany = Normalizers.Organization.run(creator.company).requireValid { "Company" }
     val normalizedBirthday = Normalizers.BDay.run(creator.birthday to timeProvider).requireValid { "Birthday" }?.first
+    val normalizedLanguageTag = Normalizers.LanguageTag.run(creator.languageTag).requireValid { "Language Tag" }
 
     val normalizedCreator = UserCreator(
       userId = normalizedId,
@@ -61,6 +62,7 @@ class UserServiceImpl(
       contactType = normalizedContactType,
       birthday = normalizedBirthday,
       company = normalizedCompany,
+      languageTag = normalizedLanguageTag,
     )
 
     return userRepository.addUser(normalizedCreator, userIdType)
@@ -163,6 +165,9 @@ class UserServiceImpl(
     val normalizedBirthday = updater.birthday?.mapValueNullable {
       Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
     }
+    val normalizedLanguageTag = updater.languageTag?.mapValueNullable {
+      Normalizers.LanguageTag.run(it).requireValid { "Language Tag" }
+    }
 
     val normalizedUpdater = UserUpdater(
       id = normalizedId,
@@ -176,6 +181,7 @@ class UserServiceImpl(
       verificationToken = normalizedVerificationToken,
       birthday = normalizedBirthday,
       company = normalizedCompany,
+      languageTag = normalizedLanguageTag,
     )
 
     return userRepository.updateUser(normalizedUpdater, userIdType)
