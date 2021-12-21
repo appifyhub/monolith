@@ -382,26 +382,6 @@ class UserServiceImplTest {
       .isDataClassEqualTo(storedUser)
   }
 
-  @Test fun `fetching users fails with invalid contact`() {
-    assertThat { service.fetchAllUsersByContact(" ") }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Contact")
-      }
-  }
-
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `fetching users works with a contact`() {
-    val project = newProject(UserIdType.RANDOM)
-    val creator = Stubs.userCreator.copy(contact = "contact@email.com", projectId = project.id)
-    val storedUser = service.addUser(creator).cleanDates()
-    val fetchedUsers = service.fetchAllUsersByContact(creator.contact!!).map { it.cleanDates() }
-
-    assertThat(fetchedUsers)
-      .isEqualTo(listOf(storedUser))
-  }
-
   @Test fun `fetching users fails with invalid project ID`() {
     assertThat { service.fetchAllUsersByProjectId(-1) }
       .isFailure()
@@ -417,6 +397,64 @@ class UserServiceImplTest {
     val creator = Stubs.userCreator.copy(projectId = project.id)
     val storedUser = service.addUser(creator).cleanDates()
     val fetchedUsers = service.fetchAllUsersByProjectId(project.id).map { it.cleanDates() }
+
+    assertThat(fetchedUsers)
+      .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `searching users by name fails with invalid project ID`() {
+    assertThat { service.searchByName(-1, Stubs.user.name!!) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `searching users by name fails with invalid name`() {
+    assertThat { service.searchByName(Stubs.project.id, " ") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Name")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `searching users by name works with a valid name`() {
+    val project = newProject(UserIdType.RANDOM)
+    val creator = Stubs.userCreator.copy(projectId = project.id, name = "my name")
+    val storedUser = service.addUser(creator).cleanDates()
+    val fetchedUsers = service.searchByName(project.id, "%name").map { it.cleanDates() }
+
+    assertThat(fetchedUsers)
+      .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `searching users by contact fails with invalid project ID`() {
+    assertThat { service.searchByContact(-1, Stubs.user.contact!!) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `searching users by contact fails with invalid contact`() {
+    assertThat { service.searchByContact(Stubs.project.id, " ") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Contact")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `searching users by name works with a valid contact`() {
+    val project = newProject(UserIdType.RANDOM)
+    val creator = Stubs.userCreator.copy(projectId = project.id, contact = "contact@example.com")
+    val storedUser = service.addUser(creator).cleanDates()
+    val fetchedUsers = service.searchByContact(project.id, "%@example.com").map { it.cleanDates() }
 
     assertThat(fetchedUsers)
       .isEqualTo(listOf(storedUser))
