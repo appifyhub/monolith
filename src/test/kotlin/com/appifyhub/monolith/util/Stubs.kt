@@ -26,19 +26,23 @@ import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
-import com.appifyhub.monolith.network.creator.ProjectFeatureDto
-import com.appifyhub.monolith.network.creator.ProjectResponse
-import com.appifyhub.monolith.network.creator.ProjectStatusDto
-import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
-import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.creator.project.ProjectFeatureDto
+import com.appifyhub.monolith.network.creator.project.ProjectResponse
+import com.appifyhub.monolith.network.creator.project.ProjectStatusDto
+import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
-import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
-import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
+import com.appifyhub.monolith.network.user.ops.UserSignupRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateVerificationRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.service.access.AccessManager.Feature
@@ -666,18 +670,13 @@ object Stubs {
 
   // region Network Ops Models
 
-  val userCreatorRequest = UserCreatorRequest(
+  val creatorSignupRequest = CreatorSignupRequest(
     userId = "username",
     rawSignature = "password",
     name = "User's Name",
     type = "ORGANIZATION",
-    authority = "ADMIN",
-    allowsSpam = true,
-    contact = "user@example.com",
-    contactType = "EMAIL",
     birthday = "1970-05-14",
     company = companyDto,
-    languageTag = Locale.US.toLanguageTag(),
   )
 
   val companyUpdaterDto = OrganizationUpdaterDto(
@@ -688,18 +687,38 @@ object Stubs {
     countryCode = SettableRequest("DF"),
   )
 
-  val userUpdaterRequest = UserUpdaterRequest(
-    rawSignature = SettableRequest("password1"),
-    type = SettableRequest("PERSONAL"),
-    authority = SettableRequest("MODERATOR"),
-    contactType = SettableRequest("PHONE"),
-    allowsSpam = SettableRequest(false),
+  val userSignupRequest = UserSignupRequest(
+    userId = "username",
+    rawSignature = "password",
+    name = "User's Name",
+    type = "ORGANIZATION",
+    allowsSpam = true,
+    contact = "user@example.com",
+    contactType = "EMAIL",
+    birthday = "1970-05-14",
+    company = companyDto,
+    languageTag = Locale.US.toLanguageTag(),
+  )
+
+  val userUpdateAuthorityRequest = UserUpdateAuthorityRequest(authority = User.Authority.MODERATOR.name)
+
+  val userUpdateDataRequest = UserUpdateDataRequest(
     name = SettableRequest("User's Name 1"),
+    type = SettableRequest("PERSONAL"),
+    allowsSpam = SettableRequest(false),
     contact = SettableRequest("+491760000001"),
+    contactType = SettableRequest("PHONE"),
     birthday = SettableRequest("1970-05-15"),
     company = SettableRequest(companyUpdaterDto),
-    languageTag = SettableRequest(Locale.UK.toLanguageTag())
+    languageTag = SettableRequest(Locale.UK.toLanguageTag()),
   )
+
+  val userUpdateSignatureRequest = UserUpdateSignatureRequest(
+    rawSignatureOld = "password",
+    rawSignatureNew = "password1",
+  )
+
+  val userUpdateVerificationRequest = UserUpdateVerificationRequest(rawVerificationToken = "abcd1234")
 
   val projectCreateRequest = ProjectCreateRequest(
     type = "OPENSOURCE",

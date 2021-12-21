@@ -96,7 +96,7 @@ class CreatorAuthController(
     val targetUser = accessManager.requestUserAccess(
       authData = authentication,
       targetId = UserId(userId, projectId),
-      privilege = Privilege.USER_WRITE,
+      privilege = Privilege.USER_WRITE_TOKEN,
     )
 
     if (targetUser.id == authUser.id) {

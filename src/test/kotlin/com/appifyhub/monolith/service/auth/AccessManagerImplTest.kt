@@ -25,7 +25,7 @@ import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_READ
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
-import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_TOKEN
 import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -122,7 +122,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(project).real(ADMIN),
         targetId = targetOwner.id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       )
     }
       .isFailure()
@@ -195,7 +195,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.owner().id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.owner().cleanStubArtifacts())
   }
@@ -215,7 +215,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.default().id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
@@ -227,7 +227,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(creator).real(),
         targetId = stubber.users(project).default().id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.users(project).default().cleanStubArtifacts())
   }
@@ -240,7 +240,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(owner).real(isStatic = true),
         targetId = targetOwner.id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(targetOwner.cleanStubArtifacts())
   }
