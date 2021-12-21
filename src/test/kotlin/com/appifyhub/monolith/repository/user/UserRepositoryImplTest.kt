@@ -185,35 +185,6 @@ class UserRepositoryImplTest {
 
   // endregion
 
-  // region Fetch by contact
-
-  @Test fun `fetching users by invalid contact throws`() {
-    userDao.stub {
-      onGeneric { findAllByContact(Stubs.user.contact!!) } doThrow IllegalArgumentException("failed")
-    }
-
-    assertThat { repository.fetchAllUsersByContact(Stubs.user.contact!!) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        hasMessage("failed")
-      }
-  }
-
-  @Test fun `fetching users by contact works`() {
-    userDao.stub {
-      onGeneric { findAllByContact(Stubs.user.contact!!) } doReturn listOf(Stubs.userDbm)
-    }
-
-    assertThat(repository.fetchAllUsersByContact(Stubs.user.contact!!))
-      .all {
-        hasSize(1)
-        transform { it.first() }.isDataClassEqualTo(Stubs.user)
-      }
-  }
-
-  // endregion
-
   // region Fetch by Project
 
   @Test fun `fetching users by invalid project ID throws`() {
@@ -235,6 +206,130 @@ class UserRepositoryImplTest {
     }
 
     assertThat(repository.fetchAllUsersByProjectId(Stubs.project.id))
+      .all {
+        hasSize(1)
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
+      }
+  }
+
+  // endregion
+
+  // region Search by Name
+
+  @Test fun `searching users by invalid name throws`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndNameLike(Stubs.project.id, Stubs.user.name!!)
+      } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.searchByName(Stubs.project.id, Stubs.user.name!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `searching users by name works`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndNameLike(Stubs.project.id, Stubs.user.name!!)
+      } doReturn listOf(Stubs.userDbm)
+    }
+
+    assertThat(repository.searchByName(Stubs.project.id, Stubs.user.name!!))
+      .all {
+        hasSize(1)
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
+      }
+  }
+
+  // endregion
+
+  // region Search by Contact
+
+  @Test fun `searching users by invalid contact throws`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndContactLike(Stubs.project.id, Stubs.user.contact!!)
+      } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.searchByContact(Stubs.project.id, Stubs.user.contact!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `searching users by contact works`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndContactLike(Stubs.project.id, Stubs.user.contact!!)
+      } doReturn listOf(Stubs.userDbm)
+    }
+
+    assertThat(repository.searchByContact(Stubs.project.id, Stubs.user.contact!!))
+      .all {
+        hasSize(1)
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
+      }
+  }
+
+  // endregion
+
+  // region Search by Name
+
+  @Test fun `searching users by invalid name throws`() {
+    userDao.stub {
+      onGeneric { searchAllByNameLike(Stubs.user.name!!) } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.searchByName(Stubs.user.name!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `searching users by name works`() {
+    userDao.stub {
+      onGeneric { searchAllByNameLike(Stubs.user.name!!) } doReturn listOf(Stubs.userDbm)
+    }
+
+    assertThat(repository.searchByName(Stubs.user.name!!))
+      .all {
+        hasSize(1)
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
+      }
+  }
+
+  // endregion
+
+  // region Search by Contact
+
+  @Test fun `searching users by invalid contact throws`() {
+    userDao.stub {
+      onGeneric { searchAllByContactLike(Stubs.user.contact!!) } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.searchByContact(Stubs.user.contact!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `searching users by contact works`() {
+    userDao.stub {
+      onGeneric { searchAllByContactLike(Stubs.user.contact!!) } doReturn listOf(Stubs.userDbm)
+    }
+
+    assertThat(repository.searchByContact(Stubs.user.contact!!))
       .all {
         hasSize(1)
         transform { it.first() }.isDataClassEqualTo(Stubs.user)

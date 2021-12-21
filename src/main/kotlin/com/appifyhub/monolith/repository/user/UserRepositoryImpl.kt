@@ -56,14 +56,19 @@ class UserRepositoryImpl(
     return userDao.findById(id.toData()).get().toDomain()
   }
 
-  override fun fetchAllUsersByContact(contact: String): List<User> {
-    log.debug("Fetching all users by contact $contact")
-    return userDao.findAllByContact(contact).map(UserDbm::toDomain)
-  }
-
   override fun fetchAllUsersByProjectId(projectId: Long): List<User> {
     log.debug("Fetching all users for project $projectId")
     return userDao.findAllByProject_ProjectId(projectId).map(UserDbm::toDomain)
+  }
+
+  override fun searchByName(projectId: Long, name: String): List<User> {
+    log.debug("Searching users by name $name in project $projectId")
+    return userDao.searchAllByProject_ProjectIdAndNameLike(projectId, name).map(UserDbm::toDomain)
+  }
+
+  override fun searchByContact(projectId: Long, contact: String): List<User> {
+    log.debug("Searching users by contact $contact in project $projectId")
+    return userDao.searchAllByProject_ProjectIdAndContactLike(projectId, contact).map(UserDbm::toDomain)
   }
 
   override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {

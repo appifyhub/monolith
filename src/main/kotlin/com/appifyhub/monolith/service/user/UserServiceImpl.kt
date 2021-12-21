@@ -80,16 +80,24 @@ class UserServiceImpl(
     return userRepository.fetchUserByUniversalId(normalizedUniversalId)
   }
 
-  override fun fetchAllUsersByContact(contact: String): List<User> {
-    log.debug("Fetching user by $contact")
-    val normalizedContact = Normalizers.NotBlank.run(contact).requireValid { "Contact" }
-    return userRepository.fetchAllUsersByContact(normalizedContact)
-  }
-
   override fun fetchAllUsersByProjectId(projectId: Long): List<User> {
     log.debug("Fetching all users by project $projectId")
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
     return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
+  }
+
+  override fun searchByName(projectId: Long, name: String): List<User> {
+    log.debug("Searching users by name $name in $projectId")
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+    val normalizedName = Normalizers.NotBlank.run(name).requireValid { "Name" }
+    return userRepository.searchByName(normalizedProjectId, normalizedName)
+  }
+
+  override fun searchByContact(projectId: Long, contact: String): List<User> {
+    log.debug("Searching users by contact $contact in $projectId")
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+    val normalizedContact = Normalizers.NotBlank.run(contact).requireValid { "Contact" }
+    return userRepository.searchByContact(normalizedProjectId, normalizedContact)
   }
 
   override fun updateUser(updater: UserUpdater): User {
