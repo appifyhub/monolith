@@ -16,10 +16,10 @@ import org.springframework.security.core.Authentication
 interface AccessManager {
 
   enum class Privilege(val level: Authority) {
-    USER_READ(MODERATOR),
-    USER_WRITE(ADMIN),
     PROJECT_READ(OWNER),
     PROJECT_WRITE(OWNER),
+    USER_READ(MODERATOR),
+    USER_WRITE_TOKEN(ADMIN),
   }
 
   enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {

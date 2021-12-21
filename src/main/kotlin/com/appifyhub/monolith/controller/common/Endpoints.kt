@@ -42,6 +42,4 @@ object Endpoints {
 
   const val ANY_USER = "/v1/projects/{projectId}/users/{userId}"
 
-  /* endregion */
-
 }

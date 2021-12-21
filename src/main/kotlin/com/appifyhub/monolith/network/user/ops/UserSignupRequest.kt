@@ -7,12 +7,11 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
-data class UserCreatorRequest(
+data class UserSignupRequest(
   @JsonProperty("user_id") val userId: String? = null,
   @JsonProperty("raw_signature") val rawSignature: String,
   @JsonProperty("name") val name: String? = null,
   @JsonProperty("type") val type: String? = null,
-  @JsonProperty("authority") val authority: String? = null,
   @JsonProperty("allows_spam") val allowsSpam: Boolean?,
   @JsonProperty("contact") val contact: String? = null,
   @JsonProperty("contact_type") val contactType: String? = null,
