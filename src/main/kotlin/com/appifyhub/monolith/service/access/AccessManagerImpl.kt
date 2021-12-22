@@ -61,6 +61,8 @@ class AccessManagerImpl(
 
     // static tokens are always allowed (unless it's creators looking for other creators)
     val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
+
+    @Suppress("KotlinConstantConditions") // keeping for clarity... it's unclear anyway :)
     val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
     if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchUser(normalizedTargetId)
 
@@ -99,6 +101,8 @@ class AccessManagerImpl(
 
     // static tokens are always allowed (unless it's creators looking for other creators)
     val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
+
+    @Suppress("KotlinConstantConditions") // keeping for clarity... it's unclear anyway :)
     val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
     if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchProject(normalizedTargetId)
 
@@ -167,6 +171,8 @@ class AccessManagerImpl(
     log.debug("Requiring project features ready ${features.joinToString()} for $targetId")
 
     val setupStatus = resolveProjectSetupStatus(targetId)
+
+    @Suppress("ConvertArgumentToSet") // order matters, features are sorted by importance
     val requestedUnusableFeatures = setupStatus.unusableFeatures.intersect(features.toList())
 
     if (requestedUnusableFeatures.isNotEmpty())

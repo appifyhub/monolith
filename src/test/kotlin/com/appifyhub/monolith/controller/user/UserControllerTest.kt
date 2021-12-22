@@ -5,7 +5,8 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ONE_USER
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
@@ -61,7 +62,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ONE_USER",
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
         method = HttpMethod.GET,
         requestEntity = bearerBlankRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -71,15 +72,32 @@ class UserControllerTest {
     }
   }
 
+  @Test fun `get user fails when project non-functional`() {
+    val project = stubber.projects.new(status = Project.Status.REVIEW)
+    val user = stubber.users(project).default()
+    val token = stubber.tokens(user).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.GET,
+        requestEntity = bearerBlankRequest(token),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
   @Test fun `get user succeeds with valid authorization`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(forceBasicProps = true)
     val self = stubber.users(project).default()
     val universalId = self.id.toUniversalFormat()
     val token = stubber.tokens(self).real().token.tokenValue
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ONE_USER",
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
         method = HttpMethod.GET,
         requestEntity = bearerBlankRequest(token),
         uriVariables = mapOf("universalId" to universalId),

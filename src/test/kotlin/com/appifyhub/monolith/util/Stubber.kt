@@ -5,6 +5,7 @@ import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -20,6 +21,7 @@ import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.ext.silent
 import com.auth0.jwt.JWT
 import java.util.Date
@@ -36,6 +38,7 @@ private const val EXPIRATION_DAYS_DELTA: Long = 1
 class Stubber(
   private val userRepo: UserRepository,
   private val creatorRepo: CreatorRepository,
+  private val propertyService: PropertyService,
   private val authRepo: AuthRepository,
   private val tokenDetailsRepo: TokenDetailsRepository,
   private val timeProvider: TimeProvider,
@@ -71,6 +74,7 @@ class Stubber(
       owner: User = creators.owner(),
       userIdType: Project.UserIdType = Project.UserIdType.USERNAME,
       status: Project.Status = Project.Status.ACTIVE,
+      forceBasicProps: Boolean = false,
     ) = creatorRepo.addProject(
       ProjectCreator(
         owner = owner,
@@ -78,7 +82,20 @@ class Stubber(
         status = status,
         userIdType = userIdType,
       )
-    )
+    ).also {
+      if (forceBasicProps) {
+        propertyService.saveProperty<String>(
+          projectId = it.id,
+          propName = ProjectProperty.NAME.name,
+          propRawValue = "Stub Project #${it.id}",
+        )
+        propertyService.saveProperty<Boolean>(
+          projectId = it.id,
+          propName = ProjectProperty.ON_HOLD.name,
+          propRawValue = false.toString(),
+        )
+      }
+    }
 
     val all: List<Project>
       get() = creatorRepo.fetchAllProjects()
