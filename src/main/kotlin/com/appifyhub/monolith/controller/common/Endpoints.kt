@@ -16,7 +16,7 @@ object Endpoints {
 
   // User data
 
-  const val ONE_USER = "/v1/universal/users/{universalId}"
+  const val ANY_USER_UNIVERSAL = "/v1/universal/users/{universalId}"
 
   /* ******************** CREATORS ******************** */
 

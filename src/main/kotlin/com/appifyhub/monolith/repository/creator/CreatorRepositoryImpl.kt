@@ -124,18 +124,18 @@ class CreatorRepositoryImpl(
     projectDao.deleteById(projectId)
   }
 
-  override fun removeAllProjectsByCreator(creatorUserId: UserId) {
-    log.debug("Removing all projects for creator $creatorUserId")
+  override fun removeAllProjectsByCreator(creatorId: UserId) {
+    log.debug("Removing all projects for creator $creatorId")
 
     // find the projects marked for deletion
     val projects = creationDao.findAllByData_CreatorUserIdAndData_CreatorProjectId(
-      userId = creatorUserId.userId,
-      projectId = creatorUserId.projectId,
+      userId = creatorId.userId,
+      projectId = creatorId.projectId,
     ).map { it.project.toDomain() }
 
     // cascade manually for now
     projects.forEach { userRepository.removeAllUsersByProjectId(it.id) }
-    creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorUserId.userId, creatorUserId.projectId)
+    creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorId.userId, creatorId.projectId)
 
     // remove the projects
     projectDao.deleteAll(projects.map(Project::toData))
