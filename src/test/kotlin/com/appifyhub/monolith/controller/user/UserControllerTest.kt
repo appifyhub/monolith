@@ -5,8 +5,10 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
-import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
@@ -14,7 +16,8 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bodyRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -56,6 +59,52 @@ class UserControllerTest {
     timeProvider.staticTime = { null }
   }
 
+  // region Add User
+
+  @Test fun `add user fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_SIGNUP",
+        method = HttpMethod.POST,
+        requestEntity = bodyRequest(Stubs.userSignupRequest),
+        uriVariables = mapOf("projectId" to project.id),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `add user succeeds`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$ANY_USER_SIGNUP",
+        method = HttpMethod.POST,
+        requestEntity = bodyRequest(Stubs.userSignupRequest),
+        uriVariables = mapOf("projectId" to project.id),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = Stubs.userId.userId,
+          projectId = project.id,
+          universalId = Stubs.userId.copy(projectId = project.id).toUniversalFormat(),
+          authority = Authority.DEFAULT.name,
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  // endregion
+
+  // region Get User
+
   @Test fun `get user fails when unauthorized`() {
     val project = stubber.projects.new()
     val universalId = stubber.users(project).default().id.toUniversalFormat()
@@ -64,7 +113,7 @@ class UserControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_UNIVERSAL",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
       )
     ).all {
@@ -73,7 +122,7 @@ class UserControllerTest {
   }
 
   @Test fun `get user fails when project non-functional`() {
-    val project = stubber.projects.new(status = Project.Status.REVIEW)
+    val project = stubber.projects.new(status = REVIEW)
     val user = stubber.users(project).default()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -81,7 +130,7 @@ class UserControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_UNIVERSAL",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
       )
     ).all {
@@ -99,7 +148,7 @@ class UserControllerTest {
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER_UNIVERSAL",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to universalId),
       )
     ).all {
@@ -118,5 +167,7 @@ class UserControllerTest {
       )
     }
   }
+
+  // endregion
 
 }

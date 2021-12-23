@@ -33,7 +33,7 @@ import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -83,7 +83,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
         url = "$baseUrl$CONFIGURATIONS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -101,7 +101,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
         url = "$baseUrl$CONFIGURATIONS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -126,7 +126,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
         url = "$baseUrl$CONFIGURATIONS?${filter.buildQueryTemplate()}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = filter.buildQueryMap() + mapOf(
           "projectId" to project.id,
         ),
@@ -147,7 +147,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<PropertyResponse>(
         url = "$baseUrl$PROPERTY",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
           "propertyName" to MAX_USERS.name,
@@ -167,7 +167,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<PropertyResponse>(
         url = "$baseUrl$PROPERTY",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
           "propertyName" to MAX_USERS.name,
@@ -186,7 +186,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyResponse>>(
         url = "$baseUrl$PROPERTIES",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -209,7 +209,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyResponse>>(
         url = "$baseUrl$PROPERTIES?names={name1}&names={name2}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
           "name1" to MAX_USERS.name,
@@ -235,7 +235,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyResponse>>(
         url = "$baseUrl$PROPERTIES",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -264,7 +264,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyResponse>>(
         url = "$baseUrl$PROPERTIES?${filter.buildQueryTemplate()}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = filter.buildQueryMap() + mapOf(
           "projectId" to project.id,
         ),
@@ -282,7 +282,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<PropertyResponse>(
         url = "$baseUrl$PROPERTY",
         method = HttpMethod.POST,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
           "propertyName" to MAX_USERS.name,
@@ -326,7 +326,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<List<PropertyResponse>>(
         url = "$baseUrl$PROPERTIES",
         method = HttpMethod.POST,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -381,7 +381,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROPERTY",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
           "propertyName" to MAX_USERS.name,
@@ -401,7 +401,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROPERTY",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
           "propertyName" to MAX_USERS.name,
@@ -423,7 +423,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROPERTIES",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -446,7 +446,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROPERTIES",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -475,7 +475,7 @@ class CreatorPropertyControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROPERTIES?${filter.buildQueryTemplate()}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = filter.buildQueryMap() + mapOf(
           "projectId" to project.id,
         ),

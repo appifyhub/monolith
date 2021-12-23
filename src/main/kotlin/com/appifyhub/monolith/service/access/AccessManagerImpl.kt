@@ -190,7 +190,7 @@ class AccessManagerImpl(
       throwPreconditionFailed { "Project feature '$requiredFeature' is not configured" }
     }
 
-    // on hold property must be set to 
+    // on hold property must be set to
     properties.firstOrNull { it.config == ProjectProperty.ON_HOLD }
       .let { (it as? Property.FlagProp)?.typed() ?: true } // assume true if not set
       .let { onHold -> if (onHold) throwLocked { "Project is 'on hold'" } }

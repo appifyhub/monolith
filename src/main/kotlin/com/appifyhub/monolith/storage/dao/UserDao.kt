@@ -16,9 +16,7 @@ interface UserDao : CrudRepository<UserDbm, UserIdDbm> {
 
   fun searchAllByProject_ProjectIdAndContactLike(projectId: Long, contact: String): List<UserDbm>
 
-  fun searchAllByNameLike(name: String): List<UserDbm>
-
-  fun searchAllByContactLike(name: String): List<UserDbm>
+  fun countAllByProject_ProjectId(projectId: Long): Long
 
   @Transactional
   fun deleteAllByProject_ProjectId(projectId: Long)

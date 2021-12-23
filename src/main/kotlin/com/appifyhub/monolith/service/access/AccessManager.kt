@@ -20,10 +20,6 @@ interface AccessManager {
     PROJECT_WRITE(OWNER),
     USER_READ(MODERATOR),
     USER_WRITE_TOKEN(ADMIN),
-    USER_WRITE_AUTHORITY(OWNER),
-    USER_WRITE_DATA(ADMIN),
-    USER_WRITE_SECRET(ADMIN),
-    USER_WRITE_VERIFICATION(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {
