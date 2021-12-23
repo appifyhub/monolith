@@ -10,7 +10,7 @@ class UserMapperTest {
 
   @Test fun `user domain to network`() {
     val user = Stubs.user.copy(
-      birthday = DateTimeMapper.parseAsDateTime("1970-05-15 00:00"), // from the stub
+      birthday = DateTimeMapper.parseAsDateTime("1970-05-14 00:00"), // from the stub
       createdAt = DateTimeMapper.parseAsDateTime("1970-05-14 03:04"), // from the stub
       updatedAt = DateTimeMapper.parseAsDateTime("1970-05-15 05:06"), // from the stub
     ).toNetwork()

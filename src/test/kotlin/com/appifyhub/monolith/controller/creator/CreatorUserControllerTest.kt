@@ -14,7 +14,7 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -63,7 +63,7 @@ class CreatorUserControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to targetId.projectId,
           "userId" to targetId.userId,
@@ -83,7 +83,7 @@ class CreatorUserControllerTest {
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to self.id.projectId,
           "userId" to self.id.userId,
@@ -115,7 +115,7 @@ class CreatorUserControllerTest {
       restTemplate.exchange<UserResponse>(
         url = "$baseUrl$ANY_USER",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to target.id.projectId,
           "userId" to target.id.userId,

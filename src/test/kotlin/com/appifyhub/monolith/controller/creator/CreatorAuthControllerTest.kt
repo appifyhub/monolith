@@ -25,7 +25,7 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.blankUriVariables
 import com.appifyhub.monolith.util.bodyRequest
@@ -114,7 +114,7 @@ class CreatorAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$CREATOR_API_KEY",
         method = HttpMethod.POST,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -147,7 +147,7 @@ class CreatorAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to targetId.projectId,
           "userId" to targetId.userId,
@@ -167,7 +167,7 @@ class CreatorAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to self.id.projectId,
           "userId" to self.id.userId,
@@ -193,7 +193,7 @@ class CreatorAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(adminToken),
+        requestEntity = bearerEmptyRequest(adminToken),
         uriVariables = mapOf(
           "projectId" to target.id.projectId,
           "userId" to target.id.userId,
@@ -219,7 +219,7 @@ class CreatorAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$ANY_USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(staticToken),
+        requestEntity = bearerEmptyRequest(staticToken),
         uriVariables = mapOf(
           "projectId" to target.id.projectId,
           "userId" to target.id.userId,
@@ -240,7 +240,7 @@ class CreatorAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_AUTH",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to targetId.projectId,
           "userId" to targetId.userId,
@@ -263,7 +263,7 @@ class CreatorAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token1),
+          requestEntity = bearerEmptyRequest(token1),
           uriVariables = mapOf(
             "projectId" to self.id.projectId,
             "userId" to self.id.userId,
@@ -294,7 +294,7 @@ class CreatorAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(adminToken),
+          requestEntity = bearerEmptyRequest(adminToken),
           uriVariables = mapOf(
             "projectId" to target.id.projectId,
             "userId" to target.id.userId,
@@ -326,7 +326,7 @@ class CreatorAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$ANY_USER_AUTH",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(staticToken),
+          requestEntity = bearerEmptyRequest(staticToken),
           uriVariables = mapOf(
             "projectId" to target.id.projectId,
             "userId" to target.id.userId,

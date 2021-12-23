@@ -6,6 +6,7 @@ import assertk.assertions.hasClass
 import assertk.assertions.hasMessage
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
@@ -280,60 +281,17 @@ class UserRepositoryImplTest {
 
   // endregion
 
-  // region Search by Name
+  // region Counting
 
-  @Test fun `searching users by invalid name throws`() {
+  @Test fun `counting users by project works`() {
     userDao.stub {
-      onGeneric { searchAllByNameLike(Stubs.user.name!!) } doThrow IllegalArgumentException("failed")
+      onGeneric {
+        countAllByProject_ProjectId(Stubs.project.id)
+      } doReturn 10
     }
 
-    assertThat { repository.searchByName(Stubs.user.name!!) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        hasMessage("failed")
-      }
-  }
-
-  @Test fun `searching users by name works`() {
-    userDao.stub {
-      onGeneric { searchAllByNameLike(Stubs.user.name!!) } doReturn listOf(Stubs.userDbm)
-    }
-
-    assertThat(repository.searchByName(Stubs.user.name!!))
-      .all {
-        hasSize(1)
-        transform { it.first() }.isDataClassEqualTo(Stubs.user)
-      }
-  }
-
-  // endregion
-
-  // region Search by Contact
-
-  @Test fun `searching users by invalid contact throws`() {
-    userDao.stub {
-      onGeneric { searchAllByContactLike(Stubs.user.contact!!) } doThrow IllegalArgumentException("failed")
-    }
-
-    assertThat { repository.searchByContact(Stubs.user.contact!!) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        hasMessage("failed")
-      }
-  }
-
-  @Test fun `searching users by contact works`() {
-    userDao.stub {
-      onGeneric { searchAllByContactLike(Stubs.user.contact!!) } doReturn listOf(Stubs.userDbm)
-    }
-
-    assertThat(repository.searchByContact(Stubs.user.contact!!))
-      .all {
-        hasSize(1)
-        transform { it.first() }.isDataClassEqualTo(Stubs.user)
-      }
+    assertThat(repository.count(Stubs.project.id))
+      .isEqualTo(10)
   }
 
   // endregion

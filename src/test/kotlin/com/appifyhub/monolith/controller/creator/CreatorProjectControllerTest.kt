@@ -21,7 +21,7 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.blankUriVariables
 import org.junit.jupiter.api.AfterEach
@@ -70,7 +70,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -144,7 +144,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -160,7 +160,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -181,7 +181,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<List<ProjectResponse>>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -207,7 +207,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
       )
     ).all {
@@ -226,7 +226,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalCreatorId" to creator2.id.toUniversalFormat()),
       )
     ).all {
@@ -247,7 +247,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<List<ProjectResponse>>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
       )
     ).all {
@@ -276,7 +276,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<List<ProjectResponse>>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
       )
     ).all {
@@ -299,7 +299,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_PROJECT",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -318,7 +318,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<ProjectResponse>(
         url = "$baseUrl$ANY_PROJECT",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -341,7 +341,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_PROJECT",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -540,7 +540,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_PROJECT",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -559,7 +559,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_PROJECT",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -584,7 +584,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_PROJECT",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -606,7 +606,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
       )
     ).all {
@@ -624,7 +624,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
       )
     ).all {
@@ -648,7 +648,7 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
       )
     ).all {

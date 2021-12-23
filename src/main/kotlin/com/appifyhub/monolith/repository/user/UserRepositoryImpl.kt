@@ -71,6 +71,11 @@ class UserRepositoryImpl(
     return userDao.searchAllByProject_ProjectIdAndContactLike(projectId, contact).map(UserDbm::toDomain)
   }
 
+  override fun count(projectId: Long): Long {
+    log.debug("Counting users in project $projectId")
+    return userDao.countAllByProject_ProjectId(projectId)
+  }
+
   override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
     log.debug("Updating user $updater")
 

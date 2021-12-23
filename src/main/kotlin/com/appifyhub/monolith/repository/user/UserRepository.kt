@@ -20,6 +20,8 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun searchByContact(projectId: Long, contact: String): List<User>
 
+  @Throws fun count(projectId: Long): Long
+
   @Throws fun updateUser(updater: UserUpdater, userIdType: Project.UserIdType): User
 
   @Throws fun removeUserById(id: UserId)

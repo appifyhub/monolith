@@ -106,7 +106,7 @@ class CreatorProjectController(
         privilege = Privilege.PROJECT_WRITE,
       )
 
-      // force REVIEW state after type change  
+      // force REVIEW state after type change
       if (updateRequest.status == null) {
         projectUpdater = projectUpdater.copy(status = Settable(Project.Status.REVIEW))
       }

@@ -9,7 +9,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.HEARTBEAT
 import com.appifyhub.monolith.network.heartbeat.HeartbeatResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.util.TimeProviderFake
-import com.appifyhub.monolith.util.blankRequest
+import com.appifyhub.monolith.util.emptyRequest
 import com.appifyhub.monolith.util.blankUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -56,7 +56,7 @@ class HeartbeatControllerTest {
       restTemplate.exchange<HeartbeatResponse>(
         url = "$baseUrl/$HEARTBEAT",
         method = HttpMethod.GET,
-        requestEntity = blankRequest(),
+        requestEntity = emptyRequest(),
         uriVariables = blankUriVariables(),
       )
     ).all {

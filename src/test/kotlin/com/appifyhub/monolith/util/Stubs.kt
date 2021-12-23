@@ -534,7 +534,7 @@ object Stubs {
     allowsSpam = true,
     contact = "user@example.com",
     contactType = "EMAIL",
-    birthday = "1970-05-15",
+    birthday = "1970-05-14",
     company = companyDto,
     languageTag = Locale.US.toLanguageTag(),
     createdAt = "1970-05-14 03:04",

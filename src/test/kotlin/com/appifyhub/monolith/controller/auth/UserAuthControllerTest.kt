@@ -24,7 +24,7 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.blankUriVariables
 import com.appifyhub.monolith.util.bodyRequest
 import java.time.Duration
@@ -131,7 +131,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -147,7 +147,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -163,7 +163,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<TokenDetailsResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -179,7 +179,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -195,7 +195,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -213,7 +213,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<List<TokenDetailsResponse>>(
         url = "$baseUrl$TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token1),
+        requestEntity = bearerEmptyRequest(token1),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -231,7 +231,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -247,7 +247,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -262,7 +262,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<TokenResponse>(
         url = "$baseUrl$AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = blankUriVariables(),
       )
     ).all {
@@ -279,7 +279,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH?all={all}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("all" to null),
       )
     ).all {
@@ -295,7 +295,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$AUTH?all={all}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("all" to null),
       )
     ).all {
@@ -311,7 +311,7 @@ class UserAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token),
+          requestEntity = bearerEmptyRequest(token),
           uriVariables = mapOf("all" to false),
         )
       ).all {
@@ -334,7 +334,7 @@ class UserAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token1),
+          requestEntity = bearerEmptyRequest(token1),
           uriVariables = mapOf("all" to true),
         )
       ).all {
@@ -352,7 +352,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "token1" to null,
           "token2" to null,
@@ -371,7 +371,7 @@ class UserAuthControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "token1" to null,
           "token2" to null,
@@ -395,7 +395,7 @@ class UserAuthControllerTest {
         restTemplate.exchange<MessageResponse>(
           url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token3),
+          requestEntity = bearerEmptyRequest(token3),
           uriVariables = mapOf(
             "token1" to token1,
             "token2" to token2,
