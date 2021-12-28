@@ -56,6 +56,7 @@ object Normalizers {
   val PropProjectWebsite = normalizesNonNull(Validators.Url, Cleaners.Url)
   val PropMaxUsers = normalizesNonNull(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
   val PropOnHold = normalizesNonNull(Validators.FlagAsString, Cleaners.FlagDefTrueAsString)
+  val PropAnyoneCanSearch = normalizesNonNull(Validators.FlagAsString, Cleaners.FlagDefFalseAsString)
 
   // Other normalizers
 

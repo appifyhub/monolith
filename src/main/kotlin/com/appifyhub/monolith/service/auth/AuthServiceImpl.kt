@@ -209,7 +209,7 @@ class AuthServiceImpl(
     val geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString()
 
     val isCreator = creatorService.getCreatorProject().id == user.id.projectId
-    val isOwner = user.canActAs(Authority.OWNER)
+    val isOwner = user.authority == Authority.OWNER
     val isAllowedToCreateStaticTokens = isCreator || isOwner
     if (isStatic && !isAllowedToCreateStaticTokens)
       throwUnauthorized { "Only ${Authority.OWNER.groupName} can create static tokens" }

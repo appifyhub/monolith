@@ -19,6 +19,7 @@ interface AccessManager {
     PROJECT_READ(OWNER),
     PROJECT_WRITE(OWNER),
     USER_READ(MODERATOR),
+    USER_SEARCH(ADMIN),
     USER_WRITE_TOKEN(ADMIN),
   }
 

@@ -25,6 +25,7 @@ import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_READ
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_SEARCH
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_TOKEN
 import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
@@ -551,6 +552,78 @@ class AccessManagerImplTest {
     assertThat(
       manager.requestSuperCreator(token)
     ).isDataClassEqualTo(creator)
+  }
+
+  // endregion
+
+  // region Special access
+
+  @Test fun `requesting project access fails with requesting peer SEARCH (setting missing)`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).default()
+
+    assertThat {
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
+      }
+  }
+
+  @Test fun `requesting project access fails with requesting peer SEARCH (setting is false)`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).default()
+    propService.saveProperty<Boolean>(project.id, ProjectProperty.ANYONE_CAN_SEARCH.name, "false")
+
+    assertThat {
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
+      }
+  }
+
+  @Test fun `requesting project access succeeds with requesting peer SEARCH (setting is true)`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).default()
+    propService.saveProperty<Boolean>(project.id, ProjectProperty.ANYONE_CAN_SEARCH.name, "true")
+
+    assertThat(
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    ).isDataClassEqualTo(project.cleanStubArtifacts())
+  }
+
+  @Test fun `requesting project access succeeds with requesting inferior SEARCH`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).admin()
+
+    assertThat(
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
   // endregion

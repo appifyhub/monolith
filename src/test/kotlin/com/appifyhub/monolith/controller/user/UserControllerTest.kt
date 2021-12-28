@@ -5,7 +5,8 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_SIGNUP
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SEARCH
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -66,7 +67,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_SIGNUP",
+        url = "$baseUrl$ANY_PROJECT_SIGNUP",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
         uriVariables = mapOf("projectId" to project.id),
@@ -81,7 +82,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_SIGNUP",
+        url = "$baseUrl$ANY_PROJECT_SIGNUP",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
         uriVariables = mapOf("projectId" to project.id),
@@ -161,6 +162,129 @@ class UserControllerTest {
           type = self.type.name,
           authority = self.authority.name,
           birthday = DateTimeMapper.formatAsDate(self.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  // endregion
+
+  // region Search User
+
+  @Test fun `search user fails when unauthorized`() {
+    val project = stubber.projects.new()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT_SEARCH?user_name={userName}",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+          "userName" to "whatever",
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `search user fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val admin = stubber.users(project).admin()
+    val token = stubber.tokens(admin).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT_SEARCH?user_name={userName}",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+          "userName" to "whatever",
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `search user fails when no query is provided`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val admin = stubber.users(project).admin()
+    val token = stubber.tokens(admin).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_PROJECT_SEARCH",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("projectId" to project.id),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.NOT_FOUND)
+    }
+  }
+
+  @Test fun `search user succeeds with valid authorization and user name`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val admin = stubber.users(project).admin()
+    val token = stubber.tokens(admin).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<List<UserResponse>>(
+        url = "$baseUrl$ANY_PROJECT_SEARCH?user_name={userName}",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+          "userName" to admin.name,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!!.first() }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = admin.id.userId,
+          projectId = project.id,
+          universalId = admin.id.toUniversalFormat(),
+          type = admin.type.name,
+          authority = admin.authority.name,
+          birthday = DateTimeMapper.formatAsDate(admin.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  @Test fun `search user succeeds with valid authorization and user contact`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val admin = stubber.users(project).admin()
+    val token = stubber.tokens(admin).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<List<UserResponse>>(
+        url = "$baseUrl$ANY_PROJECT_SEARCH?user_contact={userContact}",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf(
+          "projectId" to project.id,
+          "userContact" to admin.contact,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!!.first() }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = admin.id.userId,
+          projectId = project.id,
+          universalId = admin.id.toUniversalFormat(),
+          type = admin.type.name,
+          authority = admin.authority.name,
+          birthday = DateTimeMapper.formatAsDate(admin.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )
