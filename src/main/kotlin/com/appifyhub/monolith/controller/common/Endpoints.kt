@@ -11,7 +11,8 @@ object Endpoints {
 
   // User data
 
-  const val ANY_USER_SIGNUP = "/v1/projects/{projectId}/signup"
+  const val ANY_PROJECT_SIGNUP = "/v1/projects/{projectId}/signup"
+  const val ANY_PROJECT_SEARCH = "/v1/projects/{projectId}/search"
   const val ANY_USER_UNIVERSAL = "/v1/universal/users/{universalId}"
 
   /* ******************** CREATORS ******************** */
@@ -36,7 +37,6 @@ object Endpoints {
 
   // Creator data
 
-  const val CREATOR_SIGNUP = "/v1/creator/signup"
   const val ANY_USER = "/v1/projects/{projectId}/users/{userId}"
 
   /* ***************** UNAUTHENTICATED ****************** */
@@ -46,6 +46,6 @@ object Endpoints {
   const val HEARTBEAT = "/heartbeat"
   const val H2_CONSOLE = "/h2-console/**" // debug mode only
   const val SIGNUP_USERS = "/v1/projects/**/signup" // see ANY_USER_SIGNUP
-  const val SIGNUP_CREATORS = CREATOR_SIGNUP
+  const val SIGNUP_CREATORS = "/v1/creator/signup"
 
 }

@@ -89,6 +89,17 @@ enum class ProjectProperty(
     isDeprecated = false,
   ),
 
+  ANYONE_CAN_SEARCH(
+    type = FLAG,
+    category = OPERATIONAL,
+    normalizer = Normalizers.PropOnHold,
+    tags = setOf(CONTROL, IMPORTANT),
+    defaultValue = "true",
+    isMandatory = true,
+    isSecret = false,
+    isDeprecated = false,
+  ),
+
   ON_HOLD(
     type = FLAG,
     category = OPERATIONAL,

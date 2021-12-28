@@ -79,6 +79,4 @@ data class User(
 
   val isVerified = verificationToken.isNullOrBlank()
 
-  fun canActAs(authority: Authority) = this.authority.ordinal >= authority.ordinal
-
 }

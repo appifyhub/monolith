@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.controller.user
 
 import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -9,12 +10,14 @@ import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.user.UserService
+import com.appifyhub.monolith.util.ext.throwNotFound
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -25,7 +28,7 @@ class UserController(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @PostMapping(Endpoints.ANY_USER_SIGNUP)
+  @PostMapping(Endpoints.ANY_PROJECT_SIGNUP)
   fun addUser(
     @PathVariable projectId: Long,
     @RequestBody request: UserSignupRequest,
@@ -49,6 +52,25 @@ class UserController(
     accessManager.requireProjectFunctional(userId.projectId)
 
     return accessManager.requestUserAccess(authentication, userId, Privilege.USER_READ).toNetwork()
+  }
+
+  @GetMapping(Endpoints.ANY_PROJECT_SEARCH)
+  fun searchUsers(
+    authentication: Authentication,
+    @PathVariable projectId: Long,
+    @RequestParam("user_name") userName: String? = null,
+    @RequestParam("user_contact") userContact: String? = null,
+  ): List<UserResponse> {
+    log.debug("[GET] user search in project $projectId with name $userName or $userContact")
+
+    accessManager.requireProjectFunctional(projectId)
+    val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.USER_SEARCH)
+
+    return when {
+      userName != null -> userService.searchByName(project.id, userName).map(User::toNetwork)
+      userContact != null -> userService.searchByContact(project.id, userContact).map(User::toNetwork)
+      else -> throwNotFound { "At least one user property is required for querying" }
+    }
   }
 
 }
