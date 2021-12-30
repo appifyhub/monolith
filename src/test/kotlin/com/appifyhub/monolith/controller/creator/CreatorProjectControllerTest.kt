@@ -205,10 +205,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -224,10 +224,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator2.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator2.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -245,10 +245,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<List<ProjectResponse>>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -274,10 +274,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<List<ProjectResponse>>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -604,10 +604,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -622,10 +622,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -646,10 +646,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)

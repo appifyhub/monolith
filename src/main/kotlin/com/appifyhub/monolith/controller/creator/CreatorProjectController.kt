@@ -51,7 +51,7 @@ class CreatorProjectController(
   @GetMapping(Endpoints.PROJECTS)
   fun getProjects(
     authentication: Authentication,
-    @RequestParam(required = false) universalCreatorId: String? = null,
+    @RequestParam("creator_id", required = false) universalCreatorId: String? = null,
   ): List<ProjectResponse> {
     log.debug("[GET] get creator projects, universalCreatorId = $universalCreatorId")
 
@@ -134,7 +134,7 @@ class CreatorProjectController(
   @DeleteMapping(Endpoints.PROJECTS)
   fun removeProjectsByCreator(
     authentication: Authentication,
-    @RequestParam universalCreatorId: String,
+    @RequestParam("creator_id") universalCreatorId: String,
   ): MessageResponse {
     log.debug("[DELETE] remove all creator projects for $universalCreatorId")
 

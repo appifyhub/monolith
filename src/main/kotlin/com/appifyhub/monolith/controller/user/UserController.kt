@@ -9,8 +9,10 @@ import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
+import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.throwNotFound
 import org.slf4j.LoggerFactory
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class UserController(
   private val userService: UserService,
+  private val authService: AuthService,
   private val accessManager: AccessManager,
 ) {
 
@@ -108,6 +111,30 @@ class UserController(
     val updater = request.toDomain(userId)
 
     return userService.updateUser(updater).toNetwork()
+  }
+
+  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_SIGNATURE)
+  fun updateData(
+    authentication: Authentication,
+    @PathVariable universalId: String,
+    @RequestBody request: UserUpdateSignatureRequest,
+    @RequestParam logout: Boolean,
+  ): UserResponse {
+    log.debug("[PUT] signature update for $universalId with data $request, logout=$logout")
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    accessManager.requireProjectFunctional(userId.projectId)
+
+    accessManager.requestUserAccess(authentication, userId, Privilege.USER_WRITE_SIGNATURE)
+    authService.resolveUser(universalId, request.rawSignatureOld)
+    if (logout) accessManager.requestUserAccess(authentication, userId, Privilege.USER_WRITE_TOKEN)
+
+    val updater = request.toDomain(userId)
+    val updated = userService.updateUser(updater).toNetwork()
+
+    if (logout) authService.unauthorizeAllFor(authentication, userId)
+
+    return updated
   }
 
 }

@@ -16,6 +16,7 @@ object Endpoints {
   const val ANY_USER_UNIVERSAL = "/v1/universal/users/{universalId}"
   const val ANY_USER_UNIVERSAL_AUTHORITY = "/v1/universal/users/{universalId}/authority"
   const val ANY_USER_UNIVERSAL_DATA = "/v1/universal/users/{universalId}/data"
+  const val ANY_USER_UNIVERSAL_SIGNATURE = "/v1/universal/users/{universalId}/signature"
 
   /* ******************** CREATORS ******************** */
 
