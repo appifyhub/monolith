@@ -14,6 +14,8 @@ object Endpoints {
   const val ANY_PROJECT_SIGNUP = "/v1/projects/{projectId}/signup"
   const val ANY_PROJECT_SEARCH = "/v1/projects/{projectId}/search"
   const val ANY_USER_UNIVERSAL = "/v1/universal/users/{universalId}"
+  const val ANY_USER_UNIVERSAL_AUTHORITY = "/v1/universal/users/{universalId}/authority"
+  const val ANY_USER_UNIVERSAL_DATA = "/v1/universal/users/{universalId}/data"
 
   /* ******************** CREATORS ******************** */
 

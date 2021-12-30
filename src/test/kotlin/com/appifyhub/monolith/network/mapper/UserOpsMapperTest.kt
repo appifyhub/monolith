@@ -80,7 +80,7 @@ class UserOpsMapperTest {
         rawSignature = null,
         authority = null,
         verificationToken = null,
-        birthday = Settable(DateTimeMapper.parseAsDateTime("1970-05-15 00:00")), // from the stub
+        birthday = Settable(DateTimeMapper.parseAsDateTime("1978-11-15 00:00")), // from the stub
       )
     )
   }

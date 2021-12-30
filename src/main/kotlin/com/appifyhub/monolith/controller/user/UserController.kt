@@ -8,6 +8,7 @@ import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.user.UserService
@@ -75,7 +76,7 @@ class UserController(
     }
   }
 
-  @PutMapping(Endpoints.ANY_USER_UNIVERSAL)
+  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_AUTHORITY)
   fun updateAuthority(
     authentication: Authentication,
     @PathVariable universalId: String,
@@ -87,6 +88,23 @@ class UserController(
     accessManager.requireProjectFunctional(userId.projectId)
 
     accessManager.requestUserAccess(authentication, userId, Privilege.USER_WRITE_AUTHORITY)
+    val updater = request.toDomain(userId)
+
+    return userService.updateUser(updater).toNetwork()
+  }
+
+  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_DATA)
+  fun updateData(
+    authentication: Authentication,
+    @PathVariable universalId: String,
+    @RequestBody request: UserUpdateDataRequest,
+  ): UserResponse {
+    log.debug("[PUT] data update for $universalId with data $request")
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    accessManager.requireProjectFunctional(userId.projectId)
+
+    accessManager.requestUserAccess(authentication, userId, Privilege.USER_WRITE_DATA)
     val updater = request.toDomain(userId)
 
     return userService.updateUser(updater).toNetwork()
