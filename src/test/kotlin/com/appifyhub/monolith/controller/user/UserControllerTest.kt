@@ -13,10 +13,12 @@ import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
+import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
+import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bodyRequest
 import org.junit.jupiter.api.AfterEach
@@ -285,6 +287,76 @@ class UserControllerTest {
           type = admin.type.name,
           authority = admin.authority.name,
           birthday = DateTimeMapper.formatAsDate(admin.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  // endregion
+
+  // region Update user: Authority
+
+  @Test fun `update user authority fails when unauthorized`() {
+    val project = stubber.projects.new()
+    val universalId = stubber.users(project).default().id.toUniversalFormat()
+    val request = UserUpdateAuthorityRequest(Authority.MODERATOR.name)
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, "invalid"),
+        uriVariables = mapOf("universalId" to universalId),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `update user authority fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val user = stubber.users(project).default()
+    val token = stubber.tokens(user).real().token.tokenValue
+    val request = UserUpdateAuthorityRequest(Authority.MODERATOR.name)
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `update user authority succeeds with valid authorization`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val owner = stubber.users(project).owner()
+    val targetUser = stubber.users(project).default()
+    val token = stubber.tokens(owner).real().token.tokenValue
+    val request = UserUpdateAuthorityRequest(Authority.MODERATOR.name)
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = targetUser.id.userId,
+          projectId = project.id,
+          universalId = targetUser.id.toUniversalFormat(),
+          type = targetUser.type.name,
+          authority = request.authority,
+          birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )

@@ -119,7 +119,7 @@ class GlobalExceptionHandler(
         )
 
     }.also {
-      log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}", t)
+      log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}, body=${it.body}", t)
     }
 
 }

@@ -7,6 +7,7 @@ import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.UserSignupRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.user.UserService
@@ -16,6 +17,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -71,6 +73,23 @@ class UserController(
       userContact != null -> userService.searchByContact(project.id, userContact).map(User::toNetwork)
       else -> throwNotFound { "At least one user property is required for querying" }
     }
+  }
+
+  @PutMapping(Endpoints.ANY_USER_UNIVERSAL)
+  fun updateAuthority(
+    authentication: Authentication,
+    @PathVariable universalId: String,
+    @RequestBody request: UserUpdateAuthorityRequest,
+  ): UserResponse {
+    log.debug("[PUT] authorization update for $universalId with data $request")
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    accessManager.requireProjectFunctional(userId.projectId)
+
+    accessManager.requestUserAccess(authentication, userId, Privilege.USER_WRITE_AUTHORITY)
+    val updater = request.toDomain(userId)
+
+    return userService.updateUser(updater).toNetwork()
   }
 
 }
