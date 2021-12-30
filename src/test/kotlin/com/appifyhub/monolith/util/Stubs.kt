@@ -113,6 +113,15 @@ object Stubs {
     countryCode = "DE",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
+  val companyUpdated = company.copy(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
+  )
+
   val ipAddress = "173.85.251.191"
 
   val geo = Geolocation(
@@ -168,6 +177,23 @@ object Stubs {
     updatedAt = Date(0xA00000),
   )
 
+  var userUpdated = user.copy(
+    id = user.id,
+    signature = "1drowssap",
+    name = "User's Name 1",
+    type = User.Type.PERSONAL,
+    authority = User.Authority.MODERATOR,
+    allowsSpam = false,
+    contact = "+491760000001",
+    contactType = User.ContactType.PHONE,
+    verificationToken = "abcd12341",
+    birthday = Date(0x10B00001),
+    company = companyUpdated,
+    languageTag = Locale.UK.toLanguageTag(),
+    createdAt = user.createdAt,
+    updatedAt = Date(0xA00001),
+  )
+
   val project = Project(
     id = userId.projectId,
     type = Project.Type.OPENSOURCE,
@@ -175,6 +201,15 @@ object Stubs {
     userIdType = Project.UserIdType.USERNAME,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
+  )
+
+  val projectUpdated = Project(
+    id = project.id,
+    type = Project.Type.FREE,
+    status = Project.Status.SUSPENDED,
+    userIdType = project.userIdType,
+    createdAt = project.createdAt,
+    updatedAt = Date(0xA20001),
   )
 
   val schema = Schema(
@@ -270,6 +305,15 @@ object Stubs {
     countryCode = "DE",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
+  val companyUpdatedDbm = OrganizationDbm(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
+  )
+
   val userDbm = UserDbm(
     id = userIdDbm,
     project = projectDbm,
@@ -286,6 +330,24 @@ object Stubs {
     languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
+  )
+
+  val userUpdatedDbm = UserDbm(
+    id = userIdDbm,
+    project = projectDbm,
+    signature = "1drowssap",
+    name = "User's Name 1",
+    type = "PERSONAL",
+    authority = "MODERATOR",
+    allowsSpam = false,
+    contact = "+491760000001",
+    contactType = "PHONE",
+    verificationToken = "abcd12341",
+    birthday = Date(0x10B00001),
+    company = companyUpdatedDbm,
+    languageTag = Locale.UK.toLanguageTag(),
+    createdAt = userDbm.createdAt,
+    updatedAt = Date(0xA00001),
   )
 
   @Suppress("MemberVisibilityCanBePrivate")
@@ -348,72 +410,6 @@ object Stubs {
     project = projectDbm,
     rawValue = propFlag.rawValue,
     updatedAt = propFlag.updatedAt,
-  )
-
-  // endregion
-
-  // region Domain Models (with updated values)
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val companyUpdated = company.copy(
-    name = "Company 1",
-    street = "Street Name 11",
-    postcode = "123451",
-    city = "City 1",
-    countryCode = "DF",
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val companyUpdatedDbm = OrganizationDbm(
-    name = "Company 1",
-    street = "Street Name 11",
-    postcode = "123451",
-    city = "City 1",
-    countryCode = "DF",
-  )
-
-  var userUpdated = user.copy(
-    id = user.id,
-    signature = "1drowssap",
-    name = "User's Name 1",
-    type = User.Type.PERSONAL,
-    authority = User.Authority.MODERATOR,
-    allowsSpam = false,
-    contact = "+491760000001",
-    contactType = User.ContactType.PHONE,
-    verificationToken = "abcd12341",
-    birthday = Date(0x10B00001),
-    company = companyUpdated,
-    languageTag = Locale.UK.toLanguageTag(),
-    createdAt = user.createdAt,
-    updatedAt = Date(0xA00001),
-  )
-
-  val userUpdatedDbm = UserDbm(
-    id = userIdDbm,
-    project = projectDbm,
-    signature = "1drowssap",
-    name = "User's Name 1",
-    type = "PERSONAL",
-    authority = "MODERATOR",
-    allowsSpam = false,
-    contact = "+491760000001",
-    contactType = "PHONE",
-    verificationToken = "abcd12341",
-    birthday = Date(0x10B00001),
-    company = companyUpdatedDbm,
-    languageTag = Locale.UK.toLanguageTag(),
-    createdAt = userDbm.createdAt,
-    updatedAt = Date(0xA00001),
-  )
-
-  val projectUpdated = Project(
-    id = project.id,
-    type = Project.Type.FREE,
-    status = Project.Status.SUSPENDED,
-    userIdType = project.userIdType,
-    createdAt = project.createdAt,
-    updatedAt = Date(0xA20001),
   )
 
   // endregion
@@ -524,6 +520,14 @@ object Stubs {
     countryCode = "DE",
   )
 
+  val companyDtoUpdated = OrganizationDto(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
+  )
+
   val userResponse = UserResponse(
     userId = userId.userId,
     projectId = userId.projectId,
@@ -539,6 +543,23 @@ object Stubs {
     languageTag = Locale.US.toLanguageTag(),
     createdAt = "1970-05-14 03:04",
     updatedAt = "1970-05-15 05:06",
+  )
+
+  val userResponseUpdated = UserResponse(
+    userId = userId.userId,
+    projectId = userId.projectId,
+    universalId = universalUserId,
+    name = "User's Name 1",
+    type = User.Type.PERSONAL.name,
+    authority = User.Authority.MODERATOR.name,
+    allowsSpam = false,
+    contact = "+491760000001",
+    contactType = User.ContactType.PHONE.name,
+    birthday = "1978-11-15",
+    company = companyDtoUpdated,
+    languageTag = Locale.UK.toLanguageTag(),
+    createdAt = "1970-05-14 03:04",
+    updatedAt = "1970-05-02 08:42",
   )
 
   val tokenResponse = TokenResponse(
@@ -708,7 +729,7 @@ object Stubs {
     allowsSpam = SettableRequest(false),
     contact = SettableRequest("+491760000001"),
     contactType = SettableRequest("PHONE"),
-    birthday = SettableRequest("1970-05-15"),
+    birthday = SettableRequest("1978-11-15"),
     company = SettableRequest(companyUpdaterDto),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
   )

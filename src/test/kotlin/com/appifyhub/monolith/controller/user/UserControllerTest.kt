@@ -8,6 +8,8 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SEARCH
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_AUTHORITY
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_DATA
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -305,7 +307,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$ANY_USER_UNIVERSAL_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -323,7 +325,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$ANY_USER_UNIVERSAL_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -342,7 +344,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$ANY_USER_UNIVERSAL_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
@@ -357,6 +359,71 @@ class UserControllerTest {
           type = targetUser.type.name,
           authority = request.authority,
           birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  // endregion
+
+  // region Update user: Data
+
+  @Test fun `update user data fails when unauthorized`() {
+    val project = stubber.projects.new()
+    val universalId = stubber.users(project).default().id.toUniversalFormat()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_DATA",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, "invalid"),
+        uriVariables = mapOf("universalId" to universalId),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `update user data fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val user = stubber.users(project).default()
+    val token = stubber.tokens(user).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_DATA",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `update user data succeeds with valid authorization`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val owner = stubber.users(project).owner()
+    val targetUser = stubber.users(project).default()
+    val token = stubber.tokens(owner).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_DATA",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
+        uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponseUpdated.copy(
+          userId = targetUser.id.userId,
+          projectId = project.id,
+          universalId = targetUser.id.toUniversalFormat(),
+          authority = targetUser.authority.name,
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )
