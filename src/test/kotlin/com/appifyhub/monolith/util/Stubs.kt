@@ -460,7 +460,7 @@ object Stubs {
   val userCreator = UserCreator(
     userId = "username",
     projectId = project.id,
-    rawSecret = "password",
+    rawSignature = "password",
     name = "User's Name",
     type = User.Type.ORGANIZATION,
     authority = User.Authority.ADMIN,
@@ -583,13 +583,13 @@ object Stubs {
 
   val userCredentialsRequest = UserCredentialsRequest(
     universalId = universalUserId,
-    secret = "password",
+    signature = "password",
     origin = "Token Origin",
   )
 
   val creatorCredentialsRequest = CreatorCredentialsRequest(
     universalId = userCredentialsRequest.universalId,
-    secret = userCredentialsRequest.secret,
+    signature = userCredentialsRequest.signature,
     origin = userCredentialsRequest.origin,
   )
 

@@ -99,7 +99,7 @@ class SchemaInitializerTest {
       on { updateUser(any()) } doReturn user
     }
 
-    assertThat { runInitializer(superCreatorSecret = "root secret") }
+    assertThat { runInitializer(superCreatorSignature = "root secret") }
       .isSuccess()
 
     verify(creatorService).addProject(
@@ -125,7 +125,7 @@ class SchemaInitializerTest {
         creator = UserCreator(
           userId = user.contact,
           projectId = project.id,
-          rawSecret = "root secret",
+          rawSignature = "root secret",
           name = user.name,
           type = User.Type.ORGANIZATION,
           authority = User.Authority.OWNER,
@@ -163,7 +163,7 @@ class SchemaInitializerTest {
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(superCreatorSecret = " \t\n ") }
+    assertThat { runInitializer(superCreatorSignature = " \t\n ") }
       .isSuccess()
 
     verify(creatorService).addProject(
@@ -189,7 +189,7 @@ class SchemaInitializerTest {
         creator = UserCreator(
           userId = user.contact,
           projectId = project.id,
-          rawSecret = "generated sig",
+          rawSignature = "generated sig",
           name = user.name,
           type = User.Type.ORGANIZATION,
           authority = User.Authority.OWNER,
@@ -214,7 +214,7 @@ class SchemaInitializerTest {
 
   private fun runInitializer(
     superCreatorName: String = Stubs.user.name!!,
-    superCreatorSecret: String = Stubs.userCreator.rawSecret,
+    superCreatorSignature: String = Stubs.userCreator.rawSignature,
     superCreatorEmail: String = Stubs.user.contact!!,
     creatorProjectName: String = "Project Name",
     args: ApplicationArguments? = null,
@@ -225,7 +225,7 @@ class SchemaInitializerTest {
     schemaService = schemaService,
     creatorConfig = CreatorProjectConfig().apply {
       this.ownerName = superCreatorName
-      this.ownerSecret = superCreatorSecret
+      this.ownerSignature = superCreatorSignature
       this.ownerEmail = superCreatorEmail
       this.projectName = creatorProjectName
     },

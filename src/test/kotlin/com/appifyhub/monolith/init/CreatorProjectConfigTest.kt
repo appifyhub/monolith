@@ -26,7 +26,7 @@ class CreatorProjectConfigTest {
         isNotNull()
         transform { it.projectName }.isEqualTo("AppifyHub")
         transform { it.ownerName }.isEqualTo("Owner")
-        transform { it.ownerSecret }.isEmpty()
+        transform { it.ownerSignature }.isEmpty()
         transform { it.ownerEmail }.isEqualTo("creator@appifyhub.com")
       }
   }

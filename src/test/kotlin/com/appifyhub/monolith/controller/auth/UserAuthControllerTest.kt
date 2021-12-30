@@ -71,7 +71,7 @@ class UserAuthControllerTest {
   @Test fun `auth user fails with invalid credentials`() {
     val credentials = UserCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
-      secret = "invalid",
+      signature = "invalid",
       origin = Stubs.userCredentialsRequest.origin,
     )
 
@@ -109,7 +109,7 @@ class UserAuthControllerTest {
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = UserCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
-      secret = Stubs.userCredentialsRequest.secret,
+      signature = Stubs.userCredentialsRequest.signature,
       origin = Stubs.userCredentialsRequest.origin,
     )
 

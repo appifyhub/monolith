@@ -61,7 +61,7 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSecret)
+    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSignature)
       .requireValid { "Owner Signature" }
     val ownerName = Normalizers.Name.run(creatorConfig.ownerName)
       .requireValid { "Owner Name" }
@@ -69,7 +69,7 @@ class SchemaInitializer(
       .requireValid { "Owner Email" }
     val creatorProjectName = Normalizers.PropProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
-    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
+    val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
 
     // create the creator project
     val project = creatorService.addProject(
@@ -100,7 +100,7 @@ class SchemaInitializer(
       creator = UserCreator(
         userId = ownerEmail,
         projectId = project.id,
-        rawSecret = rawOwnerSecret,
+        rawSignature = rawOwnerSignature,
         name = ownerName,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
@@ -124,7 +124,7 @@ class SchemaInitializer(
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
       ?.let { "<see \$env.CREATOR_OWNER_SECRET>" }
-      ?: rawOwnerSecret
+      ?: rawOwnerSignature
 
     // print credentials
     val margin = "\n".repeat(8)

@@ -10,7 +10,7 @@ class CreatorProjectConfig {
   lateinit var ownerName: String
 
   @Value("\${app.creator.owner.secret}")
-  lateinit var ownerSecret: String
+  lateinit var ownerSignature: String
 
   @Value("\${app.creator.owner.email}")
   lateinit var ownerEmail: String

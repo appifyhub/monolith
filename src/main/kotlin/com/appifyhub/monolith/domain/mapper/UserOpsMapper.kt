@@ -44,7 +44,7 @@ fun UserCreator.toUser(
   timeProvider: TimeProvider,
 ): User = User(
   id = UserId(userId = userId, projectId = projectId),
-  signature = passwordEncoder.encode(rawSecret),
+  signature = passwordEncoder.encode(rawSignature),
   name = name,
   type = type,
   authority = authority,
