@@ -52,9 +52,9 @@ class AccessManagerImpl(
     val isSameProjectRequest = targetProject.id == tokenDetails.projectId
     require(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
-    // self access is always allowed, check if that's the case
+    // self access is sometimes allowed, check if that's the case
     val requesterUser = fetchUser(tokenDetails.ownerId)
-    if (requesterUser.id == normalizedTargetId) return requesterUser
+    if (requesterUser.isSelfAccessAllowed(privilege, normalizedTargetId)) return requesterUser
 
     // fail if user is not verified
     if (!requesterUser.isVerified) throwNotVerified()
@@ -238,6 +238,27 @@ class AccessManagerImpl(
       }
       // not a special case
       else -> this.authority.ordinal >= privilege.level.ordinal
+    }
+
+  private fun User.isSelfAccessAllowed(privilege: Privilege, targetId: UserId): Boolean =
+    when (privilege) {
+      // sensitive user properties can only be changed by other high-level users (even for self)
+      Privilege.USER_WRITE_AUTHORITY,
+      Privilege.USER_WRITE_VERIFICATION,
+      -> false
+
+      // non-sensitive user properties can be changed for self
+      Privilege.USER_READ,
+      Privilege.USER_SEARCH,
+      Privilege.USER_WRITE_TOKEN,
+      Privilege.USER_WRITE_DATA,
+      Privilege.USER_WRITE_SECRET,
+      -> this.id == targetId
+
+      // invalid properties
+      Privilege.PROJECT_READ,
+      Privilege.PROJECT_WRITE,
+      -> error("Users should not ask for self-access on projects")
     }
 
   private fun getCreatorProject() = creatorService.getCreatorProject()

@@ -26,6 +26,7 @@ import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_REA
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_SEARCH
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_AUTHORITY
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_TOKEN
 import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
@@ -624,6 +625,32 @@ class AccessManagerImplTest {
         privilege = USER_SEARCH,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(project.cleanStubArtifacts())
+  }
+
+  @Test fun `requesting authority self-change fails if not owner`() {
+    val project = stubber.projects.creator()
+    val self = stubber.users(project).admin()
+    val token = stubber.tokens(self).real()
+
+    assertThat {
+      manager.requestUserAccess(token, self.id, USER_WRITE_AUTHORITY)
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only ${OWNER.groupName} are authorized")
+      }
+  }
+
+  @Test fun `requesting authority self-change succeeds if owner`() {
+    val project = stubber.projects.creator()
+    val self = stubber.users(project).owner()
+    val token = stubber.tokens(self).real()
+
+    assertThat(
+      manager.requestUserAccess(token, self.id, USER_WRITE_AUTHORITY)
+        .cleanStubArtifacts()
+    ).isDataClassEqualTo(self.cleanStubArtifacts())
   }
 
   // endregion
