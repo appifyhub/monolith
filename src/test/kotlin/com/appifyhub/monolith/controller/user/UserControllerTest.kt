@@ -4,18 +4,22 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFailure
+import assertk.assertions.isSuccess
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SEARCH
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_AUTHORITY
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_DATA
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_SIGNATURE
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
+import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -52,6 +56,7 @@ class UserControllerTest {
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var restTemplate: TestRestTemplate
   @Autowired lateinit var stubber: Stubber
+  @Autowired lateinit var authService: AuthService
 
   @LocalServerPort var port: Int = 0
   private val baseUrl: String by lazy { "http://localhost:$port" }
@@ -428,6 +433,137 @@ class UserControllerTest {
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
         )
       )
+    }
+  }
+
+  // endregion
+
+  // region Update user: Signature
+
+  @Test fun `update user signature fails when unauthorized`() {
+    val project = stubber.projects.new()
+    val universalId = stubber.users(project).default().id.toUniversalFormat()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=false",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, "invalid"),
+        uriVariables = mapOf("universalId" to universalId),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `update user signature fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val user = stubber.users(project).default()
+    val token = stubber.tokens(user).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=false",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `update user signature succeeds with valid authorization (no logout)`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val targetUser = stubber.users(project).default()
+    val token = stubber.tokens(targetUser).real()
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=false",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token.token.tokenValue),
+        uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
+      )
+    ).all {
+      // verify response
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = targetUser.id.userId,
+          projectId = project.id,
+          universalId = targetUser.id.toUniversalFormat(),
+          type = targetUser.type.name,
+          authority = targetUser.authority.name,
+          birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+      // check if changing worked
+      assertThat {
+        authService.resolveUser(
+          targetUser.id.toUniversalFormat(),
+          Stubs.userUpdateSignatureRequest.rawSignatureOld,
+        )
+      }.isFailure()
+      assertThat {
+        authService.resolveUser(
+          targetUser.id.toUniversalFormat(),
+          Stubs.userUpdateSignatureRequest.rawSignatureNew,
+        )
+      }.isSuccess()
+      // check if logout param was respected
+      assertThat {
+        authService.refreshAuth(token, ipAddress = null)
+      }.isSuccess()
+    }
+  }
+
+  @Test fun `update user signature succeeds with valid authorization (with logout)`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val targetUser = stubber.users(project).default()
+    val token = stubber.tokens(targetUser).real()
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=true",
+        method = HttpMethod.PUT,
+        requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token.token.tokenValue),
+        uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
+      )
+    ).all {
+      // verify response
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = targetUser.id.userId,
+          projectId = project.id,
+          universalId = targetUser.id.toUniversalFormat(),
+          type = targetUser.type.name,
+          authority = targetUser.authority.name,
+          birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+      // check if changing worked
+      assertThat {
+        authService.resolveUser(
+          targetUser.id.toUniversalFormat(),
+          Stubs.userUpdateSignatureRequest.rawSignatureOld,
+        )
+      }.isFailure()
+      assertThat {
+        authService.resolveUser(
+          targetUser.id.toUniversalFormat(),
+          Stubs.userUpdateSignatureRequest.rawSignatureNew,
+        )
+      }.isSuccess()
+      // check if logout param was respected
+      assertThat {
+        authService.refreshAuth(token, ipAddress = null)
+      }.isFailure()
     }
   }
 

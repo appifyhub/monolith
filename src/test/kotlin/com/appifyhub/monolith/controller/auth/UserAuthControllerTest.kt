@@ -350,7 +350,7 @@ class UserAuthControllerTest {
   @Test fun `unauth tokens fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+        url = "$baseUrl$TOKENS?token_ids={token1}&token_ids={token2}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -369,7 +369,7 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+        url = "$baseUrl$TOKENS?token_ids={token1}&token_ids={token2}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -393,7 +393,7 @@ class UserAuthControllerTest {
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+          url = "$baseUrl$TOKENS?token_ids={token1}&token_ids={token2}",
           method = HttpMethod.DELETE,
           requestEntity = bearerEmptyRequest(token3),
           uriVariables = mapOf(

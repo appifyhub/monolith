@@ -101,7 +101,7 @@ class UserAuthController(
   @DeleteMapping(Endpoints.TOKENS)
   fun unauthenticateTokens(
     authentication: Authentication,
-    @RequestParam tokenIds: List<String>,
+    @RequestParam("token_ids") tokenIds: List<String>,
   ): MessageResponse {
     log.debug("[DELETE] unauth tokens $tokenIds")
 
