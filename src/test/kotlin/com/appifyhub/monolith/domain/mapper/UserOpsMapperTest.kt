@@ -204,7 +204,7 @@ class UserOpsMapperTest {
     val userCreator = UserCreator(
       userId = null,
       projectId = Stubs.project.id,
-      rawSecret = "password",
+      rawSignature = "password",
       name = "User's Name",
       type = User.Type.ORGANIZATION,
       authority = User.Authority.ADMIN,
@@ -235,7 +235,7 @@ class UserOpsMapperTest {
     val userCreator = UserCreator(
       userId = "username",
       projectId = Stubs.project.id,
-      rawSecret = "password",
+      rawSignature = "password",
       name = "User's Name",
       type = User.Type.ORGANIZATION,
       authority = User.Authority.ADMIN,

@@ -40,7 +40,7 @@ class CreatorAuthController(
   ): TokenResponse {
     log.debug("[POST] auth creator with $creds")
 
-    val user = authService.resolveCreator(creds.universalId, creds.secret)
+    val user = authService.resolveCreator(creds.universalId, creds.signature)
     val token = authService.createTokenFor(user, creds.origin, getRequestIpAddress())
     return tokenResponseOf(token)
   }

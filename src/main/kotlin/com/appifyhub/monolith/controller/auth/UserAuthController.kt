@@ -35,7 +35,7 @@ class UserAuthController(
   ): TokenResponse {
     log.debug("[POST] auth user with $creds")
 
-    val user = authService.resolveUser(creds.universalId, creds.secret)
+    val user = authService.resolveUser(creds.universalId, creds.signature)
     accessManager.requireProjectFunctional(user.id.projectId)
 
     val tokenValue = authService.createTokenFor(user, creds.origin, getRequestIpAddress())

@@ -8,6 +8,6 @@ import java.io.Serializable
 @JsonInclude(Include.NON_NULL)
 data class UserCredentialsRequest(
   @JsonProperty("universal_id") val universalId: String,
-  @JsonProperty("secret") val secret: String,
+  @JsonProperty("signature") val signature: String,
   @JsonProperty("origin") val origin: String? = null,
 ) : Serializable

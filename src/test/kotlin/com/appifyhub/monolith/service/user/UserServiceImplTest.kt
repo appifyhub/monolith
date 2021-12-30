@@ -119,7 +119,7 @@ class UserServiceImplTest {
 
   @Test fun `adding user fails with invalid raw signature`() {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
-    val creator = Stubs.userCreator.copy(rawSecret = " ", projectId = project.id)
+    val creator = Stubs.userCreator.copy(rawSignature = " ", projectId = project.id)
 
     assertThat { service.addUser(creator) }
       .isFailure()
@@ -324,7 +324,7 @@ class UserServiceImplTest {
     val creator = UserCreator(
       userId = null,
       projectId = project.id,
-      rawSecret = "12345678",
+      rawSignature = "12345678",
       name = null,
       type = Type.PERSONAL,
       authority = Authority.DEFAULT,

@@ -21,7 +21,7 @@ fun UserSignupRequest.toDomain(
 ): UserCreator = UserCreator(
   userId = userId,
   projectId = projectId,
-  rawSecret = rawSignature,
+  rawSignature = rawSignature,
   name = name,
   type = User.Type.find(type.orEmpty(), default = PERSONAL),
   authority = User.Authority.DEFAULT,
