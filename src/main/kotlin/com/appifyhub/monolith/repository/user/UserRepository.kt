@@ -16,6 +16,8 @@ interface UserRepository : SpringSecurityUserManager {
 
   @Throws fun fetchAllUsersByProjectId(projectId: Long): List<User>
 
+  @Throws fun fetchUserByUserIdAndVerificationToken(userId: UserId, verificationToken: String): User
+
   @Throws fun searchByName(projectId: Long, name: String): List<User>
 
   @Throws fun searchByContact(projectId: Long, contact: String): List<User>

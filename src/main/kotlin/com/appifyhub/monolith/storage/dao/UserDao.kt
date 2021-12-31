@@ -12,6 +12,8 @@ interface UserDao : CrudRepository<UserDbm, UserIdDbm> {
 
   fun findAllByProject_ProjectId(projectId: Long): List<UserDbm>
 
+  fun findByIdAndVerificationToken(userId: UserIdDbm, verificationToken: String): UserDbm
+
   fun searchAllByProject_ProjectIdAndNameLike(projectId: Long, name: String): List<UserDbm>
 
   fun searchAllByProject_ProjectIdAndContactLike(projectId: Long, contact: String): List<UserDbm>
