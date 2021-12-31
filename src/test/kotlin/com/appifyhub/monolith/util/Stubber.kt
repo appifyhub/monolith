@@ -174,7 +174,7 @@ class Stubber(
         // silently return null on failure (to simplify things)
         userRepo.addUser(
           creator = Stubs.userCreator.copy(
-            userId = userId,
+            userId = userId.takeIf { project.userIdType != Project.UserIdType.RANDOM },
             projectId = project.id,
             type = User.Type.PERSONAL,
             authority = authority,

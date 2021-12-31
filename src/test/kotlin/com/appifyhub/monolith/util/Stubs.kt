@@ -42,7 +42,6 @@ import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
-import com.appifyhub.monolith.network.user.ops.UserUpdateVerificationRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.service.access.AccessManager.Feature
@@ -520,6 +519,7 @@ object Stubs {
     countryCode = "DE",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
   val companyDtoUpdated = OrganizationDto(
     name = "Company 1",
     street = "Street Name 11",
@@ -738,8 +738,6 @@ object Stubs {
     rawSignatureOld = "password",
     rawSignatureNew = "password1",
   )
-
-  val userUpdateVerificationRequest = UserUpdateVerificationRequest(rawVerificationToken = "abcd1234")
 
   val projectCreateRequest = ProjectCreateRequest(
     type = "OPENSOURCE",

@@ -100,6 +100,14 @@ class UserServiceImpl(
     return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
   }
 
+  override fun fetchUserByUserIdAndVerificationToken(userId: UserId, verificationToken: String): User {
+    log.debug("Fetching user by $userId, token=$verificationToken")
+    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+    val normalizedVerificationToken = Normalizers.Dense.run(verificationToken).requireValid { "Verification Token" }
+
+    return userRepository.fetchUserByUserIdAndVerificationToken(normalizedUserId, normalizedVerificationToken)
+  }
+
   override fun searchByName(projectId: Long, name: String): List<User> {
     log.debug("Searching users by name $name in $projectId")
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }

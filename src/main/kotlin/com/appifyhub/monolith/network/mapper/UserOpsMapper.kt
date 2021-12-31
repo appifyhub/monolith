@@ -14,7 +14,6 @@ import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
-import com.appifyhub.monolith.network.user.ops.UserUpdateVerificationRequest
 
 fun UserSignupRequest.toDomain(
   projectId: Long,
@@ -59,14 +58,6 @@ fun UserUpdateSignatureRequest.toDomain(
 ): UserUpdater = UserUpdater(
   id = id,
   rawSignature = Settable(rawSignatureNew),
-)
-
-@Suppress("unused") // needed for consistency
-fun UserUpdateVerificationRequest.toDomain(
-  id: UserId,
-): UserUpdater = UserUpdater(
-  id = id,
-  verificationToken = Settable(null),
 )
 
 fun OrganizationUpdaterDto.toDomain(): OrganizationUpdater = OrganizationUpdater(

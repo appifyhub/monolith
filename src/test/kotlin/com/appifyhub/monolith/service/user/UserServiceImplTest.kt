@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
@@ -418,6 +419,47 @@ class UserServiceImplTest {
 
     assertThat(fetchedUsers)
       .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `fetching user by verification token fails with invalid user ID`() {
+    assertThat { service.fetchUserByUserIdAndVerificationToken(UserId("invalid", -1), "token") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `fetching user by verification token fails with invalid token`() {
+    assertThat { service.fetchUserByUserIdAndVerificationToken(Stubs.userId, "\t \n") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Verification Token")
+      }
+  }
+
+  @Test fun `fetching user by verification token fails with non-matching token`() {
+    val project = stubber.projects.new()
+    val user = stubber.users(project).default(autoVerified = false)
+
+    assertThat { service.fetchUserByUserIdAndVerificationToken(user.id, "invalid") }
+      .isFailure()
+      .all {
+        hasClass(EmptyResultDataAccessException::class)
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `fetching user by verification token fails with a valid token`() {
+    val project = stubber.projects.new()
+    val user = stubber.users(project).default(autoVerified = false).cleanDates()
+
+    assertThat(
+      service.fetchUserByUserIdAndVerificationToken(user.id, user.verificationToken!!)
+        .cleanDates()
+    )
+      .isDataClassEqualTo(user)
   }
 
   @Test fun `searching users by name fails with invalid project ID`() {

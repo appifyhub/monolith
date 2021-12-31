@@ -96,15 +96,4 @@ class UserOpsMapperTest {
     )
   }
 
-  @Test fun `user update verification request network to domain`() {
-    val updater = Stubs.userUpdateVerificationRequest.toDomain(id = Stubs.userId)
-
-    assertThat(updater).isDataClassEqualTo(
-      UserUpdater(
-        id = Stubs.userId,
-        verificationToken = Settable(null),
-      )
-    )
-  }
-
 }

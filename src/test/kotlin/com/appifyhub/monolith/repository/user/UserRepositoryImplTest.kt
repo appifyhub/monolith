@@ -215,6 +215,42 @@ class UserRepositoryImplTest {
 
   // endregion
 
+  // region Fetch by Verification Token
+
+  @Test fun `fetching users by verification token throws when not found`() {
+    userDao.stub {
+      onGeneric {
+        findByIdAndVerificationToken(
+          userId = Stubs.userIdDbm,
+          verificationToken = Stubs.user.verificationToken!!,
+        )
+      } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `fetching users by verification token works`() {
+    userDao.stub {
+      onGeneric {
+        findByIdAndVerificationToken(
+          userId = Stubs.userIdDbm,
+          verificationToken = Stubs.user.verificationToken!!,
+        )
+      } doReturn Stubs.userDbm
+    }
+
+    assertThat(repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!))
+      .isDataClassEqualTo(Stubs.user)
+  }
+
+  // endregion
+
   // region Search by Name
 
   @Test fun `searching users by invalid name throws`() {

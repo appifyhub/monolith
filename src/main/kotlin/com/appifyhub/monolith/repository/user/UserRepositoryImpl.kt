@@ -61,6 +61,11 @@ class UserRepositoryImpl(
     return userDao.findAllByProject_ProjectId(projectId).map(UserDbm::toDomain)
   }
 
+  override fun fetchUserByUserIdAndVerificationToken(userId: UserId, verificationToken: String): User {
+    log.debug("Fetching user $userId with token $verificationToken")
+    return userDao.findByIdAndVerificationToken(userId.toData(), verificationToken).toDomain()
+  }
+
   override fun searchByName(projectId: Long, name: String): List<User> {
     log.debug("Searching users by name $name in project $projectId")
     return userDao.searchAllByProject_ProjectIdAndNameLike(projectId, name).map(UserDbm::toDomain)
