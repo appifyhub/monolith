@@ -253,6 +253,7 @@ class AccessManagerImpl(
       Privilege.USER_WRITE_TOKEN,
       Privilege.USER_WRITE_DATA,
       Privilege.USER_WRITE_SIGNATURE,
+      Privilege.USER_DELETE,
       -> this.id == targetId
 
       // invalid properties

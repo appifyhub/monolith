@@ -667,4 +667,61 @@ class UserControllerTest {
 
   // endregion
 
+  // region Delete User
+
+  @Test fun `delete user fails when unauthorized`() {
+    val project = stubber.projects.new()
+    val universalId = stubber.users(project).default().id.toUniversalFormat()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = mapOf("universalId" to universalId),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `delete user fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val user = stubber.users(project).default()
+    val token = stubber.tokens(user).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `delete user succeeds with valid authorization`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val self = stubber.users(project).default()
+    val universalId = self.id.toUniversalFormat()
+    val token = stubber.tokens(self).real().token.tokenValue
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("universalId" to universalId),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      assertThat {
+        authService.resolveUser(self.id.toUniversalFormat(), Stubs.userCreator.rawSignature)
+      }.isFailure()
+    }
+  }
+
 }

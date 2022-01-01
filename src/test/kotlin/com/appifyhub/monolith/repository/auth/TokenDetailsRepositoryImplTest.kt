@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.security.JwtHelper
@@ -232,6 +233,18 @@ class TokenDetailsRepositoryImplTest {
     val toBlock = listOf(Stubs.tokenValue, Stubs.tokenValue)
     assertThat(repository.blockAllTokens(toBlock))
       .isEqualTo(listOf(Stubs.tokenDetails))
+  }
+
+  @Test fun `removing tokens by owner works`() {
+    tokenDetailsDao.stub {
+      onGeneric { deleteAllByOwner(any()) } doAnswer {}
+    }
+
+    assertThat {
+      repository.removeTokensFor(Stubs.user, Stubs.project)
+    }.isSuccess()
+
+    verify(tokenDetailsDao).deleteAllByOwner(Stubs.userDbm)
   }
 
 }

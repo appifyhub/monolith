@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.repository.auth
 
-import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User
 
 interface TokenDetailsRepository {
@@ -27,5 +27,7 @@ interface TokenDetailsRepository {
   @Throws fun blockToken(tokenValue: String): TokenDetails
 
   @Throws fun blockAllTokens(tokenValues: List<String>): List<TokenDetails>
+
+  @Throws fun removeTokensFor(owner: User, project: Project?)
 
 }

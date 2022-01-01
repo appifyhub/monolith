@@ -20,6 +20,7 @@ import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.throwNotFound
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -169,6 +170,22 @@ class UserController(
 
     val user = userService.resetSignatureById(userId)
     authService.unauthorizeAllFor(user.id)
+
+    return MessageResponse.DONE
+  }
+
+  @DeleteMapping(Endpoints.ANY_USER_UNIVERSAL)
+  fun deleteUser(
+    authentication: Authentication,
+    @PathVariable universalId: String,
+  ): MessageResponse {
+    log.debug("[DELETE] remove user $universalId")
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    accessManager.requireProjectFunctional(userId.projectId)
+
+    accessManager.requestUserAccess(authentication, userId, Privilege.USER_DELETE)
+    userService.removeUserById(userId)
 
     return MessageResponse.DONE
   }

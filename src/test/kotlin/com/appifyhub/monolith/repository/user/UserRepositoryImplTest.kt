@@ -14,6 +14,7 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
@@ -34,20 +36,31 @@ import org.mockito.kotlin.stub
 class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
+  private val tokenDetailsRepository = mock<TokenDetailsRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
 
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
+    tokenDetailsRepository = tokenDetailsRepository,
     passwordEncoder = passwordEncoder,
-    timeProvider = timeProvider,
     springSecurityUserManager = springUserManager,
+    timeProvider = timeProvider,
   )
 
   @BeforeEach fun setup() {
     userDao.stub {
       onGeneric { save(any()) } doAnswer { it.arguments.first() as UserDbm }
+    }
+    tokenDetailsRepository.stub {
+      onGeneric { blockAllTokens(any()) } doAnswer {
+        @Suppress("UNCHECKED_CAST")
+        val tokenValues = it.arguments.first() as List<String>
+        tokenValues.map { value -> Stubs.tokenDetails.copy(tokenValue = value, isBlocked = true) }
+      }
+      onGeneric { fetchAllValidTokens(any(), anyOrNull()) } doReturn listOf(Stubs.tokenDetails)
+      onGeneric { removeTokensFor(Stubs.user, null) } doAnswer {}
     }
   }
 
@@ -400,6 +413,7 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by invalid ID throws`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
@@ -413,6 +427,7 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by ID works`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
@@ -428,6 +443,7 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by invalid universal ID throws`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
@@ -441,10 +457,35 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by universal ID works`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
     assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
+      .isSuccess()
+  }
+
+  @Test fun `removing user by invalid project ID throws`() {
+    userDao.stub {
+      onGeneric { findAllByProject_ProjectId(Stubs.project.id) } doReturn listOf(Stubs.userDbm)
+      onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `removing user by project ID works`() {
+    userDao.stub {
+      onGeneric { findAllByProject_ProjectId(Stubs.project.id) } doReturn listOf(Stubs.userDbm)
+      onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doAnswer {}
+    }
+
+    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
       .isSuccess()
   }
 
