@@ -5,6 +5,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
+import assertk.assertions.isNull
 import assertk.assertions.isSuccess
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SEARCH
@@ -13,6 +14,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_AUTHORITY
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_DATA
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_SIGNATURE
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -27,6 +29,7 @@ import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bodyRequest
+import com.appifyhub.monolith.util.emptyRequest
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -564,6 +567,62 @@ class UserControllerTest {
       assertThat {
         authService.refreshAuth(token, ipAddress = null)
       }.isFailure()
+    }
+  }
+
+  // endregion
+
+  // region Token Verification
+
+  @Test fun `token verification fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val user = stubber.users(project).default(autoVerified = false)
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_VERIFY",
+        method = HttpMethod.PUT,
+        requestEntity = emptyRequest(),
+        uriVariables = mapOf(
+          "universalId" to user.id.toUniversalFormat(),
+          "verificationToken" to user.verificationToken,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `token verification succeeds with valid token`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val user = stubber.users(project).default(autoVerified = false)
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_VERIFY",
+        method = HttpMethod.PUT,
+        requestEntity = emptyRequest(),
+        uriVariables = mapOf(
+          "universalId" to user.id.toUniversalFormat(),
+          "verificationToken" to user.verificationToken,
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = user.id.userId,
+          projectId = project.id,
+          universalId = user.id.toUniversalFormat(),
+          type = user.type.name,
+          authority = user.authority.name,
+          birthday = DateTimeMapper.formatAsDate(user.birthday!!),
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+      assertThat(stubber.users(project).default().verificationToken)
+        .isNull()
     }
   }
 
