@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.repository.auth
 
-import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.user.User
@@ -89,6 +89,12 @@ class TokenDetailsRepositoryImpl(
     val toBlock = valid.map { it.copy(isBlocked = true) }
 
     return tokenDetailsDao.saveAll(toBlock.map(TokenDetails::toData)).map { it.toDomain(jwtHelper) }
+  }
+
+  override fun removeTokensFor(owner: User, project: Project?) {
+    log.debug("Removing tokens for $owner, project=$project")
+
+    tokenDetailsDao.deleteAllByOwner(owner.toData(project))
   }
 
   // Helpers

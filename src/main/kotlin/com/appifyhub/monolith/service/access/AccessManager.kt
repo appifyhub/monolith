@@ -25,6 +25,7 @@ interface AccessManager {
     USER_WRITE_DATA(ADMIN),
     USER_WRITE_SIGNATURE(ADMIN),
     USER_WRITE_VERIFICATION(ADMIN),
+    USER_DELETE(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {

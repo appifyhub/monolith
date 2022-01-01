@@ -31,12 +31,14 @@ class CreatorRepositoryImplTest {
 
   private val projectDao = mock<ProjectDao>()
   private val creationDao = mock<ProjectCreationDao>()
+  private val propertyRepository = mock<PropertyRepository>()
   private val userRepository = mock<UserRepository>()
   private val timeProvider = TimeProviderFake()
 
   private val repository = CreatorRepositoryImpl(
     projectDao = projectDao,
     creationDao = creationDao,
+    propertyRepository = propertyRepository,
     userRepository = userRepository,
     timeProvider = timeProvider,
   )
@@ -49,6 +51,9 @@ class CreatorRepositoryImplTest {
           projectId = Stubs.project.id
         }
       }
+    }
+    propertyRepository.stub {
+      onGeneric { clearAllProperties(any()) } doAnswer {}
     }
   }
 

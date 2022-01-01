@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.repository.creator
 
+import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Repository
 class CreatorRepositoryImpl(
   private val projectDao: ProjectDao,
   private val creationDao: ProjectCreationDao,
+  private val propertyRepository: PropertyRepository,
   private val userRepository: UserRepository,
   private val timeProvider: TimeProvider,
 ) : CreatorRepository {
@@ -119,6 +121,7 @@ class CreatorRepositoryImpl(
     // cascade manually for now
     userRepository.removeAllUsersByProjectId(projectId)
     creationDao.deleteAllByData_CreatedProjectId(projectId)
+    propertyRepository.clearAllProperties(stubProject().copy(id = projectId))
 
     // remove the project itself
     projectDao.deleteById(projectId)
@@ -134,7 +137,10 @@ class CreatorRepositoryImpl(
     ).map { it.project.toDomain() }
 
     // cascade manually for now
-    projects.forEach { userRepository.removeAllUsersByProjectId(it.id) }
+    projects.forEach { project ->
+      userRepository.removeAllUsersByProjectId(project.id)
+      propertyRepository.clearAllProperties(project)
+    }
     creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorId.userId, creatorId.projectId)
 
     // remove the projects
