@@ -33,12 +33,15 @@ class WebSecurityConfiguration(
         it.antMatchers(
           Endpoints.ERROR,
           Endpoints.FAVICON,
+          Endpoints.FAVICON_DIR,
           Endpoints.HEARTBEAT,
           Endpoints.H2_CONSOLE,
           Endpoints.AUTH,
           Endpoints.SIGNUP_USERS,
           Endpoints.SIGNUP_CREATORS,
           Endpoints.CREATOR_AUTH,
+          Endpoints.VERIFICATION,
+          Endpoints.SIGNATURE_RESET,
         )
           .permitAll()
           .anyRequest()

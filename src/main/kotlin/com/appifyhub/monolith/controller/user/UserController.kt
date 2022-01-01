@@ -1,8 +1,10 @@
 package com.appifyhub.monolith.controller.user
 
 import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
@@ -135,6 +137,22 @@ class UserController(
     if (logout) authService.unauthorizeAllFor(authentication, userId)
 
     return updated
+  }
+
+  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_VERIFY)
+  fun verifyToken(
+    @PathVariable universalId: String,
+    @PathVariable verificationToken: String,
+  ): UserResponse {
+    log.debug("[POST] token verification for $universalId with token $verificationToken")
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    accessManager.requireProjectFunctional(userId.projectId)
+
+    val user = userService.fetchUserByUserIdAndVerificationToken(userId, verificationToken)
+
+    val updater = UserUpdater(id = user.id, verificationToken = Settable(null))
+    return userService.updateUser(updater).toNetwork()
   }
 
 }

@@ -17,6 +17,8 @@ object Endpoints {
   const val ANY_USER_UNIVERSAL_AUTHORITY = "/v1/universal/users/{universalId}/authority"
   const val ANY_USER_UNIVERSAL_DATA = "/v1/universal/users/{universalId}/data"
   const val ANY_USER_UNIVERSAL_SIGNATURE = "/v1/universal/users/{universalId}/signature"
+  const val ANY_USER_UNIVERSAL_SIGNATURE_RESET = "/v1/universal/users/{universalId}/signature/reset"
+  const val ANY_USER_UNIVERSAL_VERIFY = "/v1/universal/users/{universalId}/verify/{verificationToken}"
 
   /* ******************** CREATORS ******************** */
 
@@ -45,10 +47,13 @@ object Endpoints {
   /* ***************** UNAUTHENTICATED ****************** */
 
   const val ERROR = "/error"
-  const val FAVICON = "/favicon**"
+  const val FAVICON = "/favicon*"
+  const val FAVICON_DIR = "/favicon/**"
   const val HEARTBEAT = "/heartbeat"
-  const val H2_CONSOLE = "/h2-console/**" // debug mode only
-  const val SIGNUP_USERS = "/v1/projects/**/signup" // see ANY_USER_SIGNUP
-  const val SIGNUP_CREATORS = "/v1/creator/signup"
+  const val H2_CONSOLE = "/h2-console/**" // shows up in debug mode only
+  const val SIGNUP_USERS = "/v1/projects/*/signup" // see ANY_USER_SIGNUP
+  const val SIGNUP_CREATORS = "/v1/creator/signup" // similar to ANY_USER_SIGNUP
+  const val VERIFICATION = "/v1/universal/users/*/verify/*" // see ANY_USER_UNIVERSAL_VERIFY
+  const val SIGNATURE_RESET = "/v1/universal/users/*/signature/reset" // see ANY_USER_UNIVERSAL_SIGNATURE_RESET
 
 }
