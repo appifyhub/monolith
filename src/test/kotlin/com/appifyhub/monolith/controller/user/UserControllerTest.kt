@@ -14,6 +14,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_AUTHORITY
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_DATA
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_SIGNATURE
+import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_SIGNATURE_RESET
 import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -598,7 +599,7 @@ class UserControllerTest {
     val user = stubber.users(project).default(autoVerified = false)
 
     assertThat(
-      restTemplate.exchange<UserResponse>(
+      restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$ANY_USER_UNIVERSAL_VERIFY",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
@@ -609,20 +610,58 @@ class UserControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(
-        Stubs.userResponse.copy(
-          userId = user.id.userId,
-          projectId = project.id,
-          universalId = user.id.toUniversalFormat(),
-          type = user.type.name,
-          authority = user.authority.name,
-          birthday = DateTimeMapper.formatAsDate(user.birthday!!),
-          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      assertThat(stubber.users(project).default().verificationToken).isNull()
+    }
+  }
+
+  // endregion
+
+  // region Signature reset
+
+  @Test fun `reset signature fails when project non-functional`() {
+    val project = stubber.projects.new(status = REVIEW)
+    val user = stubber.users(project).default()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE_RESET",
+        method = HttpMethod.PUT,
+        requestEntity = emptyRequest(),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
       )
-      assertThat(stubber.users(project).default().verificationToken)
-        .isNull()
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
+  @Test fun `reset signature succeeds with valid authorization`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val user = stubber.users(project).default()
+    val token = stubber.tokens(user).real()
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE_RESET",
+        method = HttpMethod.PUT,
+        requestEntity = emptyRequest(),
+        uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
+      )
+    ).all {
+      // verify response
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      // check if changing worked
+      assertThat {
+        authService.resolveUser(
+          user.id.toUniversalFormat(),
+          Stubs.userCreator.rawSignature,
+        )
+      }.isFailure()
+      // check if tokens are invalid
+      assertThat {
+        authService.refreshAuth(token, ipAddress = null)
+      }.isFailure()
     }
   }
 

@@ -22,6 +22,7 @@ import com.appifyhub.monolith.domain.user.User.Type
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
 import com.appifyhub.monolith.service.creator.PropertyService
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
@@ -52,6 +54,7 @@ class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
   @Autowired lateinit var propertyService: PropertyService
+  @Autowired lateinit var passwordEncoder: PasswordEncoder
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var stubber: Stubber
 
@@ -66,6 +69,7 @@ class UserServiceImplTest {
     UserIdGenerator.interceptor = { null }
     TokenGenerator.emailInterceptor = { null }
     TokenGenerator.phoneInterceptor = { null }
+    SignatureGenerator.interceptor = { null }
   }
 
   // Adding
@@ -849,6 +853,24 @@ class UserServiceImplTest {
       )
   }
 
+  @Test fun `resetting signature by ID fails with invalid user ID`() {
+    assertThat { service.resetSignatureById(UserId("invalid", -1)) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `resetting signature by ID succeeds`() {
+    stubGenerators()
+    val user = stubber.creators.default()
+    val expectedSignature = passwordEncoder.encode(SignatureGenerator.nextSignature)
+
+    assertThat(service.resetSignatureById(user.id))
+      .isDataClassEqualTo(user.copy(signature = expectedSignature))
+  }
+
   // Removing
 
   @Test fun `removing user fails with invalid user ID`() {
@@ -926,6 +948,7 @@ class UserServiceImplTest {
     UserIdGenerator.interceptor = { "user_id" }
     TokenGenerator.emailInterceptor = { "email_token" }
     TokenGenerator.phoneInterceptor = { "phone_token" }
+    SignatureGenerator.interceptor = { "signature" }
   }
 
   private fun User.cleanDates() = copy(
