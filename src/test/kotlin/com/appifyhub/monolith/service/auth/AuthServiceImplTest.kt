@@ -782,6 +782,35 @@ class AuthServiceImplTest {
     }
   }
 
+  @Test fun `unauthorize all by user ID fails with invalid ID`() {
+    assertThat {
+      service.unauthorizeAllFor(UserId("\t\n", -1))
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `unauthorize all by user ID succeeds with valid auth data`() {
+    val user = stubber.creators.default()
+    val token1 = stubber.tokens(user).real()
+    val token2 = stubber.tokens(user).real()
+
+    assertAll {
+      // unauth first
+      assertThat { service.unauthorizeAllFor(stubber.creators.default().id) }
+        .isSuccess()
+
+      // and then try to re-auth
+      assertThat { service.refreshAuth(token1, ipAddress = null) }
+        .isFailure()
+      assertThat { service.refreshAuth(token2, ipAddress = null) }
+        .isFailure()
+    }
+  }
+
   @Test fun `unauthorize tokens fails with expired token`() {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))

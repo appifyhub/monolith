@@ -11,6 +11,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.creator.PropertyService
@@ -215,6 +216,19 @@ class UserServiceImpl(
     )
 
     return userRepository.updateUser(normalizedUpdater, userIdType)
+  }
+
+  override fun resetSignatureById(id: UserId): User {
+    log.debug("Resetting signature by $id")
+
+    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
+    val userIdType = creatorService.fetchProjectById(id.projectId).userIdType
+    val updater = UserUpdater(
+      id = normalizedUserId,
+      rawSignature = Settable(SignatureGenerator.nextSignature),
+    )
+
+    return userRepository.updateUser(updater, userIdType)
   }
 
   override fun removeUserById(id: UserId) {

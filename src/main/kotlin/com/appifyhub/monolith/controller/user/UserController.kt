@@ -5,6 +5,7 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
@@ -143,8 +144,8 @@ class UserController(
   fun verifyToken(
     @PathVariable universalId: String,
     @PathVariable verificationToken: String,
-  ): UserResponse {
-    log.debug("[POST] token verification for $universalId with token $verificationToken")
+  ): MessageResponse {
+    log.debug("[PUT] token verification for $universalId with token $verificationToken")
 
     val userId = UserId.fromUniversalFormat(universalId)
     accessManager.requireProjectFunctional(userId.projectId)
@@ -152,7 +153,24 @@ class UserController(
     val user = userService.fetchUserByUserIdAndVerificationToken(userId, verificationToken)
 
     val updater = UserUpdater(id = user.id, verificationToken = Settable(null))
-    return userService.updateUser(updater).toNetwork()
+    userService.updateUser(updater)
+
+    return MessageResponse.DONE
+  }
+
+  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_SIGNATURE_RESET)
+  fun resetSignature(
+    @PathVariable universalId: String,
+  ): MessageResponse {
+    log.debug("[PUT] resetting signature for $universalId")
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    accessManager.requireProjectFunctional(userId.projectId)
+
+    val user = userService.resetSignatureById(userId)
+    authService.unauthorizeAllFor(user.id)
+
+    return MessageResponse.DONE
   }
 
 }

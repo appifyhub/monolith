@@ -23,6 +23,8 @@ interface UserService {
 
   @Throws fun updateUser(updater: UserUpdater): User
 
+  @Throws fun resetSignatureById(id: UserId): User
+
   @Throws fun removeUserById(id: UserId)
 
   @Throws fun removeUserByUniversalId(universalId: String)

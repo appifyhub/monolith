@@ -36,6 +36,8 @@ interface AuthService {
 
   @Throws fun unauthorizeAllFor(authData: Authentication, targetId: UserId)
 
+  @Throws fun unauthorizeAllFor(targetId: UserId)
+
   @Throws fun unauthorizeTokens(authData: Authentication, tokenValues: List<String>)
 
 }
