@@ -26,7 +26,8 @@ fun UserDetails.toDomain(timeProvider: TimeProvider): User = User(
   contactType = User.ContactType.CUSTOM,
   verificationToken = if (isAccountNonLocked) null else "",
   birthday = null,
+  company = null,
+  languageTag = null,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
-  company = null,
 )

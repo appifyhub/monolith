@@ -46,7 +46,7 @@ enum class ProjectProperty(
     category = IDENTITY,
     normalizer = Normalizers.PropProjectDescription,
     tags = setOf(COSMETIC),
-    defaultValue = "This project is about doing the best work I can.",
+    defaultValue = "This project is about doing the best work I can do.",
     isMandatory = false,
     isSecret = false,
     isDeprecated = false,
@@ -89,6 +89,17 @@ enum class ProjectProperty(
     isDeprecated = false,
   ),
 
+  ANYONE_CAN_SEARCH(
+    type = FLAG,
+    category = OPERATIONAL,
+    normalizer = Normalizers.PropOnHold,
+    tags = setOf(CONTROL, IMPORTANT),
+    defaultValue = "true",
+    isMandatory = true,
+    isSecret = false,
+    isDeprecated = false,
+  ),
+
   ON_HOLD(
     type = FLAG,
     category = OPERATIONAL,
@@ -102,7 +113,7 @@ enum class ProjectProperty(
 
   // endregion
 
-  // region Generic 
+  // region Generic
 
   GENERIC_STRING(
     type = STRING,

@@ -16,6 +16,7 @@ import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.validation.impl.Normalizers
+import java.util.Locale
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -60,7 +61,7 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSecret)
+    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSignature)
       .requireValid { "Owner Signature" }
     val ownerName = Normalizers.Name.run(creatorConfig.ownerName)
       .requireValid { "Owner Name" }
@@ -68,7 +69,7 @@ class SchemaInitializer(
       .requireValid { "Owner Email" }
     val creatorProjectName = Normalizers.PropProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
-    val rawOwnerSecret = configuredSignature ?: SignatureGenerator.nextSignature
+    val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
 
     // create the creator project
     val project = creatorService.addProject(
@@ -99,7 +100,7 @@ class SchemaInitializer(
       creator = UserCreator(
         userId = ownerEmail,
         projectId = project.id,
-        rawSecret = rawOwnerSecret,
+        rawSignature = rawOwnerSignature,
         name = ownerName,
         type = User.Type.ORGANIZATION,
         authority = User.Authority.OWNER,
@@ -108,6 +109,7 @@ class SchemaInitializer(
         contactType = User.ContactType.EMAIL,
         birthday = null,
         company = null,
+        languageTag = Locale.US.toLanguageTag(),
       )
     )
 
@@ -122,7 +124,7 @@ class SchemaInitializer(
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
       ?.let { "<see \$env.CREATOR_OWNER_SECRET>" }
-      ?: rawOwnerSecret
+      ?: rawOwnerSignature
 
     // print credentials
     val margin = "\n".repeat(8)

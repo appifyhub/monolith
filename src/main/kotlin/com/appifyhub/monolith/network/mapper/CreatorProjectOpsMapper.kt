@@ -4,8 +4,8 @@ import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
-import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 
 fun ProjectCreateRequest.toDomain(
   owner: User? = null,

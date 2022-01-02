@@ -6,6 +6,7 @@ import assertk.assertions.hasClass
 import assertk.assertions.hasMessage
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
@@ -13,6 +14,7 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
@@ -33,20 +36,31 @@ import org.mockito.kotlin.stub
 class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
+  private val tokenDetailsRepository = mock<TokenDetailsRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
 
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
+    tokenDetailsRepository = tokenDetailsRepository,
     passwordEncoder = passwordEncoder,
-    timeProvider = timeProvider,
     springSecurityUserManager = springUserManager,
+    timeProvider = timeProvider,
   )
 
   @BeforeEach fun setup() {
     userDao.stub {
       onGeneric { save(any()) } doAnswer { it.arguments.first() as UserDbm }
+    }
+    tokenDetailsRepository.stub {
+      onGeneric { blockAllTokens(any()) } doAnswer {
+        @Suppress("UNCHECKED_CAST")
+        val tokenValues = it.arguments.first() as List<String>
+        tokenValues.map { value -> Stubs.tokenDetails.copy(tokenValue = value, isBlocked = true) }
+      }
+      onGeneric { fetchAllValidTokens(any(), anyOrNull()) } doReturn listOf(Stubs.tokenDetails)
+      onGeneric { removeTokensFor(Stubs.user, null) } doAnswer {}
     }
   }
 
@@ -185,35 +199,6 @@ class UserRepositoryImplTest {
 
   // endregion
 
-  // region Fetch by contact
-
-  @Test fun `fetching users by invalid contact throws`() {
-    userDao.stub {
-      onGeneric { findAllByContact(Stubs.user.contact!!) } doThrow IllegalArgumentException("failed")
-    }
-
-    assertThat { repository.fetchAllUsersByContact(Stubs.user.contact!!) }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        hasMessage("failed")
-      }
-  }
-
-  @Test fun `fetching users by contact works`() {
-    userDao.stub {
-      onGeneric { findAllByContact(Stubs.user.contact!!) } doReturn listOf(Stubs.userDbm)
-    }
-
-    assertThat(repository.fetchAllUsersByContact(Stubs.user.contact!!))
-      .all {
-        hasSize(1)
-        transform { it.first() }.isDataClassEqualTo(Stubs.user)
-      }
-  }
-
-  // endregion
-
   // region Fetch by Project
 
   @Test fun `fetching users by invalid project ID throws`() {
@@ -239,6 +224,123 @@ class UserRepositoryImplTest {
         hasSize(1)
         transform { it.first() }.isDataClassEqualTo(Stubs.user)
       }
+  }
+
+  // endregion
+
+  // region Fetch by Verification Token
+
+  @Test fun `fetching users by verification token throws when not found`() {
+    userDao.stub {
+      onGeneric {
+        findByIdAndVerificationToken(
+          userId = Stubs.userIdDbm,
+          verificationToken = Stubs.user.verificationToken!!,
+        )
+      } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `fetching users by verification token works`() {
+    userDao.stub {
+      onGeneric {
+        findByIdAndVerificationToken(
+          userId = Stubs.userIdDbm,
+          verificationToken = Stubs.user.verificationToken!!,
+        )
+      } doReturn Stubs.userDbm
+    }
+
+    assertThat(repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!))
+      .isDataClassEqualTo(Stubs.user)
+  }
+
+  // endregion
+
+  // region Search by Name
+
+  @Test fun `searching users by invalid name throws`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndNameLike(Stubs.project.id, Stubs.user.name!!)
+      } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.searchByName(Stubs.project.id, Stubs.user.name!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `searching users by name works`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndNameLike(Stubs.project.id, Stubs.user.name!!)
+      } doReturn listOf(Stubs.userDbm)
+    }
+
+    assertThat(repository.searchByName(Stubs.project.id, Stubs.user.name!!))
+      .all {
+        hasSize(1)
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
+      }
+  }
+
+  // endregion
+
+  // region Search by Contact
+
+  @Test fun `searching users by invalid contact throws`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndContactLike(Stubs.project.id, Stubs.user.contact!!)
+      } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.searchByContact(Stubs.project.id, Stubs.user.contact!!) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `searching users by contact works`() {
+    userDao.stub {
+      onGeneric {
+        searchAllByProject_ProjectIdAndContactLike(Stubs.project.id, Stubs.user.contact!!)
+      } doReturn listOf(Stubs.userDbm)
+    }
+
+    assertThat(repository.searchByContact(Stubs.project.id, Stubs.user.contact!!))
+      .all {
+        hasSize(1)
+        transform { it.first() }.isDataClassEqualTo(Stubs.user)
+      }
+  }
+
+  // endregion
+
+  // region Counting
+
+  @Test fun `counting users by project works`() {
+    userDao.stub {
+      onGeneric {
+        countAllByProject_ProjectId(Stubs.project.id)
+      } doReturn 10
+    }
+
+    assertThat(repository.count(Stubs.project.id))
+      .isEqualTo(10)
   }
 
   // endregion
@@ -311,6 +413,7 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by invalid ID throws`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
@@ -324,6 +427,7 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by ID works`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
@@ -339,6 +443,7 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by invalid universal ID throws`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
@@ -352,10 +457,35 @@ class UserRepositoryImplTest {
 
   @Test fun `removing user by universal ID works`() {
     userDao.stub {
+      onGeneric { findById(Stubs.userIdDbm) } doReturn Optional.of(Stubs.userDbm)
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
     assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
+      .isSuccess()
+  }
+
+  @Test fun `removing user by invalid project ID throws`() {
+    userDao.stub {
+      onGeneric { findAllByProject_ProjectId(Stubs.project.id) } doReturn listOf(Stubs.userDbm)
+      onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doThrow IllegalArgumentException("failed")
+    }
+
+    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        hasMessage("failed")
+      }
+  }
+
+  @Test fun `removing user by project ID works`() {
+    userDao.stub {
+      onGeneric { findAllByProject_ProjectId(Stubs.project.id) } doReturn listOf(Stubs.userDbm)
+      onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doAnswer {}
+    }
+
+    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
       .isSuccess()
   }
 

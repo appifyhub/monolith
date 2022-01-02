@@ -27,6 +27,7 @@ fun UserUpdater.applyTo(
   .applySettable(verificationToken) { copy(verificationToken = it) }
   .applySettable(birthday) { copy(birthday = it) }
   .applySettable(company) { copy(company = it?.applyTo(company)) }
+  .applySettable(languageTag) { copy(languageTag = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun OrganizationUpdater.applyTo(organization: Organization?): Organization? =
@@ -43,7 +44,7 @@ fun UserCreator.toUser(
   timeProvider: TimeProvider,
 ): User = User(
   id = UserId(userId = userId, projectId = projectId),
-  signature = passwordEncoder.encode(rawSecret),
+  signature = passwordEncoder.encode(rawSignature),
   name = name,
   type = type,
   authority = authority,
@@ -52,7 +53,8 @@ fun UserCreator.toUser(
   contactType = contactType,
   verificationToken = null,
   birthday = birthday,
+  company = company,
+  languageTag = languageTag,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
-  company = company,
 )

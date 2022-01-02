@@ -53,6 +53,12 @@ class UserDbm(
   @Temporal(TemporalType.TIMESTAMP)
   var birthday: Date?,
 
+  @Embedded
+  var company: OrganizationDbm?,
+
+  @Column(nullable = true, length = 8)
+  var languageTag: String?,
+
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   var createdAt: Date,
@@ -60,9 +66,6 @@ class UserDbm(
   @Column(nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   var updatedAt: Date = createdAt,
-
-  @Embedded
-  var company: OrganizationDbm?,
 
 ) : Serializable {
 
@@ -82,9 +85,10 @@ class UserDbm(
     if (contactType != other.contactType) return false
     if (verificationToken != other.verificationToken) return false
     if (birthday != other.birthday) return false
+    if (company != other.company) return false
+    if (languageTag != other.languageTag) return false
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
-    if (company != other.company) return false
 
     return true
   }
@@ -101,9 +105,10 @@ class UserDbm(
     result = 31 * result + contactType.hashCode()
     result = 31 * result + (verificationToken?.hashCode() ?: 0)
     result = 31 * result + (birthday?.hashCode() ?: 0)
+    result = 31 * result + (company?.hashCode() ?: 0)
+    result = 31 * result + (languageTag?.hashCode() ?: 0)
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
-    result = 31 * result + (company?.hashCode() ?: 0)
     return result
   }
 
@@ -120,9 +125,10 @@ class UserDbm(
       "contactType='$contactType', " +
       "verificationToken=$verificationToken, " +
       "birthday=$birthday, " +
+      "company=$company, " +
+      "languageTag=$languageTag, " +
       "createdAt=$createdAt, " +
-      "updatedAt=$updatedAt, " +
-      "company=$company " +
+      "updatedAt=$updatedAt " +
       ")"
   }
 

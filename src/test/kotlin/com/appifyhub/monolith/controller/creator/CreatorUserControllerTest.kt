@@ -4,9 +4,13 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER
-import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
+import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_SIGNUP
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_FORCE_VERIFY
+import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
@@ -14,7 +18,9 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bodyRequest
+import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,12 +33,13 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -55,87 +62,80 @@ class CreatorUserControllerTest {
     timeProvider.staticTime = { null }
   }
 
-  @Test fun `get any user fails when unauthorized`() {
-    val project = stubber.projects.new()
-    val targetId = stubber.users(project).default().id
+  // region Add Creator
+
+  @Test fun `add creator succeeds`() {
+    val request = Stubs.creatorSignupRequest.copy(userId = "username@example.com")
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$CREATOR_SIGNUP",
+        method = HttpMethod.POST,
+        requestEntity = bodyRequest(request),
+        uriVariables = emptyUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = request.userId,
+          projectId = stubber.projects.creator().id,
+          universalId = UserId(request.userId, stubber.projects.creator().id).toUniversalFormat(),
+          authority = User.Authority.DEFAULT.name,
+          contact = request.userId,
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  // endregion
+
+  // region Force Verification
+
+  @Test fun `token force-verification fails when project non-functional`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator, status = REVIEW)
+    val user = stubber.users(project).default(autoVerified = false)
+    val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER",
-        method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        url = "$baseUrl$UNIVERSAL_USER_FORCE_VERIFY",
+        method = HttpMethod.POST,
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
-          "projectId" to targetId.projectId,
-          "userId" to targetId.userId,
+          "universalId" to user.id.toUniversalFormat(),
         ),
       )
     ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
   }
 
-  @Test fun `get any user succeeds for self`() {
-    val project = stubber.projects.new()
-    val self = stubber.users(project).default()
-    val token = stubber.tokens(self).real().token.tokenValue
+  @Test fun `token force-verification succeeds with valid token for lower rank`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator, forceBasicProps = true)
+    val user = stubber.users(project).default(autoVerified = false)
+    val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER",
-        method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$UNIVERSAL_USER_FORCE_VERIFY",
+        method = HttpMethod.POST,
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
-          "projectId" to self.id.projectId,
-          "userId" to self.id.userId,
+          "universalId" to user.id.toUniversalFormat(),
         ),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(
-        Stubs.userResponse.copy(
-          userId = self.id.userId,
-          projectId = project.id,
-          universalId = self.id.toUniversalFormat(),
-          type = self.type.name,
-          authority = self.authority.name,
-          birthday = DateTimeMapper.formatAsDate(self.birthday!!),
-          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
-      )
+      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      assertThat(stubber.users(project).default().verificationToken).isNull()
     }
   }
 
-  @Test fun `get any user succeeds for lower rank`() {
-    val project = stubber.projects.new()
-    val target = stubber.users(project).default()
-    val token = stubber.tokens(project).real(MODERATOR).token.tokenValue
-
-    assertThat(
-      restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER",
-        method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = mapOf(
-          "projectId" to target.id.projectId,
-          "userId" to target.id.userId,
-        ),
-      )
-    ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(
-        Stubs.userResponse.copy(
-          userId = target.id.userId,
-          projectId = project.id,
-          universalId = target.id.toUniversalFormat(),
-          type = target.type.name,
-          authority = target.authority.name,
-          birthday = DateTimeMapper.formatAsDate(target.birthday!!),
-          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
-      )
-    }
-  }
+  // endregion
 
 }

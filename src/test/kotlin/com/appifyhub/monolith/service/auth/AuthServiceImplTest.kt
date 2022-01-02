@@ -84,11 +84,12 @@ class AuthServiceImplTest {
         name = null,
         signature = "spring-asks-for-it",
         allowsSpam = false,
-        birthday = null,
-        company = null,
         verificationToken = null,
         contactType = User.ContactType.CUSTOM,
         contact = null,
+        birthday = null,
+        company = null,
+        languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -143,6 +144,7 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
+        languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -171,6 +173,7 @@ class AuthServiceImplTest {
         birthday = null,
         verificationToken = null,
         company = null,
+        languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
       )
@@ -769,6 +772,35 @@ class AuthServiceImplTest {
     assertAll {
       // unauth with the token
       assertThat { service.unauthorizeAllFor(ownerToken, targetId = stubber.creators.default().id) }
+        .isSuccess()
+
+      // and then try to re-auth
+      assertThat { service.refreshAuth(token1, ipAddress = null) }
+        .isFailure()
+      assertThat { service.refreshAuth(token2, ipAddress = null) }
+        .isFailure()
+    }
+  }
+
+  @Test fun `unauthorize all by user ID fails with invalid ID`() {
+    assertThat {
+      service.unauthorizeAllFor(UserId("\t\n", -1))
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `unauthorize all by user ID succeeds with valid auth data`() {
+    val user = stubber.creators.default()
+    val token1 = stubber.tokens(user).real()
+    val token2 = stubber.tokens(user).real()
+
+    assertAll {
+      // unauth first
+      assertThat { service.unauthorizeAllFor(stubber.creators.default().id) }
         .isSuccess()
 
       // and then try to re-auth

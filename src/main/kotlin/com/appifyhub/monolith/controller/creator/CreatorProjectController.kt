@@ -5,9 +5,9 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.common.MessageResponse
-import com.appifyhub.monolith.network.creator.ProjectResponse
-import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
-import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.creator.project.ProjectResponse
+import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.access.AccessManager
@@ -51,7 +51,7 @@ class CreatorProjectController(
   @GetMapping(Endpoints.PROJECTS)
   fun getProjects(
     authentication: Authentication,
-    @RequestParam(required = false) universalCreatorId: String? = null,
+    @RequestParam("creator_id", required = false) universalCreatorId: String? = null,
   ): List<ProjectResponse> {
     log.debug("[GET] get creator projects, universalCreatorId = $universalCreatorId")
 
@@ -71,7 +71,7 @@ class CreatorProjectController(
     }
   }
 
-  @GetMapping(Endpoints.ANY_PROJECT)
+  @GetMapping(Endpoints.PROJECT)
   fun getProject(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -84,7 +84,7 @@ class CreatorProjectController(
     return project.toNetwork(projectStatus = status)
   }
 
-  @PutMapping(Endpoints.ANY_PROJECT)
+  @PutMapping(Endpoints.PROJECT)
   fun updateProject(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -106,7 +106,7 @@ class CreatorProjectController(
         privilege = Privilege.PROJECT_WRITE,
       )
 
-      // force REVIEW state after type change  
+      // force REVIEW state after type change
       if (updateRequest.status == null) {
         projectUpdater = projectUpdater.copy(status = Settable(Project.Status.REVIEW))
       }
@@ -118,7 +118,7 @@ class CreatorProjectController(
     return project.toNetwork(projectStatus = status)
   }
 
-  @DeleteMapping(Endpoints.ANY_PROJECT)
+  @DeleteMapping(Endpoints.PROJECT)
   fun removeProject(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -134,7 +134,7 @@ class CreatorProjectController(
   @DeleteMapping(Endpoints.PROJECTS)
   fun removeProjectsByCreator(
     authentication: Authentication,
-    @RequestParam universalCreatorId: String,
+    @RequestParam("creator_id") universalCreatorId: String,
   ): MessageResponse {
     log.debug("[DELETE] remove all creator projects for $universalCreatorId")
 

@@ -6,17 +6,18 @@ import org.springframework.security.core.GrantedAuthority
 data class User(
   val id: UserId,
   val signature: String,
-  val name: String? = null,
-  val type: Type = Type.PERSONAL,
-  val authority: Authority = Authority.DEFAULT,
-  val allowsSpam: Boolean = false,
-  val contact: String? = null,
-  val contactType: ContactType = ContactType.CUSTOM,
-  val verificationToken: String? = null,
-  val birthday: Date? = null,
+  val name: String?,
+  val type: Type,
+  val authority: Authority,
+  val allowsSpam: Boolean,
+  val contact: String?,
+  val contactType: ContactType,
+  val verificationToken: String?,
+  val birthday: Date?,
+  val company: Organization?,
+  val languageTag: String?,
   val createdAt: Date,
-  val updatedAt: Date = createdAt,
-  val company: Organization? = null,
+  val updatedAt: Date,
 ) {
 
   enum class Type {
@@ -77,7 +78,5 @@ data class User(
   val allAuthorities = authority.allAuthorities
 
   val isVerified = verificationToken.isNullOrBlank()
-
-  fun canActAs(authority: Authority) = this.authority.ordinal >= authority.ordinal
 
 }

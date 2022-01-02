@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.network.creator
+package com.appifyhub.monolith.network.creator.project
 
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.fasterxml.jackson.annotation.JsonInclude

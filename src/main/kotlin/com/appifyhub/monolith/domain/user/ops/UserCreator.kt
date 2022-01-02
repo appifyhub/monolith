@@ -9,13 +9,14 @@ import java.util.Date
 data class UserCreator(
   val userId: String?, // some projects have pre-existing IDs
   val projectId: Long,
-  val rawSecret: String,
-  val name: String? = null,
-  val type: Type = Type.PERSONAL,
-  val authority: Authority = Authority.DEFAULT,
-  val allowsSpam: Boolean = false,
-  val contact: String? = null,
-  val contactType: ContactType = ContactType.CUSTOM,
-  val birthday: Date? = null,
-  val company: Organization? = null,
+  val rawSignature: String,
+  val name: String?,
+  val type: Type,
+  val authority: Authority,
+  val allowsSpam: Boolean,
+  val contact: String?,
+  val contactType: ContactType,
+  val birthday: Date?,
+  val company: Organization?,
+  val languageTag: String?,
 )

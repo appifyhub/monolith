@@ -12,8 +12,9 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
@@ -21,20 +22,25 @@ import com.appifyhub.monolith.domain.user.User.Type
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
 import java.time.temporal.ChronoUnit
 import java.util.Date
+import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
@@ -47,6 +53,8 @@ import org.springframework.web.server.ResponseStatusException
 class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
+  @Autowired lateinit var propertyService: PropertyService
+  @Autowired lateinit var passwordEncoder: PasswordEncoder
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var stubber: Stubber
 
@@ -61,12 +69,13 @@ class UserServiceImplTest {
     UserIdGenerator.interceptor = { null }
     TokenGenerator.emailInterceptor = { null }
     TokenGenerator.phoneInterceptor = { null }
+    SignatureGenerator.interceptor = { null }
   }
 
   // Adding
 
   @Test fun `adding user fails with invalid username`() {
-    val project = newProject(UserIdType.USERNAME)
+    val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
     val creator = Stubs.userCreator.copy(userId = " ", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -78,7 +87,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid email`() {
-    val project = newProject(UserIdType.EMAIL)
+    val project = stubber.projects.new(userIdType = UserIdType.EMAIL)
     val creator = Stubs.userCreator.copy(userId = "invalid", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -90,7 +99,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid phone`() {
-    val project = newProject(UserIdType.PHONE)
+    val project = stubber.projects.new(userIdType = UserIdType.PHONE)
     val creator = Stubs.userCreator.copy(userId = "invalid", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -102,7 +111,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid custom user ID`() {
-    val project = newProject(UserIdType.CUSTOM)
+    val project = stubber.projects.new(userIdType = UserIdType.CUSTOM)
     val creator = Stubs.userCreator.copy(userId = " ", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -114,8 +123,8 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid raw signature`() {
-    val project = newProject(Stubs.project.userIdType)
-    val creator = Stubs.userCreator.copy(rawSecret = " ", projectId = project.id)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
+    val creator = Stubs.userCreator.copy(rawSignature = " ", projectId = project.id)
 
     assertThat { service.addUser(creator) }
       .isFailure()
@@ -126,7 +135,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid name`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(name = " ", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -138,7 +147,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid contact email`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(contactType = ContactType.EMAIL, contact = "invalid", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -150,7 +159,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid contact phone`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(contactType = ContactType.PHONE, contact = "invalid", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -162,7 +171,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid custom contact`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(contactType = ContactType.CUSTOM, contact = " ", projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -174,7 +183,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid birthday`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val fiveYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(5).toMillis()
     val birthday = Date(timeProvider.currentMillis - fiveYearsMillis)
     val creator = Stubs.userCreator.copy(birthday = birthday, projectId = project.id)
@@ -188,7 +197,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with invalid organization`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(company = Stubs.company.copy(countryCode = "D"), projectId = project.id)
 
     assertThat { service.addUser(creator) }
@@ -199,9 +208,24 @@ class UserServiceImplTest {
       }
   }
 
+  @Test fun `adding user fails with max users reached`() {
+    val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
+    stubber.users(project).default(idSuffix = "_1")
+    stubber.users(project).default(idSuffix = "_2")
+    propertyService.saveProperty<Int>(project.id, ProjectProperty.MAX_USERS.name, "2")
+    val creator = Stubs.userCreator.copy(projectId = project.id)
+
+    assertThat { service.addUser(creator) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Maximum users")
+      }
+  }
+
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with random ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(userId = null, projectId = project.id)
     stubGenerators()
 
@@ -218,7 +242,7 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with username ID`() {
-    val project = newProject(UserIdType.USERNAME)
+    val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
     val creator = Stubs.userCreator.copy(userId = "username", projectId = project.id)
     stubGenerators()
 
@@ -235,7 +259,7 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with email ID`() {
-    val project = newProject(UserIdType.EMAIL)
+    val project = stubber.projects.new(userIdType = UserIdType.EMAIL)
     val creator = Stubs.userCreator.copy(userId = "email@domain.com", projectId = project.id)
     stubGenerators()
 
@@ -252,12 +276,13 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with phone ID (and phone contact)`() {
-    val project = newProject(UserIdType.PHONE)
+    val project = stubber.projects.new(userIdType = UserIdType.PHONE)
     val creator = Stubs.userCreator.copy(
       userId = "+491760000000",
       contactType = ContactType.PHONE,
       contact = "+491760000000",
       projectId = project.id,
+      languageTag = Locale.US.toLanguageTag(),
     )
     stubGenerators()
 
@@ -276,7 +301,7 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with custom ID (and no contact)`() {
-    val project = newProject(UserIdType.CUSTOM)
+    val project = stubber.projects.new(userIdType = UserIdType.CUSTOM)
     val creator = Stubs.userCreator.copy(
       userId = "custom_id",
       contactType = ContactType.CUSTOM,
@@ -300,11 +325,11 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `adding user works with random ID (minimal data)`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = UserCreator(
       userId = null,
       projectId = project.id,
-      rawSecret = "12345678",
+      rawSignature = "12345678",
       name = null,
       type = Type.PERSONAL,
       authority = Authority.DEFAULT,
@@ -313,6 +338,7 @@ class UserServiceImplTest {
       contactType = ContactType.CUSTOM,
       birthday = null,
       company = null,
+      languageTag = null,
     )
     stubGenerators()
 
@@ -332,6 +358,7 @@ class UserServiceImplTest {
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
           company = null,
+          languageTag = null,
         )
       )
   }
@@ -339,7 +366,7 @@ class UserServiceImplTest {
   // Fetching
 
   @Test fun `fetching user fails with invalid user ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val targetId = UserId(" ", project.id)
     assertThat { service.fetchUserByUserId(targetId) }
       .isFailure()
@@ -350,7 +377,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `fetching user works with a user ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(projectId = project.id)
     val storedUser = service.addUser(creator).cleanDates()
     val fetchedUser = service.fetchUserByUserId(storedUser.id).cleanDates()
@@ -369,33 +396,13 @@ class UserServiceImplTest {
   }
 
   @Test fun `fetching user works with a universal ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(projectId = project.id)
     val storedUser = service.addUser(creator).cleanDates()
     val fetchedUser = service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()).cleanDates()
 
     assertThat(fetchedUser)
       .isDataClassEqualTo(storedUser)
-  }
-
-  @Test fun `fetching users fails with invalid contact`() {
-    assertThat { service.fetchAllUsersByContact(" ") }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Contact")
-      }
-  }
-
-  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
-  @Test fun `fetching users works with a contact`() {
-    val project = newProject(UserIdType.RANDOM)
-    val creator = Stubs.userCreator.copy(contact = "contact@email.com", projectId = project.id)
-    val storedUser = service.addUser(creator).cleanDates()
-    val fetchedUsers = service.fetchAllUsersByContact(creator.contact!!).map { it.cleanDates() }
-
-    assertThat(fetchedUsers)
-      .isEqualTo(listOf(storedUser))
   }
 
   @Test fun `fetching users fails with invalid project ID`() {
@@ -409,10 +416,109 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `fetching users works with a project ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(projectId = project.id)
     val storedUser = service.addUser(creator).cleanDates()
     val fetchedUsers = service.fetchAllUsersByProjectId(project.id).map { it.cleanDates() }
+
+    assertThat(fetchedUsers)
+      .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `fetching user by verification token fails with invalid user ID`() {
+    assertThat { service.fetchUserByUserIdAndVerificationToken(UserId("invalid", -1), "token") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `fetching user by verification token fails with invalid token`() {
+    assertThat { service.fetchUserByUserIdAndVerificationToken(Stubs.userId, "\t \n") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Verification Token")
+      }
+  }
+
+  @Test fun `fetching user by verification token fails with non-matching token`() {
+    val project = stubber.projects.new()
+    val user = stubber.users(project).default(autoVerified = false)
+
+    assertThat { service.fetchUserByUserIdAndVerificationToken(user.id, "invalid") }
+      .isFailure()
+      .all {
+        hasClass(EmptyResultDataAccessException::class)
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `fetching user by verification token fails with a valid token`() {
+    val project = stubber.projects.new()
+    val user = stubber.users(project).default(autoVerified = false).cleanDates()
+
+    assertThat(
+      service.fetchUserByUserIdAndVerificationToken(user.id, user.verificationToken!!)
+        .cleanDates()
+    )
+      .isDataClassEqualTo(user)
+  }
+
+  @Test fun `searching users by name fails with invalid project ID`() {
+    assertThat { service.searchByName(-1, Stubs.user.name!!) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `searching users by name fails with invalid name`() {
+    assertThat { service.searchByName(Stubs.project.id, " ") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Name")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `searching users by name works with a valid name`() {
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
+    val creator = Stubs.userCreator.copy(projectId = project.id, name = "my name")
+    val storedUser = service.addUser(creator).cleanDates()
+    val fetchedUsers = service.searchByName(project.id, "%name").map { it.cleanDates() }
+
+    assertThat(fetchedUsers)
+      .isEqualTo(listOf(storedUser))
+  }
+
+  @Test fun `searching users by contact fails with invalid project ID`() {
+    assertThat { service.searchByContact(-1, Stubs.user.contact!!) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `searching users by contact fails with invalid contact`() {
+    assertThat { service.searchByContact(Stubs.project.id, " ") }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Contact")
+      }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `searching users by name works with a valid contact`() {
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
+    val creator = Stubs.userCreator.copy(projectId = project.id, contact = "contact@example.com")
+    val storedUser = service.addUser(creator).cleanDates()
+    val fetchedUsers = service.searchByContact(project.id, "%@example.com").map { it.cleanDates() }
 
     assertThat(fetchedUsers)
       .isEqualTo(listOf(storedUser))
@@ -432,7 +538,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid username`() {
-    val project = newProject(UserIdType.USERNAME)
+    val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
     val updater = Stubs.userUpdater.copy(id = UserId(" ", projectId = project.id))
 
     assertThat { service.updateUser(updater) }
@@ -444,7 +550,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid email`() {
-    val project = newProject(UserIdType.EMAIL)
+    val project = stubber.projects.new(userIdType = UserIdType.EMAIL)
     val updater = Stubs.userUpdater.copy(id = UserId("invalid", project.id))
 
     assertThat { service.updateUser(updater) }
@@ -456,7 +562,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid phone`() {
-    val project = newProject(UserIdType.PHONE)
+    val project = stubber.projects.new(userIdType = UserIdType.PHONE)
     val updater = Stubs.userUpdater.copy(id = UserId("invalid", project.id))
 
     assertThat { service.updateUser(updater) }
@@ -468,7 +574,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid custom user ID`() {
-    val project = newProject(UserIdType.CUSTOM)
+    val project = stubber.projects.new(userIdType = UserIdType.CUSTOM)
     val updater = Stubs.userUpdater.copy(id = UserId(" ", project.id))
 
     assertThat { service.updateUser(updater) }
@@ -480,7 +586,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid random user ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val updater = Stubs.userUpdater.copy(id = UserId(" ", project.id))
 
     assertThat { service.updateUser(updater) }
@@ -492,7 +598,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid raw signature`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(projectId = project.id), rawSignature = Settable(" "))
 
     assertThat { service.updateUser(updater) }
@@ -504,7 +610,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid contact email`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       contactType = Settable(ContactType.EMAIL),
@@ -520,7 +626,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid contact phone`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       contactType = Settable(ContactType.PHONE),
@@ -536,7 +642,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid custom contact`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       contactType = Settable(ContactType.CUSTOM),
@@ -552,7 +658,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid name`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(projectId = project.id), name = Settable(" "))
 
     assertThat { service.updateUser(updater) }
@@ -564,7 +670,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid token`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       verificationToken = Settable(" "),
@@ -579,7 +685,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid company name`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
@@ -596,7 +702,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid company street`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
@@ -613,7 +719,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid company postcode`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
@@ -630,7 +736,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid company city`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
@@ -647,7 +753,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid company country code`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
@@ -664,7 +770,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `updating user fails with invalid birthday`() {
-    val project = newProject(Stubs.project.userIdType)
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val fiveYearsMillis: Long = ChronoUnit.YEARS.duration.multipliedBy(5).toMillis()
     val tooYoungDate = Date(timeProvider.currentMillis - fiveYearsMillis)
     val updater = Stubs.userUpdater.copy(
@@ -682,7 +788,7 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `updating user works with changed data`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(
       projectId = project.id,
       contactType = ContactType.EMAIL,
@@ -707,7 +813,7 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `updating user works with erased data (with username ID)`() {
-    val project = newProject(UserIdType.USERNAME)
+    val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
     val creator = Stubs.userCreator.copy(
       projectId = project.id,
       contactType = ContactType.EMAIL,
@@ -747,6 +853,24 @@ class UserServiceImplTest {
       )
   }
 
+  @Test fun `resetting signature by ID fails with invalid user ID`() {
+    assertThat { service.resetSignatureById(UserId("invalid", -1)) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `resetting signature by ID succeeds`() {
+    stubGenerators()
+    val user = stubber.creators.default()
+    val expectedSignature = passwordEncoder.encode(SignatureGenerator.nextSignature)
+
+    assertThat(service.resetSignatureById(user.id))
+      .isDataClassEqualTo(user.copy(signature = expectedSignature))
+  }
+
   // Removing
 
   @Test fun `removing user fails with invalid user ID`() {
@@ -759,7 +883,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `removing user works with a user ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(userId = null, projectId = project.id)
     val storedUser = service.addUser(creator)
 
@@ -779,7 +903,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `removing user works with a universal user ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(userId = null, projectId = project.id)
     val storedUser = service.addUser(creator)
 
@@ -804,7 +928,7 @@ class UserServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   @Test fun `removing users works with a project ID`() {
-    val project = newProject(UserIdType.RANDOM)
+    val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val creator = Stubs.userCreator.copy(userId = null, projectId = project.id)
     val storedUser = service.addUser(creator)
 
@@ -820,12 +944,11 @@ class UserServiceImplTest {
 
   // Helpers
 
-  private fun newProject(userIdType: UserIdType) = stubber.projects.new(userIdType = userIdType)
-
   private fun stubGenerators() {
     UserIdGenerator.interceptor = { "user_id" }
     TokenGenerator.emailInterceptor = { "email_token" }
     TokenGenerator.phoneInterceptor = { "phone_token" }
+    SignatureGenerator.interceptor = { "signature" }
   }
 
   private fun User.cleanDates() = copy(

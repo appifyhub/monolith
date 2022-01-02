@@ -7,23 +7,23 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.common.SettableRequest
-import com.appifyhub.monolith.network.creator.ProjectResponse
-import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.creator.project.ProjectResponse
+import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
-import com.appifyhub.monolith.util.blankUriVariables
+import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -70,8 +70,8 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -89,7 +89,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -107,7 +107,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -124,7 +124,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -144,8 +144,8 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -160,8 +160,8 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<MessageResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -181,8 +181,8 @@ class CreatorProjectControllerTest {
       restTemplate.exchange<List<ProjectResponse>>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -205,10 +205,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -224,10 +224,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator2.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("creator_id" to creator2.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -245,10 +245,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<List<ProjectResponse>>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -274,10 +274,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<List<ProjectResponse>>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -297,9 +297,9 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -316,9 +316,9 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -339,9 +339,9 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -362,7 +362,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -386,7 +386,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -411,7 +411,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -445,7 +445,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -479,7 +479,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -513,7 +513,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -538,9 +538,9 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -557,9 +557,9 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -582,9 +582,9 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
@@ -604,10 +604,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -622,10 +622,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -646,10 +646,10 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROJECTS?universalCreatorId={universalCreatorId}",
+        url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = mapOf("universalCreatorId" to creator.id.toUniversalFormat()),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)

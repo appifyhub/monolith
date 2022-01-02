@@ -24,8 +24,10 @@ import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_READ
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
-import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
-import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ_DATA
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_SEARCH
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_AUTHORITY
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_TOKEN
 import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -70,7 +72,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = UserId("", stubber.projects.creator().id),
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -88,7 +90,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = token,
         targetId = stubber.creators.owner().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -105,7 +107,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(project).real(MODERATOR),
         targetId = targetAdmin.id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -122,7 +124,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(project).real(ADMIN),
         targetId = targetOwner.id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       )
     }
       .isFailure()
@@ -139,7 +141,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(owner).real(isStatic = true),
         targetId = stubber.creators.default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -154,13 +156,13 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(DEFAULT, isStatic = true),
         targetId = stubber.creators.owner().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
-        messageContains("Only ${USER_READ.level.groupName} are authorized")
+        messageContains("Only ${USER_READ_DATA.level.groupName} are authorized")
       }
   }
 
@@ -170,7 +172,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(project).real(OWNER, isStatic = true, autoVerified = false),
         targetId = stubber.users(project).default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -185,7 +187,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(DEFAULT),
         targetId = stubber.creators.default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
@@ -195,7 +197,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.owner().id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.owner().cleanStubArtifacts())
   }
@@ -205,7 +207,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
@@ -215,7 +217,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.default().id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
@@ -227,7 +229,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(creator).real(),
         targetId = stubber.users(project).default().id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.users(project).default().cleanStubArtifacts())
   }
@@ -240,7 +242,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(owner).real(isStatic = true),
         targetId = targetOwner.id,
-        privilege = USER_WRITE,
+        privilege = USER_WRITE_TOKEN,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(targetOwner.cleanStubArtifacts())
   }
@@ -551,6 +553,104 @@ class AccessManagerImplTest {
     assertThat(
       manager.requestSuperCreator(token)
     ).isDataClassEqualTo(creator)
+  }
+
+  // endregion
+
+  // region Special access
+
+  @Test fun `requesting project access fails with requesting peer SEARCH (setting missing)`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).default()
+
+    assertThat {
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
+      }
+  }
+
+  @Test fun `requesting project access fails with requesting peer SEARCH (setting is false)`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).default()
+    propService.saveProperty<Boolean>(project.id, ProjectProperty.ANYONE_CAN_SEARCH.name, "false")
+
+    assertThat {
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
+      }
+  }
+
+  @Test fun `requesting project access succeeds with requesting peer SEARCH (setting is true)`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).default()
+    propService.saveProperty<Boolean>(project.id, ProjectProperty.ANYONE_CAN_SEARCH.name, "true")
+
+    assertThat(
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    ).isDataClassEqualTo(project.cleanStubArtifacts())
+  }
+
+  @Test fun `requesting project access succeeds with requesting inferior SEARCH`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator)
+    val user = stubber.users(project).admin()
+
+    assertThat(
+      manager.requestProjectAccess(
+        authData = stubber.tokens(user).real(),
+        targetId = project.id,
+        privilege = USER_SEARCH,
+      ).cleanStubArtifacts()
+    ).isDataClassEqualTo(project.cleanStubArtifacts())
+  }
+
+  @Test fun `requesting authority self-change fails if not owner`() {
+    val project = stubber.projects.creator()
+    val self = stubber.users(project).admin()
+    val token = stubber.tokens(self).real()
+
+    assertThat {
+      manager.requestUserAccess(token, self.id, USER_WRITE_AUTHORITY)
+    }
+      .isFailure()
+      .all {
+        hasClass(IllegalArgumentException::class)
+        messageContains("Only ${OWNER.groupName} are authorized")
+      }
+  }
+
+  @Test fun `requesting authority self-change succeeds if owner`() {
+    val project = stubber.projects.creator()
+    val self = stubber.users(project).owner()
+    val token = stubber.tokens(self).real()
+
+    assertThat(
+      manager.requestUserAccess(token, self.id, USER_WRITE_AUTHORITY)
+        .cleanStubArtifacts()
+    ).isDataClassEqualTo(self.cleanStubArtifacts())
   }
 
   // endregion
