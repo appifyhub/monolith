@@ -40,6 +40,7 @@ object Endpoints {
 
   // Users
 
+  const val CREATOR_SIGNUP = "/v1/creator/signup"
   const val UNIVERSAL_USER_FORCE_VERIFY = "/v1/universal/users/{universalId}/force-verify"
 
   /* ***************** UNAUTHENTICATED ****************** */
@@ -50,7 +51,7 @@ object Endpoints {
   const val HEARTBEAT = "/heartbeat"
   const val H2_CONSOLE = "/h2-console/**" // shows up in debug mode only
   const val SIGNUP_USERS = "/v1/projects/*/signup" // see PROJECT_SIGNUP
-  const val SIGNUP_CREATORS = "/v1/creator/signup" // similar to SIGNUP_USERS
+  const val SIGNUP_CREATORS = CREATOR_SIGNUP
   const val VERIFICATION = "/v1/universal/users/*/verify/*" // see UNIVERSAL_USER_VERIFY
   const val SIGNATURE_RESET = "/v1/universal/users/*/signature/reset" // see UNIVERSAL_USER_SIGNATURE_RESET
 

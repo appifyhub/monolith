@@ -26,7 +26,7 @@ import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerEmptyRequest
-import com.appifyhub.monolith.util.blankUriVariables
+import com.appifyhub.monolith.util.emptyUriVariables
 import com.appifyhub.monolith.util.bodyRequest
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
@@ -81,7 +81,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -100,7 +100,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -119,7 +119,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -133,7 +133,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -149,7 +149,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -165,7 +165,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -181,7 +181,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_TOKENS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -197,7 +197,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_TOKENS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -215,7 +215,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_TOKENS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token1),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -283,7 +283,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -299,7 +299,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -314,7 +314,7 @@ class UserAuthControllerTest {
         url = "$baseUrl$USER_AUTH",
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)

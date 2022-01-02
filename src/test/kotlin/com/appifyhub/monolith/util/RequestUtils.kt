@@ -37,4 +37,4 @@ fun <T> bearerBodyRequest(body: T, token: String) = HttpEntity<T>(
   }
 )
 
-fun blankUriVariables() = emptyMap<String, String>()
+fun emptyUriVariables() = emptyMap<String, String>()

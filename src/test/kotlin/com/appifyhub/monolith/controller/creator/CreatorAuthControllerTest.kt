@@ -18,7 +18,7 @@ import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.bearerEmptyRequest
-import com.appifyhub.monolith.util.blankUriVariables
+import com.appifyhub.monolith.util.emptyUriVariables
 import com.appifyhub.monolith.util.bodyRequest
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
@@ -73,7 +73,7 @@ class CreatorAuthControllerTest {
         url = "$baseUrl$CREATOR_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -92,7 +92,7 @@ class CreatorAuthControllerTest {
         url = "$baseUrl$CREATOR_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -106,7 +106,7 @@ class CreatorAuthControllerTest {
         url = "$baseUrl$CREATOR_API_KEY",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -123,7 +123,7 @@ class CreatorAuthControllerTest {
         url = "$baseUrl$CREATOR_API_KEY",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(keyData, ownerToken),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)

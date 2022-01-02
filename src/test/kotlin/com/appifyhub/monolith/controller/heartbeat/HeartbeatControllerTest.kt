@@ -10,7 +10,7 @@ import com.appifyhub.monolith.network.heartbeat.HeartbeatResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.emptyRequest
-import com.appifyhub.monolith.util.blankUriVariables
+import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -57,7 +57,7 @@ class HeartbeatControllerTest {
         url = "$baseUrl/$HEARTBEAT",
         method = HttpMethod.GET,
         requestEntity = emptyRequest(),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
