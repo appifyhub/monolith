@@ -38,6 +38,10 @@ object Endpoints {
   const val PROJECT_PROPERTIES = "/v1/projects/{projectId}/properties"
   const val PROJECT_PROPERTY = "/v1/projects/{projectId}/properties/{propertyName}"
 
+  // Users
+
+  const val UNIVERSAL_USER_FORCE_VERIFY = "/v1/universal/users/{universalId}/force-verify"
+
   /* ***************** UNAUTHENTICATED ****************** */
 
   const val ERROR = "/error"
