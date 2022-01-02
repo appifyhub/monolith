@@ -71,7 +71,7 @@ class CreatorProjectController(
     }
   }
 
-  @GetMapping(Endpoints.ANY_PROJECT)
+  @GetMapping(Endpoints.PROJECT)
   fun getProject(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -84,7 +84,7 @@ class CreatorProjectController(
     return project.toNetwork(projectStatus = status)
   }
 
-  @PutMapping(Endpoints.ANY_PROJECT)
+  @PutMapping(Endpoints.PROJECT)
   fun updateProject(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -118,7 +118,7 @@ class CreatorProjectController(
     return project.toNetwork(projectStatus = status)
   }
 
-  @DeleteMapping(Endpoints.ANY_PROJECT)
+  @DeleteMapping(Endpoints.PROJECT)
   fun removeProject(
     authentication: Authentication,
     @PathVariable projectId: Long,

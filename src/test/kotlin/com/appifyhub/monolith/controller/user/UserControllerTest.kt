@@ -8,14 +8,14 @@ import assertk.assertions.isFailure
 import assertk.assertions.isNull
 import assertk.assertions.isSuccess
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SEARCH
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT_SIGNUP
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_AUTHORITY
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_DATA
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_SIGNATURE
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_SIGNATURE_RESET
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_UNIVERSAL_VERIFY
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_USER_SEARCH
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_SIGNUP
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_AUTHORITY
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_DATA
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATURE
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATURE_RESET
+import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.MessageResponse
@@ -80,7 +80,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT_SIGNUP",
+        url = "$baseUrl$PROJECT_SIGNUP",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
         uriVariables = mapOf("projectId" to project.id),
@@ -95,7 +95,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_PROJECT_SIGNUP",
+        url = "$baseUrl$PROJECT_SIGNUP",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
         uriVariables = mapOf("projectId" to project.id),
@@ -125,7 +125,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -142,7 +142,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -160,7 +160,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to universalId),
@@ -191,7 +191,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT_SEARCH?user_name={userName}",
+        url = "$baseUrl$PROJECT_USER_SEARCH?user_name={userName}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -211,7 +211,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT_SEARCH?user_name={userName}",
+        url = "$baseUrl$PROJECT_USER_SEARCH?user_name={userName}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -231,7 +231,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT_SEARCH",
+        url = "$baseUrl$PROJECT_USER_SEARCH",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
@@ -248,7 +248,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<List<UserResponse>>(
-        url = "$baseUrl$ANY_PROJECT_SEARCH?user_name={userName}",
+        url = "$baseUrl$PROJECT_USER_SEARCH?user_name={userName}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -280,7 +280,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<List<UserResponse>>(
-        url = "$baseUrl$ANY_PROJECT_SEARCH?user_contact={userContact}",
+        url = "$baseUrl$PROJECT_USER_SEARCH?user_contact={userContact}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -316,7 +316,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_AUTHORITY",
+        url = "$baseUrl$UNIVERSAL_USER_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -334,7 +334,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_AUTHORITY",
+        url = "$baseUrl$UNIVERSAL_USER_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -353,7 +353,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_AUTHORITY",
+        url = "$baseUrl$UNIVERSAL_USER_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
@@ -385,7 +385,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_DATA",
+        url = "$baseUrl$UNIVERSAL_USER_DATA",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -402,7 +402,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_DATA",
+        url = "$baseUrl$UNIVERSAL_USER_DATA",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -420,7 +420,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_DATA",
+        url = "$baseUrl$UNIVERSAL_USER_DATA",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
@@ -450,7 +450,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=false",
+        url = "$baseUrl$UNIVERSAL_USER_SIGNATURE?logout=false",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -467,7 +467,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=false",
+        url = "$baseUrl$UNIVERSAL_USER_SIGNATURE?logout=false",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -484,7 +484,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=false",
+        url = "$baseUrl$UNIVERSAL_USER_SIGNATURE?logout=false",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token.token.tokenValue),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
@@ -531,7 +531,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<UserResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE?logout=true",
+        url = "$baseUrl$UNIVERSAL_USER_SIGNATURE?logout=true",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token.token.tokenValue),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
@@ -581,7 +581,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_VERIFY",
+        url = "$baseUrl$UNIVERSAL_USER_VERIFY",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
         uriVariables = mapOf(
@@ -600,7 +600,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_VERIFY",
+        url = "$baseUrl$UNIVERSAL_USER_VERIFY",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
         uriVariables = mapOf(
@@ -625,7 +625,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE_RESET",
+        url = "$baseUrl$UNIVERSAL_USER_SIGNATURE_RESET",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -642,7 +642,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL_SIGNATURE_RESET",
+        url = "$baseUrl$UNIVERSAL_USER_SIGNATURE_RESET",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -675,7 +675,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
@@ -692,7 +692,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
@@ -710,7 +710,7 @@ class UserControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_UNIVERSAL",
+        url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to universalId),

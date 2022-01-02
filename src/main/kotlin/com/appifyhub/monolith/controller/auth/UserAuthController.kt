@@ -3,6 +3,7 @@ package com.appifyhub.monolith.controller.auth
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
 import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
@@ -10,6 +11,7 @@ import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
 import com.appifyhub.monolith.service.access.AccessManager
+import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
@@ -29,7 +31,7 @@ class UserAuthController(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @PostMapping(Endpoints.AUTH)
+  @PostMapping(Endpoints.USER_AUTH)
   fun authenticate(
     @RequestBody creds: UserCredentialsRequest,
   ): TokenResponse {
@@ -43,7 +45,7 @@ class UserAuthController(
     return tokenResponseOf(tokenValue)
   }
 
-  @GetMapping(Endpoints.AUTH)
+  @GetMapping(Endpoints.USER_AUTH)
   fun getCurrentToken(
     authentication: Authentication,
   ): TokenDetailsResponse {
@@ -55,20 +57,32 @@ class UserAuthController(
     return currentToken.toNetwork()
   }
 
-  @GetMapping(Endpoints.TOKENS)
+  @GetMapping(Endpoints.USER_TOKENS)
   fun getAllTokens(
     authentication: Authentication,
+    @RequestParam("user_id", required = false) universalUserId: String? = null,
     @RequestParam(required = false) valid: Boolean?,
   ): List<TokenDetailsResponse> {
-    log.debug("[GET] get all tokens, [valid $valid]")
+    log.debug("[GET] get all tokens, universalUserId=$universalUserId, [valid $valid]")
 
-    val tokens = authService.fetchAllTokenDetails(authentication, valid)
-    accessManager.requireProjectFunctional(tokens.first().ownerId.projectId)
+    val authUser = authService.resolveShallowSelf(authentication)
+    accessManager.requireProjectFunctional(authUser.id.projectId)
+
+    val targetUserId = universalUserId?.let { UserId.fromUniversalFormat(it) } ?: authUser.id
+    val targetUser = accessManager.requestUserAccess(authentication, targetUserId, Privilege.USER_READ_TOKEN)
+
+    val tokens = if (authUser.id == targetUser.id) {
+      // for self only
+      authService.fetchAllTokenDetails(authentication, valid)
+    } else {
+      // for others
+      authService.fetchAllTokenDetailsFor(authentication, targetUser.id, valid)
+    }
 
     return tokens.map(TokenDetails::toNetwork)
   }
 
-  @PutMapping(Endpoints.AUTH)
+  @PutMapping(Endpoints.USER_AUTH)
   fun refresh(authentication: Authentication): TokenResponse {
     log.debug("[PUT] refresh user with $authentication")
 
@@ -79,26 +93,36 @@ class UserAuthController(
     return tokenResponseOf(tokenValue)
   }
 
-  @DeleteMapping(Endpoints.AUTH)
+  @DeleteMapping(Endpoints.USER_AUTH)
   fun unauthenticate(
     authentication: Authentication,
+    @RequestParam("user_id", required = false) universalUserId: String? = null,
     @RequestParam(required = false) all: Boolean? = false,
   ): MessageResponse {
-    log.debug("[DELETE] unauth user with $authentication, [all $all]")
+    log.debug("[DELETE] unauth, universalUserId=$universalUserId, [all $all]")
 
-    val token = authService.fetchTokenDetails(authentication)
-    accessManager.requireProjectFunctional(token.ownerId.projectId)
+    val authUser = authService.resolveShallowSelf(authentication)
+    accessManager.requireProjectFunctional(authUser.id.projectId)
 
-    if (all == true) {
-      authService.unauthorizeAll(authentication)
+    val targetUserId = universalUserId?.let { UserId.fromUniversalFormat(it) } ?: authUser.id
+    val targetUser = accessManager.requestUserAccess(authentication, targetUserId, Privilege.USER_WRITE_TOKEN)
+
+    if (authUser.id == targetUser.id) {
+      // for self only
+      if (all == true) {
+        authService.unauthorizeAll(authentication)
+      } else {
+        authService.unauthorize(authentication)
+      }
     } else {
-      authService.unauthorize(authentication)
+      // for others (treated as all=true)
+      authService.unauthorizeAllFor(authentication, targetUser.id)
     }
 
     return MessageResponse.DONE
   }
 
-  @DeleteMapping(Endpoints.TOKENS)
+  @DeleteMapping(Endpoints.USER_TOKENS)
   fun unauthenticateTokens(
     authentication: Authentication,
     @RequestParam("token_ids") tokenIds: List<String>,

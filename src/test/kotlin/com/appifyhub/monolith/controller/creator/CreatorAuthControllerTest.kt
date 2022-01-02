@@ -1,32 +1,23 @@
 package com.appifyhub.monolith.controller.creator
 
 import assertk.all
-import assertk.assertAll
 import assertk.assertThat
-import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFalse
 import assertk.assertions.isNotEmpty
-import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_AUTH
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_USER_TOKENS
 import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_API_KEY
 import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_AUTH
-import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.auth.ApiKeyRequest
 import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
-import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.MessageResponse
-import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.blankUriVariables
 import com.appifyhub.monolith.util.bodyRequest
 import java.time.Duration
@@ -137,209 +128,6 @@ class CreatorAuthControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.tokenValue }.isNotEmpty()
-    }
-  }
-
-  @Test fun `get any user tokens fails when unauthorized`() {
-    val targetId = stubber.creators.default().id
-
-    assertThat(
-      restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_TOKENS",
-        method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = mapOf(
-          "projectId" to targetId.projectId,
-          "userId" to targetId.userId,
-        ),
-      )
-    ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
-    }
-  }
-
-  @Test fun `get any user tokens succeeds for self`() {
-    val self = stubber.creators.default()
-    val token = stubber.tokens(self).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-
-    assertThat(
-      restTemplate.exchange<List<TokenDetailsResponse>>(
-        url = "$baseUrl$ANY_USER_TOKENS",
-        method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(token),
-        uriVariables = mapOf(
-          "projectId" to self.id.projectId,
-          "userId" to self.id.userId,
-        ),
-      )
-    ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isEqualTo(
-        listOf(stubber.latestTokenOf(self).toNetwork())
-      )
-    }
-  }
-
-  @Test fun `get any user tokens succeeds for lower rank`() {
-    val project = stubber.projects.new()
-    val adminToken = stubber.tokens(project).real(ADMIN).token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val target = stubber.users(project).default()
-    val targetToken = stubber.tokens(target).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-
-    assertThat(
-      restTemplate.exchange<List<TokenDetailsResponse>>(
-        url = "$baseUrl$ANY_USER_TOKENS",
-        method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(adminToken),
-        uriVariables = mapOf(
-          "projectId" to target.id.projectId,
-          "userId" to target.id.userId,
-        ),
-      )
-    ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isEqualTo(
-        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() }
-      )
-    }
-  }
-
-  @Test fun `get any user tokens succeeds with static token`() {
-    val project = stubber.projects.new()
-    val target = stubber.users(project).owner(idSuffix = "_another")
-    val staticToken = stubber.tokens(project).real(OWNER, isStatic = true).token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val targetToken = stubber.tokens(target).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-
-    assertThat(
-      restTemplate.exchange<List<TokenDetailsResponse>>(
-        url = "$baseUrl$ANY_USER_TOKENS",
-        method = HttpMethod.GET,
-        requestEntity = bearerEmptyRequest(staticToken),
-        uriVariables = mapOf(
-          "projectId" to target.id.projectId,
-          "userId" to target.id.userId,
-        ),
-      )
-    ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isEqualTo(
-        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() }
-      )
-    }
-  }
-
-  @Test fun `unauth any user tokens fails when unauthorized`() {
-    val targetId = stubber.creators.default().id
-
-    assertThat(
-      restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_USER_AUTH",
-        method = HttpMethod.DELETE,
-        requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = mapOf(
-          "projectId" to targetId.projectId,
-          "userId" to targetId.userId,
-        ),
-      )
-    ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
-    }
-  }
-
-  @Test fun `unauth any user succeeds for self`() {
-    val self = stubber.creators.default()
-    val token1 = stubber.tokens(self).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val token2 = stubber.tokens(self).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-
-    assertAll {
-      assertThat(
-        restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$ANY_USER_AUTH",
-          method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(token1),
-          uriVariables = mapOf(
-            "projectId" to self.id.projectId,
-            "userId" to self.id.userId,
-          ),
-        )
-      ).all {
-        transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-        transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
-      }
-
-      assertThat(stubber.isAuthorized(token1)).isFalse()
-      assertThat(stubber.isAuthorized(token2)).isFalse()
-    }
-  }
-
-  @Test fun `unauth any user succeeds for lower rank`() {
-    val project = stubber.projects.new()
-    val target = stubber.users(project).default()
-    val adminToken = stubber.tokens(project).real(ADMIN).token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val targetToken1 = stubber.tokens(target).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val targetToken2 = stubber.tokens(target).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-
-    assertAll {
-      assertThat(
-        restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$ANY_USER_AUTH",
-          method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(adminToken),
-          uriVariables = mapOf(
-            "projectId" to target.id.projectId,
-            "userId" to target.id.userId,
-          ),
-        )
-      ).all {
-        transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-        transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
-      }
-
-      assertThat(stubber.isAuthorized(targetToken1)).isFalse()
-      assertThat(stubber.isAuthorized(targetToken2)).isFalse()
-      assertThat(stubber.isAuthorized(adminToken)).isTrue()
-    }
-  }
-
-  @Test fun `unauth any user succeeds with static token`() {
-    val project = stubber.projects.new()
-    val target = stubber.users(project).owner(idSuffix = "_another")
-    val staticToken = stubber.tokens(project).real(OWNER, isStatic = true).token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val targetToken1 = stubber.tokens(target).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-    val targetToken2 = stubber.tokens(target).real().token.tokenValue
-    timeProvider.advanceBy(Duration.ofHours(1))
-
-    assertAll {
-      assertThat(
-        restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$ANY_USER_AUTH",
-          method = HttpMethod.DELETE,
-          requestEntity = bearerEmptyRequest(staticToken),
-          uriVariables = mapOf(
-            "projectId" to target.id.projectId,
-            "userId" to target.id.userId,
-          ),
-        )
-      ).all {
-        transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-        transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
-      }
-
-      assertThat(stubber.isAuthorized(targetToken1)).isFalse()
-      assertThat(stubber.isAuthorized(targetToken2)).isFalse()
-      assertThat(stubber.isAuthorized(staticToken)).isTrue()
     }
   }
 
