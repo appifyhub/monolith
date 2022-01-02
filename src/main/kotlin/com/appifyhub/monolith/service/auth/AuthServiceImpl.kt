@@ -160,10 +160,18 @@ class AuthServiceImpl(
   }
 
   override fun unauthorizeAllFor(authData: Authentication, targetId: UserId) {
-    log.debug("Unauthorizing all access for $targetId")
+    log.debug("Unauthorizing all access for $targetId using $authData")
 
     val normalizedUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
     authData.forceToJwt(shallow = false)
+
+    authRepository.unauthorizeAllTokensFor(normalizedUserId)
+  }
+
+  override fun unauthorizeAllFor(targetId: UserId) {
+    log.debug("Unauthorizing all access for $targetId")
+
+    val normalizedUserId = Normalizers.UserId.run(targetId).requireValid { "User ID" }
 
     authRepository.unauthorizeAllTokensFor(normalizedUserId)
   }
@@ -209,7 +217,7 @@ class AuthServiceImpl(
     val geo = geoRepository.fetchGeolocationForIp(normalizedIp)?.mergeToString()
 
     val isCreator = creatorService.getCreatorProject().id == user.id.projectId
-    val isOwner = user.canActAs(Authority.OWNER)
+    val isOwner = user.authority == Authority.OWNER
     val isAllowedToCreateStaticTokens = isCreator || isOwner
     if (isStatic && !isAllowedToCreateStaticTokens)
       throwUnauthorized { "Only ${Authority.OWNER.groupName} can create static tokens" }

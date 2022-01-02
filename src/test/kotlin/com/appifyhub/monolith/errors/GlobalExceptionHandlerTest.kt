@@ -39,7 +39,7 @@ class GlobalExceptionHandlerTest {
     verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
     verify(response.outputStream).println(
       testMapper.writeValueAsString(
-        MessageResponse(message = "Unauthorized : ${exception.message}")
+        MessageResponse(message = "Unauthorized: ${exception.message}")
       )
     )
   }
@@ -55,7 +55,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Unauthorized : ${exception.message}")
+        .isEqualTo("Unauthorized: ${exception.message}")
     }
   }
 
@@ -70,7 +70,22 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Unauthorized : ${exception.message}")
+        .isEqualTo("Unauthorized: ${exception.message}")
+    }
+  }
+
+  @Test fun `handle illegal access exception`() {
+    val exception = IllegalAccessException("Something failed")
+
+    val result = handler.handleThrowable(exception)
+
+    assertThat(result).all {
+      prop("status") { it.statusCode }
+        .isEqualTo(HttpStatus.UNAUTHORIZED)
+      prop("headers") { it.headers }
+        .isEqualTo(HttpHeaders())
+      prop("message") { it.body?.message }
+        .isEqualTo("Unauthorized: ${exception.message}")
     }
   }
 
@@ -85,7 +100,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Credentials Error : ${exception.message}")
+        .isEqualTo("Credentials Error: ${exception.message}")
     }
   }
 
@@ -100,7 +115,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Unauthorized : ${exception.message}")
+        .isEqualTo("Unauthorized: ${exception.message}")
     }
   }
 
@@ -115,7 +130,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Access Error : ${exception.message}")
+        .isEqualTo("Access Error: ${exception.message}")
     }
   }
 
@@ -130,7 +145,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Access Error : ${exception.message}")
+        .isEqualTo("Access Error: ${exception.message}")
     }
   }
 
@@ -160,7 +175,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Request Error : ${exception.message}")
+        .isEqualTo("Request Error: ${exception.message}")
     }
   }
 
@@ -175,7 +190,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Request Error : ${exception.message}")
+        .isEqualTo("Request Error: ${exception.message}")
     }
   }
 
@@ -190,7 +205,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Request Error : ${exception.message}")
+        .isEqualTo("Request Error: ${exception.message}")
     }
   }
 
@@ -205,7 +220,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Request Error : ${exception.message}")
+        .isEqualTo("Request Error: ${exception.message}")
     }
   }
 
@@ -220,7 +235,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Request Error : ${exception.message}")
+        .isEqualTo("Request Error: ${exception.message}")
     }
   }
 
@@ -235,7 +250,7 @@ class GlobalExceptionHandlerTest {
       prop("headers") { it.headers }
         .isEqualTo(HttpHeaders())
       prop("message") { it.body?.message }
-        .isEqualTo("Internal Error : ${exception.message}")
+        .isEqualTo("Internal Error: ${exception.message}")
     }
   }
 

@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.repository.user
 
+import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
@@ -10,6 +11,7 @@ import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -20,9 +22,10 @@ import org.springframework.stereotype.Repository
 @Repository
 class UserRepositoryImpl(
   private val userDao: UserDao,
+  private val tokenDetailsRepository: TokenDetailsRepository,
   private val passwordEncoder: PasswordEncoder,
-  private val timeProvider: TimeProvider,
   private val springSecurityUserManager: SpringSecurityUserManager,
+  private val timeProvider: TimeProvider,
 ) : UserRepository,
   SpringSecurityUserManager by springSecurityUserManager {
 
@@ -56,14 +59,29 @@ class UserRepositoryImpl(
     return userDao.findById(id.toData()).get().toDomain()
   }
 
-  override fun fetchAllUsersByContact(contact: String): List<User> {
-    log.debug("Fetching all users by contact $contact")
-    return userDao.findAllByContact(contact).map(UserDbm::toDomain)
-  }
-
   override fun fetchAllUsersByProjectId(projectId: Long): List<User> {
     log.debug("Fetching all users for project $projectId")
     return userDao.findAllByProject_ProjectId(projectId).map(UserDbm::toDomain)
+  }
+
+  override fun fetchUserByUserIdAndVerificationToken(userId: UserId, verificationToken: String): User {
+    log.debug("Fetching user $userId with token $verificationToken")
+    return userDao.findByIdAndVerificationToken(userId.toData(), verificationToken).toDomain()
+  }
+
+  override fun searchByName(projectId: Long, name: String): List<User> {
+    log.debug("Searching users by name $name in project $projectId")
+    return userDao.searchAllByProject_ProjectIdAndNameLike(projectId, name).map(UserDbm::toDomain)
+  }
+
+  override fun searchByContact(projectId: Long, contact: String): List<User> {
+    log.debug("Searching users by contact $contact in project $projectId")
+    return userDao.searchAllByProject_ProjectIdAndContactLike(projectId, contact).map(UserDbm::toDomain)
+  }
+
+  override fun count(projectId: Long): Long {
+    log.debug("Counting users in project $projectId")
+    return userDao.countAllByProject_ProjectId(projectId)
   }
 
   override fun updateUser(updater: UserUpdater, userIdType: UserIdType): User {
@@ -81,18 +99,45 @@ class UserRepositoryImpl(
 
   override fun removeUserById(id: UserId) {
     log.debug("Removing user $id")
+
+    // cascade manually for now
+    val user = userDao.findById(id.toData()).get().toDomain()
+    val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
+    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
+    tokenDetailsRepository.removeTokensFor(user, project = null)
+
+    // finally remove
     userDao.deleteById(id.toData())
   }
 
   override fun removeUserByUniversalId(universalId: String) {
     log.debug("Removing user $universalId")
     val userId = UserId.fromUniversalFormat(universalId)
+
+    // cascade manually for now
+    val user = userDao.findById(userId.toData()).get().toDomain()
+    val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
+    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
+    tokenDetailsRepository.removeTokensFor(user, project = null)
+
+    // finally remove
     userDao.deleteById(userId.toData())
   }
 
   override fun removeAllUsersByProjectId(projectId: Long) {
     log.debug("Removing all users from project $projectId")
-    return userDao.deleteAllByProject_ProjectId(projectId)
+
+    // cascade manually for now
+    userDao.findAllByProject_ProjectId(projectId)
+      .map(UserDbm::toDomain)
+      .forEach { user ->
+        val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
+        tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
+        tokenDetailsRepository.removeTokensFor(user, project = null)
+      }
+
+    // finally, remove the user
+    userDao.deleteAllByProject_ProjectId(projectId)
   }
 
   // Helpers

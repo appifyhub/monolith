@@ -6,7 +6,7 @@ import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
 
-class CreatorOpsMapperTest {
+class CreatorProjectOpsMapperTest {
 
   @Test fun `project creator - network to domain (with user)`() {
     assertThat(Stubs.projectCreateRequest.toDomain(owner = Stubs.user))

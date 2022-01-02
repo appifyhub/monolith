@@ -47,7 +47,7 @@ fun <T> Normalizer.Result<T>.requireValid(
   propName: () -> Any = { "Property" },
 ) = if (!isValid) throwNormalization { "${propName()} '$value' is invalid" } else value
 
-inline fun <R> silent(log: Boolean = true, block: () -> R?): R? = try {
+inline fun <R> silent(log: Boolean = false, block: () -> R?): R? = try {
   block()
 } catch (t: Throwable) {
   if (log) t.printStackTrace()

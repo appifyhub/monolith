@@ -6,7 +6,7 @@ import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
 
-class CreatorMapperTest {
+class CreatorProjectMapperTest {
 
   @Test fun `property filter query params - network to domain`() {
     assertThat(Stubs.propertyFilterQueryParams.toDomain())

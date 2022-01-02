@@ -26,19 +26,22 @@ import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
-import com.appifyhub.monolith.network.creator.ProjectFeatureDto
-import com.appifyhub.monolith.network.creator.ProjectResponse
-import com.appifyhub.monolith.network.creator.ProjectStatusDto
-import com.appifyhub.monolith.network.creator.ops.ProjectCreateRequest
-import com.appifyhub.monolith.network.creator.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.creator.project.ProjectFeatureDto
+import com.appifyhub.monolith.network.creator.project.ProjectResponse
+import com.appifyhub.monolith.network.creator.project.ProjectStatusDto
+import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
+import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
+import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
-import com.appifyhub.monolith.network.user.ops.UserCreatorRequest
-import com.appifyhub.monolith.network.user.ops.UserUpdaterRequest
+import com.appifyhub.monolith.network.user.ops.UserSignupRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
+import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.service.access.AccessManager.Feature
@@ -53,6 +56,7 @@ import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @Suppress("MayBeConstant")
@@ -108,6 +112,15 @@ object Stubs {
     countryCode = "DE",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
+  val companyUpdated = company.copy(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
+  )
+
   val ipAddress = "173.85.251.191"
 
   val geo = Geolocation(
@@ -157,9 +170,27 @@ object Stubs {
     contactType = User.ContactType.EMAIL,
     verificationToken = "abcd1234",
     birthday = Date(0xB00000),
+    company = company,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
-    company = company,
+  )
+
+  var userUpdated = user.copy(
+    id = user.id,
+    signature = "1drowssap",
+    name = "User's Name 1",
+    type = User.Type.PERSONAL,
+    authority = User.Authority.MODERATOR,
+    allowsSpam = false,
+    contact = "+491760000001",
+    contactType = User.ContactType.PHONE,
+    verificationToken = "abcd12341",
+    birthday = Date(0x10B00001),
+    company = companyUpdated,
+    languageTag = Locale.UK.toLanguageTag(),
+    createdAt = user.createdAt,
+    updatedAt = Date(0xA00001),
   )
 
   val project = Project(
@@ -169,6 +200,15 @@ object Stubs {
     userIdType = Project.UserIdType.USERNAME,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
+  )
+
+  val projectUpdated = Project(
+    id = project.id,
+    type = Project.Type.FREE,
+    status = Project.Status.SUSPENDED,
+    userIdType = project.userIdType,
+    createdAt = project.createdAt,
+    updatedAt = Date(0xA20001),
   )
 
   val schema = Schema(
@@ -264,6 +304,15 @@ object Stubs {
     countryCode = "DE",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
+  val companyUpdatedDbm = OrganizationDbm(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
+  )
+
   val userDbm = UserDbm(
     id = userIdDbm,
     project = projectDbm,
@@ -276,9 +325,28 @@ object Stubs {
     contactType = "EMAIL",
     verificationToken = "abcd1234",
     birthday = Date(0xB00000),
+    company = companyDbm,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC00000),
     updatedAt = Date(0xA00000),
-    company = companyDbm,
+  )
+
+  val userUpdatedDbm = UserDbm(
+    id = userIdDbm,
+    project = projectDbm,
+    signature = "1drowssap",
+    name = "User's Name 1",
+    type = "PERSONAL",
+    authority = "MODERATOR",
+    allowsSpam = false,
+    contact = "+491760000001",
+    contactType = "PHONE",
+    verificationToken = "abcd12341",
+    birthday = Date(0x10B00001),
+    company = companyUpdatedDbm,
+    languageTag = Locale.UK.toLanguageTag(),
+    createdAt = userDbm.createdAt,
+    updatedAt = Date(0xA00001),
   )
 
   @Suppress("MemberVisibilityCanBePrivate")
@@ -345,70 +413,6 @@ object Stubs {
 
   // endregion
 
-  // region Domain Models (with updated values)
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val companyUpdated = company.copy(
-    name = "Company 1",
-    street = "Street Name 11",
-    postcode = "123451",
-    city = "City 1",
-    countryCode = "DF",
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val companyUpdatedDbm = OrganizationDbm(
-    name = "Company 1",
-    street = "Street Name 11",
-    postcode = "123451",
-    city = "City 1",
-    countryCode = "DF",
-  )
-
-  var userUpdated = user.copy(
-    id = user.id,
-    signature = "1drowssap",
-    name = "User's Name 1",
-    type = User.Type.PERSONAL,
-    authority = User.Authority.MODERATOR,
-    allowsSpam = false,
-    contact = "+491760000001",
-    contactType = User.ContactType.PHONE,
-    verificationToken = "abcd12341",
-    birthday = Date(0x10B00001),
-    company = companyUpdated,
-    createdAt = user.createdAt,
-    updatedAt = Date(0xA00001),
-  )
-
-  val userUpdatedDbm = UserDbm(
-    id = userIdDbm,
-    project = projectDbm,
-    signature = "1drowssap",
-    name = "User's Name 1",
-    type = "PERSONAL",
-    authority = "MODERATOR",
-    allowsSpam = false,
-    contact = "+491760000001",
-    contactType = "PHONE",
-    verificationToken = "abcd12341",
-    birthday = Date(0x10B00001),
-    createdAt = userDbm.createdAt,
-    updatedAt = Date(0xA00001),
-    company = companyUpdatedDbm,
-  )
-
-  val projectUpdated = Project(
-    id = project.id,
-    type = Project.Type.FREE,
-    status = Project.Status.SUSPENDED,
-    userIdType = project.userIdType,
-    createdAt = project.createdAt,
-    updatedAt = Date(0xA20001),
-  )
-
-  // endregion
-
   // region Auth Ops Models
 
   val tokenCreator = TokenCreator(
@@ -455,7 +459,7 @@ object Stubs {
   val userCreator = UserCreator(
     userId = "username",
     projectId = project.id,
-    rawSecret = "password",
+    rawSignature = "password",
     name = "User's Name",
     type = User.Type.ORGANIZATION,
     authority = User.Authority.ADMIN,
@@ -464,6 +468,7 @@ object Stubs {
     contactType = User.ContactType.EMAIL,
     birthday = Date(0xB00000),
     company = company,
+    languageTag = Locale.US.toLanguageTag(),
   )
 
   val companyUpdater = OrganizationUpdater(
@@ -486,6 +491,7 @@ object Stubs {
     verificationToken = Settable("abcd12341"),
     birthday = Settable(Date(0x10B00001)),
     company = Settable(companyUpdater),
+    languageTag = Settable(Locale.UK.toLanguageTag()),
   )
 
   val projectCreator = ProjectCreator(
@@ -513,6 +519,15 @@ object Stubs {
     countryCode = "DE",
   )
 
+  @Suppress("MemberVisibilityCanBePrivate")
+  val companyDtoUpdated = OrganizationDto(
+    name = "Company 1",
+    street = "Street Name 11",
+    postcode = "123451",
+    city = "City 1",
+    countryCode = "DF",
+  )
+
   val userResponse = UserResponse(
     userId = userId.userId,
     projectId = userId.projectId,
@@ -523,10 +538,28 @@ object Stubs {
     allowsSpam = true,
     contact = "user@example.com",
     contactType = "EMAIL",
-    birthday = "1970-05-15",
+    birthday = "1970-05-14",
     company = companyDto,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = "1970-05-14 03:04",
     updatedAt = "1970-05-15 05:06",
+  )
+
+  val userResponseUpdated = UserResponse(
+    userId = userId.userId,
+    projectId = userId.projectId,
+    universalId = universalUserId,
+    name = "User's Name 1",
+    type = User.Type.PERSONAL.name,
+    authority = User.Authority.MODERATOR.name,
+    allowsSpam = false,
+    contact = "+491760000001",
+    contactType = User.ContactType.PHONE.name,
+    birthday = "1978-11-15",
+    company = companyDtoUpdated,
+    languageTag = Locale.UK.toLanguageTag(),
+    createdAt = "1970-05-14 03:04",
+    updatedAt = "1970-05-02 08:42",
   )
 
   val tokenResponse = TokenResponse(
@@ -550,13 +583,13 @@ object Stubs {
 
   val userCredentialsRequest = UserCredentialsRequest(
     universalId = universalUserId,
-    secret = "password",
+    signature = "password",
     origin = "Token Origin",
   )
 
   val creatorCredentialsRequest = CreatorCredentialsRequest(
     universalId = userCredentialsRequest.universalId,
-    secret = userCredentialsRequest.secret,
+    signature = userCredentialsRequest.signature,
     origin = userCredentialsRequest.origin,
   )
 
@@ -658,15 +691,11 @@ object Stubs {
 
   // region Network Ops Models
 
-  val userCreatorRequest = UserCreatorRequest(
+  val creatorSignupRequest = CreatorSignupRequest(
     userId = "username",
     rawSignature = "password",
     name = "User's Name",
     type = "ORGANIZATION",
-    authority = "ADMIN",
-    allowsSpam = true,
-    contact = "user@example.com",
-    contactType = "EMAIL",
     birthday = "1970-05-14",
     company = companyDto,
   )
@@ -679,16 +708,35 @@ object Stubs {
     countryCode = SettableRequest("DF"),
   )
 
-  val userUpdaterRequest = UserUpdaterRequest(
-    rawSignature = SettableRequest("password1"),
-    type = SettableRequest("PERSONAL"),
-    authority = SettableRequest("MODERATOR"),
-    contactType = SettableRequest("PHONE"),
-    allowsSpam = SettableRequest(false),
+  val userSignupRequest = UserSignupRequest(
+    userId = "username",
+    rawSignature = "password",
+    name = "User's Name",
+    type = "ORGANIZATION",
+    allowsSpam = true,
+    contact = "user@example.com",
+    contactType = "EMAIL",
+    birthday = "1970-05-14",
+    company = companyDto,
+    languageTag = Locale.US.toLanguageTag(),
+  )
+
+  val userUpdateAuthorityRequest = UserUpdateAuthorityRequest(authority = User.Authority.MODERATOR.name)
+
+  val userUpdateDataRequest = UserUpdateDataRequest(
     name = SettableRequest("User's Name 1"),
+    type = SettableRequest("PERSONAL"),
+    allowsSpam = SettableRequest(false),
     contact = SettableRequest("+491760000001"),
-    birthday = SettableRequest("1970-05-15"),
+    contactType = SettableRequest("PHONE"),
+    birthday = SettableRequest("1978-11-15"),
     company = SettableRequest(companyUpdaterDto),
+    languageTag = SettableRequest(Locale.UK.toLanguageTag()),
+  )
+
+  val userUpdateSignatureRequest = UserUpdateSignatureRequest(
+    rawSignatureOld = "password",
+    rawSignatureNew = "password1",
   )
 
   val projectCreateRequest = ProjectCreateRequest(

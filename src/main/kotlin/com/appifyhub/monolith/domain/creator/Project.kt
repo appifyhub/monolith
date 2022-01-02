@@ -4,11 +4,11 @@ import java.util.Date
 
 data class Project(
   val id: Long,
-  val type: Type = Type.COMMERCIAL,
-  val status: Status = Status.REVIEW,
-  val userIdType: UserIdType = UserIdType.RANDOM,
+  val type: Type,
+  val status: Status,
+  val userIdType: UserIdType,
   val createdAt: Date,
-  val updatedAt: Date = createdAt,
+  val updatedAt: Date,
 ) {
 
   enum class UserIdType {

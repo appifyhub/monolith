@@ -5,11 +5,11 @@ import assertk.assertThat
 import assertk.assertions.containsAll
 import assertk.assertions.containsNone
 import assertk.assertions.isEqualTo
-import com.appifyhub.monolith.domain.creator.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.GENERIC_DECIMAL
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.GENERIC_FLAG
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.GENERIC_INTEGER
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.GENERIC_STRING
+import com.appifyhub.monolith.domain.creator.property.PropertyCategory.GENERIC
 import com.appifyhub.monolith.domain.creator.property.PropertyTag.COSMETIC
 import com.appifyhub.monolith.domain.creator.property.PropertyTag.IMPORTANT
 import com.appifyhub.monolith.domain.creator.property.PropertyType.FLAG
@@ -97,7 +97,7 @@ class ProjectPropertyTest {
     ).isEqualTo(listOf(GENERIC_FLAG))
   }
 
-  // Helpers 
+  // Helpers
 
   private fun List<ProjectProperty>.forTest() = filter { it in allGeneric }
 

@@ -11,6 +11,7 @@ import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import java.util.Date
+import java.util.Locale
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 
@@ -275,7 +276,7 @@ class CleanersTest {
   }
 
   @Test fun `orga with nulls is null`() {
-    assertThat(Cleaners.Organization.clean(Organization()))
+    assertThat(Cleaners.Organization.clean(Organization.EMPTY))
       .isNull()
   }
 
@@ -402,6 +403,27 @@ class CleanersTest {
     val birthday: BDay = Date() to mock()
     assertThat(Cleaners.BDay.clean(birthday))
       .isEqualTo(birthday)
+  }
+
+  @Test fun `language tag defaulting to null with null`() {
+    assertThat(Cleaners.LanguageTag.clean(null))
+      .isNull()
+  }
+
+  @Test fun `language tag defaulting to null with empty`() {
+    assertThat(Cleaners.LanguageTag.clean(""))
+      .isNull()
+  }
+
+  @Test fun `language tag defaulting to null with invalid code`() {
+    assertThat(Cleaners.LanguageTag.clean("asdasdasdasd"))
+      .isNull()
+  }
+
+  @Test fun `language tag cleans trimmed valid code`() {
+    val tag = Locale.US.toLanguageTag()
+    assertThat(Cleaners.LanguageTag.clean(" \n$tag\t "))
+      .isEqualTo(tag)
   }
 
   // endregion

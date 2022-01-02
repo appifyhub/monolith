@@ -18,6 +18,7 @@ data class UserResponse(
   @JsonProperty("contact_type") val contactType: String,
   @JsonProperty("birthday") val birthday: String?,
   @JsonProperty("company") val company: OrganizationDto?,
+  @JsonProperty("language_tag") val languageTag: String?,
   @JsonProperty("created_at") val createdAt: String,
   @JsonProperty("updated_at") val updatedAt: String,
 ) : Serializable

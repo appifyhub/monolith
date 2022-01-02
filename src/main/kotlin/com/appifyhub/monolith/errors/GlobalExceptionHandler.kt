@@ -2,8 +2,6 @@ package com.appifyhub.monolith.errors
 
 import com.appifyhub.monolith.network.common.MessageResponse
 import com.fasterxml.jackson.databind.ObjectMapper
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -19,6 +17,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ResponseStatusException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
@@ -46,79 +46,80 @@ class GlobalExceptionHandler(
 
       t is AuthenticationException ||
         t is AccessDeniedException ||
+        t is IllegalAccessException ||
         t.message?.contains("access is denied", ignoreCase = true) == true ->
 
         ResponseEntity(
-          MessageResponse("Unauthorized : ${t.message}"),
+          MessageResponse("Unauthorized: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t.message?.contains("invalid credentials", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Credentials Error : ${t.message}"),
+          MessageResponse("Credentials Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t.message?.contains("token is blocked", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Access Error : ${t.message}"),
+          MessageResponse("Access Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t.message?.contains("token expired", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Access Error : ${t.message}"),
+          MessageResponse("Access Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t is ResponseStatusException ->
         ResponseEntity(
-          MessageResponse(t.reason ?: "Request Error : ${t.message}"),
+          MessageResponse(t.reason ?: "Request Error: ${t.message}"),
           HttpHeaders(),
           t.status,
         )
 
       t is IllegalStateException ->
         ResponseEntity(
-          MessageResponse("Request Error : ${t.message}"),
+          MessageResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNPROCESSABLE_ENTITY,
         )
 
       t is IllegalArgumentException ->
         ResponseEntity(
-          MessageResponse("Request Error : ${t.message}"),
+          MessageResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNPROCESSABLE_ENTITY,
         )
 
       t is NoSuchElementException ->
         ResponseEntity(
-          MessageResponse("Request Error : ${t.message}"),
+          MessageResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.NOT_FOUND,
         )
 
       t is EmptyResultDataAccessException ->
         ResponseEntity(
-          MessageResponse("Request Error : ${t.message}"),
+          MessageResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.NOT_FOUND,
         )
 
       else ->
         ResponseEntity(
-          MessageResponse("Internal Error : ${t.message}"),
+          MessageResponse("Internal Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.INTERNAL_SERVER_ERROR,
         )
 
     }.also {
-      log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}", t)
+      log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}, body=${it.body}", t)
     }
 
 }

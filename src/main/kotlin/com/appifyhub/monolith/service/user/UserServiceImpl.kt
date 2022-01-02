@@ -1,19 +1,24 @@
 package com.appifyhub.monolith.service.user
 
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
+import com.appifyhub.monolith.domain.creator.Project.UserIdType
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.silent
+import com.appifyhub.monolith.util.ext.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -22,6 +27,7 @@ import org.springframework.stereotype.Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
   private val creatorService: CreatorService,
+  private val propertyService: PropertyService,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
@@ -38,7 +44,7 @@ class UserServiceImpl(
       UserIdType.CUSTOM -> Normalizers.CustomUserId.run(creator.userId).requireValid { "User ID" }
       UserIdType.RANDOM -> null
     }
-    val normalizedRawSignature = Normalizers.RawSignature.run(creator.rawSecret).requireValid { "Signature" }
+    val normalizedRawSignature = Normalizers.RawSignature.run(creator.rawSignature).requireValid { "Signature" }
     val normalizedName = Normalizers.Name.run(creator.name).requireValid { "Name" }
     val normalizedContact = when (creator.contactType) {
       ContactType.EMAIL -> Normalizers.Email.run(creator.contact).requireValid { "Contact Email" }
@@ -48,11 +54,12 @@ class UserServiceImpl(
     val normalizedContactType = if (normalizedContact == null) ContactType.CUSTOM else creator.contactType
     val normalizedCompany = Normalizers.Organization.run(creator.company).requireValid { "Company" }
     val normalizedBirthday = Normalizers.BDay.run(creator.birthday to timeProvider).requireValid { "Birthday" }?.first
+    val normalizedLanguageTag = Normalizers.LanguageTag.run(creator.languageTag).requireValid { "Language Tag" }
 
     val normalizedCreator = UserCreator(
       userId = normalizedId,
       projectId = creator.projectId,
-      rawSecret = normalizedRawSignature,
+      rawSignature = normalizedRawSignature,
       name = normalizedName,
       type = creator.type,
       authority = creator.authority,
@@ -61,7 +68,17 @@ class UserServiceImpl(
       contactType = normalizedContactType,
       birthday = normalizedBirthday,
       company = normalizedCompany,
+      languageTag = normalizedLanguageTag,
     )
+
+    val maxUsers = silent {
+      propertyService.fetchProperty<Int>(
+        projectId = normalizedCreator.projectId,
+        propName = ProjectProperty.MAX_USERS.name,
+      ).typed().toLong()
+    } ?: Long.MAX_VALUE
+    val totalUsers = userRepository.count(normalizedCreator.projectId)
+    if (totalUsers >= maxUsers) throwPreconditionFailed { "Maximum users reached" }
 
     return userRepository.addUser(normalizedCreator, userIdType)
   }
@@ -78,16 +95,32 @@ class UserServiceImpl(
     return userRepository.fetchUserByUniversalId(normalizedUniversalId)
   }
 
-  override fun fetchAllUsersByContact(contact: String): List<User> {
-    log.debug("Fetching user by $contact")
-    val normalizedContact = Normalizers.NotBlank.run(contact).requireValid { "Contact" }
-    return userRepository.fetchAllUsersByContact(normalizedContact)
-  }
-
   override fun fetchAllUsersByProjectId(projectId: Long): List<User> {
     log.debug("Fetching all users by project $projectId")
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
     return userRepository.fetchAllUsersByProjectId(normalizedProjectId)
+  }
+
+  override fun fetchUserByUserIdAndVerificationToken(userId: UserId, verificationToken: String): User {
+    log.debug("Fetching user by $userId, token=$verificationToken")
+    val normalizedUserId = Normalizers.UserId.run(userId).requireValid { "User ID" }
+    val normalizedVerificationToken = Normalizers.Dense.run(verificationToken).requireValid { "Verification Token" }
+
+    return userRepository.fetchUserByUserIdAndVerificationToken(normalizedUserId, normalizedVerificationToken)
+  }
+
+  override fun searchByName(projectId: Long, name: String): List<User> {
+    log.debug("Searching users by name $name in $projectId")
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+    val normalizedName = Normalizers.NotBlank.run(name).requireValid { "Name" }
+    return userRepository.searchByName(normalizedProjectId, normalizedName)
+  }
+
+  override fun searchByContact(projectId: Long, contact: String): List<User> {
+    log.debug("Searching users by contact $contact in $projectId")
+    val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
+    val normalizedContact = Normalizers.NotBlank.run(contact).requireValid { "Contact" }
+    return userRepository.searchByContact(normalizedProjectId, normalizedContact)
   }
 
   override fun updateUser(updater: UserUpdater): User {
@@ -163,6 +196,9 @@ class UserServiceImpl(
     val normalizedBirthday = updater.birthday?.mapValueNullable {
       Normalizers.BDay.run(it to timeProvider).requireValid { "Birthday" }?.first
     }
+    val normalizedLanguageTag = updater.languageTag?.mapValueNullable {
+      Normalizers.LanguageTag.run(it).requireValid { "Language Tag" }
+    }
 
     val normalizedUpdater = UserUpdater(
       id = normalizedId,
@@ -176,9 +212,23 @@ class UserServiceImpl(
       verificationToken = normalizedVerificationToken,
       birthday = normalizedBirthday,
       company = normalizedCompany,
+      languageTag = normalizedLanguageTag,
     )
 
     return userRepository.updateUser(normalizedUpdater, userIdType)
+  }
+
+  override fun resetSignatureById(id: UserId): User {
+    log.debug("Resetting signature by $id")
+
+    val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
+    val userIdType = creatorService.fetchProjectById(id.projectId).userIdType
+    val updater = UserUpdater(
+      id = normalizedUserId,
+      rawSignature = Settable(SignatureGenerator.nextSignature),
+    )
+
+    return userRepository.updateUser(updater, userIdType)
   }
 
   override fun removeUserById(id: UserId) {

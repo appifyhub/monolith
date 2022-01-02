@@ -1,11 +1,11 @@
 package com.appifyhub.monolith.util
 
-import java.nio.charset.Charset
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import java.nio.charset.Charset
 
-fun blankRequest() = HttpEntity<Any?>(
+fun emptyRequest() = HttpEntity<Any?>(
   HttpHeaders().apply {
     acceptCharset = listOf(Charset.defaultCharset())
     accept = listOf(MediaType.APPLICATION_JSON)
@@ -20,7 +20,7 @@ fun <T> bodyRequest(body: T) = HttpEntity<T>(
   }
 )
 
-fun bearerBlankRequest(token: String) = HttpEntity<Any?>(
+fun bearerEmptyRequest(token: String) = HttpEntity<Any?>(
   HttpHeaders().apply {
     acceptCharset = listOf(Charset.defaultCharset())
     accept = listOf(MediaType.APPLICATION_JSON)
@@ -37,4 +37,4 @@ fun <T> bearerBodyRequest(body: T, token: String) = HttpEntity<T>(
   }
 )
 
-fun blankUriVariables() = emptyMap<String, String>()
+fun emptyUriVariables() = emptyMap<String, String>()

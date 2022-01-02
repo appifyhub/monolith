@@ -182,6 +182,11 @@ class NormalizersTest {
       .consistsOf(Validators.FlagAsString, Cleaners.FlagDefTrueAsString)
   }
 
+  @Test fun `prop anyone can search = flag as string + flag def false as string`() {
+    assertThat(Normalizers.PropAnyoneCanSearch)
+      .consistsOf(Validators.FlagAsString, Cleaners.FlagDefFalseAsString)
+  }
+
   // endregion
 
   // region Other normalizers
@@ -199,6 +204,11 @@ class NormalizersTest {
   @Test fun `birthday = birthday + birthday`() {
     assertThat(Normalizers.BDay)
       .consistsOf(Validators.BDay, Cleaners.BDay)
+  }
+
+  @Test fun `language tag = language tag + language tag`() {
+    assertThat(Normalizers.LanguageTag)
+      .consistsOf(Validators.LanguageTag, Cleaners.LanguageTag)
   }
 
   // endregion

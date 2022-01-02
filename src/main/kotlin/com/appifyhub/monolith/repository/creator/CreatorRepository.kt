@@ -26,6 +26,6 @@ interface CreatorRepository {
 
   @Throws fun removeProjectById(projectId: Long)
 
-  @Throws fun removeAllProjectsByCreator(creatorUserId: UserId)
+  @Throws fun removeAllProjectsByCreator(creatorId: UserId)
 
 }

@@ -13,11 +13,17 @@ interface UserService {
 
   @Throws fun fetchUserByUniversalId(universalId: String): User
 
-  @Throws fun fetchAllUsersByContact(contact: String): List<User>
-
   @Throws fun fetchAllUsersByProjectId(projectId: Long): List<User>
 
+  @Throws fun fetchUserByUserIdAndVerificationToken(userId: UserId, verificationToken: String): User
+
+  @Throws fun searchByName(projectId: Long, name: String): List<User>
+
+  @Throws fun searchByContact(projectId: Long, contact: String): List<User>
+
   @Throws fun updateUser(updater: UserUpdater): User
+
+  @Throws fun resetSignatureById(id: UserId): User
 
   @Throws fun removeUserById(id: UserId)
 

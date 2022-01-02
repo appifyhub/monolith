@@ -10,9 +10,10 @@ import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.AUTH
-import com.appifyhub.monolith.controller.common.Endpoints.TOKENS
+import com.appifyhub.monolith.controller.common.Endpoints.USER_AUTH
+import com.appifyhub.monolith.controller.common.Endpoints.USER_TOKENS
 import com.appifyhub.monolith.domain.creator.Project.Status
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
@@ -24,8 +25,8 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerBlankRequest
-import com.appifyhub.monolith.util.blankUriVariables
+import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.emptyUriVariables
 import com.appifyhub.monolith.util.bodyRequest
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
@@ -71,16 +72,16 @@ class UserAuthControllerTest {
   @Test fun `auth user fails with invalid credentials`() {
     val credentials = UserCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
-      secret = "invalid",
+      signature = "invalid",
       origin = Stubs.userCredentialsRequest.origin,
     )
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -96,10 +97,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -109,16 +110,16 @@ class UserAuthControllerTest {
   @Test fun `auth user succeeds with valid credentials`() {
     val credentials = UserCredentialsRequest(
       universalId = stubber.creators.default().id.toUniversalFormat(),
-      secret = Stubs.userCredentialsRequest.secret,
+      signature = Stubs.userCredentialsRequest.signature,
       origin = Stubs.userCredentialsRequest.origin,
     )
 
     assertThat(
       restTemplate.exchange<TokenResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -129,10 +130,10 @@ class UserAuthControllerTest {
   @Test fun `get current token fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -145,10 +146,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -161,10 +162,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<TokenDetailsResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -177,10 +178,10 @@ class UserAuthControllerTest {
   @Test fun `get all tokens fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$TOKENS",
+        url = "$baseUrl$USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -193,10 +194,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$TOKENS",
+        url = "$baseUrl$USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -211,10 +212,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<List<TokenDetailsResponse>>(
-        url = "$baseUrl$TOKENS",
+        url = "$baseUrl$USER_TOKENS",
         method = HttpMethod.GET,
-        requestEntity = bearerBlankRequest(token1),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token1),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -226,13 +227,63 @@ class UserAuthControllerTest {
     }
   }
 
+  @Test fun `get any user tokens succeeds for lower rank`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val adminToken = stubber.tokens(project).real(User.Authority.ADMIN).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val target = stubber.users(project).default()
+    val targetToken = stubber.tokens(target).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+
+    assertThat(
+      restTemplate.exchange<List<TokenDetailsResponse>>(
+        url = "$baseUrl$USER_TOKENS?user_id={user_id}",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest(adminToken),
+        uriVariables = mapOf(
+          "user_id" to target.id.toUniversalFormat(),
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isEqualTo(
+        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() }
+      )
+    }
+  }
+
+  @Test fun `get any user tokens succeeds with static token`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val target = stubber.users(project).owner(idSuffix = "_another")
+    val staticToken = stubber.tokens(project).real(OWNER, isStatic = true).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val targetToken = stubber.tokens(target).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+
+    assertThat(
+      restTemplate.exchange<List<TokenDetailsResponse>>(
+        url = "$baseUrl$USER_TOKENS?user_id={user_id}",
+        method = HttpMethod.GET,
+        requestEntity = bearerEmptyRequest(staticToken),
+        uriVariables = mapOf(
+          "user_id" to target.id.toUniversalFormat(),
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isEqualTo(
+        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() }
+      )
+    }
+  }
+
   @Test fun `refresh user fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -245,10 +296,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
@@ -260,10 +311,10 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<TokenResponse>(
-        url = "$baseUrl$AUTH",
+        url = "$baseUrl$USER_AUTH",
         method = HttpMethod.PUT,
-        requestEntity = bearerBlankRequest(token),
-        uriVariables = blankUriVariables(),
+        requestEntity = bearerEmptyRequest(token),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -277,9 +328,9 @@ class UserAuthControllerTest {
   @Test fun `unauth user fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH?all={all}",
+        url = "$baseUrl$USER_AUTH?all={all}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("all" to null),
       )
     ).all {
@@ -293,9 +344,9 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$AUTH?all={all}",
+        url = "$baseUrl$USER_AUTH?all={all}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("all" to null),
       )
     ).all {
@@ -309,9 +360,9 @@ class UserAuthControllerTest {
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$AUTH?all={all}",
+          url = "$baseUrl$USER_AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token),
+          requestEntity = bearerEmptyRequest(token),
           uriVariables = mapOf("all" to false),
         )
       ).all {
@@ -332,9 +383,9 @@ class UserAuthControllerTest {
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$AUTH?all={all}",
+          url = "$baseUrl$USER_AUTH?all={all}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token1),
+          requestEntity = bearerEmptyRequest(token1),
           uriVariables = mapOf("all" to true),
         )
       ).all {
@@ -350,9 +401,9 @@ class UserAuthControllerTest {
   @Test fun `unauth tokens fails when unauthorized`() {
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+        url = "$baseUrl$USER_TOKENS?token_ids={token1}&token_ids={token2}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest("invalid"),
+        requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
           "token1" to null,
           "token2" to null,
@@ -369,9 +420,9 @@ class UserAuthControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+        url = "$baseUrl$USER_TOKENS?token_ids={token1}&token_ids={token2}",
         method = HttpMethod.DELETE,
-        requestEntity = bearerBlankRequest(token),
+        requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
           "token1" to null,
           "token2" to null,
@@ -393,9 +444,9 @@ class UserAuthControllerTest {
     assertAll {
       assertThat(
         restTemplate.exchange<MessageResponse>(
-          url = "$baseUrl$TOKENS?tokenIds={token1}&tokenIds={token2}",
+          url = "$baseUrl$USER_TOKENS?token_ids={token1}&token_ids={token2}",
           method = HttpMethod.DELETE,
-          requestEntity = bearerBlankRequest(token3),
+          requestEntity = bearerEmptyRequest(token3),
           uriVariables = mapOf(
             "token1" to token1,
             "token2" to token2,
@@ -409,6 +460,112 @@ class UserAuthControllerTest {
       assertThat(stubber.isAuthorized(token1)).isFalse()
       assertThat(stubber.isAuthorized(token2)).isFalse()
       assertThat(stubber.isAuthorized(token3)).isTrue()
+    }
+  }
+
+  @Test fun `unauth any user tokens fails when unauthorized`() {
+    val targetId = stubber.creators.default().id
+
+    assertThat(
+      restTemplate.exchange<MessageResponse>(
+        url = "$baseUrl$USER_AUTH?user_id={user_id}",
+        method = HttpMethod.DELETE,
+        requestEntity = bearerEmptyRequest("invalid"),
+        uriVariables = mapOf(
+          "user_id" to targetId.toUniversalFormat(),
+        ),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
+    }
+  }
+
+  @Test fun `unauth any user succeeds for self`() {
+    val self = stubber.creators.default()
+    val token1 = stubber.tokens(self).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val token2 = stubber.tokens(self).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+
+    assertAll {
+      assertThat(
+        restTemplate.exchange<MessageResponse>(
+          url = "$baseUrl$USER_AUTH?user_id={user_id}&all=true",
+          method = HttpMethod.DELETE,
+          requestEntity = bearerEmptyRequest(token1),
+          uriVariables = mapOf(
+            "user_id" to self.id.toUniversalFormat(),
+          ),
+        )
+      ).all {
+        transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+        transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      }
+
+      assertThat(stubber.isAuthorized(token1)).isFalse()
+      assertThat(stubber.isAuthorized(token2)).isFalse()
+    }
+  }
+
+  @Test fun `unauth any user succeeds for lower rank`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val target = stubber.users(project).default()
+    val adminToken = stubber.tokens(project).real(User.Authority.ADMIN).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val targetToken1 = stubber.tokens(target).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val targetToken2 = stubber.tokens(target).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+
+    assertAll {
+      assertThat(
+        restTemplate.exchange<MessageResponse>(
+          url = "$baseUrl$USER_AUTH?user_id={user_id}",
+          method = HttpMethod.DELETE,
+          requestEntity = bearerEmptyRequest(adminToken),
+          uriVariables = mapOf(
+            "user_id" to target.id.toUniversalFormat(),
+          ),
+        )
+      ).all {
+        transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+        transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      }
+
+      assertThat(stubber.isAuthorized(targetToken1)).isFalse()
+      assertThat(stubber.isAuthorized(targetToken2)).isFalse()
+      assertThat(stubber.isAuthorized(adminToken)).isTrue()
+    }
+  }
+
+  @Test fun `unauth any user succeeds with static token`() {
+    val project = stubber.projects.new(forceBasicProps = true)
+    val target = stubber.users(project).owner(idSuffix = "_another")
+    val staticToken = stubber.tokens(project).real(OWNER, isStatic = true).token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val targetToken1 = stubber.tokens(target).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+    val targetToken2 = stubber.tokens(target).real().token.tokenValue
+    timeProvider.advanceBy(Duration.ofHours(1))
+
+    assertAll {
+      assertThat(
+        restTemplate.exchange<MessageResponse>(
+          url = "$baseUrl$USER_AUTH?user_id={user_id}",
+          method = HttpMethod.DELETE,
+          requestEntity = bearerEmptyRequest(staticToken),
+          uriVariables = mapOf(
+            "user_id" to target.id.toUniversalFormat(),
+          ),
+        )
+      ).all {
+        transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+        transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      }
+
+      assertThat(stubber.isAuthorized(targetToken1)).isFalse()
+      assertThat(stubber.isAuthorized(targetToken2)).isFalse()
+      assertThat(stubber.isAuthorized(staticToken)).isTrue()
     }
   }
 

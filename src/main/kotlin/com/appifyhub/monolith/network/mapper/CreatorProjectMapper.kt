@@ -8,9 +8,9 @@ import com.appifyhub.monolith.domain.creator.property.PropertyTag
 import com.appifyhub.monolith.domain.creator.property.PropertyType
 import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
-import com.appifyhub.monolith.network.creator.ProjectFeatureDto
-import com.appifyhub.monolith.network.creator.ProjectResponse
-import com.appifyhub.monolith.network.creator.ProjectStatusDto
+import com.appifyhub.monolith.network.creator.project.ProjectFeatureDto
+import com.appifyhub.monolith.network.creator.project.ProjectResponse
+import com.appifyhub.monolith.network.creator.project.ProjectStatusDto
 import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
 import com.appifyhub.monolith.network.creator.property.PropertyResponse
 import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams

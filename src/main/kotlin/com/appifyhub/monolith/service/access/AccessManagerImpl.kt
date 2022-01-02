@@ -29,7 +29,7 @@ class AccessManagerImpl(
   private val authService: AuthService,
   private val userService: UserService,
   private val creatorService: CreatorService,
-  private val propService: PropertyService,
+  private val propertyService: PropertyService,
 ) : AccessManager {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -44,28 +44,30 @@ class AccessManagerImpl(
 
     // allow request if it's the project creator requesting
     val isRequesterProjectCreator = fetchCreator(normalizedTargetId.projectId)?.id == tokenDetails.ownerId
-    val isRequesterSuperOwner = getSuperCreator().id == tokenDetails.ownerId
-    if (isRequesterProjectCreator || isRequesterSuperOwner) return fetchUser(normalizedTargetId)
+    val isRequesterSuperCreator = getSuperCreator().id == tokenDetails.ownerId
+    if (isRequesterProjectCreator || isRequesterSuperCreator) return fetchUser(normalizedTargetId)
 
     // not project creator; validate that the project matches
     val targetProject = fetchProject(normalizedTargetId.projectId)
     val isSameProjectRequest = targetProject.id == tokenDetails.projectId
     require(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
-    // self access is always allowed, check if that's the case
+    // self access is sometimes allowed, check if that's the case
     val requesterUser = fetchUser(tokenDetails.ownerId)
-    if (requesterUser.id == normalizedTargetId) return requesterUser
+    if (requesterUser.isSelfAccessAllowed(privilege, normalizedTargetId)) return requesterUser
 
     // fail if user is not verified
     if (!requesterUser.isVerified) throwNotVerified()
 
     // static tokens are always allowed (unless it's creators looking for other creators)
     val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
-    val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
+
+    @Suppress("KotlinConstantConditions") // keeping for clarity... it's unclear anyway :)
+    val isCrossCreatorAccess = !isRequesterSuperCreator && isCreatorRequest
     if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchUser(normalizedTargetId)
 
     // check if minimum authorization level is met
-    val isPrivileged = requesterUser.canActAs(privilege.level)
+    val isPrivileged = requesterUser.isPrivilegedTo(privilege, targetProject)
     require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
 
     // check if authorization level is enough (mods can't access other mods)
@@ -85,9 +87,10 @@ class AccessManagerImpl(
     val tokenDetails = authService.fetchTokenDetails(jwt)
 
     // allow request if it's the project creator requesting
+    val targetProject = fetchProject(normalizedTargetId)
     val isRequesterProjectCreator = fetchCreator(normalizedTargetId)?.id == tokenDetails.ownerId
-    val isRequesterSuperOwner = getSuperCreator().id == tokenDetails.ownerId
-    if (isRequesterProjectCreator || isRequesterSuperOwner) return fetchProject(normalizedTargetId)
+    val isRequesterSuperCreator = getSuperCreator().id == tokenDetails.ownerId
+    if (isRequesterProjectCreator || isRequesterSuperCreator) return targetProject
 
     // not project creator; validate that the project matches
     val isSameProjectRequest = tokenDetails.projectId == normalizedTargetId
@@ -99,14 +102,16 @@ class AccessManagerImpl(
 
     // static tokens are always allowed (unless it's creators looking for other creators)
     val isCreatorRequest = getCreatorProject().id == requesterUser.id.projectId
-    val isCrossCreatorAccess = !isRequesterSuperOwner && isCreatorRequest
-    if (tokenDetails.isStatic && !isCrossCreatorAccess) return fetchProject(normalizedTargetId)
+
+    @Suppress("KotlinConstantConditions") // keeping for clarity... it's unclear anyway :)
+    val isCrossCreatorAccess = !isRequesterSuperCreator && isCreatorRequest
+    if (tokenDetails.isStatic && !isCrossCreatorAccess) return targetProject
 
     // check if minimum authorization level is met
-    val isPrivileged = requesterUser.canActAs(privilege.level)
+    val isPrivileged = requesterUser.isPrivilegedTo(privilege, targetProject)
     require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
 
-    return fetchProject(normalizedTargetId)
+    return targetProject
   }
 
   override fun requestCreator(authData: Authentication, matchesId: UserId?, requireVerified: Boolean): User {
@@ -145,8 +150,8 @@ class AccessManagerImpl(
     val tokenDetails = authService.fetchTokenDetails(jwt)
 
     // allow request if it's the project creator requesting
-    val isRequesterSuperOwner = getSuperCreator().id == tokenDetails.ownerId
-    if (!isRequesterSuperOwner) throwUnauthorized { "Only requests from super creator are allowed" }
+    val isRequesterSuperCreator = getSuperCreator().id == tokenDetails.ownerId
+    if (!isRequesterSuperCreator) throwUnauthorized { "Only requests from super creator are allowed" }
 
     return fetchUser(tokenDetails.ownerId)
   }
@@ -167,6 +172,8 @@ class AccessManagerImpl(
     log.debug("Requiring project features ready ${features.joinToString()} for $targetId")
 
     val setupStatus = resolveProjectSetupStatus(targetId)
+
+    @Suppress("ConvertArgumentToSet") // order matters, features are sorted by importance
     val requestedUnusableFeatures = setupStatus.unusableFeatures.intersect(features.toList())
 
     if (requestedUnusableFeatures.isNotEmpty())
@@ -184,7 +191,7 @@ class AccessManagerImpl(
       throwPreconditionFailed { "Project feature '$requiredFeature' is not configured" }
     }
 
-    // on hold property must be set to 
+    // on hold property must be set to
     properties.firstOrNull { it.config == ProjectProperty.ON_HOLD }
       .let { (it as? Property.FlagProp)?.typed() ?: true } // assume true if not set
       .let { onHold -> if (onHold) throwLocked { "Project is 'on hold'" } }
@@ -212,6 +219,50 @@ class AccessManagerImpl(
     )
   }
 
+  private fun User.isPrivilegedTo(privilege: Privilege, project: Project): Boolean =
+    when (privilege) {
+      // handle special cases first
+      Privilege.USER_SEARCH -> {
+        val isUserSearchAllowed = silent {
+          propertyService.fetchProperty<Boolean>(
+            projectId = project.id,
+            propName = ProjectProperty.ANYONE_CAN_SEARCH.name,
+          )
+        }?.typed() ?: false
+
+        if (isUserSearchAllowed) true
+        else {
+          // treat as a non-special case
+          this.authority.ordinal >= privilege.level.ordinal
+        }
+      }
+      // not a special case
+      else -> this.authority.ordinal >= privilege.level.ordinal
+    }
+
+  private fun User.isSelfAccessAllowed(privilege: Privilege, targetId: UserId): Boolean =
+    when (privilege) {
+      // secure user properties can only be changed by other high-level users (even for self)
+      Privilege.USER_WRITE_AUTHORITY,
+      Privilege.USER_WRITE_VERIFICATION,
+      -> false
+
+      // non-secure user properties can be used for self
+      Privilege.USER_SEARCH,
+      Privilege.USER_READ_TOKEN,
+      Privilege.USER_READ_DATA,
+      Privilege.USER_WRITE_TOKEN,
+      Privilege.USER_WRITE_DATA,
+      Privilege.USER_WRITE_SIGNATURE,
+      Privilege.USER_DELETE,
+      -> this.id == targetId
+
+      // invalid user privileges
+      Privilege.PROJECT_READ,
+      Privilege.PROJECT_WRITE,
+      -> error("Users should not ask for self-access on projects")
+    }
+
   private fun getCreatorProject() = creatorService.getCreatorProject()
 
   private fun getSuperCreator() = creatorService.getSuperCreator()
@@ -222,7 +273,7 @@ class AccessManagerImpl(
 
   private fun fetchProject(id: Long) = creatorService.fetchProjectById(id)
 
-  private fun fetchProps(id: Long) = propService.fetchProperties(id, ProjectProperty.names())
+  private fun fetchProps(id: Long) = propertyService.fetchProperties(id, ProjectProperty.names())
 
   private val TokenDetails.projectId get() = ownerId.projectId
 

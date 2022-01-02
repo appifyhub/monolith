@@ -18,6 +18,7 @@ fun User.toNetwork(): UserResponse = UserResponse(
   contactType = contactType.name,
   birthday = birthday?.let { DateTimeMapper.formatAsDate(it) },
   company = company?.toNetwork(),
+  languageTag = languageTag,
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
   updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
 )
