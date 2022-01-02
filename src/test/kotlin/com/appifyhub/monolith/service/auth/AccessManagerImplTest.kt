@@ -24,7 +24,7 @@ import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_READ
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.PROJECT_WRITE
-import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ
+import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ_DATA
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_SEARCH
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_AUTHORITY
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_TOKEN
@@ -72,7 +72,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = UserId("", stubber.projects.creator().id),
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -90,7 +90,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = token,
         targetId = stubber.creators.owner().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -107,7 +107,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(project).real(MODERATOR),
         targetId = targetAdmin.id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -141,7 +141,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(owner).real(isStatic = true),
         targetId = stubber.creators.default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -156,13 +156,13 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(DEFAULT, isStatic = true),
         targetId = stubber.creators.owner().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
-        messageContains("Only ${USER_READ.level.groupName} are authorized")
+        messageContains("Only ${USER_READ_DATA.level.groupName} are authorized")
       }
   }
 
@@ -172,7 +172,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.tokens(project).real(OWNER, isStatic = true, autoVerified = false),
         targetId = stubber.users(project).default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       )
     }
       .isFailure()
@@ -187,7 +187,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(DEFAULT),
         targetId = stubber.creators.default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
@@ -207,7 +207,7 @@ class AccessManagerImplTest {
       manager.requestUserAccess(
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.default().id,
-        privilege = USER_READ,
+        privilege = USER_READ_DATA,
       ).cleanStubArtifacts()
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }

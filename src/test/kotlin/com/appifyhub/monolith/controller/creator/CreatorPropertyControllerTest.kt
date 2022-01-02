@@ -8,9 +8,9 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.CONFIGURATIONS
-import com.appifyhub.monolith.controller.common.Endpoints.PROPERTIES
-import com.appifyhub.monolith.controller.common.Endpoints.PROPERTY
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_CONFIGS
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_PROPERTIES
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_PROPERTY
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.DESCRIPTION
 import com.appifyhub.monolith.domain.creator.property.ProjectProperty.LOGO_URL
@@ -81,7 +81,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
-        url = "$baseUrl$CONFIGURATIONS",
+        url = "$baseUrl$PROJECT_CONFIGS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -99,7 +99,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
-        url = "$baseUrl$CONFIGURATIONS",
+        url = "$baseUrl$PROJECT_CONFIGS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -124,7 +124,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyConfigurationResponse>>(
-        url = "$baseUrl$CONFIGURATIONS?${filter.buildQueryTemplate()}",
+        url = "$baseUrl$PROJECT_CONFIGS?${filter.buildQueryTemplate()}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = filter.buildQueryMap() + mapOf(
@@ -145,7 +145,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
-        url = "$baseUrl$PROPERTY",
+        url = "$baseUrl$PROJECT_PROPERTY",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -165,7 +165,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
-        url = "$baseUrl$PROPERTY",
+        url = "$baseUrl$PROJECT_PROPERTY",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -184,7 +184,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
-        url = "$baseUrl$PROPERTIES",
+        url = "$baseUrl$PROJECT_PROPERTIES",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -207,7 +207,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
-        url = "$baseUrl$PROPERTIES?names={name1}&names={name2}",
+        url = "$baseUrl$PROJECT_PROPERTIES?names={name1}&names={name2}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -233,7 +233,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
-        url = "$baseUrl$PROPERTIES",
+        url = "$baseUrl$PROJECT_PROPERTIES",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -262,7 +262,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
-        url = "$baseUrl$PROPERTIES?${filter.buildQueryTemplate()}",
+        url = "$baseUrl$PROJECT_PROPERTIES?${filter.buildQueryTemplate()}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = filter.buildQueryMap() + mapOf(
@@ -280,7 +280,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
-        url = "$baseUrl$PROPERTY",
+        url = "$baseUrl$PROJECT_PROPERTY",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -299,7 +299,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<PropertyResponse>(
-        url = "$baseUrl$PROPERTY",
+        url = "$baseUrl$PROJECT_PROPERTY",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(PropertySaveRequest("20"), token),
         uriVariables = mapOf(
@@ -324,7 +324,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
-        url = "$baseUrl$PROPERTIES",
+        url = "$baseUrl$PROJECT_PROPERTIES",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -348,7 +348,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<List<PropertyResponse>>(
-        url = "$baseUrl$PROPERTIES",
+        url = "$baseUrl$PROJECT_PROPERTIES",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(values, token),
         uriVariables = mapOf(
@@ -379,7 +379,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROPERTY",
+        url = "$baseUrl$PROJECT_PROPERTY",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -399,7 +399,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROPERTY",
+        url = "$baseUrl$PROJECT_PROPERTY",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -421,7 +421,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROPERTIES",
+        url = "$baseUrl$PROJECT_PROPERTIES",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -444,7 +444,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROPERTIES",
+        url = "$baseUrl$PROJECT_PROPERTIES",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -473,7 +473,7 @@ class CreatorPropertyControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$PROPERTIES?${filter.buildQueryTemplate()}",
+        url = "$baseUrl$PROJECT_PROPERTIES?${filter.buildQueryTemplate()}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = filter.buildQueryMap() + mapOf(

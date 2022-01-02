@@ -18,8 +18,9 @@ interface AccessManager {
   enum class Privilege(val level: Authority) {
     PROJECT_READ(OWNER),
     PROJECT_WRITE(OWNER),
-    USER_READ(MODERATOR),
     USER_SEARCH(ADMIN),
+    USER_READ_TOKEN(ADMIN),
+    USER_READ_DATA(MODERATOR),
     USER_WRITE_TOKEN(ADMIN),
     USER_WRITE_AUTHORITY(OWNER),
     USER_WRITE_DATA(ADMIN),

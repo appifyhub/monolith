@@ -38,7 +38,7 @@ class UserController(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @PostMapping(Endpoints.ANY_PROJECT_SIGNUP)
+  @PostMapping(Endpoints.PROJECT_SIGNUP)
   fun addUser(
     @PathVariable projectId: Long,
     @RequestBody request: UserSignupRequest,
@@ -51,7 +51,7 @@ class UserController(
     return userService.addUser(creator).toNetwork()
   }
 
-  @GetMapping(Endpoints.ANY_USER_UNIVERSAL)
+  @GetMapping(Endpoints.UNIVERSAL_USER)
   fun getUser(
     authentication: Authentication,
     @PathVariable universalId: String,
@@ -61,15 +61,15 @@ class UserController(
     val userId = UserId.fromUniversalFormat(universalId)
     accessManager.requireProjectFunctional(userId.projectId)
 
-    return accessManager.requestUserAccess(authentication, userId, Privilege.USER_READ).toNetwork()
+    return accessManager.requestUserAccess(authentication, userId, Privilege.USER_READ_DATA).toNetwork()
   }
 
-  @GetMapping(Endpoints.ANY_PROJECT_SEARCH)
+  @GetMapping(Endpoints.PROJECT_USER_SEARCH)
   fun searchUsers(
     authentication: Authentication,
     @PathVariable projectId: Long,
-    @RequestParam("user_name") userName: String? = null,
-    @RequestParam("user_contact") userContact: String? = null,
+    @RequestParam("user_name", required = false) userName: String? = null,
+    @RequestParam("user_contact", required = false) userContact: String? = null,
   ): List<UserResponse> {
     log.debug("[GET] user search in project $projectId with name $userName or $userContact")
 
@@ -83,7 +83,7 @@ class UserController(
     }
   }
 
-  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_AUTHORITY)
+  @PutMapping(Endpoints.UNIVERSAL_USER_AUTHORITY)
   fun updateAuthority(
     authentication: Authentication,
     @PathVariable universalId: String,
@@ -100,7 +100,7 @@ class UserController(
     return userService.updateUser(updater).toNetwork()
   }
 
-  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_DATA)
+  @PutMapping(Endpoints.UNIVERSAL_USER_DATA)
   fun updateData(
     authentication: Authentication,
     @PathVariable universalId: String,
@@ -117,7 +117,7 @@ class UserController(
     return userService.updateUser(updater).toNetwork()
   }
 
-  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_SIGNATURE)
+  @PutMapping(Endpoints.UNIVERSAL_USER_SIGNATURE)
   fun updateData(
     authentication: Authentication,
     @PathVariable universalId: String,
@@ -141,7 +141,7 @@ class UserController(
     return updated
   }
 
-  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_VERIFY)
+  @PutMapping(Endpoints.UNIVERSAL_USER_VERIFY)
   fun verifyToken(
     @PathVariable universalId: String,
     @PathVariable verificationToken: String,
@@ -159,7 +159,7 @@ class UserController(
     return MessageResponse.DONE
   }
 
-  @PutMapping(Endpoints.ANY_USER_UNIVERSAL_SIGNATURE_RESET)
+  @PutMapping(Endpoints.UNIVERSAL_USER_SIGNATURE_RESET)
   fun resetSignature(
     @PathVariable universalId: String,
   ): MessageResponse {
@@ -174,7 +174,7 @@ class UserController(
     return MessageResponse.DONE
   }
 
-  @DeleteMapping(Endpoints.ANY_USER_UNIVERSAL)
+  @DeleteMapping(Endpoints.UNIVERSAL_USER)
   fun deleteUser(
     authentication: Authentication,
     @PathVariable universalId: String,

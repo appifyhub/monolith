@@ -7,7 +7,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.ANY_PROJECT
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
@@ -297,7 +297,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -316,7 +316,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -339,7 +339,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -362,7 +362,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -386,7 +386,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -411,7 +411,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -445,7 +445,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -479,7 +479,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -513,7 +513,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf(
@@ -538,7 +538,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf(
@@ -557,7 +557,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(
@@ -582,7 +582,7 @@ class CreatorProjectControllerTest {
 
     assertThat(
       restTemplate.exchange<MessageResponse>(
-        url = "$baseUrl$ANY_PROJECT",
+        url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf(

@@ -32,7 +32,7 @@ class CreatorPropertyController(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  @GetMapping(Endpoints.CONFIGURATIONS)
+  @GetMapping(Endpoints.PROJECT_CONFIGS)
   fun getConfigurations(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -46,7 +46,7 @@ class CreatorPropertyController(
     return configurations.map(ProjectProperty::toNetwork)
   }
 
-  @GetMapping(Endpoints.PROPERTY)
+  @GetMapping(Endpoints.PROJECT_PROPERTY)
   fun getProperty(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -60,7 +60,7 @@ class CreatorPropertyController(
     return property.toNetwork()
   }
 
-  @GetMapping(Endpoints.PROPERTIES)
+  @GetMapping(Endpoints.PROJECT_PROPERTIES)
   fun getProperties(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -79,7 +79,7 @@ class CreatorPropertyController(
     return properties.map(Property<*>::toNetwork)
   }
 
-  @PostMapping(Endpoints.PROPERTY)
+  @PostMapping(Endpoints.PROJECT_PROPERTY)
   fun saveProperty(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -94,7 +94,7 @@ class CreatorPropertyController(
     return property.toNetwork()
   }
 
-  @PostMapping(Endpoints.PROPERTIES)
+  @PostMapping(Endpoints.PROJECT_PROPERTIES)
   fun saveProperties(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -110,7 +110,7 @@ class CreatorPropertyController(
     return properties.map(Property<*>::toNetwork)
   }
 
-  @DeleteMapping(Endpoints.PROPERTY)
+  @DeleteMapping(Endpoints.PROJECT_PROPERTY)
   fun clearProperties(
     authentication: Authentication,
     @PathVariable projectId: Long,
@@ -124,7 +124,7 @@ class CreatorPropertyController(
     return MessageResponse.DONE
   }
 
-  @DeleteMapping(Endpoints.PROPERTIES)
+  @DeleteMapping(Endpoints.PROJECT_PROPERTIES)
   fun clearProperties(
     authentication: Authentication,
     @PathVariable projectId: Long,

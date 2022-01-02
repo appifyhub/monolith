@@ -36,7 +36,7 @@ class WebSecurityConfiguration(
           Endpoints.FAVICON_DIR,
           Endpoints.HEARTBEAT,
           Endpoints.H2_CONSOLE,
-          Endpoints.AUTH,
+          Endpoints.USER_AUTH,
           Endpoints.SIGNUP_USERS,
           Endpoints.SIGNUP_CREATORS,
           Endpoints.CREATOR_AUTH,

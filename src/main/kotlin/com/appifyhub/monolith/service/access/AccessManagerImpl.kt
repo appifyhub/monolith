@@ -242,21 +242,22 @@ class AccessManagerImpl(
 
   private fun User.isSelfAccessAllowed(privilege: Privilege, targetId: UserId): Boolean =
     when (privilege) {
-      // sensitive user properties can only be changed by other high-level users (even for self)
+      // secure user properties can only be changed by other high-level users (even for self)
       Privilege.USER_WRITE_AUTHORITY,
       Privilege.USER_WRITE_VERIFICATION,
       -> false
 
-      // non-sensitive user properties can be changed for self
-      Privilege.USER_READ,
+      // non-secure user properties can be used for self
       Privilege.USER_SEARCH,
+      Privilege.USER_READ_TOKEN,
+      Privilege.USER_READ_DATA,
       Privilege.USER_WRITE_TOKEN,
       Privilege.USER_WRITE_DATA,
       Privilege.USER_WRITE_SIGNATURE,
       Privilege.USER_DELETE,
       -> this.id == targetId
 
-      // invalid properties
+      // invalid user privileges
       Privilege.PROJECT_READ,
       Privilege.PROJECT_WRITE,
       -> error("Users should not ask for self-access on projects")
