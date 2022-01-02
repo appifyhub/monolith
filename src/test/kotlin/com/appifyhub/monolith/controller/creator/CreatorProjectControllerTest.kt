@@ -23,7 +23,7 @@ import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
-import com.appifyhub.monolith.util.blankUriVariables
+import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -71,7 +71,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -89,7 +89,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -107,7 +107,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -124,7 +124,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -145,7 +145,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -161,7 +161,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
@@ -182,7 +182,7 @@ class CreatorProjectControllerTest {
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
-        uriVariables = blankUriVariables(),
+        uriVariables = emptyUriVariables(),
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)

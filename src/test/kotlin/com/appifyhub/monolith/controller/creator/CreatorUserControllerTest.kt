@@ -6,13 +6,21 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
+import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_FORCE_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.user.DateTimeMapper
+import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.util.Stubber
+import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerEmptyRequest
+import com.appifyhub.monolith.util.bodyRequest
+import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -53,6 +61,38 @@ class CreatorUserControllerTest {
   @AfterEach fun teardown() {
     timeProvider.staticTime = { null }
   }
+
+  // region Add Creator
+
+  @Test fun `add creator succeeds`() {
+    val request = Stubs.creatorSignupRequest.copy(userId = "username@example.com")
+
+    assertThat(
+      restTemplate.exchange<UserResponse>(
+        url = "$baseUrl$CREATOR_SIGNUP",
+        method = HttpMethod.POST,
+        requestEntity = bodyRequest(request),
+        uriVariables = emptyUriVariables(),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.OK)
+      transform { it.body!! }.isDataClassEqualTo(
+        Stubs.userResponse.copy(
+          userId = request.userId,
+          projectId = stubber.projects.creator().id,
+          universalId = UserId(request.userId, stubber.projects.creator().id).toUniversalFormat(),
+          authority = User.Authority.DEFAULT.name,
+          contact = request.userId,
+          createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+          updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
+        )
+      )
+    }
+  }
+
+  // endregion
+
+  // region Force Verification
 
   @Test fun `token force-verification fails when project non-functional`() {
     val creator = stubber.creators.default()
@@ -95,5 +135,7 @@ class CreatorUserControllerTest {
       assertThat(stubber.users(project).default().verificationToken).isNull()
     }
   }
+
+  // endregion
 
 }
