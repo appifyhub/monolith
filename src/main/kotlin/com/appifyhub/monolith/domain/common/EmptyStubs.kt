@@ -5,12 +5,14 @@ import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import java.util.Date
+import java.util.Locale
 
 fun stubProject() = Project(
   id = -1,
   type = Project.Type.COMMERCIAL,
   status = Project.Status.REVIEW,
   userIdType = Project.UserIdType.RANDOM,
+  languageTag = Locale.US.toLanguageTag(),
   createdAt = Date(),
   updatedAt = Date(),
 )

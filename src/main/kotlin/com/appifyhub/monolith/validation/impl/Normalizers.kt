@@ -63,6 +63,6 @@ object Normalizers {
   val Origin = normalizesNullable(Validators.Origin, Cleaners.Origin)
   val IpAddress = normalizesNullable(Validators.IpAddress, Cleaners.IpAddress)
   val BDay = normalizesNullable(Validators.BDay, Cleaners.BDay)
-  val LanguageTag = normalizesNullable(Validators.LanguageTag, Cleaners.LanguageTag)
+  val LanguageTag = normalizesNullable(Validators.LanguageTag, Cleaners.LanguageTagNullified)
 
 }

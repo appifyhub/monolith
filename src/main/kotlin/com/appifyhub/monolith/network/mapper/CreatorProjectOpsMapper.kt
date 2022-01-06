@@ -14,6 +14,7 @@ fun ProjectCreateRequest.toDomain(
   type = Project.Type.find(type, Project.Type.COMMERCIAL),
   status = Project.Status.REVIEW,
   userIdType = Project.UserIdType.find(userIdType, Project.UserIdType.RANDOM),
+  languageTag = languageTag,
 )
 
 fun ProjectUpdateRequest.toDomain(
@@ -22,4 +23,5 @@ fun ProjectUpdateRequest.toDomain(
   id = projectId,
   type = type.mapToDomainNonNull { Project.Type.find(it) },
   status = status.mapToDomainNonNull { Project.Status.find(it) },
+  languageTag = languageTag.toDomainNullable(),
 )

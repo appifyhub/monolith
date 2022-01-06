@@ -7,6 +7,7 @@ data class Project(
   val type: Type,
   val status: Status,
   val userIdType: UserIdType,
+  val languageTag: String?,
   val createdAt: Date,
   val updatedAt: Date,
 ) {

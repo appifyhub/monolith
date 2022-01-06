@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.service.creator
 
+import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
@@ -81,11 +82,13 @@ class CreatorServiceImpl(
     log.debug("Updating project $updater")
 
     val normalizedProjectId = Normalizers.ProjectId.run(updater.id).requireValid { "Project ID" }
+    val normalizedLanguageTag = Normalizers.LanguageTag.run(updater.languageTag?.value).requireValid { "Language Tag" }
 
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,
       type = updater.type,
       status = updater.status,
+      languageTag = Settable(normalizedLanguageTag),
     )
 
     return creatorRepository.updateProject(normalizedUpdater)

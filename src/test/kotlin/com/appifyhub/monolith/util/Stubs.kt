@@ -198,6 +198,7 @@ object Stubs {
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -207,6 +208,7 @@ object Stubs {
     type = Project.Type.FREE,
     status = Project.Status.SUSPENDED,
     userIdType = project.userIdType,
+    languageTag = Locale.UK.toLanguageTag(),
     createdAt = project.createdAt,
     updatedAt = Date(0xA20001),
   )
@@ -292,6 +294,7 @@ object Stubs {
     type = "OPENSOURCE",
     status = "ACTIVE",
     userIdType = "USERNAME",
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -499,12 +502,14 @@ object Stubs {
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
+    languageTag = Locale.US.toLanguageTag(),
   )
 
   val projectUpdater = ProjectUpdater(
     id = project.id,
     type = Settable(Project.Type.FREE),
     status = Settable(Project.Status.SUSPENDED),
+    languageTag = Settable(Locale.UK.toLanguageTag()),
   )
 
   // endregion
@@ -683,6 +688,7 @@ object Stubs {
     type = project.type.name,
     status = projectStatusDto,
     userIdType = project.userIdType.name,
+    languageTag = Locale.US.toLanguageTag(),
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
   )
@@ -743,11 +749,13 @@ object Stubs {
     type = "OPENSOURCE",
     userIdType = "USERNAME",
     ownerUniversalId = universalUserId,
+    languageTag = Locale.US.toLanguageTag(),
   )
 
   val projectUpdateRequest = ProjectUpdateRequest(
     type = SettableRequest("FREE"),
     status = SettableRequest("SUSPENDED"),
+    languageTag = SettableRequest(Locale.UK.toLanguageTag()),
   )
 
   // endregion

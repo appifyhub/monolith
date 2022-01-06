@@ -108,6 +108,7 @@ class SchemaInitializerTest {
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
+        languageTag = Locale.US.toLanguageTag(),
       ),
     )
     verify(propService).saveProperty<String>(
@@ -172,6 +173,7 @@ class SchemaInitializerTest {
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
+        languageTag = Locale.US.toLanguageTag(),
       ),
     )
     verify(propService).saveProperty<String>(

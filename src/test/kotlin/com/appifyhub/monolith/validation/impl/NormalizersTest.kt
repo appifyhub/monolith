@@ -208,7 +208,7 @@ class NormalizersTest {
 
   @Test fun `language tag = language tag + language tag`() {
     assertThat(Normalizers.LanguageTag)
-      .consistsOf(Validators.LanguageTag, Cleaners.LanguageTag)
+      .consistsOf(Validators.LanguageTag, Cleaners.LanguageTagNullified)
   }
 
   // endregion

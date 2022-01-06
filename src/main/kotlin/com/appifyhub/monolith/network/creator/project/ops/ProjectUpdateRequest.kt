@@ -9,4 +9,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class ProjectUpdateRequest(
   @JsonProperty("type") val type: SettableRequest<String>? = null,
   @JsonProperty("status") val status: SettableRequest<String>? = null,
+  @JsonProperty("language_tag") val languageTag: SettableRequest<String?>? = null,
 )

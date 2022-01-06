@@ -27,6 +27,9 @@ class ProjectDbm(
   @Column(nullable = false, updatable = false, length = 16)
   var userIdType: String,
 
+  @Column(nullable = true, length = 8)
+  var languageTag: String?,
+
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   var createdAt: Date,
@@ -46,6 +49,7 @@ class ProjectDbm(
     if (type != other.type) return false
     if (status != other.status) return false
     if (userIdType != other.userIdType) return false
+    if (languageTag != other.languageTag) return false
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
 
@@ -57,6 +61,7 @@ class ProjectDbm(
     result = 31 * result + type.hashCode()
     result = 31 * result + status.hashCode()
     result = 31 * result + userIdType.hashCode()
+    result = 31 * result + languageTag.hashCode()
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
     return result
@@ -68,6 +73,7 @@ class ProjectDbm(
       "type='$type', " +
       "status='$status', " +
       "userIdType='$userIdType', " +
+      "languageTag='$languageTag', " +
       "createdAt=$createdAt, " +
       "updatedAt=$updatedAt" +
       ")"

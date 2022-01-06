@@ -11,6 +11,7 @@ data class ProjectResponse(
   @JsonProperty("type") val type: String,
   @JsonProperty("status") val status: ProjectStatusDto,
   @JsonProperty("user_id_type") val userIdType: String,
+  @JsonProperty("language_tag") val languageTag: String?,
   @JsonProperty("created_at") val createdAt: String,
   @JsonProperty("updated_at") val updatedAt: String,
 ) : Serializable
