@@ -25,6 +25,7 @@ import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.ext.silent
 import com.auth0.jwt.JWT
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt
@@ -81,6 +82,7 @@ class Stubber(
         type = Project.Type.COMMERCIAL,
         status = status,
         userIdType = userIdType,
+        languageTag = Locale.US.toLanguageTag(),
       )
     ).also {
       if (forceBasicProps) {

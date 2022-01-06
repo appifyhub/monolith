@@ -406,23 +406,23 @@ class CleanersTest {
   }
 
   @Test fun `language tag defaulting to null with null`() {
-    assertThat(Cleaners.LanguageTag.clean(null))
+    assertThat(Cleaners.LanguageTagNullified.clean(null))
       .isNull()
   }
 
   @Test fun `language tag defaulting to null with empty`() {
-    assertThat(Cleaners.LanguageTag.clean(""))
+    assertThat(Cleaners.LanguageTagNullified.clean(""))
       .isNull()
   }
 
   @Test fun `language tag defaulting to null with invalid code`() {
-    assertThat(Cleaners.LanguageTag.clean("asdasdasdasd"))
+    assertThat(Cleaners.LanguageTagNullified.clean("asdasdasdasd"))
       .isNull()
   }
 
   @Test fun `language tag cleans trimmed valid code`() {
     val tag = Locale.US.toLanguageTag()
-    assertThat(Cleaners.LanguageTag.clean(" \n$tag\t "))
+    assertThat(Cleaners.LanguageTagNullified.clean(" \n$tag\t "))
       .isEqualTo(tag)
   }
 

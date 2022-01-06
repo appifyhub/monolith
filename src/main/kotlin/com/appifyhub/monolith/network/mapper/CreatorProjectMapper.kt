@@ -67,6 +67,7 @@ fun Project.toNetwork(
   type = type.name,
   status = projectStatus.toNetwork(),
   userIdType = userIdType.name,
+  languageTag = languageTag,
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
   updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
 )

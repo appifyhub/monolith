@@ -9,4 +9,5 @@ data class ProjectCreateRequest(
   @JsonProperty("type") val type: String,
   @JsonProperty("user_id_type") val userIdType: String,
   @JsonProperty("owner_universal_id") val ownerUniversalId: String,
+  @JsonProperty("language_tag") val languageTag: String?,
 )

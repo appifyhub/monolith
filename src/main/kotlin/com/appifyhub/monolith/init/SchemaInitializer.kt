@@ -78,6 +78,7 @@ class SchemaInitializer(
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,
+        languageTag = Locale.US.toLanguageTag(),
       ),
     )
 

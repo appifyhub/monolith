@@ -11,6 +11,7 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
+import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.util.Stubber
@@ -177,6 +178,25 @@ class CreatorServiceImplTest {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
       }
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `update project succeeds with an invalid language tag`() {
+    val project = stubber.projects.new().cleanStubArtifacts()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      languageTag = Settable("asdasdasdasd"),
+    )
+    val expected = Stubs.projectUpdated.copy(
+      id = project.id,
+      languageTag = null,
+    )
+
+    assertThat(
+      service.updateProject(updater).cleanStubArtifacts()
+    ).isDataClassEqualTo(
+      expected.cleanStubArtifacts()
+    )
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)

@@ -1,19 +1,19 @@
 package com.appifyhub.monolith.domain.mapper
 
+import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.Property
 import com.appifyhub.monolith.domain.creator.property.Property.DecimalProp
 import com.appifyhub.monolith.domain.creator.property.Property.FlagProp
 import com.appifyhub.monolith.domain.creator.property.Property.IntegerProp
 import com.appifyhub.monolith.domain.creator.property.Property.StringProp
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.creator.property.PropertyType.DECIMAL
 import com.appifyhub.monolith.domain.creator.property.PropertyType.FLAG
 import com.appifyhub.monolith.domain.creator.property.PropertyType.INTEGER
 import com.appifyhub.monolith.domain.creator.property.PropertyType.STRING
-import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.storage.model.creator.PropertyDbm
 import com.appifyhub.monolith.storage.model.creator.PropertyIdDbm
@@ -26,6 +26,7 @@ fun ProjectUpdater.applyTo(
 ): Project = project
   .applySettable(type) { copy(type = it) }
   .applySettable(status) { copy(status = it) }
+  .applySettable(languageTag) { copy(languageTag = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun ProjectCreator.toProjectData(
@@ -35,6 +36,7 @@ fun ProjectCreator.toProjectData(
   type = type.name,
   status = status.name,
   userIdType = userIdType.name,
+  languageTag = languageTag,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
 )
@@ -44,6 +46,7 @@ fun ProjectDbm.toDomain(): Project = Project(
   type = Project.Type.find(type, default = Project.Type.COMMERCIAL),
   status = Project.Status.find(status, default = Project.Status.REVIEW),
   userIdType = Project.UserIdType.find(userIdType, default = Project.UserIdType.RANDOM),
+  languageTag = languageTag,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
@@ -53,6 +56,7 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   type = type.name,
   status = status.name,
   userIdType = userIdType.name,
+  languageTag = languageTag,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
