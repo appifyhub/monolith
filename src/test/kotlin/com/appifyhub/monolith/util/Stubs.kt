@@ -3,6 +3,7 @@ package com.appifyhub.monolith.util
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.common.stubMessageTemplate
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
@@ -14,6 +15,10 @@ import com.appifyhub.monolith.domain.creator.property.PropertyType
 import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.domain.mapper.toData
+import com.appifyhub.monolith.domain.messaging.TemplateDataBinder
+import com.appifyhub.monolith.domain.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.messaging.VariableBinding
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
@@ -51,6 +56,9 @@ import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.storage.model.creator.PropertyDbm
 import com.appifyhub.monolith.storage.model.creator.PropertyIdDbm
+import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
+import com.appifyhub.monolith.storage.model.messaging.VariableBindingDbm
+import com.appifyhub.monolith.storage.model.messaging.VariableBindingKeyDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
@@ -62,7 +70,7 @@ import java.util.concurrent.TimeUnit
 @Suppress("MayBeConstant")
 object Stubs {
 
-  // region Auth Models
+  // region Tokens
 
   // signed with debug key, will expire in 2026
   @Suppress("SpellCheckingInspection")
@@ -280,6 +288,25 @@ object Stubs {
     properties = listOf(propStringName, propFlagOnHold),
   )
 
+  val variableBinding = VariableBinding(
+    variableName = "variable",
+    bindsTo = TemplateDataBinder.Code.USER_NAME,
+    createdAt = Date(0x10001E),
+    updatedAt = Date(0x10001F),
+  )
+
+  val messageTemplate = MessageTemplate(
+    id = 10,
+    projectId = project.id,
+    name = "template",
+    language = Locale.US.toLanguageTag(),
+    content = "content",
+    isHtml = true,
+    bindings = listOf(variableBinding),
+    createdAt = Date(0x10000E),
+    updatedAt = Date(0x10000F),
+  )
+
   // endregion
 
   // region Database Models
@@ -412,6 +439,30 @@ object Stubs {
     project = projectDbm,
     rawValue = propFlag.rawValue,
     updatedAt = propFlag.updatedAt,
+  )
+
+  val variableBindingDbm = VariableBindingDbm(
+    id = VariableBindingKeyDbm(
+      templateId = 10, // see the template below
+      variableName = "variable",
+    ),
+    // stubbing because only IDs are needed
+    template = stubMessageTemplate().copy(id = 10).toData(project.id),
+    bindingCode = TemplateDataBinder.Code.USER_NAME.code,
+    createdAt = Date(0x10001E),
+    updatedAt = Date(0x10001F),
+  )
+
+  val messageTemplateDbm = MessageTemplateDbm(
+    id = 10,
+    project = projectDbm,
+    name = "template",
+    language = Locale.US.toLanguageTag(),
+    content = "content",
+    isHtml = true,
+    bindings = listOf(variableBindingDbm),
+    createdAt = Date(0x10000E),
+    updatedAt = Date(0x10000F),
   )
 
   // endregion

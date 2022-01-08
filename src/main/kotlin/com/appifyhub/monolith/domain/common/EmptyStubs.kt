@@ -1,11 +1,20 @@
 package com.appifyhub.monolith.domain.common
 
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import java.util.Date
 import java.util.Locale
+
+/*
+ * Why this? (you may ask)
+ *
+ * Well... Spring's ORM is not very nice to complex object relations,
+ * so these are some hacks that needed to be done in order to reduce
+ * relational complexity. Let's say it's "temporary".
+ */
 
 fun stubProject() = Project(
   id = -1,
@@ -17,21 +26,11 @@ fun stubProject() = Project(
   updatedAt = Date(),
 )
 
-fun stubUserId() = UserId(
-  userId = "id",
-  projectId = -1,
-)
-
-fun stubOrganization() = Organization(
-  name = "name",
-  street = "street",
-  postcode = "postcode",
-  city = "city",
-  countryCode = "countryCode",
-)
-
 fun stubUser() = User(
-  id = stubUserId(),
+  id = UserId(
+    userId = "id",
+    projectId = -1, // stubbed, not used
+  ),
   signature = "signature",
   name = "name",
   type = User.Type.PERSONAL,
@@ -41,8 +40,26 @@ fun stubUser() = User(
   contactType = User.ContactType.CUSTOM,
   verificationToken = "verificationToken",
   birthday = Date(),
-  company = stubOrganization(),
+  company = Organization(
+    name = "name", // stubbed, not used
+    street = "street", // stubbed, not used
+    postcode = "postcode", // stubbed, not used
+    city = "city", // stubbed, not used
+    countryCode = "countryCode", // stubbed, not used
+  ),
   languageTag = null,
+  createdAt = Date(),
+  updatedAt = Date(),
+)
+
+fun stubMessageTemplate() = MessageTemplate(
+  id = -1,
+  projectId = -1,
+  name = "name",
+  language = "language",
+  content = "content",
+  isHtml = false,
+  bindings = emptyList(),
   createdAt = Date(),
   updatedAt = Date(),
 )
