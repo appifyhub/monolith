@@ -16,8 +16,9 @@ import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
 import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.mapper.toData
-import com.appifyhub.monolith.domain.messaging.TemplateDataBinder
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.TemplateDataBinder
 import com.appifyhub.monolith.domain.messaging.VariableBinding
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
@@ -307,6 +308,14 @@ object Stubs {
     updatedAt = Date(0x10000F),
   )
 
+  val messageTemplateCreator = MessageTemplateCreator(
+    projectId = project.id,
+    name = messageTemplate.name,
+    language = messageTemplate.language,
+    content = messageTemplate.content,
+    isHtml = messageTemplate.isHtml,
+  )
+
   // endregion
 
   // region Database Models
@@ -443,11 +452,11 @@ object Stubs {
 
   val variableBindingDbm = VariableBindingDbm(
     id = VariableBindingKeyDbm(
-      templateId = 10, // see the template below
+      templateId = 10, // the template object is below
       variableName = "variable",
     ),
     // stubbing because only IDs are needed
-    template = stubMessageTemplate().copy(id = 10).toData(project.id),
+    template = stubMessageTemplate().copy(id = 10).toData(),
     bindingCode = TemplateDataBinder.Code.USER_NAME.code,
     createdAt = Date(0x10001E),
     updatedAt = Date(0x10001F),
