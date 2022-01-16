@@ -16,7 +16,7 @@ sealed interface TemplateDataBinder<S> {
     ;
 
     companion object {
-      fun find(code: String, default: Code? = null) =
+      fun findByCode(code: String, default: Code? = null) =
         values().firstOrNull { it.code == code }
           ?: default
           ?: throw IllegalArgumentException("Not found")
