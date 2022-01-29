@@ -4,7 +4,7 @@ import com.appifyhub.monolith.domain.common.stubMessageTemplate
 import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.TemplateDataBinder.Code
+import com.appifyhub.monolith.domain.messaging.binding.TemplateDataBinder.Code
 import com.appifyhub.monolith.domain.messaging.VariableBinding
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.storage.model.messaging.VariableBindingDbm
