@@ -18,7 +18,7 @@ import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.TemplateDataBinder
+import com.appifyhub.monolith.domain.messaging.binding.TemplateDataBinder
 import com.appifyhub.monolith.domain.messaging.VariableBinding
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
