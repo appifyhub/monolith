@@ -21,8 +21,8 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -117,7 +117,11 @@ class CreatorProjectControllerTest {
   @Test fun `create a project succeeds`() {
     val creator = stubber.creators.default()
     val token = stubber.tokens(creator).real().token.tokenValue
-    val request = Stubs.projectCreateRequest.copy(ownerUniversalId = creator.id.toUniversalFormat())
+    val request = Stubs.projectCreateRequest.copy(
+      ownerUniversalId = creator.id.toUniversalFormat(),
+      logoUrl = null,
+      websiteUrl = null,
+    )
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
@@ -130,7 +134,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       // list ordering is problematic for comparisons, so just comparing the basics
-      transform { it.body!!.status.status }
+      transform { it.body!!.state.status }
         .isEqualTo(Project.Status.REVIEW.toString())
       transform { it.body!!.userIdType }
         .isEqualTo(Stubs.projectResponse.userIdType)
@@ -170,10 +174,10 @@ class CreatorProjectControllerTest {
 
   @Test fun `get all projects succeeds`() {
     val projectResponse = stubber.projects.new().let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val creatorProjectResponse = stubber.projects.creator().let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.creatorTokens().real(OWNER).token.tokenValue
 
@@ -190,13 +194,13 @@ class CreatorProjectControllerTest {
       // list ordering is problematic for comparisons, so just comparing the basics
       transform { it.body!!.first().projectId }
         .isEqualTo(creatorProjectResponse.projectId)
-      transform { it.body!!.first().status.status }
-        .isEqualTo(creatorProjectResponse.status.status)
+      transform { it.body!!.first().state.status }
+        .isEqualTo(creatorProjectResponse.state.status)
 
       transform { it.body!![1].projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!![1].status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!![1].state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -239,7 +243,7 @@ class CreatorProjectControllerTest {
     stubber.projects.new(owner = superCreator)
     val creator = stubber.creators.default()
     val projectResponse = stubber.projects.new(owner = creator).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(creator).real().token.tokenValue
 
@@ -258,8 +262,8 @@ class CreatorProjectControllerTest {
         .hasSize(1)
       transform { it.body!!.first().projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.first().status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.first().state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -268,7 +272,7 @@ class CreatorProjectControllerTest {
     stubber.projects.new(owner = superCreator)
     val creator = stubber.creators.default()
     val projectResponse = stubber.projects.new(owner = creator).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
 
@@ -287,8 +291,8 @@ class CreatorProjectControllerTest {
         .hasSize(1)
       transform { it.body!!.first().projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.first().status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.first().state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -311,7 +315,7 @@ class CreatorProjectControllerTest {
 
   @Test fun `get any project succeeds`() {
     val project = stubber.projects.new()
-    val projectResponse = project.toNetwork(projectStatus = accessManager.fetchProjectStatus(project.id))
+    val projectResponse = project.toNetwork(projectState = accessManager.fetchProjectState(project.id))
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
     assertThat(
@@ -329,8 +333,8 @@ class CreatorProjectControllerTest {
       // list ordering is problematic for comparisons, so just comparing the basics
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -401,7 +405,7 @@ class CreatorProjectControllerTest {
   @Test fun `update project succeeds when owner changes type`() {
     val creator = stubber.creators.default()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(creator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -424,8 +428,8 @@ class CreatorProjectControllerTest {
       // list ordering is problematic for comparisons, so just comparing the basics
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.state.status }
+        .isEqualTo(projectResponse.state.status)
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())
     }
@@ -435,7 +439,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
     val superCreator = stubber.creators.owner()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -458,8 +462,8 @@ class CreatorProjectControllerTest {
       // list ordering is problematic for comparisons, so just comparing the basics
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.state.status }
+        .isEqualTo(projectResponse.state.status)
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())
     }
@@ -469,7 +473,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
     val superCreator = stubber.creators.owner()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -492,7 +496,7 @@ class CreatorProjectControllerTest {
       // list ordering is problematic for comparisons, so just comparing the basics
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
+      transform { it.body!!.state.status }
         .isEqualTo(Project.Status.ACTIVE.toString())
       transform { it.body!!.type }
         .isEqualTo(projectResponse.type)
@@ -503,7 +507,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
     val superCreator = stubber.creators.owner()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -526,7 +530,7 @@ class CreatorProjectControllerTest {
       // list ordering is problematic for comparisons, so just comparing the basics
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
+      transform { it.body!!.state.status }
         .isEqualTo(Project.Status.ACTIVE.toString())
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())

@@ -91,7 +91,7 @@ class UserControllerTest {
   }
 
   @Test fun `add user succeeds`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -153,7 +153,7 @@ class UserControllerTest {
   }
 
   @Test fun `get user succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val self = stubber.users(project).default()
     val universalId = self.id.toUniversalFormat()
     val token = stubber.tokens(self).real().token.tokenValue
@@ -225,7 +225,7 @@ class UserControllerTest {
   }
 
   @Test fun `search user fails when no query is provided`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val admin = stubber.users(project).admin()
     val token = stubber.tokens(admin).real().token.tokenValue
 
@@ -242,7 +242,7 @@ class UserControllerTest {
   }
 
   @Test fun `search user succeeds with valid authorization and user name`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val admin = stubber.users(project).admin()
     val token = stubber.tokens(admin).real().token.tokenValue
 
@@ -274,7 +274,7 @@ class UserControllerTest {
   }
 
   @Test fun `search user succeeds with valid authorization and user contact`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val admin = stubber.users(project).admin()
     val token = stubber.tokens(admin).real().token.tokenValue
 
@@ -345,7 +345,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user authority succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val owner = stubber.users(project).owner()
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(owner).real().token.tokenValue
@@ -413,7 +413,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user data succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val owner = stubber.users(project).owner()
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(owner).real().token.tokenValue
@@ -478,7 +478,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user signature succeeds with valid authorization (no logout)`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(targetUser).real()
 
@@ -525,7 +525,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user signature succeeds with valid authorization (with logout)`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(targetUser).real()
 
@@ -595,7 +595,7 @@ class UserControllerTest {
   }
 
   @Test fun `token verification succeeds with valid token`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).default(autoVerified = false)
 
     assertThat(
@@ -636,7 +636,7 @@ class UserControllerTest {
   }
 
   @Test fun `reset signature succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).default()
     val token = stubber.tokens(user).real()
 
@@ -703,7 +703,7 @@ class UserControllerTest {
   }
 
   @Test fun `delete user succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val self = stubber.users(project).default()
     val universalId = self.id.toUniversalFormat()
     val token = stubber.tokens(self).real().token.tokenValue

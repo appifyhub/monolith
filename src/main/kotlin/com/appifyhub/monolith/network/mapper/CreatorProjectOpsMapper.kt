@@ -6,6 +6,7 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
 
 fun ProjectCreateRequest.toDomain(
   owner: User? = null,
@@ -14,6 +15,13 @@ fun ProjectCreateRequest.toDomain(
   type = Project.Type.find(type, Project.Type.COMMERCIAL),
   status = Project.Status.REVIEW,
   userIdType = Project.UserIdType.find(userIdType, Project.UserIdType.RANDOM),
+  name = name,
+  description = description,
+  logoUrl = logoUrl,
+  websiteUrl = websiteUrl,
+  maxUsers = DEFAULT_MAX_USERS,
+  anyoneCanSearch = false,
+  onHold = true,
   languageTag = languageTag,
 )
 
@@ -23,5 +31,12 @@ fun ProjectUpdateRequest.toDomain(
   id = projectId,
   type = type.mapToDomainNonNull { Project.Type.find(it) },
   status = status.mapToDomainNonNull { Project.Status.find(it) },
+  name = name.toDomainNonNull(),
+  description = description.toDomainNullable(),
+  logoUrl = logoUrl.toDomainNullable(),
+  websiteUrl = websiteUrl.toDomainNullable(),
+  maxUsers = maxUsers.toDomainNonNull(),
+  anyoneCanSearch = anyoneCanSearch.toDomainNonNull(),
+  onHold = onHold.toDomainNonNull(),
   languageTag = languageTag.toDomainNullable(),
 )

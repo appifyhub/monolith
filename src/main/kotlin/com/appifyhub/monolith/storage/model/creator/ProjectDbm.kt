@@ -27,6 +27,27 @@ class ProjectDbm(
   @Column(nullable = false, updatable = false, length = 16)
   var userIdType: String,
 
+  @Column(nullable = false, updatable = true, length = 128)
+  var name: String,
+
+  @Column(nullable = true, updatable = true, length = 512)
+  var description: String?,
+
+  @Column(nullable = true, updatable = true, length = 1024)
+  var logoUrl: String?,
+
+  @Column(nullable = true, updatable = true, length = 1024)
+  var websiteUrl: String?,
+
+  @Column(nullable = false, updatable = true)
+  var maxUsers: Int,
+
+  @Column(nullable = false, updatable = true)
+  var anyoneCanSearch: Boolean,
+
+  @Column(nullable = false, updatable = true)
+  var onHold: Boolean,
+
   @Column(nullable = true, length = 8)
   var languageTag: String?,
 

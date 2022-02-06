@@ -8,33 +8,18 @@ import org.junit.jupiter.api.Test
 
 class CreatorProjectMapperTest {
 
-  @Test fun `property filter query params - network to domain`() {
-    assertThat(Stubs.propertyFilterQueryParams.toDomain())
-      .isDataClassEqualTo(Stubs.propertyFilter)
-  }
-
-  @Test fun `property configuration - domain to network`() {
-    assertThat(Stubs.propString.config.toNetwork())
-      .isDataClassEqualTo(Stubs.propertyConfigurationResponse)
-  }
-
-  @Test fun `property - domain to network`() {
-    assertThat(Stubs.propString.toNetwork())
-      .isDataClassEqualTo(Stubs.propertyResponse)
-  }
-
   @Test fun `feature - domain to network`() {
     assertThat(Feature.BASIC.toNetwork())
-      .isDataClassEqualTo(Stubs.projectFeatureDto)
+      .isDataClassEqualTo(Stubs.projectFeatureResponse)
   }
 
-  @Test fun `project status - domain to network`() {
-    assertThat(Stubs.projectStatus.toNetwork())
-      .isDataClassEqualTo(Stubs.projectStatusDto)
+  @Test fun `project state - domain to network`() {
+    assertThat(Stubs.projectState.toNetwork())
+      .isDataClassEqualTo(Stubs.projectStateResponse)
   }
 
   @Test fun `project - domain to network`() {
-    assertThat(Stubs.project.toNetwork(projectStatus = Stubs.projectStatus))
+    assertThat(Stubs.project.toNetwork(projectState = Stubs.projectState))
       .isDataClassEqualTo(Stubs.projectResponse)
   }
 

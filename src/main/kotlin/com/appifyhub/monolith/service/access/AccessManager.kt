@@ -1,10 +1,7 @@
 package com.appifyhub.monolith.service.access
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty.NAME
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty.ON_HOLD
-import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
+import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
@@ -29,10 +26,10 @@ interface AccessManager {
     USER_DELETE(OWNER),
   }
 
-  enum class Feature(val isRequired: Boolean, vararg val properties: ProjectProperty) {
-    BASIC(isRequired = true, NAME, ON_HOLD),
-    AUTH(isRequired = true),
-    DEMO(isRequired = false),
+  enum class Feature(val isRequired: Boolean) {
+    BASIC(isRequired = true), // core functionality: service health, status check, feature check, security...
+    USERS(isRequired = true), // user-related functionality: signup, login, user data updates...
+    DEMO(isRequired = false), // demoing service functionality
   }
 
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User
@@ -43,7 +40,7 @@ interface AccessManager {
 
   @Throws fun requestSuperCreator(authData: Authentication): User
 
-  @Throws fun fetchProjectStatus(targetId: Long): ProjectStatus
+  @Throws fun fetchProjectState(targetId: Long): ProjectState
 
   @Throws fun requireProjectFunctional(targetId: Long)
 

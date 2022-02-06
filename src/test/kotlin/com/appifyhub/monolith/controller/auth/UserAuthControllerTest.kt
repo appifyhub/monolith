@@ -228,7 +228,7 @@ class UserAuthControllerTest {
   }
 
   @Test fun `get any user tokens succeeds for lower rank`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val adminToken = stubber.tokens(project).real(User.Authority.ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
     val target = stubber.users(project).default()
@@ -253,7 +253,7 @@ class UserAuthControllerTest {
   }
 
   @Test fun `get any user tokens succeeds with static token`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val target = stubber.users(project).owner(idSuffix = "_another")
     val staticToken = stubber.tokens(project).real(OWNER, isStatic = true).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
@@ -508,7 +508,7 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth any user succeeds for lower rank`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val target = stubber.users(project).default()
     val adminToken = stubber.tokens(project).real(User.Authority.ADMIN).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
@@ -539,7 +539,7 @@ class UserAuthControllerTest {
   }
 
   @Test fun `unauth any user succeeds with static token`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val target = stubber.users(project).owner(idSuffix = "_another")
     val staticToken = stubber.tokens(project).real(OWNER, isStatic = true).token.tokenValue
     timeProvider.advanceBy(Duration.ofHours(1))
