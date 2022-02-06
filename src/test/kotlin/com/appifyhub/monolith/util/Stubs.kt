@@ -7,19 +7,13 @@ import com.appifyhub.monolith.domain.common.stubMessageTemplate
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
-import com.appifyhub.monolith.domain.creator.property.Property
-import com.appifyhub.monolith.domain.creator.property.PropertyCategory
-import com.appifyhub.monolith.domain.creator.property.PropertyTag
-import com.appifyhub.monolith.domain.creator.property.PropertyType
-import com.appifyhub.monolith.domain.creator.property.ops.PropertyFilter
-import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
+import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.binding.TemplateDataBinder
 import com.appifyhub.monolith.domain.messaging.VariableBinding
+import com.appifyhub.monolith.domain.messaging.binding.TemplateDataBinder
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
@@ -32,14 +26,11 @@ import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
-import com.appifyhub.monolith.network.creator.project.ProjectFeatureDto
+import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
-import com.appifyhub.monolith.network.creator.project.ProjectStatusDto
+import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
-import com.appifyhub.monolith.network.creator.property.PropertyConfigurationResponse
-import com.appifyhub.monolith.network.creator.property.PropertyResponse
-import com.appifyhub.monolith.network.creator.property.ops.PropertyFilterQueryParams
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
@@ -55,8 +46,6 @@ import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
-import com.appifyhub.monolith.storage.model.creator.PropertyDbm
-import com.appifyhub.monolith.storage.model.creator.PropertyIdDbm
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.storage.model.messaging.VariableBindingDbm
 import com.appifyhub.monolith.storage.model.messaging.VariableBindingKeyDbm
@@ -207,6 +196,13 @@ object Stubs {
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
+    name = "name",
+    description = "description",
+    logoUrl = "logoUrl",
+    websiteUrl = "websiteUrl",
+    maxUsers = 1000,
+    anyoneCanSearch = true,
+    onHold = true,
     languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
@@ -217,6 +213,13 @@ object Stubs {
     type = Project.Type.FREE,
     status = Project.Status.SUSPENDED,
     userIdType = project.userIdType,
+    name = "name1",
+    description = "description1",
+    logoUrl = "logoUrl1",
+    websiteUrl = "websiteUrl1",
+    maxUsers = 1001,
+    anyoneCanSearch = false,
+    onHold = false,
     languageTag = Locale.UK.toLanguageTag(),
     createdAt = project.createdAt,
     updatedAt = Date(0xA20001),
@@ -227,66 +230,10 @@ object Stubs {
     isInitialized = true,
   )
 
-  val propString = Property.StringProp(
-    config = ProjectProperty.GENERIC_STRING,
-    projectId = project.id,
-    rawValue = "value",
-    updatedAt = Date(0xFF0000),
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propStringName = Property.StringProp(
-    config = ProjectProperty.NAME,
-    projectId = project.id,
-    rawValue = "name",
-    updatedAt = Date(0xFF0000),
-  )
-
-  val propInteger = Property.IntegerProp(
-    config = ProjectProperty.GENERIC_INTEGER,
-    projectId = project.id,
-    rawValue = "1",
-    updatedAt = Date(0xFF0000),
-  )
-
-  val propDecimal = Property.DecimalProp(
-    config = ProjectProperty.GENERIC_DECIMAL,
-    projectId = project.id,
-    rawValue = "1.1",
-    updatedAt = Date(0xFF0000),
-  )
-
-  val propFlag = Property.FlagProp(
-    config = ProjectProperty.GENERIC_FLAG,
-    projectId = project.id,
-    rawValue = "true",
-    updatedAt = Date(0xFF0000),
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propFlagOnHold = Property.FlagProp(
-    config = ProjectProperty.ON_HOLD,
-    projectId = project.id,
-    rawValue = "false",
-    updatedAt = Date(0xFF0000),
-  )
-
-  val propertyFilter = PropertyFilter(
-    type = PropertyType.STRING,
-    category = PropertyCategory.GENERIC,
-    nameContains = "_STRING",
-    isMandatory = true,
-    isSecret = true,
-    isDeprecated = true,
-    mustHaveTags = setOf(PropertyTag.GENERIC),
-    hasAtLeastOneOfTags = setOf(PropertyTag.GENERIC),
-  )
-
-  val projectStatus = ProjectStatus(
-    status = Project.Status.ACTIVE,
+  val projectState = ProjectState(
+    project = project,
     usableFeatures = listOf(Feature.BASIC),
     unusableFeatures = emptyList(),
-    properties = listOf(propStringName, propFlagOnHold),
   )
 
   val variableBinding = VariableBinding(
@@ -330,6 +277,13 @@ object Stubs {
     type = "OPENSOURCE",
     status = "ACTIVE",
     userIdType = "USERNAME",
+    name = "name",
+    description = "description",
+    logoUrl = "logoUrl",
+    websiteUrl = "websiteUrl",
+    maxUsers = 1000,
+    anyoneCanSearch = true,
+    onHold = true,
     languageTag = Locale.US.toLanguageTag(),
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
@@ -410,44 +364,6 @@ object Stubs {
   val schemaDbm = SchemaDbm(
     version = 1,
     isInitialized = true,
-  )
-
-  val propStringIdDbm = PropertyIdDbm(propString.config.name, propString.projectId)
-
-  val propIntegerIdDbm = PropertyIdDbm(propInteger.config.name, propInteger.projectId)
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propDecimalIdDbm = PropertyIdDbm(propDecimal.config.name, propDecimal.projectId)
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propFlagIdDbm = PropertyIdDbm(propFlag.config.name, propFlag.projectId)
-
-  val propStringDbm = PropertyDbm(
-    id = propStringIdDbm,
-    project = projectDbm,
-    rawValue = propString.rawValue,
-    updatedAt = propString.updatedAt,
-  )
-
-  val propIntegerDbm = PropertyDbm(
-    id = propIntegerIdDbm,
-    project = projectDbm,
-    rawValue = propInteger.rawValue,
-    updatedAt = propInteger.updatedAt,
-  )
-
-  val propDecimalDbm = PropertyDbm(
-    id = propDecimalIdDbm,
-    project = projectDbm,
-    rawValue = propDecimal.rawValue,
-    updatedAt = propDecimal.updatedAt,
-  )
-
-  val propFlagDbm = PropertyDbm(
-    id = propFlagIdDbm,
-    project = projectDbm,
-    rawValue = propFlag.rawValue,
-    updatedAt = propFlag.updatedAt,
   )
 
   val variableBindingDbm = VariableBindingDbm(
@@ -562,6 +478,13 @@ object Stubs {
     type = Project.Type.OPENSOURCE,
     status = Project.Status.ACTIVE,
     userIdType = Project.UserIdType.USERNAME,
+    name = "name",
+    description = "description",
+    logoUrl = "logoUrl",
+    websiteUrl = "websiteUrl",
+    maxUsers = 1000,
+    anyoneCanSearch = true,
+    onHold = true,
     languageTag = Locale.US.toLanguageTag(),
   )
 
@@ -569,6 +492,13 @@ object Stubs {
     id = project.id,
     type = Settable(Project.Type.FREE),
     status = Settable(Project.Status.SUSPENDED),
+    name = Settable("name1"),
+    description = Settable("description1"),
+    logoUrl = Settable("logoUrl1"),
+    websiteUrl = Settable("websiteUrl1"),
+    maxUsers = Settable(1001),
+    anyoneCanSearch = Settable(false),
+    onHold = Settable(false),
     languageTag = Settable(Locale.UK.toLanguageTag()),
   )
 
@@ -658,96 +588,29 @@ object Stubs {
     origin = userCredentialsRequest.origin,
   )
 
-  val propertyFilterQueryParams = PropertyFilterQueryParams(
-    type = PropertyType.STRING.name,
-    category = PropertyCategory.GENERIC.name,
-    name_contains = "_STRING",
-    mandatory = true,
-    secret = true,
-    deprecated = true,
-    must_have_tags = listOf(PropertyTag.GENERIC.name),
-    has_at_least_one_of_tags = listOf(PropertyTag.GENERIC.name),
-  )
-
-  val propertyConfigurationResponse = PropertyConfigurationResponse(
-    name = ProjectProperty.GENERIC_STRING.name,
-    type = ProjectProperty.GENERIC_STRING.type.name,
-    category = ProjectProperty.GENERIC_STRING.category.name,
-    tags = ProjectProperty.GENERIC_STRING.tags.map(PropertyTag::name).toSet(),
-    defaultValue = ProjectProperty.GENERIC_STRING.defaultValue,
-    isMandatory = ProjectProperty.GENERIC_STRING.isMandatory,
-    isSecret = ProjectProperty.GENERIC_STRING.isSecret,
-    isDeprecated = ProjectProperty.GENERIC_STRING.isDeprecated,
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propertyConfigurationResponseName = PropertyConfigurationResponse(
-    name = ProjectProperty.NAME.name,
-    type = ProjectProperty.NAME.type.name,
-    category = ProjectProperty.NAME.category.name,
-    tags = ProjectProperty.NAME.tags.map(PropertyTag::name).toSet(),
-    defaultValue = ProjectProperty.NAME.defaultValue,
-    isMandatory = ProjectProperty.NAME.isMandatory,
-    isSecret = ProjectProperty.NAME.isSecret,
-    isDeprecated = ProjectProperty.NAME.isDeprecated,
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propertyConfigurationResponseOnHold = PropertyConfigurationResponse(
-    name = ProjectProperty.ON_HOLD.name,
-    type = ProjectProperty.ON_HOLD.type.name,
-    category = ProjectProperty.ON_HOLD.category.name,
-    tags = ProjectProperty.ON_HOLD.tags.map(PropertyTag::name).toSet(),
-    defaultValue = ProjectProperty.ON_HOLD.defaultValue,
-    isMandatory = ProjectProperty.ON_HOLD.isMandatory,
-    isSecret = ProjectProperty.ON_HOLD.isSecret,
-    isDeprecated = ProjectProperty.ON_HOLD.isDeprecated,
-  )
-
-  val propertyResponse = PropertyResponse(
-    config = propertyConfigurationResponse,
-    rawValue = propString.rawValue,
-    updatedAt = "1970-01-01 04:38",
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propertyResponseName = PropertyResponse(
-    config = propertyConfigurationResponseName,
-    rawValue = "name",
-    updatedAt = "1970-01-01 04:38",
-  )
-
-  @Suppress("MemberVisibilityCanBePrivate")
-  val propertyResponseOnHold = PropertyResponse(
-    config = propertyConfigurationResponseOnHold,
-    rawValue = "false",
-    updatedAt = "1970-01-01 04:38",
-  )
-
-  val projectFeatureDto = ProjectFeatureDto(
+  val projectFeatureResponse = ProjectFeatureResponse(
     name = Feature.BASIC.name,
     isRequired = true,
-    properties = listOf(
-      ProjectProperty.NAME.name,
-      ProjectProperty.ON_HOLD.name,
-    ),
   )
 
-  val projectStatusDto = ProjectStatusDto(
+  val projectStateResponse = ProjectStateResponse(
     status = project.status.name,
-    usableFeatures = listOf(projectFeatureDto),
+    usableFeatures = listOf(projectFeatureResponse),
     unusableFeatures = emptyList(),
-    properties = listOf(
-      propertyResponseName,
-      propertyResponseOnHold,
-    ),
   )
 
   val projectResponse = ProjectResponse(
     projectId = userId.projectId,
     type = project.type.name,
-    status = projectStatusDto,
+    state = projectStateResponse,
     userIdType = project.userIdType.name,
+    name = project.name,
+    description = project.description,
+    logoUrl = project.logoUrl,
+    websiteUrl = project.websiteUrl,
+    maxUsers = project.maxUsers,
+    anyoneCanSearch = project.anyoneCanSearch,
+    onHold = project.onHold,
     languageTag = Locale.US.toLanguageTag(),
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
@@ -809,12 +672,23 @@ object Stubs {
     type = "OPENSOURCE",
     userIdType = "USERNAME",
     ownerUniversalId = universalUserId,
+    name = project.name,
+    description = project.description,
+    logoUrl = project.logoUrl,
+    websiteUrl = project.websiteUrl,
     languageTag = Locale.US.toLanguageTag(),
   )
 
   val projectUpdateRequest = ProjectUpdateRequest(
     type = SettableRequest("FREE"),
     status = SettableRequest("SUSPENDED"),
+    name = SettableRequest("name1"),
+    description = SettableRequest("description1"),
+    logoUrl = SettableRequest("logoUrl1"),
+    websiteUrl = SettableRequest("websiteUrl1"),
+    maxUsers = SettableRequest(1001),
+    anyoneCanSearch = SettableRequest(false),
+    onHold = SettableRequest(false),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
   )
 

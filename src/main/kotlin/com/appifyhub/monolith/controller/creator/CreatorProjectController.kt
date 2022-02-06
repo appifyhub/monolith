@@ -43,7 +43,7 @@ class CreatorProjectController(
     val requester = accessManager.requestCreator(authentication, matchesId = ownerId, requireVerified = true)
     val projectData = projectRequest.toDomain(owner = requester)
     val project = creatorService.addProject(projectData)
-    val status = accessManager.fetchProjectStatus(project.id)
+    val status = accessManager.fetchProjectState(project.id)
 
     return project.toNetwork(status)
   }
@@ -66,7 +66,7 @@ class CreatorProjectController(
 
     return projects.map {
       it.toNetwork(
-        projectStatus = accessManager.fetchProjectStatus(it.id),
+        projectState = accessManager.fetchProjectState(it.id),
       )
     }
   }
@@ -79,9 +79,9 @@ class CreatorProjectController(
     log.debug("[GET] get creator project $projectId")
 
     val project = accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_READ)
-    val status = accessManager.fetchProjectStatus(projectId)
+    val status = accessManager.fetchProjectState(projectId)
 
-    return project.toNetwork(projectStatus = status)
+    return project.toNetwork(projectState = status)
   }
 
   @PutMapping(Endpoints.PROJECT)
@@ -94,28 +94,26 @@ class CreatorProjectController(
 
     var projectUpdater = updateRequest.toDomain(projectId)
 
+    // verify access rights for editing this project
+    accessManager.requestProjectAccess(
+      authData = authentication,
+      targetId = projectId,
+      privilege = Privilege.PROJECT_WRITE,
+    )
+
     // only super-creator can change the project status
     if (updateRequest.status != null)
       accessManager.requestSuperCreator(authentication)
 
-    // only owner and super-creator can change the project type
-    if (updateRequest.type != null) {
-      accessManager.requestProjectAccess(
-        authData = authentication,
-        targetId = projectId,
-        privilege = Privilege.PROJECT_WRITE,
-      )
-
-      // force REVIEW state after type change
-      if (updateRequest.status == null) {
-        projectUpdater = projectUpdater.copy(status = Settable(Project.Status.REVIEW))
-      }
+    // force REVIEW state if type is changed
+    if (updateRequest.type != null && updateRequest.status == null) {
+      projectUpdater = projectUpdater.copy(status = Settable(Project.Status.REVIEW))
     }
 
     val project = creatorService.updateProject(projectUpdater)
-    val status = accessManager.fetchProjectStatus(projectId)
+    val status = accessManager.fetchProjectState(projectId)
 
-    return project.toNetwork(projectStatus = status)
+    return project.toNetwork(projectState = status)
   }
 
   @DeleteMapping(Endpoints.PROJECT)

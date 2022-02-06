@@ -19,11 +19,6 @@ object Normalizers {
   val FlagDefFalse = normalizesNonNull(Validators.Flag, Cleaners.FlagDefFalse)
   val FlagDefTrue = normalizesNonNull(Validators.Flag, Cleaners.FlagDefTrue)
 
-  // Top level normalizers
-
-  val ProjectId = normalizesNonNull(Validators.ProjectId, Cleaners.ProjectId)
-  val AccountId = normalizesNonNull(Validators.AccountId, Cleaners.AccountId)
-
   // ID normalizers
 
   val CustomUserId = normalizesNonNull(Validators.CustomUserId, Cleaners.CustomUserId)
@@ -48,15 +43,16 @@ object Normalizers {
   val OrganizationCountryCode = normalizesNullable(Validators.OrganizationCountryCode, Cleaners.OrganizationCountryCode)
   val Organization = normalizesNullable(Validators.Organization, Cleaners.Organization)
 
-  // Project property normalizers
+  // Project normalizers
 
-  val PropProjectName = normalizesNonNull(Validators.ProjectName, Cleaners.ProjectName)
-  val PropProjectDescription = normalizesNonNull(Validators.NotBlank, Cleaners.Trim)
-  val PropProjectLogoUrl = normalizesNonNull(Validators.Url, Cleaners.Url)
-  val PropProjectWebsite = normalizesNonNull(Validators.Url, Cleaners.Url)
-  val PropMaxUsers = normalizesNonNull(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
-  val PropOnHold = normalizesNonNull(Validators.FlagAsString, Cleaners.FlagDefTrueAsString)
-  val PropAnyoneCanSearch = normalizesNonNull(Validators.FlagAsString, Cleaners.FlagDefFalseAsString)
+  val ProjectId = normalizesNonNull(Validators.ProjectId, Cleaners.ProjectId)
+  val ProjectName = normalizesNonNull(Validators.ProjectName, Cleaners.ProjectName)
+  val ProjectDescription = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullified)
+  val ProjectLogoUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
+  val ProjectWebsiteUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
+  val MaxUsers = normalizesNonNull(Validators.PositiveLong, Cleaners.LongToCardinal)
+  val AnyoneCanSearch = normalizesNonNull(Validators.Flag, Cleaners.FlagDefFalse)
+  val OnHold = normalizesNonNull(Validators.Flag, Cleaners.FlagDefTrue)
 
   // Other normalizers
 

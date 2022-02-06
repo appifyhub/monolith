@@ -116,7 +116,7 @@ class CreatorUserControllerTest {
 
   @Test fun `token force-verification succeeds with valid token for lower rank`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator, forceBasicProps = true)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val user = stubber.users(project).default(autoVerified = false)
     val token = stubber.tokens(creator).real().token.tokenValue
 

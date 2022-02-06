@@ -32,12 +32,6 @@ object Endpoints {
   const val PROJECTS = "/v1/projects"
   const val PROJECT = "/v1/projects/{projectId}"
 
-  // Properties
-
-  const val PROJECT_CONFIGS = "/v1/projects/{projectId}/configurations"
-  const val PROJECT_PROPERTIES = "/v1/projects/{projectId}/properties"
-  const val PROJECT_PROPERTY = "/v1/projects/{projectId}/properties/{propertyName}"
-
   // Users
 
   const val CREATOR_SIGNUP = "/v1/creator/signup"

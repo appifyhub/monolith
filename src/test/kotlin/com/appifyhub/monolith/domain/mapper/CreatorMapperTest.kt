@@ -6,11 +6,10 @@ import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
-import com.appifyhub.monolith.storage.model.creator.PropertyDbm
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import org.junit.jupiter.api.Test
 import java.util.Date
+import org.junit.jupiter.api.Test
 
 class CreatorMapperTest {
 
@@ -76,22 +75,6 @@ class CreatorMapperTest {
 
   @Test fun `project domain to data`() {
     assertThat(Stubs.project.toData()).isEqualTo(Stubs.projectDbm)
-  }
-
-  @Test fun `property data to domain`() {
-    val propsData = listOf(Stubs.propStringDbm, Stubs.propIntegerDbm, Stubs.propDecimalDbm, Stubs.propFlagDbm)
-    val propsDomain = listOf(Stubs.propString, Stubs.propInteger, Stubs.propDecimal, Stubs.propFlag)
-
-    assertThat(propsData.map(PropertyDbm::toDomain))
-      .isEqualTo(propsDomain)
-  }
-
-  @Test fun `property domain to data`() {
-    val propsDomain = listOf(Stubs.propString, Stubs.propInteger, Stubs.propDecimal, Stubs.propFlag)
-    val propsData = listOf(Stubs.propStringDbm, Stubs.propIntegerDbm, Stubs.propDecimalDbm, Stubs.propFlagDbm)
-
-    assertThat(propsDomain.map { it.toData(Stubs.project) })
-      .isEqualTo(propsData)
   }
 
 }

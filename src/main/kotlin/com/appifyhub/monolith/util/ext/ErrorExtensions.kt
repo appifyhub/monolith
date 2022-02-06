@@ -17,10 +17,6 @@ fun throwNormalization(
 ): Nothing = throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, message().toString())
 
 @Throws(ResponseStatusException::class)
-fun throwPropertyNotFound(propName: String): Nothing =
-  throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Property '$propName' not found")
-
-@Throws(ResponseStatusException::class)
 fun throwLocked(
   message: () -> Any = { "Operation is not allowed" },
 ): Nothing = throw ResponseStatusException(HttpStatus.LOCKED, message().toString())

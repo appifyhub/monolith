@@ -5,6 +5,7 @@ import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
 import java.util.Date
 import java.util.Locale
 
@@ -21,6 +22,13 @@ fun stubProject() = Project(
   type = Project.Type.COMMERCIAL,
   status = Project.Status.REVIEW,
   userIdType = Project.UserIdType.RANDOM,
+  name = "PN",
+  description = null,
+  logoUrl = null,
+  websiteUrl = null,
+  maxUsers = DEFAULT_MAX_USERS,
+  anyoneCanSearch = false,
+  onHold = false,
   languageTag = Locale.US.toLanguageTag(),
   createdAt = Date(),
   updatedAt = Date(),

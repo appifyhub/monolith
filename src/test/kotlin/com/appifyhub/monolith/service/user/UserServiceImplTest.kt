@@ -14,7 +14,6 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
@@ -25,7 +24,6 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -53,7 +51,6 @@ import org.springframework.web.server.ResponseStatusException
 class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
-  @Autowired lateinit var propertyService: PropertyService
   @Autowired lateinit var passwordEncoder: PasswordEncoder
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var stubber: Stubber
@@ -209,10 +206,9 @@ class UserServiceImplTest {
   }
 
   @Test fun `adding user fails with max users reached`() {
-    val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
+    val project = stubber.projects.new(userIdType = UserIdType.USERNAME, maxUsers = 2)
     stubber.users(project).default(idSuffix = "_1")
     stubber.users(project).default(idSuffix = "_2")
-    propertyService.saveProperty<Int>(project.id, ProjectProperty.MAX_USERS.name, "2")
     val creator = Stubs.userCreator.copy(projectId = project.id)
 
     assertThat { service.addUser(creator) }

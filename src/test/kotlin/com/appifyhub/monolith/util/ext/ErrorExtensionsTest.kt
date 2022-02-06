@@ -39,18 +39,6 @@ class ErrorExtensionsTest {
       }
   }
 
-  @Test fun `throwPropertyNotFound throws correctly`() {
-    assertThat { throwPropertyNotFound("Message") }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        prop("status") { (it as ResponseStatusException).status }
-          .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-        prop("reason") { (it as ResponseStatusException).reason }
-          .isEqualTo("Property 'Message' not found")
-      }
-  }
-
   @Test fun `throwLocked throws correctly`() {
     assertThat { throwLocked { "Message" } }
       .isFailure()

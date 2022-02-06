@@ -88,13 +88,105 @@ class CreatorServiceImplTest {
       .messageContains("must not be provided")
   }
 
+  @Test fun `add project fails with invalid name`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      name = "\n\t",
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project's Name")
+      }
+  }
+
+  @Test fun `add project fails with invalid max users`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      maxUsers = -10,
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project's Max Users")
+      }
+  }
+
+  @Test fun `add project succeeds with invalid description`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      description = "\n\t",
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isSuccess()
+  }
+
+  @Test fun `add project succeeds with invalid logo URL`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = "\n\t",
+      websiteUrl = null,
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isSuccess()
+  }
+
+  @Test fun `add project succeeds with invalid website URL`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      websiteUrl = "\n\t",
+      logoUrl = null,
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isSuccess()
+  }
+
+  @Test fun `add project succeeds with invalid language tag`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      languageTag = "asdasdasdasdasd",
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isSuccess()
+  }
+
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `add project succeeds with valid data (with creator)`() {
+    val projectData = Stubs.projectCreator.copy(
+      owner = stubber.creators.owner(),
+      logoUrl = "https://www.example.com/logo.png",
+      websiteUrl = "https://www.example.com",
+    )
+
     assertThat(
-      service.addProject(Stubs.projectCreator.copy(owner = stubber.creators.owner())).cleanDates()
+      service.addProject(projectData).cleanDates()
     ).isDataClassEqualTo(
       Stubs.project.copy(
         id = Stubs.project.id + 1,
+        logoUrl = "https://www.example.com/logo.png",
+        websiteUrl = "https://www.example.com",
       ).cleanStubArtifacts()
     )
   }
@@ -180,33 +272,108 @@ class CreatorServiceImplTest {
       }
   }
 
+  @Test fun `update project fails with invalid max users`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      maxUsers = Settable(-10),
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project's Max Users")
+      }
+  }
+
+  @Test fun `update project fails with invalid name`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      name = Settable("\n\t"),
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project's Name")
+      }
+  }
+
+  @Test fun `update project succeeds with invalid description`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      description = Settable("\n\t"),
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isSuccess()
+  }
+
+  @Test fun `update project succeeds with invalid logo URL`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = Settable("\n\t"),
+      websiteUrl = null,
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isSuccess()
+  }
+
+  @Test fun `update project succeeds with invalid website URL`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      websiteUrl = Settable("\n\t"),
+      logoUrl = null,
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isSuccess()
+  }
+
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `update project succeeds with an invalid language tag`() {
     val project = stubber.projects.new().cleanStubArtifacts()
     val updater = Stubs.projectUpdater.copy(
       id = project.id,
-      languageTag = Settable("asdasdasdasd"),
-    )
-    val expected = Stubs.projectUpdated.copy(
-      id = project.id,
-      languageTag = null,
+      languageTag = Settable("asdasdasdasdasd"),
+      logoUrl = null,
+      websiteUrl = null,
     )
 
-    assertThat(
-      service.updateProject(updater).cleanStubArtifacts()
-    ).isDataClassEqualTo(
-      expected.cleanStubArtifacts()
-    )
+    assertThat { service.updateProject(updater) }
+      .isSuccess()
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `update project succeeds with valid data`() {
     val project = stubber.projects.new().cleanStubArtifacts()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = Settable("https://www.example1.com/logo1.png"),
+      websiteUrl = Settable("https://www.example1.com"),
+    )
 
     assertThat(
-      service.updateProject(Stubs.projectUpdater.copy(id = project.id)).cleanStubArtifacts()
+      service.updateProject(updater).cleanStubArtifacts()
     ).isDataClassEqualTo(
-      Stubs.projectUpdated.copy(id = project.id).cleanStubArtifacts()
+      Stubs.projectUpdated.copy(
+        id = project.id,
+        logoUrl = "https://www.example1.com/logo1.png",
+        websiteUrl = "https://www.example1.com",
+      ).cleanStubArtifacts()
     )
   }
 

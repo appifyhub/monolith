@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.service.creator
 
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.common.mapValueNonNull
+import com.appifyhub.monolith.domain.common.mapValueNullable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
@@ -22,22 +23,55 @@ class CreatorServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun addProject(projectInfo: ProjectCreator): Project {
-    log.debug("Adding project $projectInfo")
+  override fun addProject(projectData: ProjectCreator): Project {
+    log.debug("Adding project $projectData")
 
+    // hack it for the main creator project
     val creatorProject = silent(log = false) { getCreatorProject() }
     if (creatorProject != null) {
       // creator project is already created
-      if (projectInfo.owner == null) error("Project creator must be provided")
+      if (projectData.owner == null) error("Project creator must be provided")
 
-      if (projectInfo.owner.id.projectId != creatorProject.id)
+      if (projectData.owner.id.projectId != creatorProject.id)
         throwLocked { "Projects can be added only by creator project users" }
     } else {
       // looks like we're creating the creator project
-      if (projectInfo.owner != null) error("Project's future owner must not be provided for creator project")
+      if (projectData.owner != null) error("Project's future owner must not be provided for creator project")
     }
 
-    return creatorRepository.addProject(projectInfo)
+    val normalizedName = Normalizers.ProjectName.run(projectData.name)
+      .requireValid { "Project's Name" }
+    val normalizedDescription = Normalizers.ProjectDescription.run(projectData.description)
+      .requireValid { "Project's Description" }
+    val normalizedLogoUrl = Normalizers.ProjectLogoUrl.run(projectData.logoUrl)
+      .requireValid { "Project's Logo URL" }
+    val normalizedWebsiteUrl = Normalizers.ProjectWebsiteUrl.run(projectData.websiteUrl)
+      .requireValid { "Project's Website URL" }
+    val normalizedMaxUsers = Normalizers.MaxUsers.run(projectData.maxUsers.toLong())
+      .requireValid { "Project's Max Users" }.toInt()
+    val normalizedAnyoneCanSearch = Normalizers.AnyoneCanSearch.run(projectData.anyoneCanSearch)
+      .requireValid { "Project's Anyone Can Search" }
+    val normalizedOnHold = Normalizers.OnHold.run(projectData.onHold)
+      .requireValid { "Project's On Hold" }
+    val normalizedLanguageTag = Normalizers.LanguageTag.run(projectData.languageTag)
+      .requireValid { "Project's Language Tag" }
+
+    val normalizedProjectCreator = ProjectCreator(
+      owner = projectData.owner,
+      type = projectData.type,
+      status = projectData.status,
+      userIdType = projectData.userIdType,
+      name = normalizedName,
+      description = normalizedDescription,
+      logoUrl = normalizedLogoUrl,
+      websiteUrl = normalizedWebsiteUrl,
+      maxUsers = normalizedMaxUsers,
+      anyoneCanSearch = normalizedAnyoneCanSearch,
+      onHold = normalizedOnHold,
+      languageTag = normalizedLanguageTag,
+    )
+
+    return creatorRepository.addProject(normalizedProjectCreator)
   }
 
   override fun fetchAllProjects(): List<Project> {
@@ -82,13 +116,44 @@ class CreatorServiceImpl(
     log.debug("Updating project $updater")
 
     val normalizedProjectId = Normalizers.ProjectId.run(updater.id).requireValid { "Project ID" }
-    val normalizedLanguageTag = Normalizers.LanguageTag.run(updater.languageTag?.value).requireValid { "Language Tag" }
+
+    val normalizedName = updater.name?.mapValueNonNull {
+      Normalizers.ProjectName.run(it).requireValid { "Project's Name" }
+    }
+    val normalizedDescription = updater.description?.mapValueNullable {
+      Normalizers.ProjectDescription.run(it).requireValid { "Project's Description" }
+    }
+    val normalizedLogoUrl = updater.logoUrl?.mapValueNullable {
+      Normalizers.ProjectLogoUrl.run(it).requireValid { "Project's Logo URL" }
+    }
+    val normalizedWebsiteUrl = updater.websiteUrl?.mapValueNullable {
+      Normalizers.ProjectWebsiteUrl.run(it).requireValid { "Project's Website URL" }
+    }
+    val normalizedMaxUsers = updater.maxUsers?.mapValueNonNull {
+      Normalizers.MaxUsers.run(it.toLong()).requireValid { "Project's Max Users" }.toInt()
+    }
+    val normalizedAnyoneCanSearch = updater.anyoneCanSearch?.mapValueNonNull {
+      Normalizers.AnyoneCanSearch.run(it).requireValid { "Project's Anyone Can Search" }
+    }
+    val normalizedOnHold = updater.onHold?.mapValueNonNull {
+      Normalizers.OnHold.run(it).requireValid { "Project's On Hold" }
+    }
+    val normalizedLanguageTag = updater.languageTag?.mapValueNullable {
+      Normalizers.LanguageTag.run(it).requireValid { "Language Tag" }
+    }
 
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,
       type = updater.type,
       status = updater.status,
-      languageTag = Settable(normalizedLanguageTag),
+      name = normalizedName,
+      description = normalizedDescription,
+      logoUrl = normalizedLogoUrl,
+      websiteUrl = normalizedWebsiteUrl,
+      maxUsers = normalizedMaxUsers,
+      anyoneCanSearch = normalizedAnyoneCanSearch,
+      onHold = normalizedOnHold,
+      languageTag = normalizedLanguageTag,
     )
 
     return creatorRepository.updateProject(normalizedUpdater)

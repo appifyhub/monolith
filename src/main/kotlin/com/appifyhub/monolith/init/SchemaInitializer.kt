@@ -3,7 +3,6 @@ package com.appifyhub.monolith.init
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -11,7 +10,7 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.service.creator.CreatorService
-import com.appifyhub.monolith.service.creator.PropertyService
+import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component
 class SchemaInitializer(
   private val creatorService: CreatorService,
   private val userService: UserService,
-  private val propertyService: PropertyService,
   private val schemaService: SchemaService,
   private val creatorConfig: CreatorProjectConfig,
 ) : ApplicationRunner {
@@ -67,33 +65,26 @@ class SchemaInitializer(
       .requireValid { "Owner Name" }
     val ownerEmail = Normalizers.Email.run(creatorConfig.ownerEmail)
       .requireValid { "Owner Email" }
-    val creatorProjectName = Normalizers.PropProjectName.run(creatorConfig.projectName)
+    val creatorProjectName = Normalizers.ProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
     val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
 
     // create the creator project
     val project = creatorService.addProject(
-      projectInfo = ProjectCreator(
+      projectData = ProjectCreator(
         owner = null,
         type = Project.Type.FREE,
         status = Project.Status.ACTIVE,
         userIdType = Project.UserIdType.EMAIL,
+        name = creatorProjectName,
+        description = null,
+        logoUrl = null,
+        websiteUrl = null,
+        maxUsers = DEFAULT_MAX_USERS,
+        anyoneCanSearch = false,
+        onHold = false,
         languageTag = Locale.US.toLanguageTag(),
       ),
-    )
-
-    // save the project name
-    propertyService.saveProperty<String>(
-      projectId = project.id,
-      propName = ProjectProperty.NAME.name,
-      propRawValue = creatorProjectName,
-    )
-
-    // set that the project is not on hold
-    propertyService.saveProperty<Boolean>(
-      projectId = project.id,
-      propName = ProjectProperty.ON_HOLD.name,
-      propRawValue = false.toString(),
     )
 
     // create the owner's user in the creator project
