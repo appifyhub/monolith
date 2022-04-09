@@ -6,10 +6,9 @@ data class MessageTemplate(
   val id: Long,
   val projectId: Long,
   val name: String,
-  val language: String,
+  val languageTag: String,
   val content: String,
   val isHtml: Boolean,
-  val bindings: List<VariableBinding>,
   val createdAt: Date,
   val updatedAt: Date,
 )

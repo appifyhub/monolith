@@ -9,9 +9,20 @@ import org.springframework.transaction.annotation.Transactional
 @Suppress("FunctionName")
 interface MessageTemplateDao : CrudRepository<MessageTemplateDbm, Long> {
 
-  fun findAllByProject_ProjectId(id: Long): List<MessageTemplateDbm>
+  fun findAllByProject_ProjectId(projectId: Long): List<MessageTemplateDbm>
+
+  fun findAllByProject_ProjectIdAndName(projectId: Long, name: String): List<MessageTemplateDbm>
+
+  fun findAllByProject_ProjectIdAndNameAndLanguageTag(
+    projectId: Long,
+    name: String,
+    languageTag: String,
+  ): List<MessageTemplateDbm>
 
   @Transactional
-  fun deleteAllByProject_ProjectId(id: Long)
+  fun deleteAllByProject_ProjectId(projectId: Long)
+
+  @Transactional
+  fun deleteAllByProject_ProjectIdAndName(projectId: Long, name: String)
 
 }

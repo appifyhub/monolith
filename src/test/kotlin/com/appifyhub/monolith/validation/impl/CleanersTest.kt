@@ -372,6 +372,26 @@ class CleanersTest {
       .isEqualTo(tag)
   }
 
+  @Test fun `message template ID is long-to-cardinal`() {
+    assertThat(Cleaners.MessageTemplateId)
+      .isEqualTo(Cleaners.LongToCardinal)
+  }
+
+  @Test fun `message template name defaulting to empty with null`() {
+    assertThat(Cleaners.MessageTemplateName.clean(null))
+      .isEmpty()
+  }
+
+  @Test fun `message template name removes invalid chars`() {
+    assertThat(Cleaners.MessageTemplateName.clean("Some-Are_valid-1000!@#$%^&*()"))
+      .isEqualTo("Some-Are_valid-1000")
+  }
+
+  @Test fun `message template is trimming`() {
+    assertThat(Cleaners.MessageTemplate)
+      .isEqualTo(Cleaners.Trim)
+  }
+
   // endregion
 
 }
