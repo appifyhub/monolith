@@ -3,7 +3,6 @@ package com.appifyhub.monolith.storage.model.messaging
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import java.io.Serializable
 import java.util.Date
-import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.FetchType
@@ -12,7 +11,6 @@ import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
 import javax.persistence.Temporal
 import javax.persistence.TemporalType
 
@@ -32,22 +30,13 @@ class MessageTemplateDbm(
   var name: String,
 
   @Column(nullable = false, length = 8, updatable = false)
-  var language: String,
+  var languageTag: String,
 
   @Column(columnDefinition = "TEXT", nullable = false)
   var content: String,
 
   @Column(nullable = false)
   var isHtml: Boolean,
-
-  @OneToMany(
-    targetEntity = VariableBindingDbm::class,
-    fetch = FetchType.EAGER,
-    cascade = [CascadeType.ALL],
-    mappedBy = "template",
-    orphanRemoval = true,
-  )
-  var bindings: List<VariableBindingDbm>,
 
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -67,10 +56,9 @@ class MessageTemplateDbm(
     if (id != other.id) return false
     if (project.projectId != other.project.projectId) return false
     if (name != other.name) return false
-    if (language != other.language) return false
+    if (languageTag != other.languageTag) return false
     if (content != other.content) return false
     if (isHtml != other.isHtml) return false
-    if (bindings != other.bindings) return false
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
 
@@ -81,10 +69,9 @@ class MessageTemplateDbm(
     var result = id?.hashCode() ?: 0
     result = 31 * result + project.projectId.hashCode()
     result = 31 * result + name.hashCode()
-    result = 31 * result + language.hashCode()
+    result = 31 * result + languageTag.hashCode()
     result = 31 * result + content.hashCode()
     result = 31 * result + isHtml.hashCode()
-    result = 31 * result + bindings.hashCode()
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
     return result
@@ -95,10 +82,9 @@ class MessageTemplateDbm(
       "id=$id, " +
       "project.id=${project.projectId}, " +
       "name='$name', " +
-      "language='$language', " +
+      "language='$languageTag', " +
       "content='$content', " +
       "isHtml=$isHtml, " +
-      "bindings=$bindings, " +
       "createdAt=$createdAt, " +
       "updatedAt=$updatedAt" +
       ")"

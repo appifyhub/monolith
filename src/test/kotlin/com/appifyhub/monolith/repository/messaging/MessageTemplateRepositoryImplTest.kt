@@ -37,15 +37,6 @@ class MessageTemplateRepositoryImplTest {
       .isDataClassEqualTo(Stubs.messageTemplate)
   }
 
-  @Test fun `updating template works`() {
-    messageTemplateDao.stub {
-      onGeneric { save(any()) } doAnswer { it.arguments.first() as MessageTemplateDbm }
-    }
-
-    assertThat(repository.updateTemplate(Stubs.messageTemplate))
-      .isDataClassEqualTo(Stubs.messageTemplate)
-  }
-
   @Test fun `fetching template by ID works`() {
     messageTemplateDao.stub {
       onGeneric { findById(any()) } doReturn Optional.of(Stubs.messageTemplateDbm)
@@ -53,6 +44,55 @@ class MessageTemplateRepositoryImplTest {
 
     assertThat(repository.fetchTemplateById(Stubs.messageTemplate.id))
       .isDataClassEqualTo(Stubs.messageTemplate)
+  }
+
+  @Test fun `fetching all templates by name works`() {
+    messageTemplateDao.stub {
+      onGeneric { findAllByProject_ProjectIdAndName(any(), any()) } doReturn listOf(Stubs.messageTemplateDbm)
+    }
+
+    assertThat(repository.fetchTemplatesByName(Stubs.project.id, Stubs.messageTemplate.name))
+      .isEqualTo(listOf(Stubs.messageTemplate))
+  }
+
+  @Test fun `fetching all templates by project ID works`() {
+    messageTemplateDao.stub {
+      onGeneric { findAllByProject_ProjectId(any()) } doReturn listOf(Stubs.messageTemplateDbm)
+    }
+
+    assertThat(repository.fetchTemplatesByProjectId(Stubs.project.id))
+      .isEqualTo(listOf(Stubs.messageTemplate))
+  }
+
+  @Test fun `fetching all templates by name and language works`() {
+    messageTemplateDao.stub {
+      onGeneric {
+        findAllByProject_ProjectIdAndNameAndLanguageTag(
+          projectId = any(),
+          name = any(),
+          languageTag = any(),
+        )
+      } doReturn listOf(Stubs.messageTemplateDbm)
+    }
+
+    assertThat(
+      repository.fetchTemplatesByNameAndLanguage(
+        Stubs.project.id,
+        Stubs.messageTemplate.name,
+        Stubs.messageTemplate.languageTag,
+      )
+    ).isEqualTo(listOf(Stubs.messageTemplate))
+  }
+
+  @Test fun `updating template works`() {
+    timeProvider.staticTime = { Stubs.messageTemplateUpdated.updatedAt.time }
+    messageTemplateDao.stub {
+      onGeneric { findById(any()) } doReturn Optional.of(Stubs.messageTemplateDbm)
+      onGeneric { save(any()) } doAnswer { it.arguments.first() as MessageTemplateDbm }
+    }
+
+    assertThat(repository.updateTemplate(Stubs.messageTemplateUpdater))
+      .isDataClassEqualTo(Stubs.messageTemplateUpdated)
   }
 
   @Test fun `deleting template by ID works`() {
@@ -67,15 +107,6 @@ class MessageTemplateRepositoryImplTest {
     }
   }
 
-  @Test fun `fetching all templates by project ID works`() {
-    messageTemplateDao.stub {
-      onGeneric { findAllByProject_ProjectId(any()) } doReturn listOf(Stubs.messageTemplateDbm)
-    }
-
-    assertThat(repository.fetchAllTemplatesByProjectId(Stubs.project.id))
-      .isEqualTo(listOf(Stubs.messageTemplate))
-  }
-
   @Test fun `deleting all templates by project ID works`() {
     messageTemplateDao.stub {
       onGeneric { deleteAllByProject_ProjectId(any()) } doAnswer {}
@@ -85,6 +116,18 @@ class MessageTemplateRepositoryImplTest {
       assertThat { repository.deleteAllTemplatesByProjectId(Stubs.project.id) }
         .isSuccess()
       verify(messageTemplateDao).deleteAllByProject_ProjectId(Stubs.project.id)
+    }
+  }
+
+  @Test fun `deleting all templates by name works`() {
+    messageTemplateDao.stub {
+      onGeneric { deleteAllByProject_ProjectIdAndName(any(), any()) } doAnswer {}
+    }
+
+    assertAll {
+      assertThat { repository.deleteAllTemplatesByName(Stubs.project.id, Stubs.messageTemplate.name) }
+        .isSuccess()
+      verify(messageTemplateDao).deleteAllByProject_ProjectIdAndName(Stubs.project.id, Stubs.messageTemplate.name)
     }
   }
 

@@ -60,5 +60,8 @@ object Normalizers {
   val IpAddress = normalizesNullable(Validators.IpAddress, Cleaners.IpAddress)
   val BDay = normalizesNullable(Validators.BDay, Cleaners.BDay)
   val LanguageTag = normalizesNullable(Validators.LanguageTag, Cleaners.LanguageTagNullified)
+  val MessageTemplateId = normalizesNonNull(Validators.MessageTemplateId, Cleaners.MessageTemplateId)
+  val MessageTemplateName = normalizesNonNull(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
+  val MessageTemplate = normalizesNonNull(Validators.MessageTemplate, Cleaners.MessageTemplate)
 
 }

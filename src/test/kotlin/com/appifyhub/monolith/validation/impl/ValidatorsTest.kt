@@ -500,6 +500,36 @@ class ValidatorsTest {
       .isTrue()
   }
 
+  @Test fun `message template ID is positive long`() {
+    assertThat(Validators.MessageTemplateId)
+      .isEqualTo(Validators.PositiveLong)
+  }
+
+  @Test fun `message template name fails if null`() {
+    assertThat(Validators.MessageTemplateName.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `message template name fails if blank`() {
+    assertThat(Validators.MessageTemplateName.isValid("\n\t"))
+      .isFalse()
+  }
+
+  @Test fun `message template name fails with invalid characters`() {
+    assertThat(Validators.MessageTemplateName.isValid("Almost_All-Are!VALID"))
+      .isFalse()
+  }
+
+  @Test fun `message template name succeeds with valid characters`() {
+    assertThat(Validators.MessageTemplateName.isValid("All_Chars-Are-1000-VALID"))
+      .isTrue()
+  }
+
+  @Test fun `message template is non blank`() {
+    assertThat(Validators.MessageTemplate)
+      .isEqualTo(Validators.NotBlank)
+  }
+
   // endregion
 
 }

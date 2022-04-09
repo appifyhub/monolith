@@ -99,5 +99,10 @@ object Cleaners {
     Locale.forLanguageTag(it.trim()).toLanguageTag()
       ?.takeIf { tag -> tag.isNotBlank() && tag != "und" }
   }
+  val MessageTemplateId = LongToCardinal
+  val MessageTemplateName = cleansToNonNull<String>("MessageTemplateName") {
+    it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_') }.orEmpty()
+  }
+  val MessageTemplate = Trim
 
 }

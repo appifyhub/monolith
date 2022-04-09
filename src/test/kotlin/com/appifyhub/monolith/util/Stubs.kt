@@ -3,17 +3,14 @@ package com.appifyhub.monolith.util
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.common.stubMessageTemplate
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
-import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.VariableBinding
-import com.appifyhub.monolith.domain.messaging.binding.TemplateDataBinder
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
@@ -47,8 +44,6 @@ import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
-import com.appifyhub.monolith.storage.model.messaging.VariableBindingDbm
-import com.appifyhub.monolith.storage.model.messaging.VariableBindingKeyDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
@@ -236,21 +231,13 @@ object Stubs {
     unusableFeatures = emptyList(),
   )
 
-  val variableBinding = VariableBinding(
-    variableName = "variable",
-    bindsTo = TemplateDataBinder.Code.USER_NAME,
-    createdAt = Date(0x10001E),
-    updatedAt = Date(0x10001F),
-  )
-
   val messageTemplate = MessageTemplate(
     id = 10,
     projectId = project.id,
     name = "template",
-    language = Locale.US.toLanguageTag(),
+    languageTag = Locale.US.toLanguageTag(),
     content = "content",
     isHtml = true,
-    bindings = listOf(variableBinding),
     createdAt = Date(0x10000E),
     updatedAt = Date(0x10000F),
   )
@@ -258,9 +245,140 @@ object Stubs {
   val messageTemplateCreator = MessageTemplateCreator(
     projectId = project.id,
     name = messageTemplate.name,
-    language = messageTemplate.language,
+    languageTag = messageTemplate.languageTag,
     content = messageTemplate.content,
     isHtml = messageTemplate.isHtml,
+  )
+
+  val messageTemplateUpdated = MessageTemplate(
+    id = messageTemplate.id,
+    projectId = project.id,
+    name = "template1",
+    languageTag = Locale.UK.toLanguageTag(),
+    content = "content1",
+    isHtml = false,
+    createdAt = Date(0x10000E),
+    updatedAt = Date(0x10001F),
+  )
+
+  // endregion
+
+  // region Domain Ops Models
+
+  val userCreator = UserCreator(
+    userId = "username",
+    projectId = project.id,
+    rawSignature = "password",
+    name = "User's Name",
+    type = User.Type.ORGANIZATION,
+    authority = User.Authority.ADMIN,
+    allowsSpam = true,
+    contact = "user@example.com",
+    contactType = User.ContactType.EMAIL,
+    birthday = Date(0xB00000),
+    company = company,
+    languageTag = Locale.US.toLanguageTag(),
+  )
+
+  val companyUpdater = OrganizationUpdater(
+    name = Settable("Company 1"),
+    street = Settable("Street Name 11"),
+    postcode = Settable("123451"),
+    city = Settable("City 1"),
+    countryCode = Settable("DF"),
+  )
+
+  val userUpdater = UserUpdater(
+    id = userId,
+    rawSignature = Settable("password1"),
+    type = Settable(User.Type.PERSONAL),
+    authority = Settable(User.Authority.MODERATOR),
+    contactType = Settable(User.ContactType.PHONE),
+    allowsSpam = Settable(false),
+    name = Settable("User's Name 1"),
+    contact = Settable("+491760000001"),
+    verificationToken = Settable("abcd12341"),
+    birthday = Settable(Date(0x10B00001)),
+    company = Settable(companyUpdater),
+    languageTag = Settable(Locale.UK.toLanguageTag()),
+  )
+
+  val projectCreator = ProjectCreator(
+    owner = null,
+    type = Project.Type.OPENSOURCE,
+    status = Project.Status.ACTIVE,
+    userIdType = Project.UserIdType.USERNAME,
+    name = "name",
+    description = "description",
+    logoUrl = "logoUrl",
+    websiteUrl = "websiteUrl",
+    maxUsers = 1000,
+    anyoneCanSearch = true,
+    onHold = true,
+    languageTag = Locale.US.toLanguageTag(),
+  )
+
+  val projectUpdater = ProjectUpdater(
+    id = project.id,
+    type = Settable(Project.Type.FREE),
+    status = Settable(Project.Status.SUSPENDED),
+    name = Settable("name1"),
+    description = Settable("description1"),
+    logoUrl = Settable("logoUrl1"),
+    websiteUrl = Settable("websiteUrl1"),
+    maxUsers = Settable(1001),
+    anyoneCanSearch = Settable(false),
+    onHold = Settable(false),
+    languageTag = Settable(Locale.UK.toLanguageTag()),
+  )
+
+  val messageTemplateUpdater = MessageTemplateUpdater(
+    id = messageTemplate.id,
+    name = Settable("template1"),
+    languageTag = Settable(Locale.UK.toLanguageTag()),
+    content = Settable("content1"),
+    isHtml = Settable(false),
+  )
+
+  // endregion
+
+  // region Auth Ops Models
+
+  val tokenCreator = TokenCreator(
+    id = userId,
+    authority = User.Authority.ADMIN,
+    isStatic = false,
+    origin = "Token Origin",
+    ipAddress = ipAddress,
+    geo = geoMerged,
+  )
+
+  val jwtClaims: JwtClaims = mapOf(
+    Claims.VALUE to tokenValue,
+    Claims.USER_ID to userId.userId,
+    Claims.PROJECT_ID to project.id,
+    Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
+    Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.createdAt.time).toInt(),
+    Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.expiresAt.time).toInt(),
+    Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
+    Claims.ORIGIN to "Token Origin",
+    Claims.IP_ADDRESS to ipAddress,
+    Claims.GEO to geoMerged,
+    Claims.IS_STATIC to false,
+  )
+
+  val jwtClaimsStatic: JwtClaims = mapOf(
+    Claims.VALUE to tokenValueStatic,
+    Claims.USER_ID to userId.userId,
+    Claims.PROJECT_ID to project.id,
+    Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
+    Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetailsStatic.createdAt.time).toInt(),
+    Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetailsStatic.expiresAt.time).toInt(),
+    Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
+    Claims.ORIGIN to "Token Origin",
+    Claims.IP_ADDRESS to ipAddress,
+    Claims.GEO to geoMerged,
+    Claims.IS_STATIC to true,
   )
 
   // endregion
@@ -366,140 +484,15 @@ object Stubs {
     isInitialized = true,
   )
 
-  val variableBindingDbm = VariableBindingDbm(
-    id = VariableBindingKeyDbm(
-      templateId = 10, // the template object is below
-      variableName = "variable",
-    ),
-    // stubbing because only IDs are needed
-    template = stubMessageTemplate().copy(id = 10).toData(),
-    bindingCode = TemplateDataBinder.Code.USER_NAME.code,
-    createdAt = Date(0x10001E),
-    updatedAt = Date(0x10001F),
-  )
-
   val messageTemplateDbm = MessageTemplateDbm(
     id = 10,
     project = projectDbm,
     name = "template",
-    language = Locale.US.toLanguageTag(),
+    languageTag = Locale.US.toLanguageTag(),
     content = "content",
     isHtml = true,
-    bindings = listOf(variableBindingDbm),
     createdAt = Date(0x10000E),
     updatedAt = Date(0x10000F),
-  )
-
-  // endregion
-
-  // region Auth Ops Models
-
-  val tokenCreator = TokenCreator(
-    id = userId,
-    authority = User.Authority.ADMIN,
-    isStatic = false,
-    origin = "Token Origin",
-    ipAddress = ipAddress,
-    geo = geoMerged,
-  )
-
-  val jwtClaims: JwtClaims = mapOf(
-    Claims.VALUE to tokenValue,
-    Claims.USER_ID to userId.userId,
-    Claims.PROJECT_ID to project.id,
-    Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
-    Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.createdAt.time).toInt(),
-    Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetails.expiresAt.time).toInt(),
-    Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
-    Claims.ORIGIN to "Token Origin",
-    Claims.IP_ADDRESS to ipAddress,
-    Claims.GEO to geoMerged,
-    Claims.IS_STATIC to false,
-  )
-
-  val jwtClaimsStatic: JwtClaims = mapOf(
-    Claims.VALUE to tokenValueStatic,
-    Claims.USER_ID to userId.userId,
-    Claims.PROJECT_ID to project.id,
-    Claims.UNIVERSAL_ID to userId.toUniversalFormat(),
-    Claims.CREATED_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetailsStatic.createdAt.time).toInt(),
-    Claims.EXPIRES_AT to TimeUnit.MILLISECONDS.toSeconds(tokenDetailsStatic.expiresAt.time).toInt(),
-    Claims.AUTHORITIES to User.Authority.ADMIN.allAuthorities.joinToString(",") { it.authority },
-    Claims.ORIGIN to "Token Origin",
-    Claims.IP_ADDRESS to ipAddress,
-    Claims.GEO to geoMerged,
-    Claims.IS_STATIC to true,
-  )
-
-  // endregion
-
-  // region Domain Ops Models
-
-  val userCreator = UserCreator(
-    userId = "username",
-    projectId = project.id,
-    rawSignature = "password",
-    name = "User's Name",
-    type = User.Type.ORGANIZATION,
-    authority = User.Authority.ADMIN,
-    allowsSpam = true,
-    contact = "user@example.com",
-    contactType = User.ContactType.EMAIL,
-    birthday = Date(0xB00000),
-    company = company,
-    languageTag = Locale.US.toLanguageTag(),
-  )
-
-  val companyUpdater = OrganizationUpdater(
-    name = Settable("Company 1"),
-    street = Settable("Street Name 11"),
-    postcode = Settable("123451"),
-    city = Settable("City 1"),
-    countryCode = Settable("DF"),
-  )
-
-  val userUpdater = UserUpdater(
-    id = userId,
-    rawSignature = Settable("password1"),
-    type = Settable(User.Type.PERSONAL),
-    authority = Settable(User.Authority.MODERATOR),
-    contactType = Settable(User.ContactType.PHONE),
-    allowsSpam = Settable(false),
-    name = Settable("User's Name 1"),
-    contact = Settable("+491760000001"),
-    verificationToken = Settable("abcd12341"),
-    birthday = Settable(Date(0x10B00001)),
-    company = Settable(companyUpdater),
-    languageTag = Settable(Locale.UK.toLanguageTag()),
-  )
-
-  val projectCreator = ProjectCreator(
-    owner = null,
-    type = Project.Type.OPENSOURCE,
-    status = Project.Status.ACTIVE,
-    userIdType = Project.UserIdType.USERNAME,
-    name = "name",
-    description = "description",
-    logoUrl = "logoUrl",
-    websiteUrl = "websiteUrl",
-    maxUsers = 1000,
-    anyoneCanSearch = true,
-    onHold = true,
-    languageTag = Locale.US.toLanguageTag(),
-  )
-
-  val projectUpdater = ProjectUpdater(
-    id = project.id,
-    type = Settable(Project.Type.FREE),
-    status = Settable(Project.Status.SUSPENDED),
-    name = Settable("name1"),
-    description = Settable("description1"),
-    logoUrl = Settable("logoUrl1"),
-    websiteUrl = Settable("websiteUrl1"),
-    maxUsers = Settable(1001),
-    anyoneCanSearch = Settable(false),
-    onHold = Settable(false),
-    languageTag = Settable(Locale.UK.toLanguageTag()),
   )
 
   // endregion

@@ -1,7 +1,6 @@
 package com.appifyhub.monolith.domain.common
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
@@ -14,7 +13,9 @@ import java.util.Locale
  *
  * Well... Spring's ORM is not very nice to complex object relations,
  * so these are some hacks that needed to be done in order to reduce
- * relational complexity. Let's say it's "temporary".
+ * relational complexity. "Needed" might be a strong word.
+ *
+ * Anyway, let's imagine it's "temporary".
  */
 
 fun stubProject() = Project(
@@ -56,18 +57,6 @@ fun stubUser() = User(
     countryCode = "countryCode", // stubbed, not used
   ),
   languageTag = null,
-  createdAt = Date(),
-  updatedAt = Date(),
-)
-
-fun stubMessageTemplate() = MessageTemplate(
-  id = -1,
-  projectId = -1,
-  name = "name",
-  language = "language",
-  content = "content",
-  isHtml = false,
-  bindings = emptyList(),
   createdAt = Date(),
   updatedAt = Date(),
 )

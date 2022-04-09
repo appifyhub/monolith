@@ -116,5 +116,11 @@ object Validators {
     val tag = Locale.forLanguageTag(it.trim()).toLanguageTag()
     NotBlank.isValid(tag) && tag != "und"
   }
+  val MessageTemplateId = PositiveLong
+  val MessageTemplateName = validatesAs<String>("MessageTemplateName") {
+    if (it.isNullOrBlank()) return@validatesAs false
+    it.all { char -> char.isLetterOrDigit() || char in setOf('-', '_') }
+  }
+  val MessageTemplate = NotBlank
 
 }

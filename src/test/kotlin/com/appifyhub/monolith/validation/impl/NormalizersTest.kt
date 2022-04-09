@@ -202,6 +202,21 @@ class NormalizersTest {
       .consistsOf(Validators.LanguageTag, Cleaners.LanguageTagNullified)
   }
 
+  @Test fun `message template ID = message template ID + message template ID`() {
+    assertThat(Normalizers.MessageTemplateId)
+      .consistsOf(Validators.MessageTemplateId, Cleaners.MessageTemplateId)
+  }
+
+  @Test fun `message template name = message template name + message template name`() {
+    assertThat(Normalizers.MessageTemplateName)
+      .consistsOf(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
+  }
+
+  @Test fun `message template = message template + message template`() {
+    assertThat(Normalizers.MessageTemplate)
+      .consistsOf(Validators.MessageTemplate, Cleaners.MessageTemplate)
+  }
+
   // endregion
 
   // region Helpers
