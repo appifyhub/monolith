@@ -24,11 +24,14 @@ interface AccessManager {
     USER_WRITE_SIGNATURE(ADMIN),
     USER_WRITE_VERIFICATION(ADMIN),
     USER_DELETE(OWNER),
+    MESSAGE_TEMPLATE_READ(OWNER),
+    MESSAGE_TEMPLATE_WRITE(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean) {
     BASIC(isRequired = true), // core functionality: service health, status check, feature check, security...
     USERS(isRequired = true), // user-related functionality: signup, login, user data updates...
+    MESSAGE_TEMPLATES(isRequired = false), // messaging functionality: managing and materializing templates
     DEMO(isRequired = false), // demoing service functionality
   }
 

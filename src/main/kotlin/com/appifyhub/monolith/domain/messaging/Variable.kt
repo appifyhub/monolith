@@ -17,11 +17,4 @@ enum class Variable(
 
   ;
 
-  companion object {
-    fun findByCode(code: String, default: Variable? = null) =
-      values().firstOrNull { it.code == code }
-        ?: default
-        ?: throw IllegalArgumentException("Not found")
-  }
-
 }

@@ -3,7 +3,7 @@ package com.appifyhub.monolith.domain.mapper
 import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -52,4 +52,3 @@ fun MessageTemplateUpdater.applyTo(
   .applySettable(content) { copy(content = it) }
   .applySettable(isHtml) { copy(isHtml = it) }
   .copy(updatedAt = timeProvider.currentDate)
-

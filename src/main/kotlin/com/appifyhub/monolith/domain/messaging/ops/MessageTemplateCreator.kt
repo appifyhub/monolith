@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.messaging
+package com.appifyhub.monolith.domain.messaging.ops
 
 data class MessageTemplateCreator(
   val projectId: Long,

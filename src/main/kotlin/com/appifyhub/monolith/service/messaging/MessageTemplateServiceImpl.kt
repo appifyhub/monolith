@@ -4,7 +4,7 @@ import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
 import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME

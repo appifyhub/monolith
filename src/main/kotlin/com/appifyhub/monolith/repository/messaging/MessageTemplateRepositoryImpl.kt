@@ -4,7 +4,7 @@ import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.storage.dao.MessageTemplateDao
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm

@@ -8,8 +8,8 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Feature.BASIC
 import com.appifyhub.monolith.service.access.AccessManager.Feature.DEMO
+import com.appifyhub.monolith.service.access.AccessManager.Feature.MESSAGE_TEMPLATES
 import com.appifyhub.monolith.service.access.AccessManager.Feature.USERS
-import com.appifyhub.monolith.service.access.AccessManager.Feature.values
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.creator.CreatorService
@@ -204,10 +204,11 @@ class AccessManagerImpl(
     //   - feature has all of its required properties set
 
     val featureSupport: Map<Feature, Boolean> =
-      values().associateWith { feature ->
+      Feature.values().associateWith { feature ->
         when (feature) {
           BASIC -> true // always supported
           USERS -> true // always supported
+          MESSAGE_TEMPLATES -> true // always supported
           DEMO -> false // unsupported for now
         }
       }
@@ -244,10 +245,15 @@ class AccessManagerImpl(
       Privilege.USER_DELETE,
       -> this.id == targetId
 
-      // invalid user privileges
+      // invalid group for user
       Privilege.PROJECT_READ,
       Privilege.PROJECT_WRITE,
       -> error("Users should not ask for self-access on projects")
+
+      // invalid group for user
+      Privilege.MESSAGE_TEMPLATE_READ,
+      Privilege.MESSAGE_TEMPLATE_WRITE,
+      -> error("Users should not ask for self-access on message templates")
     }
 
   private fun getCreatorProject() = creatorService.getCreatorProject()
