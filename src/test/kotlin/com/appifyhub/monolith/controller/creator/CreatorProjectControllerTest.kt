@@ -11,8 +11,8 @@ import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -133,7 +133,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.state.status }
         .isEqualTo(Project.Status.REVIEW.toString())
       transform { it.body!!.userIdType }
@@ -191,7 +191,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.first().projectId }
         .isEqualTo(creatorProjectResponse.projectId)
       transform { it.body!!.first().state.status }
@@ -257,7 +257,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!! }
         .hasSize(1)
       transform { it.body!!.first().projectId }
@@ -286,7 +286,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!! }
         .hasSize(1)
       transform { it.body!!.first().projectId }
@@ -330,7 +330,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
       transform { it.body!!.state.status }
@@ -425,7 +425,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
       transform { it.body!!.state.status }
@@ -459,7 +459,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
       transform { it.body!!.state.status }
@@ -493,7 +493,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
       transform { it.body!!.state.status }
@@ -527,7 +527,7 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
       transform { it.body!!.state.status }

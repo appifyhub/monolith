@@ -37,6 +37,14 @@ object Endpoints {
   const val CREATOR_SIGNUP = "/v1/creator/signup"
   const val UNIVERSAL_USER_FORCE_VERIFY = "/v1/universal/users/{universalId}/force-verify"
 
+  // Messaging
+
+  const val TEMPLATES = "/v1/projects/{projectId}/messaging/template"
+  const val TEMPLATE = "/v1/projects/{projectId}/messaging/templates/{templateId}"
+  const val TEMPLATE_SEARCH = "/v1/projects/{projectId}/messaging/template-search"
+  const val TEMPLATE_VARIABLES = "/v1/projects/{projectId}/messaging/template-variables"
+  const val TEMPLATE_MATERIALIZE = "/v1/projects/{projectId}/messaging/template-materialize"
+
   /* ***************** UNAUTHENTICATED ****************** */
 
   const val ERROR = "/error"
