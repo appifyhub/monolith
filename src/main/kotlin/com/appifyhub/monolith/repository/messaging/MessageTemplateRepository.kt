@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.repository.messaging
 
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 
 interface MessageTemplateRepository {

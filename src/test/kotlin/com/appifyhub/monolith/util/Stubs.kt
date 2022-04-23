@@ -8,8 +8,10 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
@@ -29,6 +31,12 @@ import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
+import com.appifyhub.monolith.network.messaging.MessageResponse
+import com.appifyhub.monolith.network.messaging.MessageTemplateResponse
+import com.appifyhub.monolith.network.messaging.VariableResponse
+import com.appifyhub.monolith.network.messaging.ops.MessageInputsRequest
+import com.appifyhub.monolith.network.messaging.ops.MessageTemplateCreateRequest
+import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
@@ -39,6 +47,7 @@ import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
@@ -239,15 +248,7 @@ object Stubs {
     content = "content",
     isHtml = true,
     createdAt = Date(0x10000E),
-    updatedAt = Date(0x10000F),
-  )
-
-  val messageTemplateCreator = MessageTemplateCreator(
-    projectId = project.id,
-    name = messageTemplate.name,
-    languageTag = messageTemplate.languageTag,
-    content = messageTemplate.content,
-    isHtml = messageTemplate.isHtml,
+    updatedAt = Date(0x1F0000),
   )
 
   val messageTemplateUpdated = MessageTemplate(
@@ -259,6 +260,11 @@ object Stubs {
     isHtml = false,
     createdAt = Date(0x10000E),
     updatedAt = Date(0x10001F),
+  )
+
+  val message = Message(
+    template = messageTemplate,
+    materialized = "content",
   )
 
   // endregion
@@ -332,12 +338,25 @@ object Stubs {
     languageTag = Settable(Locale.UK.toLanguageTag()),
   )
 
+  val messageTemplateCreator = MessageTemplateCreator(
+    projectId = project.id,
+    name = messageTemplate.name,
+    languageTag = messageTemplate.languageTag,
+    content = messageTemplate.content,
+    isHtml = messageTemplate.isHtml,
+  )
+
   val messageTemplateUpdater = MessageTemplateUpdater(
     id = messageTemplate.id,
     name = Settable("template1"),
     languageTag = Settable(Locale.UK.toLanguageTag()),
     content = Settable("content1"),
     isHtml = Settable(false),
+  )
+
+  val messageInputs = Inputs(
+    userId = user.id,
+    projectId = project.id,
   )
 
   // endregion
@@ -492,7 +511,7 @@ object Stubs {
     content = "content",
     isHtml = true,
     createdAt = Date(0x10000E),
-    updatedAt = Date(0x10000F),
+    updatedAt = Date(0x1F0000),
   )
 
   // endregion
@@ -609,6 +628,26 @@ object Stubs {
     updatedAt = "1970-01-01 02:56",
   )
 
+  val variableResponse = VariableResponse(
+    code = Variable.USER_NAME.code,
+    example = Variable.USER_NAME.example,
+  )
+
+  val messageTemplateResponse = MessageTemplateResponse(
+    id = messageTemplate.id,
+    name = messageTemplate.name,
+    languageTag = messageTemplate.languageTag,
+    content = messageTemplate.content,
+    isHtml = messageTemplate.isHtml,
+    createdAt = "1970-01-01 00:17",
+    updatedAt = "1970-01-01 00:33",
+  )
+
+  val messageResponse = MessageResponse(
+    template = messageTemplateResponse,
+    materialized = "content",
+  )
+
   // endregion
 
   // region Network Ops Models
@@ -683,6 +722,25 @@ object Stubs {
     anyoneCanSearch = SettableRequest(false),
     onHold = SettableRequest(false),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
+  )
+
+  val messageTemplateCreateRequest = MessageTemplateCreateRequest(
+    name = messageTemplateCreator.name,
+    languageTag = messageTemplateCreator.languageTag,
+    content = messageTemplateCreator.content,
+    isHtml = messageTemplateCreator.isHtml,
+  )
+
+  val messageTemplateUpdateRequest = MessageTemplateUpdateRequest(
+    name = SettableRequest(messageTemplateUpdater.name!!.value),
+    languageTag = SettableRequest(messageTemplateUpdater.languageTag!!.value),
+    content = SettableRequest(messageTemplateUpdater.content!!.value),
+    isHtml = SettableRequest(messageTemplateUpdater.isHtml!!.value),
+  )
+
+  val messageInputsRequest = MessageInputsRequest(
+    universalUserId = messageInputs.userId?.toUniversalFormat(),
+    projectId = messageInputs.projectId,
   )
 
   // endregion
