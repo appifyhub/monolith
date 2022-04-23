@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.errors
 
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
@@ -41,7 +41,7 @@ class GlobalExceptionHandler(
   }
 
   @ExceptionHandler(Throwable::class)
-  fun handleThrowable(t: Throwable): ResponseEntity<MessageResponse> =
+  fun handleThrowable(t: Throwable): ResponseEntity<SimpleResponse> =
     when {
 
       t is AuthenticationException ||
@@ -50,70 +50,70 @@ class GlobalExceptionHandler(
         t.message?.contains("access is denied", ignoreCase = true) == true ->
 
         ResponseEntity(
-          MessageResponse("Unauthorized: ${t.message}"),
+          SimpleResponse("Unauthorized: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t.message?.contains("invalid credentials", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Credentials Error: ${t.message}"),
+          SimpleResponse("Credentials Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t.message?.contains("token is blocked", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Access Error: ${t.message}"),
+          SimpleResponse("Access Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t.message?.contains("token expired", ignoreCase = true) == true ->
         ResponseEntity(
-          MessageResponse("Access Error: ${t.message}"),
+          SimpleResponse("Access Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNAUTHORIZED,
         )
 
       t is ResponseStatusException ->
         ResponseEntity(
-          MessageResponse(t.reason ?: "Request Error: ${t.message}"),
+          SimpleResponse(t.reason ?: "Request Error: ${t.message}"),
           HttpHeaders(),
           t.status,
         )
 
       t is IllegalStateException ->
         ResponseEntity(
-          MessageResponse("Request Error: ${t.message}"),
+          SimpleResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNPROCESSABLE_ENTITY,
         )
 
       t is IllegalArgumentException ->
         ResponseEntity(
-          MessageResponse("Request Error: ${t.message}"),
+          SimpleResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.UNPROCESSABLE_ENTITY,
         )
 
       t is NoSuchElementException ->
         ResponseEntity(
-          MessageResponse("Request Error: ${t.message}"),
+          SimpleResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.NOT_FOUND,
         )
 
       t is EmptyResultDataAccessException ->
         ResponseEntity(
-          MessageResponse("Request Error: ${t.message}"),
+          SimpleResponse("Request Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.NOT_FOUND,
         )
 
       else ->
         ResponseEntity(
-          MessageResponse("Internal Error: ${t.message}"),
+          SimpleResponse("Internal Error: ${t.message}"),
           HttpHeaders(),
           HttpStatus.INTERNAL_SERVER_ERROR,
         )

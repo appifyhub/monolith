@@ -11,7 +11,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_FORCE_V
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.util.Stubber
@@ -101,7 +101,7 @@ class CreatorUserControllerTest {
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_FORCE_VERIFY",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest(token),
@@ -121,7 +121,7 @@ class CreatorUserControllerTest {
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_FORCE_VERIFY",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest(token),
@@ -131,7 +131,7 @@ class CreatorUserControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
       assertThat(stubber.users(project).default().verificationToken).isNull()
     }
   }
