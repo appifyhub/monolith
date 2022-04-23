@@ -4,7 +4,7 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
@@ -120,20 +120,20 @@ class CreatorProjectController(
   fun removeProject(
     authentication: Authentication,
     @PathVariable projectId: Long,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[DELETE] remove creator project $projectId")
 
     accessManager.requestProjectAccess(authentication, projectId, Privilege.PROJECT_WRITE)
     creatorService.removeProjectById(projectId)
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
   @DeleteMapping(Endpoints.PROJECTS)
   fun removeProjectsByCreator(
     authentication: Authentication,
     @RequestParam("creator_id") universalCreatorId: String,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[DELETE] remove all creator projects for $universalCreatorId")
 
     val creatorId = UserId.fromUniversalFormat(universalCreatorId)
@@ -141,7 +141,7 @@ class CreatorProjectController(
 
     creatorService.removeAllProjectsByCreator(creatorId)
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
 }

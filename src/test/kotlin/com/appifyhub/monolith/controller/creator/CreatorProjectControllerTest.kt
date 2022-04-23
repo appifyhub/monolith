@@ -11,7 +11,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.common.SettableRequest
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
@@ -67,7 +67,7 @@ class CreatorProjectControllerTest {
 
   @Test fun `create a project fails when unauthorized`() {
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -85,7 +85,7 @@ class CreatorProjectControllerTest {
     val request = Stubs.projectCreateRequest.copy(ownerUniversalId = user.id.toUniversalFormat())
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
@@ -103,7 +103,7 @@ class CreatorProjectControllerTest {
     val request = Stubs.projectCreateRequest.copy(ownerUniversalId = creator2.id.toUniversalFormat())
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
@@ -145,7 +145,7 @@ class CreatorProjectControllerTest {
 
   @Test fun `get all projects fails when unauthorized`() {
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -161,7 +161,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -208,7 +208,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -227,7 +227,7 @@ class CreatorProjectControllerTest {
     stubber.projects.new(owner = creator2)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -300,7 +300,7 @@ class CreatorProjectControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -342,7 +342,7 @@ class CreatorProjectControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -365,7 +365,7 @@ class CreatorProjectControllerTest {
     )
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
@@ -389,7 +389,7 @@ class CreatorProjectControllerTest {
     )
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
@@ -541,7 +541,7 @@ class CreatorProjectControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -560,7 +560,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -572,7 +572,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id == project.id })
         .isNull()
     }
@@ -585,7 +585,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(superCreator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -597,7 +597,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id == project.id })
         .isNull()
     }
@@ -607,7 +607,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -625,7 +625,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -635,7 +635,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id in setOf(project1.id, project2.id) })
         .isNull()
     }
@@ -649,7 +649,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(superCreator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -659,7 +659,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id in setOf(project1.id, project2.id) })
         .isNull()
     }

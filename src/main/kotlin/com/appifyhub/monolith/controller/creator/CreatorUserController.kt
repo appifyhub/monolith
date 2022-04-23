@@ -4,7 +4,7 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -45,7 +45,7 @@ class CreatorUserController(
   fun forceVerifyUser(
     authentication: Authentication,
     @PathVariable universalId: String,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[PUT] force-verifying universal user $universalId")
 
     val userId = UserId.fromUniversalFormat(universalId)
@@ -56,7 +56,7 @@ class CreatorUserController(
     val updater = UserUpdater(id = user.id, verificationToken = Settable(null))
     userService.updateUser(updater)
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
 }

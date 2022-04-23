@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
-data class MessageResponse(
+data class SimpleResponse(
   @JsonProperty("message") val message: String,
 ) : Serializable {
 
   companion object {
 
-    val DONE = MessageResponse("Done")
+    val DONE = SimpleResponse("Done")
 
   }
 

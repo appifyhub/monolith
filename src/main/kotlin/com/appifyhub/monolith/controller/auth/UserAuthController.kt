@@ -7,7 +7,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
 import com.appifyhub.monolith.service.access.AccessManager
@@ -98,7 +98,7 @@ class UserAuthController(
     authentication: Authentication,
     @RequestParam("user_id", required = false) universalUserId: String? = null,
     @RequestParam(required = false) all: Boolean? = false,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[DELETE] unauth, universalUserId=$universalUserId, [all $all]")
 
     val authUser = authService.resolveShallowSelf(authentication)
@@ -119,21 +119,21 @@ class UserAuthController(
       authService.unauthorizeAllFor(authentication, targetUser.id)
     }
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
   @DeleteMapping(Endpoints.USER_TOKENS)
   fun unauthenticateTokens(
     authentication: Authentication,
     @RequestParam("token_ids") tokenIds: List<String>,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[DELETE] unauth tokens $tokenIds")
 
     val token = authService.fetchTokenDetails(authentication)
     accessManager.requireProjectFunctional(token.ownerId.projectId)
 
     authService.unauthorizeTokens(authentication, tokenIds)
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
 }

@@ -4,7 +4,7 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.prop
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -39,7 +39,7 @@ class GlobalExceptionHandlerTest {
     verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
     verify(response.outputStream).println(
       testMapper.writeValueAsString(
-        MessageResponse(message = "Unauthorized: ${exception.message}")
+        SimpleResponse(message = "Unauthorized: ${exception.message}")
       )
     )
   }

@@ -11,7 +11,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.network.auth.ApiKeyRequest
 import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenResponse
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -69,7 +69,7 @@ class CreatorAuthControllerTest {
     )
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$CREATOR_AUTH",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
@@ -102,7 +102,7 @@ class CreatorAuthControllerTest {
 
   @Test fun `create api key fails when unauthorized`() {
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$CREATOR_API_KEY",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
