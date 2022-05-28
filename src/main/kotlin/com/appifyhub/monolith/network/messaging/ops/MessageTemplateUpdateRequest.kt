@@ -9,7 +9,7 @@ import java.io.Serializable
 @JsonInclude(Include.NON_NULL)
 data class MessageTemplateUpdateRequest(
   @JsonProperty("name") val name: SettableRequest<String>? = null,
-  @JsonProperty("languageTag") val languageTag: SettableRequest<String>? = null,
+  @JsonProperty("language_tag") val languageTag: SettableRequest<String>? = null,
   @JsonProperty("content") val content: SettableRequest<String>? = null,
-  @JsonProperty("isHtml") val isHtml: SettableRequest<Boolean>? = null,
+  @JsonProperty("is_html") val isHtml: SettableRequest<Boolean>? = null,
 ) : Serializable
