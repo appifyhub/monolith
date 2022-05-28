@@ -48,7 +48,7 @@ class AccessManagerImpl(
     // not project creator; validate that the project matches
     val targetProject = fetchProject(normalizedTargetId.projectId)
     val isSameProjectRequest = targetProject.id == tokenDetails.projectId
-    require(isSameProjectRequest) { "Only requests within the same project are allowed" }
+    requireForAuth(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
     // self access is sometimes allowed, check if that's the case
     val requesterUser = fetchUser(tokenDetails.ownerId)
@@ -66,12 +66,12 @@ class AccessManagerImpl(
 
     // check if minimum authorization level is met
     val isPrivileged = requesterUser.isPrivilegedTo(privilege, targetProject)
-    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+    requireForAuth(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
 
     // check if authorization level is enough (mods can't access other mods)
     val targetUser = fetchUser(normalizedTargetId)
     val isHigherAuthority = requesterUser.authority.ordinal > targetUser.authority.ordinal
-    require(isHigherAuthority) { "Only ${targetUser.authority.nextGroupName} are authorized" }
+    requireForAuth(isHigherAuthority) { "Only ${targetUser.authority.nextGroupName} are authorized" }
 
     return fetchUser(normalizedTargetId)
   }
@@ -92,7 +92,7 @@ class AccessManagerImpl(
 
     // not project creator; validate that the project matches
     val isSameProjectRequest = tokenDetails.projectId == normalizedTargetId
-    require(isSameProjectRequest) { "Only requests within the same project are allowed" }
+    requireForAuth(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
     // fail if user is not verified
     val requesterUser = fetchUser(tokenDetails.ownerId)
@@ -107,7 +107,7 @@ class AccessManagerImpl(
 
     // check if minimum authorization level is met
     val isPrivileged = requesterUser.isPrivilegedTo(privilege, targetProject)
-    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+    requireForAuth(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
 
     return targetProject
   }
@@ -251,6 +251,9 @@ class AccessManagerImpl(
       Privilege.MESSAGE_TEMPLATE_WRITE,
       -> error("Users should not ask for self-access on message templates")
     }
+
+  private fun requireForAuth(value: Boolean, lazyMessage: () -> Any) =
+    if (!value) throwUnauthorized(lazyMessage) else Unit
 
   private fun getCreatorProject() = creatorService.getCreatorProject()
 
