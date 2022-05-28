@@ -93,7 +93,7 @@ class MessageTemplateController(
     @PathVariable templateId: Long,
     @RequestBody request: MessageTemplateUpdateRequest,
   ): MessageTemplateResponse {
-    log.debug("[POST] updating template $templateId using $request in project $projectId")
+    log.debug("[PUT] updating template $templateId using $request in project $projectId")
 
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_WRITE)
