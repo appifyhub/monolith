@@ -398,7 +398,7 @@ class CreatorProjectControllerTest {
         ),
       )
     ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
   }
 

@@ -107,7 +107,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${targetAdmin.authority.nextGroupName} are authorized")
       }
   }
@@ -124,7 +124,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${targetOwner.authority.nextGroupName} are authorized")
       }
   }
@@ -141,7 +141,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only requests within the same project are allowed")
       }
   }
@@ -156,7 +156,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${USER_READ_DATA.level.groupName} are authorized")
       }
   }
@@ -290,7 +290,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only requests within the same project are allowed")
       }
   }
@@ -321,7 +321,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${PROJECT_READ.level.groupName} are authorized")
       }
   }
@@ -336,7 +336,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only owners are authorized")
       }
   }
@@ -351,7 +351,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only owners are authorized")
       }
   }
@@ -568,7 +568,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
       }
   }
@@ -611,7 +611,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${OWNER.groupName} are authorized")
       }
   }
