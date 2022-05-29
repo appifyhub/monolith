@@ -129,20 +129,6 @@ class ValidatorsTest {
 
   // endregion
 
-  // region Top level domain validators
-
-  @Test fun `project ID is positive long`() {
-    assertThat(Validators.ProjectId)
-      .isEqualTo(Validators.PositiveLong)
-  }
-
-  @Test fun `account ID is positive long`() {
-    assertThat(Validators.AccountId)
-      .isEqualTo(Validators.PositiveLong)
-  }
-
-  // endregion
-
   // region ID validators
 
   @Test fun `custom user ID is no spaces`() {
@@ -368,7 +354,12 @@ class ValidatorsTest {
 
   // endregion
 
-  // region Project property validators
+  // region Project validators
+
+  @Test fun `project ID is positive long`() {
+    assertThat(Validators.ProjectId)
+      .isEqualTo(Validators.PositiveLong)
+  }
 
   @Test fun `project name is non blank`() {
     assertThat(Validators.ProjectName)
@@ -412,41 +403,6 @@ class ValidatorsTest {
 
   @Test fun `nullable url succeeds with valid content`() {
     assertThat(Validators.UrlNullable.isValid("https://appifyhub.com"))
-      .isTrue()
-  }
-
-  @Test fun `positive long (as string) fails with null`() {
-    assertThat(Validators.PositiveLongAsString.isValid(null))
-      .isFalse()
-  }
-
-  @Test fun `positive long (as string) fails with zero`() {
-    assertThat(Validators.PositiveLongAsString.isValid("0"))
-      .isFalse()
-  }
-
-  @Test fun `positive long (as string) succeeds with positive`() {
-    assertThat(Validators.PositiveLongAsString.isValid("1"))
-      .isTrue()
-  }
-
-  @Test fun `flag (as string) fails with null`() {
-    assertThat(Validators.FlagAsString.isValid(null))
-      .isFalse()
-  }
-
-  @Test fun `flag (as string) fails with invalid input`() {
-    assertThat(Validators.FlagAsString.isValid("invalid"))
-      .isFalse()
-  }
-
-  @Test fun `flag (as string) succeeds with true`() {
-    assertThat(Validators.FlagAsString.isValid("true"))
-      .isTrue()
-  }
-
-  @Test fun `flag (as string) succeeds with false`() {
-    assertThat(Validators.FlagAsString.isValid("false"))
       .isTrue()
   }
 
@@ -542,6 +498,36 @@ class ValidatorsTest {
   @Test fun `language tag succeeds if valid code`() {
     assertThat(Validators.LanguageTag.isValid(Locale.US.toLanguageTag()))
       .isTrue()
+  }
+
+  @Test fun `message template ID is positive long`() {
+    assertThat(Validators.MessageTemplateId)
+      .isEqualTo(Validators.PositiveLong)
+  }
+
+  @Test fun `message template name fails if null`() {
+    assertThat(Validators.MessageTemplateName.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `message template name fails if blank`() {
+    assertThat(Validators.MessageTemplateName.isValid("\n\t"))
+      .isFalse()
+  }
+
+  @Test fun `message template name fails with invalid characters`() {
+    assertThat(Validators.MessageTemplateName.isValid("Almost_All-Are!VALID"))
+      .isFalse()
+  }
+
+  @Test fun `message template name succeeds with valid characters`() {
+    assertThat(Validators.MessageTemplateName.isValid("All_Chars-Are-1000-VALID"))
+      .isTrue()
+  }
+
+  @Test fun `message template is non blank`() {
+    assertThat(Validators.MessageTemplate)
+      .isEqualTo(Validators.NotBlank)
   }
 
   // endregion

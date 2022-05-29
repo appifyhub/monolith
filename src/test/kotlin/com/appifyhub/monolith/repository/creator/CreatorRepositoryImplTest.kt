@@ -7,6 +7,7 @@ import assertk.assertions.isSuccess
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.repository.messaging.MessageTemplateRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.storage.dao.ProjectCreationDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
@@ -31,15 +32,15 @@ class CreatorRepositoryImplTest {
 
   private val projectDao = mock<ProjectDao>()
   private val creationDao = mock<ProjectCreationDao>()
-  private val propertyRepository = mock<PropertyRepository>()
   private val userRepository = mock<UserRepository>()
+  private val messageTemplateRepository = mock<MessageTemplateRepository>()
   private val timeProvider = TimeProviderFake()
 
   private val repository = CreatorRepositoryImpl(
     projectDao = projectDao,
     creationDao = creationDao,
-    propertyRepository = propertyRepository,
     userRepository = userRepository,
+    messageTemplateRepository = messageTemplateRepository,
     timeProvider = timeProvider,
   )
 
@@ -51,9 +52,6 @@ class CreatorRepositoryImplTest {
           projectId = Stubs.project.id
         }
       }
-    }
-    propertyRepository.stub {
-      onGeneric { clearAllProperties(any()) } doAnswer {}
     }
   }
 
@@ -181,6 +179,7 @@ class CreatorRepositoryImplTest {
     assertThat { repository.removeProjectById(Stubs.project.id) }.isSuccess()
     verify(userRepository).removeAllUsersByProjectId(Stubs.project.id)
     verify(creationDao).deleteAllByData_CreatedProjectId(Stubs.project.id)
+    verify(messageTemplateRepository).deleteAllTemplatesByProjectId(Stubs.project.id)
   }
 
   @Test fun `removing all projects by creator works`() {
@@ -198,6 +197,7 @@ class CreatorRepositoryImplTest {
 
     assertThat { repository.removeAllProjectsByCreator(Stubs.userId) }.isSuccess()
     verify(userRepository).removeAllUsersByProjectId(Stubs.project.id)
+    verify(messageTemplateRepository).deleteAllTemplatesByProjectId(Stubs.project.id)
     verify(projectDao).deleteAll(listOf(Stubs.projectDbm))
   }
 

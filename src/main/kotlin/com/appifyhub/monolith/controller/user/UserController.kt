@@ -5,7 +5,7 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
@@ -145,7 +145,7 @@ class UserController(
   fun verifyToken(
     @PathVariable universalId: String,
     @PathVariable verificationToken: String,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[PUT] token verification for $universalId with token $verificationToken")
 
     val userId = UserId.fromUniversalFormat(universalId)
@@ -156,13 +156,13 @@ class UserController(
     val updater = UserUpdater(id = user.id, verificationToken = Settable(null))
     userService.updateUser(updater)
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
   @PutMapping(Endpoints.UNIVERSAL_USER_SIGNATURE_RESET)
   fun resetSignature(
     @PathVariable universalId: String,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[PUT] resetting signature for $universalId")
 
     val userId = UserId.fromUniversalFormat(universalId)
@@ -171,14 +171,14 @@ class UserController(
     val user = userService.resetSignatureById(userId)
     authService.unauthorizeAllFor(user.id)
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
   @DeleteMapping(Endpoints.UNIVERSAL_USER)
   fun deleteUser(
     authentication: Authentication,
     @PathVariable universalId: String,
-  ): MessageResponse {
+  ): SimpleResponse {
     log.debug("[DELETE] remove user $universalId")
 
     val userId = UserId.fromUniversalFormat(universalId)
@@ -187,7 +187,7 @@ class UserController(
     accessManager.requestUserAccess(authentication, userId, Privilege.USER_DELETE)
     userService.removeUserById(userId)
 
-    return MessageResponse.DONE
+    return SimpleResponse.DONE
   }
 
 }

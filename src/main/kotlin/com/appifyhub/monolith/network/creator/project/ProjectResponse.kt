@@ -9,8 +9,16 @@ import java.io.Serializable
 data class ProjectResponse(
   @JsonProperty("project_id") val projectId: Long,
   @JsonProperty("type") val type: String,
-  @JsonProperty("status") val status: ProjectStatusDto,
+  @JsonProperty("state") val state: ProjectStateResponse,
   @JsonProperty("user_id_type") val userIdType: String,
+  @JsonProperty("name") val name: String,
+  @JsonProperty("description") val description: String?,
+  @JsonProperty("logo_url") val logoUrl: String?,
+  @JsonProperty("website_url") val websiteUrl: String?,
+  @JsonProperty("max_users") val maxUsers: Int,
+  @JsonProperty("anyone_can_search") val anyoneCanSearch: Boolean,
+  @JsonProperty("on_hold") val onHold: Boolean,
+  @JsonProperty("language_tag") val languageTag: String?,
   @JsonProperty("created_at") val createdAt: String,
   @JsonProperty("updated_at") val updatedAt: String,
 ) : Serializable

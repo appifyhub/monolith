@@ -13,7 +13,6 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.service.creator.CreatorService
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
@@ -35,7 +34,6 @@ class SchemaInitializerTest {
 
   private val creatorService = mock<CreatorService>()
   private val userService = mock<UserService>()
-  private val propService = mock<PropertyService>()
   private val schemaService = mock<SchemaService>()
 
   @BeforeEach fun setup() {
@@ -56,7 +54,7 @@ class SchemaInitializerTest {
 
     runInitializer()
 
-    verifyNoMoreInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService)
     verify(schemaService, never()).update(any())
   }
 
@@ -65,7 +63,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Project Name")
 
-    verifyNoMoreInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
@@ -73,7 +71,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Owner Name")
 
-    verifyNoMoreInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
@@ -81,7 +79,7 @@ class SchemaInitializerTest {
       .isFailure()
       .messageContains("Owner Email")
 
-    verifyNoMoreInteractions(creatorService, userService, propService)
+    verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed uses config signature if present`() {
@@ -103,22 +101,20 @@ class SchemaInitializerTest {
       .isSuccess()
 
     verify(creatorService).addProject(
-      projectInfo = ProjectCreator(
+      projectData = ProjectCreator(
         owner = null,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
+        name = "Project Name",
+        description = null,
+        logoUrl = null,
+        websiteUrl = null,
+        maxUsers = CreatorService.DEFAULT_MAX_USERS,
+        anyoneCanSearch = false,
+        onHold = false,
+        languageTag = Locale.US.toLanguageTag(),
       ),
-    )
-    verify(propService).saveProperty<String>(
-      projectId = project.id,
-      propName = "NAME",
-      propRawValue = "Project Name",
-    )
-    verify(propService).saveProperty<String>(
-      projectId = project.id,
-      propName = "ON_HOLD",
-      propRawValue = "false",
     )
     verify(userService) {
       mock.addUser(
@@ -167,23 +163,22 @@ class SchemaInitializerTest {
       .isSuccess()
 
     verify(creatorService).addProject(
-      projectInfo = ProjectCreator(
+      projectData = ProjectCreator(
         owner = null,
         type = project.type,
         status = project.status,
         userIdType = project.userIdType,
+        name = "Project Name",
+        description = null,
+        logoUrl = null,
+        websiteUrl = null,
+        maxUsers = CreatorService.DEFAULT_MAX_USERS,
+        anyoneCanSearch = false,
+        onHold = false,
+        languageTag = Locale.US.toLanguageTag(),
       ),
     )
-    verify(propService).saveProperty<String>(
-      projectId = project.id,
-      propName = "NAME",
-      propRawValue = "Project Name",
-    )
-    verify(propService).saveProperty<String>(
-      projectId = project.id,
-      propName = "ON_HOLD",
-      propRawValue = "false",
-    )
+
     verify(userService) {
       mock.addUser(
         creator = UserCreator(
@@ -221,7 +216,6 @@ class SchemaInitializerTest {
   ) = SchemaInitializer(
     creatorService = creatorService,
     userService = userService,
-    propertyService = propService,
     schemaService = schemaService,
     creatorConfig = CreatorProjectConfig().apply {
       this.ownerName = superCreatorName

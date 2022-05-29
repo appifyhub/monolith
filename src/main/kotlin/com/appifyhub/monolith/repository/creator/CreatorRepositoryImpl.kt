@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.repository.creator
 
-import com.appifyhub.monolith.domain.common.stubProject
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
@@ -11,6 +10,7 @@ import com.appifyhub.monolith.domain.mapper.toProjectData
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.repository.messaging.MessageTemplateRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.storage.dao.ProjectCreationDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
@@ -25,8 +25,8 @@ import org.springframework.stereotype.Repository
 class CreatorRepositoryImpl(
   private val projectDao: ProjectDao,
   private val creationDao: ProjectCreationDao,
-  private val propertyRepository: PropertyRepository,
   private val userRepository: UserRepository,
+  private val messageTemplateRepository: MessageTemplateRepository,
   private val timeProvider: TimeProvider,
 ) : CreatorRepository {
 
@@ -120,8 +120,8 @@ class CreatorRepositoryImpl(
 
     // cascade manually for now
     userRepository.removeAllUsersByProjectId(projectId)
+    messageTemplateRepository.deleteAllTemplatesByProjectId(projectId)
     creationDao.deleteAllByData_CreatedProjectId(projectId)
-    propertyRepository.clearAllProperties(stubProject().copy(id = projectId))
 
     // remove the project itself
     projectDao.deleteById(projectId)
@@ -139,7 +139,7 @@ class CreatorRepositoryImpl(
     // cascade manually for now
     projects.forEach { project ->
       userRepository.removeAllUsersByProjectId(project.id)
-      propertyRepository.clearAllProperties(project)
+      messageTemplateRepository.deleteAllTemplatesByProjectId(project.id)
     }
     creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorId.userId, creatorId.projectId)
 

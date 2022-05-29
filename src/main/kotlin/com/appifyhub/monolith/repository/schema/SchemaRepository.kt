@@ -4,7 +4,7 @@ import com.appifyhub.monolith.domain.schema.Schema
 
 interface SchemaRepository {
 
-  @Throws fun update(schema: Schema)
+  @Throws fun save(schema: Schema)
 
   fun isInitialized(version: Long): Boolean
 

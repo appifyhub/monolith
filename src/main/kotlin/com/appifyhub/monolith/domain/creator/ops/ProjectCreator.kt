@@ -10,4 +10,12 @@ data class ProjectCreator(
   val type: Type,
   val status: Status,
   val userIdType: UserIdType,
+  val name: String,
+  val description: String?,
+  val logoUrl: String?,
+  val websiteUrl: String?,
+  val maxUsers: Int,
+  val anyoneCanSearch: Boolean,
+  val onHold: Boolean,
+  val languageTag: String?,
 )

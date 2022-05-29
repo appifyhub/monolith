@@ -5,7 +5,6 @@ import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.mapper.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -21,10 +20,10 @@ import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.ext.silent
 import com.auth0.jwt.JWT
 import java.util.Date
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt
@@ -38,7 +37,6 @@ private const val EXPIRATION_DAYS_DELTA: Long = 1
 class Stubber(
   private val userRepo: UserRepository,
   private val creatorRepo: CreatorRepository,
-  private val propertyService: PropertyService,
   private val authRepo: AuthRepository,
   private val tokenDetailsRepo: TokenDetailsRepository,
   private val timeProvider: TimeProvider,
@@ -74,28 +72,27 @@ class Stubber(
       owner: User = creators.owner(),
       userIdType: Project.UserIdType = Project.UserIdType.USERNAME,
       status: Project.Status = Project.Status.ACTIVE,
-      forceBasicProps: Boolean = false,
+      activateNow: Boolean = false,
+      anyoneCanSearch: Boolean = true,
+      maxUsers: Int = 1000,
+      name: String = "${owner.name}'s Stub Project",
+      language: String = Locale.US.toLanguageTag(),
     ) = creatorRepo.addProject(
       ProjectCreator(
         owner = owner,
         type = Project.Type.COMMERCIAL,
         status = status,
         userIdType = userIdType,
+        name = name,
+        description = "${owner.name}'s Stub Project's Description",
+        logoUrl = "https://www.example.com/logo.png",
+        websiteUrl = "https://www.example.com",
+        maxUsers = maxUsers,
+        anyoneCanSearch = anyoneCanSearch,
+        onHold = !activateNow,
+        languageTag = language,
       )
-    ).also {
-      if (forceBasicProps) {
-        propertyService.saveProperty<String>(
-          projectId = it.id,
-          propName = ProjectProperty.NAME.name,
-          propRawValue = "Stub Project #${it.id}",
-        )
-        propertyService.saveProperty<Boolean>(
-          projectId = it.id,
-          propName = ProjectProperty.ON_HOLD.name,
-          propRawValue = false.toString(),
-        )
-      }
-    }
+    )
 
     val all: List<Project>
       get() = creatorRepo.fetchAllProjects()
@@ -106,29 +103,40 @@ class Stubber(
     fun default(
       idSuffix: String = "",
       autoVerified: Boolean = true,
-    ) = ensureUser(DEFAULT, project = projects.creator(), idSuffix = idSuffix, autoVerified = autoVerified)
+      language: String = Locale.US.toLanguageTag(),
+    ) = ensureUser(
+      DEFAULT,
+      project = projects.creator(),
+      idSuffix = idSuffix,
+      autoVerified = autoVerified,
+      language = language,
+    )
   }
 
   inner class Users(private val project: Project) {
     fun owner(
       idSuffix: String = "",
       autoVerified: Boolean = true,
-    ) = ensureUser(OWNER, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+      language: String = Locale.US.toLanguageTag(),
+    ) = ensureUser(OWNER, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
 
     fun admin(
       idSuffix: String = "",
       autoVerified: Boolean = true,
-    ) = ensureUser(ADMIN, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+      language: String = Locale.US.toLanguageTag(),
+    ) = ensureUser(ADMIN, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
 
     fun mod(
       idSuffix: String = "",
       autoVerified: Boolean = true,
-    ) = ensureUser(MODERATOR, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+      language: String = Locale.US.toLanguageTag(),
+    ) = ensureUser(MODERATOR, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
 
     fun default(
       idSuffix: String = "",
       autoVerified: Boolean = true,
-    ) = ensureUser(DEFAULT, project = project, idSuffix = idSuffix, autoVerified = autoVerified)
+      language: String = Locale.US.toLanguageTag(),
+    ) = ensureUser(DEFAULT, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
   }
 
   inner class ProjectTokens(private val project: Project) {
@@ -146,8 +154,15 @@ class Stubber(
       isStatic: Boolean = false,
       idSuffix: String = "",
       autoVerified: Boolean = true,
+      language: String = Locale.US.toLanguageTag(),
     ) = createToken(
-      user = ensureUser(authority = authority, project = project, idSuffix = idSuffix, autoVerified = autoVerified),
+      user = ensureUser(
+        authority = authority,
+        project = project,
+        idSuffix = idSuffix,
+        autoVerified = autoVerified,
+        language = language,
+      ),
       shouldStore = true,
       isStatic = isStatic,
     ).toJwt()
@@ -167,6 +182,7 @@ class Stubber(
     project: Project,
     idSuffix: String,
     autoVerified: Boolean,
+    language: String,
   ): User = when {
     authority == OWNER && project == projects.creator() -> creators.owner()
     else -> "username_${authority.name.lowercase()}$idSuffix".let { userId ->
@@ -178,6 +194,7 @@ class Stubber(
             projectId = project.id,
             type = User.Type.PERSONAL,
             authority = authority,
+            languageTag = language,
           ),
           userIdType = project.userIdType,
         ).let { user ->

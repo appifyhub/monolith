@@ -121,20 +121,6 @@ class CleanersTest {
 
   // endregion
 
-  // region Top level cleaners
-
-  @Test fun `project ID is long-to-cardinal`() {
-    assertThat(Cleaners.ProjectId)
-      .isEqualTo(Cleaners.LongToCardinal)
-  }
-
-  @Test fun `account ID is long-to-cardinal`() {
-    assertThat(Cleaners.AccountId)
-      .isEqualTo(Cleaners.LongToCardinal)
-  }
-
-  // endregion
-
   // region ID domain cleaners
 
   @Test fun `custom user ID is removing spaces`() {
@@ -323,7 +309,12 @@ class CleanersTest {
 
   // endregion
 
-  // region Project property cleaners
+  // region Project cleaners
+
+  @Test fun `project ID is long-to-cardinal`() {
+    assertThat(Cleaners.ProjectId)
+      .isEqualTo(Cleaners.LongToCardinal)
+  }
 
   @Test fun `project name is trimming`() {
     assertThat(Cleaners.ProjectName)
@@ -338,51 +329,6 @@ class CleanersTest {
   @Test fun `nullified url is trimming nullified`() {
     assertThat(Cleaners.UrlNullified)
       .isEqualTo(Cleaners.TrimNullified)
-  }
-
-  @Test fun `long to cardinal (as string) with null is zero`() {
-    assertThat(Cleaners.LongToCardinalAsString.clean(null))
-      .isEqualTo("0")
-  }
-
-  @Test fun `long to cardinal (as string) with negative is zero`() {
-    assertThat(Cleaners.LongToCardinalAsString.clean("-5"))
-      .isEqualTo("0")
-  }
-
-  @Test fun `long to cardinal (as string) with positive works`() {
-    assertThat(Cleaners.LongToCardinalAsString.clean("5"))
-      .isEqualTo("5")
-  }
-
-  @Test fun `flag defaulting to false (as string) with null is false`() {
-    assertThat(Cleaners.FlagDefFalseAsString.clean(null))
-      .isEqualTo("false")
-  }
-
-  @Test fun `flag defaulting to false (as string) with false is false`() {
-    assertThat(Cleaners.FlagDefFalseAsString.clean("false"))
-      .isEqualTo("false")
-  }
-
-  @Test fun `flag defaulting to false (as string) with true is true`() {
-    assertThat(Cleaners.FlagDefFalseAsString.clean("true"))
-      .isEqualTo("true")
-  }
-
-  @Test fun `flag defaulting to true (as string) with null is false`() {
-    assertThat(Cleaners.FlagDefTrueAsString.clean(null))
-      .isEqualTo("true")
-  }
-
-  @Test fun `flag defaulting to true (as string) with false is false`() {
-    assertThat(Cleaners.FlagDefTrueAsString.clean("false"))
-      .isEqualTo("false")
-  }
-
-  @Test fun `flag defaulting to true (as string) with true is true`() {
-    assertThat(Cleaners.FlagDefTrueAsString.clean("true"))
-      .isEqualTo("true")
   }
 
   // endregion
@@ -406,24 +352,44 @@ class CleanersTest {
   }
 
   @Test fun `language tag defaulting to null with null`() {
-    assertThat(Cleaners.LanguageTag.clean(null))
+    assertThat(Cleaners.LanguageTagNullified.clean(null))
       .isNull()
   }
 
   @Test fun `language tag defaulting to null with empty`() {
-    assertThat(Cleaners.LanguageTag.clean(""))
+    assertThat(Cleaners.LanguageTagNullified.clean(""))
       .isNull()
   }
 
   @Test fun `language tag defaulting to null with invalid code`() {
-    assertThat(Cleaners.LanguageTag.clean("asdasdasdasd"))
+    assertThat(Cleaners.LanguageTagNullified.clean("asdasdasdasd"))
       .isNull()
   }
 
   @Test fun `language tag cleans trimmed valid code`() {
     val tag = Locale.US.toLanguageTag()
-    assertThat(Cleaners.LanguageTag.clean(" \n$tag\t "))
+    assertThat(Cleaners.LanguageTagNullified.clean(" \n$tag\t "))
       .isEqualTo(tag)
+  }
+
+  @Test fun `message template ID is long-to-cardinal`() {
+    assertThat(Cleaners.MessageTemplateId)
+      .isEqualTo(Cleaners.LongToCardinal)
+  }
+
+  @Test fun `message template name defaulting to empty with null`() {
+    assertThat(Cleaners.MessageTemplateName.clean(null))
+      .isEmpty()
+  }
+
+  @Test fun `message template name removes invalid chars`() {
+    assertThat(Cleaners.MessageTemplateName.clean("Some-Are_valid-1000!@#$%^&*()"))
+      .isEqualTo("Some-Are_valid-1000")
+  }
+
+  @Test fun `message template is trimming`() {
+    assertThat(Cleaners.MessageTemplate)
+      .isEqualTo(Cleaners.Trim)
   }
 
   // endregion

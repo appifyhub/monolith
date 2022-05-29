@@ -14,7 +14,7 @@ class SchemaRepositoryImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun update(schema: Schema) {
+  override fun save(schema: Schema) {
     log.debug("Updating schema $schema")
     val oldValue = schemaDao.findById(schema.version).orElse(null)?.toDomain()
     if (oldValue?.isInitialized == true) {

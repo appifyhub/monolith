@@ -18,7 +18,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATU
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User.Authority
-import com.appifyhub.monolith.network.common.MessageResponse
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
@@ -79,7 +79,7 @@ class UserControllerTest {
     val project = stubber.projects.new(status = REVIEW)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT_SIGNUP",
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
@@ -91,7 +91,7 @@ class UserControllerTest {
   }
 
   @Test fun `add user succeeds`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
 
     assertThat(
       restTemplate.exchange<UserResponse>(
@@ -124,7 +124,7 @@ class UserControllerTest {
     val universalId = stubber.users(project).default().id.toUniversalFormat()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -141,7 +141,7 @@ class UserControllerTest {
     val token = stubber.tokens(user).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -153,7 +153,7 @@ class UserControllerTest {
   }
 
   @Test fun `get user succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val self = stubber.users(project).default()
     val universalId = self.id.toUniversalFormat()
     val token = stubber.tokens(self).real().token.tokenValue
@@ -190,7 +190,7 @@ class UserControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT_USER_SEARCH?user_name={userName}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -210,7 +210,7 @@ class UserControllerTest {
     val token = stubber.tokens(admin).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT_USER_SEARCH?user_name={userName}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -225,12 +225,12 @@ class UserControllerTest {
   }
 
   @Test fun `search user fails when no query is provided`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val admin = stubber.users(project).admin()
     val token = stubber.tokens(admin).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT_USER_SEARCH",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -242,7 +242,7 @@ class UserControllerTest {
   }
 
   @Test fun `search user succeeds with valid authorization and user name`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val admin = stubber.users(project).admin()
     val token = stubber.tokens(admin).real().token.tokenValue
 
@@ -274,7 +274,7 @@ class UserControllerTest {
   }
 
   @Test fun `search user succeeds with valid authorization and user contact`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val admin = stubber.users(project).admin()
     val token = stubber.tokens(admin).real().token.tokenValue
 
@@ -315,7 +315,7 @@ class UserControllerTest {
     val request = UserUpdateAuthorityRequest(Authority.MODERATOR.name)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, "invalid"),
@@ -333,7 +333,7 @@ class UserControllerTest {
     val request = UserUpdateAuthorityRequest(Authority.MODERATOR.name)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_AUTHORITY",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
@@ -345,7 +345,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user authority succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val owner = stubber.users(project).owner()
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(owner).real().token.tokenValue
@@ -384,7 +384,7 @@ class UserControllerTest {
     val universalId = stubber.users(project).default().id.toUniversalFormat()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_DATA",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, "invalid"),
@@ -401,7 +401,7 @@ class UserControllerTest {
     val token = stubber.tokens(user).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_DATA",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
@@ -413,7 +413,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user data succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val owner = stubber.users(project).owner()
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(owner).real().token.tokenValue
@@ -449,7 +449,7 @@ class UserControllerTest {
     val universalId = stubber.users(project).default().id.toUniversalFormat()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_SIGNATURE?logout=false",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, "invalid"),
@@ -466,7 +466,7 @@ class UserControllerTest {
     val token = stubber.tokens(user).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_SIGNATURE?logout=false",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token),
@@ -478,7 +478,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user signature succeeds with valid authorization (no logout)`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(targetUser).real()
 
@@ -525,7 +525,7 @@ class UserControllerTest {
   }
 
   @Test fun `update user signature succeeds with valid authorization (with logout)`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val targetUser = stubber.users(project).default()
     val token = stubber.tokens(targetUser).real()
 
@@ -580,7 +580,7 @@ class UserControllerTest {
     val user = stubber.users(project).default(autoVerified = false)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_VERIFY",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
@@ -595,11 +595,11 @@ class UserControllerTest {
   }
 
   @Test fun `token verification succeeds with valid token`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).default(autoVerified = false)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_VERIFY",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
@@ -610,7 +610,7 @@ class UserControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
       assertThat(stubber.users(project).default().verificationToken).isNull()
     }
   }
@@ -624,7 +624,7 @@ class UserControllerTest {
     val user = stubber.users(project).default()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_SIGNATURE_RESET",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
@@ -636,12 +636,12 @@ class UserControllerTest {
   }
 
   @Test fun `reset signature succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).default()
     val token = stubber.tokens(user).real()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER_SIGNATURE_RESET",
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
@@ -650,7 +650,7 @@ class UserControllerTest {
     ).all {
       // verify response
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
       // check if changing worked
       assertThat {
         authService.resolveUser(
@@ -674,7 +674,7 @@ class UserControllerTest {
     val universalId = stubber.users(project).default().id.toUniversalFormat()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -691,7 +691,7 @@ class UserControllerTest {
     val token = stubber.tokens(user).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -703,13 +703,13 @@ class UserControllerTest {
   }
 
   @Test fun `delete user succeeds with valid authorization`() {
-    val project = stubber.projects.new(forceBasicProps = true)
+    val project = stubber.projects.new(activateNow = true)
     val self = stubber.users(project).default()
     val universalId = self.id.toUniversalFormat()
     val token = stubber.tokens(self).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$UNIVERSAL_USER",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -717,7 +717,7 @@ class UserControllerTest {
       )
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      transform { it.body!! }.isDataClassEqualTo(MessageResponse.DONE)
+      transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
       assertThat {
         authService.resolveUser(self.id.toUniversalFormat(), Stubs.userCreator.rawSignature)
       }.isFailure()

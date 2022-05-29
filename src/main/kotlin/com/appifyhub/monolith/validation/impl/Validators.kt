@@ -41,11 +41,6 @@ object Validators {
   val PositiveLong = validatesAs<Long>("PositiveLong") { it != null && it > 0L }
   val Flag = validatesAs<Boolean>("Flag") { it != null }
 
-  // Top level domain validators
-
-  val ProjectId = PositiveLong
-  val AccountId = PositiveLong
-
   // ID validators
 
   val CustomUserId = NoSpaces
@@ -91,19 +86,14 @@ object Validators {
     true
   }
 
-  // Project property validators
+  // Project validators
 
+  val ProjectId = PositiveLong
   val ProjectName = NotBlank
   val Url = validatesAs<String>("Url") { NotBlank.isValid(it) && REGEX_URL.matcher(it!!).matches() }
   val UrlNullable = validatesAs<String>("UrlNullable") {
     if (it == null) return@validatesAs true
     NotBlank.isValid(it) && REGEX_URL.matcher(it).matches()
-  }
-  val PositiveLongAsString = validatesAs<String>("PositiveLongAsString") {
-    it != null && (it.toLongOrNull() ?: 0L) > 0L
-  }
-  val FlagAsString = validatesAs<String>("FlagAsString") {
-    it?.toBooleanStrictOrNull() != null
   }
 
   // Other validators
@@ -126,5 +116,11 @@ object Validators {
     val tag = Locale.forLanguageTag(it.trim()).toLanguageTag()
     NotBlank.isValid(tag) && tag != "und"
   }
+  val MessageTemplateId = PositiveLong
+  val MessageTemplateName = validatesAs<String>("MessageTemplateName") {
+    if (it.isNullOrBlank()) return@validatesAs false
+    it.all { char -> char.isLetterOrDigit() || char in setOf('-', '_') }
+  }
+  val MessageTemplate = NotBlank
 
 }

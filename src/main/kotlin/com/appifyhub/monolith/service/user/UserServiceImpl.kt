@@ -4,7 +4,6 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
@@ -14,10 +13,8 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.service.creator.CreatorService
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.ext.requireValid
-import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.util.ext.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
@@ -27,7 +24,6 @@ import org.springframework.stereotype.Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
   private val creatorService: CreatorService,
-  private val propertyService: PropertyService,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
@@ -71,12 +67,7 @@ class UserServiceImpl(
       languageTag = normalizedLanguageTag,
     )
 
-    val maxUsers = silent {
-      propertyService.fetchProperty<Int>(
-        projectId = normalizedCreator.projectId,
-        propName = ProjectProperty.MAX_USERS.name,
-      ).typed().toLong()
-    } ?: Long.MAX_VALUE
+    val maxUsers = creatorService.fetchProjectById(normalizedCreator.projectId).maxUsers
     val totalUsers = userRepository.count(normalizedCreator.projectId)
     if (totalUsers >= maxUsers) throwPreconditionFailed { "Maximum users reached" }
 

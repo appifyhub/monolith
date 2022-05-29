@@ -11,8 +11,8 @@ import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.network.common.MessageResponse
 import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -21,8 +21,8 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
-import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.bearerBodyRequest
+import com.appifyhub.monolith.util.bearerEmptyRequest
 import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -67,7 +67,7 @@ class CreatorProjectControllerTest {
 
   @Test fun `create a project fails when unauthorized`() {
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -85,7 +85,7 @@ class CreatorProjectControllerTest {
     val request = Stubs.projectCreateRequest.copy(ownerUniversalId = user.id.toUniversalFormat())
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
@@ -103,7 +103,7 @@ class CreatorProjectControllerTest {
     val request = Stubs.projectCreateRequest.copy(ownerUniversalId = creator2.id.toUniversalFormat())
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
@@ -117,7 +117,11 @@ class CreatorProjectControllerTest {
   @Test fun `create a project succeeds`() {
     val creator = stubber.creators.default()
     val token = stubber.tokens(creator).real().token.tokenValue
-    val request = Stubs.projectCreateRequest.copy(ownerUniversalId = creator.id.toUniversalFormat())
+    val request = Stubs.projectCreateRequest.copy(
+      ownerUniversalId = creator.id.toUniversalFormat(),
+      logoUrl = null,
+      websiteUrl = null,
+    )
 
     assertThat(
       restTemplate.exchange<ProjectResponse>(
@@ -129,8 +133,8 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
-      transform { it.body!!.status.status }
+      // list ordering is problematic here, working around...
+      transform { it.body!!.state.status }
         .isEqualTo(Project.Status.REVIEW.toString())
       transform { it.body!!.userIdType }
         .isEqualTo(Stubs.projectResponse.userIdType)
@@ -141,7 +145,7 @@ class CreatorProjectControllerTest {
 
   @Test fun `get all projects fails when unauthorized`() {
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -157,7 +161,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -170,10 +174,10 @@ class CreatorProjectControllerTest {
 
   @Test fun `get all projects succeeds`() {
     val projectResponse = stubber.projects.new().let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val creatorProjectResponse = stubber.projects.creator().let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.creatorTokens().real(OWNER).token.tokenValue
 
@@ -187,16 +191,16 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.first().projectId }
         .isEqualTo(creatorProjectResponse.projectId)
-      transform { it.body!!.first().status.status }
-        .isEqualTo(creatorProjectResponse.status.status)
+      transform { it.body!!.first().state.status }
+        .isEqualTo(creatorProjectResponse.state.status)
 
       transform { it.body!![1].projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!![1].status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!![1].state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -204,7 +208,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -223,7 +227,7 @@ class CreatorProjectControllerTest {
     stubber.projects.new(owner = creator2)
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
@@ -239,7 +243,7 @@ class CreatorProjectControllerTest {
     stubber.projects.new(owner = superCreator)
     val creator = stubber.creators.default()
     val projectResponse = stubber.projects.new(owner = creator).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(creator).real().token.tokenValue
 
@@ -253,13 +257,13 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!! }
         .hasSize(1)
       transform { it.body!!.first().projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.first().status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.first().state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -268,7 +272,7 @@ class CreatorProjectControllerTest {
     stubber.projects.new(owner = superCreator)
     val creator = stubber.creators.default()
     val projectResponse = stubber.projects.new(owner = creator).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
 
@@ -282,13 +286,13 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!! }
         .hasSize(1)
       transform { it.body!!.first().projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.first().status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.first().state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -296,7 +300,7 @@ class CreatorProjectControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -311,7 +315,7 @@ class CreatorProjectControllerTest {
 
   @Test fun `get any project succeeds`() {
     val project = stubber.projects.new()
-    val projectResponse = project.toNetwork(projectStatus = accessManager.fetchProjectStatus(project.id))
+    val projectResponse = project.toNetwork(projectState = accessManager.fetchProjectState(project.id))
     val token = stubber.tokens(project).real(OWNER).token.tokenValue
 
     assertThat(
@@ -326,11 +330,11 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.state.status }
+        .isEqualTo(projectResponse.state.status)
     }
   }
 
@@ -338,7 +342,7 @@ class CreatorProjectControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -361,7 +365,7 @@ class CreatorProjectControllerTest {
     )
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
@@ -385,7 +389,7 @@ class CreatorProjectControllerTest {
     )
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
@@ -394,14 +398,14 @@ class CreatorProjectControllerTest {
         ),
       )
     ).all {
-      transform { it.statusCode }.isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+      transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
   }
 
   @Test fun `update project succeeds when owner changes type`() {
     val creator = stubber.creators.default()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(creator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -421,11 +425,11 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.state.status }
+        .isEqualTo(projectResponse.state.status)
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())
     }
@@ -435,7 +439,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
     val superCreator = stubber.creators.owner()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -455,11 +459,11 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
-        .isEqualTo(projectResponse.status.status)
+      transform { it.body!!.state.status }
+        .isEqualTo(projectResponse.state.status)
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())
     }
@@ -469,7 +473,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
     val superCreator = stubber.creators.owner()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -489,10 +493,10 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
+      transform { it.body!!.state.status }
         .isEqualTo(Project.Status.ACTIVE.toString())
       transform { it.body!!.type }
         .isEqualTo(projectResponse.type)
@@ -503,7 +507,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
     val superCreator = stubber.creators.owner()
     val projectResponse = stubber.projects.new(owner = creator, status = Project.Status.REVIEW).let {
-      it.toNetwork(projectStatus = accessManager.fetchProjectStatus(it.id))
+      it.toNetwork(projectState = accessManager.fetchProjectState(it.id))
     }
     val token = stubber.tokens(superCreator).real().token.tokenValue
     val request = ProjectUpdateRequest(
@@ -523,10 +527,10 @@ class CreatorProjectControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
-      // list ordering is problematic for comparisons, so just comparing the basics
+      // list ordering is problematic here, working around...
       transform { it.body!!.projectId }
         .isEqualTo(projectResponse.projectId)
-      transform { it.body!!.status.status }
+      transform { it.body!!.state.status }
         .isEqualTo(Project.Status.ACTIVE.toString())
       transform { it.body!!.type }
         .isEqualTo(Project.Type.FREE.toString())
@@ -537,7 +541,7 @@ class CreatorProjectControllerTest {
     val project = stubber.projects.new()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -556,7 +560,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -568,7 +572,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id == project.id })
         .isNull()
     }
@@ -581,7 +585,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(superCreator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECT",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -593,7 +597,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id == project.id })
         .isNull()
     }
@@ -603,7 +607,7 @@ class CreatorProjectControllerTest {
     val creator = stubber.creators.default()
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
@@ -621,7 +625,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -631,7 +635,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id in setOf(project1.id, project2.id) })
         .isNull()
     }
@@ -645,7 +649,7 @@ class CreatorProjectControllerTest {
     val token = stubber.tokens(superCreator).real().token.tokenValue
 
     assertThat(
-      restTemplate.exchange<MessageResponse>(
+      restTemplate.exchange<SimpleResponse>(
         url = "$baseUrl$PROJECTS?creator_id={creator_id}",
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
@@ -655,7 +659,7 @@ class CreatorProjectControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
       transform { it.body!! }
-        .isEqualTo(MessageResponse.DONE)
+        .isEqualTo(SimpleResponse.DONE)
       assertThat(stubber.projects.all.firstOrNull { it.id in setOf(project1.id, project2.id) })
         .isNull()
     }

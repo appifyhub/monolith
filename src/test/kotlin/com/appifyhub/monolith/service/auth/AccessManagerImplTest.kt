@@ -4,16 +4,13 @@ import assertk.all
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
-import assertk.assertions.isEqualTo
 import assertk.assertions.isFailure
 import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.Project.Status
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
-import com.appifyhub.monolith.domain.creator.property.Property
-import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
+import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
@@ -28,7 +25,6 @@ import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_READ_D
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_SEARCH
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_AUTHORITY
 import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_TOKEN
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
@@ -53,7 +49,6 @@ import org.springframework.web.server.ResponseStatusException
 class AccessManagerImplTest {
 
   @Autowired lateinit var manager: AccessManager
-  @Autowired lateinit var propService: PropertyService
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var stubber: Stubber
 
@@ -112,7 +107,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${targetAdmin.authority.nextGroupName} are authorized")
       }
   }
@@ -129,7 +124,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${targetOwner.authority.nextGroupName} are authorized")
       }
   }
@@ -146,7 +141,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only requests within the same project are allowed")
       }
   }
@@ -161,7 +156,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${USER_READ_DATA.level.groupName} are authorized")
       }
   }
@@ -295,7 +290,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only requests within the same project are allowed")
       }
   }
@@ -326,7 +321,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${PROJECT_READ.level.groupName} are authorized")
       }
   }
@@ -341,7 +336,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only owners are authorized")
       }
   }
@@ -356,7 +351,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only owners are authorized")
       }
   }
@@ -559,30 +554,10 @@ class AccessManagerImplTest {
 
   // region Special access
 
-  @Test fun `requesting project access fails with requesting peer SEARCH (setting missing)`() {
-    val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
-    val user = stubber.users(project).default()
-
-    assertThat {
-      manager.requestProjectAccess(
-        authData = stubber.tokens(user).real(),
-        targetId = project.id,
-        privilege = USER_SEARCH,
-      ).cleanStubArtifacts()
-    }
-      .isFailure()
-      .all {
-        hasClass(IllegalArgumentException::class)
-        messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
-      }
-  }
-
   @Test fun `requesting project access fails with requesting peer SEARCH (setting is false)`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, anyoneCanSearch = false)
     val user = stubber.users(project).default()
-    propService.saveProperty<Boolean>(project.id, ProjectProperty.ANYONE_CAN_SEARCH.name, "false")
 
     assertThat {
       manager.requestProjectAccess(
@@ -593,16 +568,15 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${USER_SEARCH.level.groupName} are authorized")
       }
   }
 
   @Test fun `requesting project access succeeds with requesting peer SEARCH (setting is true)`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, anyoneCanSearch = true)
     val user = stubber.users(project).default()
-    propService.saveProperty<Boolean>(project.id, ProjectProperty.ANYONE_CAN_SEARCH.name, "true")
 
     assertThat(
       manager.requestProjectAccess(
@@ -637,7 +611,7 @@ class AccessManagerImplTest {
     }
       .isFailure()
       .all {
-        hasClass(IllegalArgumentException::class)
+        hasClass(ResponseStatusException::class)
         messageContains("Only ${OWNER.groupName} are authorized")
       }
   }
@@ -655,11 +629,11 @@ class AccessManagerImplTest {
 
   // endregion
 
-  // region Project Status
+  // region Project State
 
-  @Test fun `fetching project status fails with invalid project ID`() {
+  @Test fun `fetching project state fails with invalid project ID`() {
     assertThat {
-      manager.fetchProjectStatus(-1)
+      manager.fetchProjectState(-1)
     }
       .isFailure()
       .all {
@@ -668,67 +642,27 @@ class AccessManagerImplTest {
       }
   }
 
-  @Test fun `fetching project status, unusable features are resolved without properties`() {
-    assertThat(
-      manager.fetchProjectStatus(stubber.projects.new(status = Status.SUSPENDED).id)
-    )
-      .isEqualTo(
-        ProjectStatus(
-          status = Status.SUSPENDED,
-          usableFeatures = listOf(Feature.AUTH, Feature.DEMO), // because of no properties
-          unusableFeatures = listOf(Feature.BASIC),
-          properties = emptyList(),
-        )
-      )
-  }
-
-  @Test fun `fetching project status, unusable features are resolved without some properties`() {
-    val project = stubber.projects.new()
-    val nameProp = propService.saveProperty<Boolean>(
-      projectId = project.id,
-      propName = ProjectProperty.NAME.name,
-      propRawValue = "Some name",
-    ).cleanStubArtifacts()
+  @Test fun `fetching project state, features resolve correctly`() {
+    val project = stubber.projects.new(status = Status.SUSPENDED).cleanStubArtifacts()
 
     assertThat(
-      manager.fetchProjectStatus(project.id)
+      manager.fetchProjectState(project.id)
         .cleanStubArtifacts()
     )
-      .isEqualTo(
-        ProjectStatus(
-          status = Status.ACTIVE,
-          usableFeatures = listOf(Feature.AUTH, Feature.DEMO), // because of no properties
-          unusableFeatures = listOf(Feature.BASIC),
-          properties = listOf(nameProp),
-        )
-      )
-  }
-
-  @Test fun `fetching project status, basic is resolved with all properties`() {
-    val project = stubber.projects.new()
-    val props = propService.saveProperties(
-      projectId = project.id,
-      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
-      propRawValues = listOf("Some name", false.toString()),
-    ).map { it.cleanStubArtifacts() }
-
-    assertThat(
-      manager.fetchProjectStatus(project.id)
-        .cleanStubArtifacts()
-    )
-      .isEqualTo(
-        ProjectStatus(
-          status = Status.ACTIVE,
-          usableFeatures = listOf(Feature.BASIC, Feature.AUTH, Feature.DEMO),
+      .isDataClassEqualTo(
+        ProjectState(
+          project = project,
+          usableFeatures = listOf(Feature.BASIC, Feature.USERS),
           unusableFeatures = emptyList(),
-          properties = props,
         )
       )
   }
 
   @Test fun `requiring functional project fails on non-active project`() {
+    val project = stubber.projects.new(status = Status.SUSPENDED)
+
     assertThat {
-      manager.requireProjectFunctional(stubber.projects.new(status = Status.SUSPENDED).id)
+      manager.requireProjectFunctional(project.id)
     }
       .isFailure()
       .all {
@@ -737,24 +671,8 @@ class AccessManagerImplTest {
       }
   }
 
-  @Test fun `requiring functional project fails when required feature is not configured`() {
-    assertThat {
-      manager.requireProjectFunctional(stubber.projects.new().id)
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("is not configured")
-      }
-  }
-
   @Test fun `requiring functional project fails when 'on hold' is true`() {
     val project = stubber.projects.new()
-    propService.saveProperties(
-      projectId = project.id,
-      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
-      propRawValues = listOf("Some name", true.toString()),
-    )
 
     assertThat {
       manager.requireProjectFunctional(project.id)
@@ -767,12 +685,7 @@ class AccessManagerImplTest {
   }
 
   @Test fun `requiring functional project succeeds when configured`() {
-    val project = stubber.projects.new()
-    propService.saveProperties(
-      projectId = project.id,
-      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
-      propRawValues = listOf("Some name", false.toString()),
-    )
+    val project = stubber.projects.new(activateNow = true)
 
     assertThat {
       manager.requireProjectFunctional(project.id)
@@ -780,34 +693,11 @@ class AccessManagerImplTest {
       .isSuccess()
   }
 
-  @Test fun `requiring functional features fails when required property is not configured`() {
-    assertThat {
-      manager.requireProjectFeaturesFunctional(stubber.projects.new().id, Feature.BASIC)
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Not configured")
-      }
-  }
-
-  @Test fun `requiring functional features succeeds with no-property features`() {
-    assertThat {
-      manager.requireProjectFeaturesFunctional(stubber.projects.new().id, Feature.AUTH, Feature.DEMO)
-    }
-      .isSuccess()
-  }
-
   @Test fun `requiring functional features succeeds with configured features`() {
-    val project = stubber.projects.new()
-    propService.saveProperties(
-      projectId = project.id,
-      propNames = listOf(ProjectProperty.NAME.name, ProjectProperty.ON_HOLD.name),
-      propRawValues = listOf("Some name", false.toString()),
-    )
+    val project = stubber.projects.new(activateNow = true)
 
     assertThat {
-      manager.requireProjectFeaturesFunctional(project.id, Feature.BASIC)
+      manager.requireProjectFeaturesFunctional(project.id, Feature.BASIC, Feature.USERS)
     }
       .isSuccess()
   }
@@ -838,15 +728,9 @@ class AccessManagerImplTest {
     updatedAt = updatedAt.truncateTo(ChronoUnit.DAYS),
   )
 
-  private fun <T : Any> Property<T>.cleanStubArtifacts() = when (this) {
-    is Property.DecimalProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
-    is Property.FlagProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
-    is Property.IntegerProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
-    is Property.StringProp -> copy(updatedAt = updatedAt.truncateTo(ChronoUnit.SECONDS))
-    else -> throw IllegalStateException("What is this type? ${this::class.simpleName}")
-  }
-
-  private fun ProjectStatus.cleanStubArtifacts() = copy(properties = properties.map { it.cleanStubArtifacts() })
+  private fun ProjectState.cleanStubArtifacts() = copy(
+    project = project.cleanStubArtifacts(),
+  )
 
   // endregion
 
