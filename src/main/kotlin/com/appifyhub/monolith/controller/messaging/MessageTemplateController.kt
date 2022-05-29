@@ -46,6 +46,7 @@ class MessageTemplateController(
   ): MessageTemplateResponse {
     log.debug("[POST] adding template $templateRequest in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_WRITE)
 
@@ -60,6 +61,7 @@ class MessageTemplateController(
   ): MessageTemplateResponse {
     log.debug("[GET] fetching template $templateId in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_READ)
 
@@ -75,6 +77,7 @@ class MessageTemplateController(
   ): List<MessageTemplateResponse> {
     log.debug("[GET] fetching templates by name $templateName/$templateLanguageTag in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_READ)
 
@@ -95,6 +98,7 @@ class MessageTemplateController(
   ): MessageTemplateResponse {
     log.debug("[PUT] updating template $templateId using $request in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_WRITE)
 
@@ -109,6 +113,7 @@ class MessageTemplateController(
   ): SimpleResponse {
     log.debug("[DELETE] deleting template $templateId in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_WRITE)
 
@@ -125,6 +130,7 @@ class MessageTemplateController(
   ): SimpleResponse {
     log.debug("[DELETE] deleting templates by name $templateName in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_WRITE)
 
@@ -143,6 +149,7 @@ class MessageTemplateController(
   ): List<VariableResponse> {
     log.debug("[GET] fetching defined variables in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_READ)
 
@@ -157,6 +164,7 @@ class MessageTemplateController(
   ): List<VariableResponse> {
     log.debug("[POST] detecting variables within '$contentRequest' in project $projectId")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_READ)
 
@@ -174,8 +182,11 @@ class MessageTemplateController(
   ): MessageResponse {
     log.debug("[POST] materialize template $templateId/$templateName in project $projectId using $inputsRequest")
 
+    accessManager.requireProjectFunctional(projectId)
     accessManager.requestCreator(authentication, matchesId = null, requireVerified = true)
     accessManager.requestProjectAccess(authentication, projectId, Privilege.MESSAGE_TEMPLATE_READ)
+
+    // additional requirements based on inputs
     inputsRequest?.universalUserId?.let {
       accessManager.requestUserAccess(authentication, UserId.fromUniversalFormat(it), Privilege.USER_READ_DATA)
     }
