@@ -10,6 +10,7 @@ import com.appifyhub.monolith.domain.mapper.toProjectData
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.repository.messaging.MessageTemplateRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.storage.dao.ProjectCreationDao
 import com.appifyhub.monolith.storage.dao.ProjectDao
@@ -25,6 +26,7 @@ class CreatorRepositoryImpl(
   private val projectDao: ProjectDao,
   private val creationDao: ProjectCreationDao,
   private val userRepository: UserRepository,
+  private val messageTemplateRepository: MessageTemplateRepository,
   private val timeProvider: TimeProvider,
 ) : CreatorRepository {
 
@@ -118,6 +120,7 @@ class CreatorRepositoryImpl(
 
     // cascade manually for now
     userRepository.removeAllUsersByProjectId(projectId)
+    messageTemplateRepository.deleteAllTemplatesByProjectId(projectId)
     creationDao.deleteAllByData_CreatedProjectId(projectId)
 
     // remove the project itself
@@ -136,6 +139,7 @@ class CreatorRepositoryImpl(
     // cascade manually for now
     projects.forEach { project ->
       userRepository.removeAllUsersByProjectId(project.id)
+      messageTemplateRepository.deleteAllTemplatesByProjectId(project.id)
     }
     creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorId.userId, creatorId.projectId)
 
