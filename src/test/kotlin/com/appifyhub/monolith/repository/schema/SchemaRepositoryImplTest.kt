@@ -11,6 +11,7 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.storage.dao.SchemaDao
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.util.Stubs
+import java.util.Optional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -19,7 +20,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
-import java.util.Optional
 
 class SchemaRepositoryImplTest {
 
@@ -35,14 +35,14 @@ class SchemaRepositoryImplTest {
     }
   }
 
-  // region Updates
+  // region Saving
 
-  @Test fun `updating schema with a previous schema initialized fails`() {
+  @Test fun `saving schema with a previous schema initialized fails`() {
     schemaDao.stub {
       onGeneric { findById(Stubs.schema.version) } doReturn Optional.of(Stubs.schemaDbm)
     }
 
-    assertThat { repository.update(Stubs.schema) }
+    assertThat { repository.save(Stubs.schema) }
       .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
@@ -50,22 +50,22 @@ class SchemaRepositoryImplTest {
       }
   }
 
-  @Test fun `updating schema with a previous schema not initialized works`() {
+  @Test fun `saving schema with a previous schema not initialized works`() {
     schemaDao.stub {
       val schema = SchemaDbm(Stubs.schema.version, isInitialized = false)
       onGeneric { findById(Stubs.schema.version) } doReturn Optional.of(schema)
     }
 
-    assertThat { repository.update(Stubs.schema) }
+    assertThat { repository.save(Stubs.schema) }
       .isSuccess()
   }
 
-  @Test fun `updating schema with no previous schema works`() {
+  @Test fun `saving schema with no previous schema works`() {
     schemaDao.stub {
       onGeneric { findById(Stubs.schema.version) } doReturn Optional.empty()
     }
 
-    assertThat { repository.update(Stubs.schema) }
+    assertThat { repository.save(Stubs.schema) }
       .isSuccess()
   }
 

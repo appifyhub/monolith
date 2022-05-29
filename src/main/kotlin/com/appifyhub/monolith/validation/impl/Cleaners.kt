@@ -24,11 +24,6 @@ object Cleaners {
   val FlagDefFalse = cleansToNonNull<Boolean>("FlagDefaultFalse") { it ?: false }
   val FlagDefTrue = cleansToNonNull<Boolean>("FlagDefaultTrue") { it ?: true }
 
-  // Top level cleaners
-
-  val ProjectId = LongToCardinal
-  val AccountId = LongToCardinal
-
   // ID domain cleaners
 
   val CustomUserId = RemoveSpaces
@@ -87,30 +82,27 @@ object Cleaners {
     }
   }
 
-  // Project property cleaners
+  // Project cleaners
 
+  val ProjectId = LongToCardinal
   val ProjectName = Trim
   val Url = Trim
   val UrlNullified = TrimNullified
-  val LongToCardinalAsString = cleansToNonNull<String>("LongToCardinalAsString") {
-    (it?.toLongOrNull()?.takeIf { num -> num > 0L } ?: 0L).toString()
-  }
-  val FlagDefFalseAsString = cleansToNonNull<String>("FlagDefFalseAsString") {
-    it?.toBooleanStrictOrNull()?.toString() ?: "false"
-  }
-  val FlagDefTrueAsString = cleansToNonNull<String>("FlagDefTrueAsString") {
-    it?.toBooleanStrictOrNull()?.toString() ?: "true"
-  }
 
   // Other cleaners
 
   val Origin = TrimNullable
   val IpAddress = RemoveSpacesNullable
   val BDay = cleansToNullable<BDay>("BDay") { it }
-  val LanguageTag = cleansToNullable<String>("LanguageTag") {
+  val LanguageTagNullified = cleansToNullable<String>("LanguageTagNullified") {
     if (it == null) return@cleansToNullable null
     Locale.forLanguageTag(it.trim()).toLanguageTag()
       ?.takeIf { tag -> tag.isNotBlank() && tag != "und" }
   }
+  val MessageTemplateId = LongToCardinal
+  val MessageTemplateName = cleansToNonNull<String>("MessageTemplateName") {
+    it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_') }.orEmpty()
+  }
+  val MessageTemplate = Trim
 
 }

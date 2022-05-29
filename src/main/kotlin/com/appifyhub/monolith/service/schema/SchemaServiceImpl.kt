@@ -17,7 +17,7 @@ class SchemaServiceImpl(
   override fun update(schema: Schema) {
     log.debug("Updating schema $schema")
     Normalizers.Cardinal.run(schema.version).requireValid { "Schema Version" }
-    schemaRepository.update(schema)
+    schemaRepository.save(schema)
   }
 
   override fun isInitialized(version: Long): Boolean {

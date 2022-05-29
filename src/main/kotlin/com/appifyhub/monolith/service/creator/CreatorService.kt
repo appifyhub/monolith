@@ -8,7 +8,11 @@ import com.appifyhub.monolith.domain.user.UserId
 
 interface CreatorService {
 
-  @Throws fun addProject(projectInfo: ProjectCreator): Project
+  companion object {
+    const val DEFAULT_MAX_USERS = 1000
+  }
+
+  @Throws fun addProject(projectData: ProjectCreator): Project
 
   @Throws fun getCreatorProject(): Project
 

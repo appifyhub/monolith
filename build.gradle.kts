@@ -19,7 +19,7 @@ buildscript {
 }
 
 plugins {
-  val kotlinVersion = "1.6.10"
+  val kotlinVersion = "1.6.21"
   kotlin("jvm") version kotlinVersion
   kotlin("plugin.spring") version kotlinVersion
   kotlin("plugin.jpa") version kotlinVersion
@@ -27,7 +27,7 @@ plugins {
   kotlin("plugin.allopen") version kotlinVersion
   kotlin("kapt") version kotlinVersion
 
-  id("org.springframework.boot") version "2.6.1"
+  id("org.springframework.boot") version "2.6.7"
   id("io.spring.dependency-management") version "1.0.11.RELEASE"
   id("com.github.breadmoirai.github-release") version "2.2.12"
 }
@@ -88,7 +88,7 @@ dependencies {
   testImplementation("org.hibernate:hibernate-testing")
   testImplementation("com.h2database:h2")
   testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
-  testImplementation("org.mockito:mockito-core:4.+")
+  testImplementation("org.mockito:mockito-core:4.4.+")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.+")
 
   // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot

@@ -49,20 +49,6 @@ class NormalizersTest {
 
   // endregion
 
-  // region Top level normalizers
-
-  @Test fun `project ID = project ID + project ID`() {
-    assertThat(Normalizers.ProjectId)
-      .consistsOf(Validators.ProjectId, Cleaners.ProjectId)
-  }
-
-  @Test fun `account ID = account ID + account ID`() {
-    assertThat(Normalizers.AccountId)
-      .consistsOf(Validators.AccountId, Cleaners.AccountId)
-  }
-
-  // endregion
-
   // region ID normalizers
 
   @Test fun `custom user ID = custom user ID + custom user ID`() {
@@ -150,41 +136,46 @@ class NormalizersTest {
 
   // endregion
 
-  // region Project property normalizers
+  // region Project normalizers
+
+  @Test fun `project ID = project ID + project ID`() {
+    assertThat(Normalizers.ProjectId)
+      .consistsOf(Validators.ProjectId, Cleaners.ProjectId)
+  }
 
   @Test fun `project name = project name + project name`() {
-    assertThat(Normalizers.PropProjectName)
+    assertThat(Normalizers.ProjectName)
       .consistsOf(Validators.ProjectName, Cleaners.ProjectName)
   }
 
-  @Test fun `prop project description = not blank nullable + trim nullified`() {
-    assertThat(Normalizers.PropProjectDescription)
-      .consistsOf(Validators.NotBlank, Cleaners.Trim)
+  @Test fun `project description = not blank nullable + trim nullified`() {
+    assertThat(Normalizers.ProjectDescription)
+      .consistsOf(Validators.NotBlankNullable, Cleaners.TrimNullified)
   }
 
-  @Test fun `prop project logo url = url + url`() {
-    assertThat(Normalizers.PropProjectLogoUrl)
-      .consistsOf(Validators.Url, Cleaners.Url)
+  @Test fun `project logo url = url nullable + url nullified`() {
+    assertThat(Normalizers.ProjectLogoUrl)
+      .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
   }
 
-  @Test fun `prop project website = url + url`() {
-    assertThat(Normalizers.PropProjectWebsite)
-      .consistsOf(Validators.Url, Cleaners.Url)
+  @Test fun `project website url = url nullable + url nullified`() {
+    assertThat(Normalizers.ProjectWebsiteUrl)
+      .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
   }
 
-  @Test fun `prop max users = positive long as string + long to cardinal as string`() {
-    assertThat(Normalizers.PropMaxUsers)
-      .consistsOf(Validators.PositiveLongAsString, Cleaners.LongToCardinalAsString)
+  @Test fun `max users = positive long + long to cardinal`() {
+    assertThat(Normalizers.MaxUsers)
+      .consistsOf(Validators.PositiveLong, Cleaners.LongToCardinal)
   }
 
-  @Test fun `prop on hold = flag as string + flag def true as string`() {
-    assertThat(Normalizers.PropOnHold)
-      .consistsOf(Validators.FlagAsString, Cleaners.FlagDefTrueAsString)
+  @Test fun `anyone can search = flag + flag def false`() {
+    assertThat(Normalizers.AnyoneCanSearch)
+      .consistsOf(Validators.Flag, Cleaners.FlagDefFalse)
   }
 
-  @Test fun `prop anyone can search = flag as string + flag def false as string`() {
-    assertThat(Normalizers.PropAnyoneCanSearch)
-      .consistsOf(Validators.FlagAsString, Cleaners.FlagDefFalseAsString)
+  @Test fun `on hold = flag + flag def true`() {
+    assertThat(Normalizers.OnHold)
+      .consistsOf(Validators.Flag, Cleaners.FlagDefTrue)
   }
 
   // endregion
@@ -208,7 +199,22 @@ class NormalizersTest {
 
   @Test fun `language tag = language tag + language tag`() {
     assertThat(Normalizers.LanguageTag)
-      .consistsOf(Validators.LanguageTag, Cleaners.LanguageTag)
+      .consistsOf(Validators.LanguageTag, Cleaners.LanguageTagNullified)
+  }
+
+  @Test fun `message template ID = message template ID + message template ID`() {
+    assertThat(Normalizers.MessageTemplateId)
+      .consistsOf(Validators.MessageTemplateId, Cleaners.MessageTemplateId)
+  }
+
+  @Test fun `message template name = message template name + message template name`() {
+    assertThat(Normalizers.MessageTemplateName)
+      .consistsOf(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
+  }
+
+  @Test fun `message template = message template + message template`() {
+    assertThat(Normalizers.MessageTemplate)
+      .consistsOf(Validators.MessageTemplate, Cleaners.MessageTemplate)
   }
 
   // endregion

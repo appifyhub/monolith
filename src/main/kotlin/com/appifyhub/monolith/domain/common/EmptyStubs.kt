@@ -4,32 +4,42 @@ import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
 import java.util.Date
+import java.util.Locale
+
+/*
+ * Why this? (you may ask)
+ *
+ * Well... Spring's ORM is not very nice to complex object relations,
+ * so these are some hacks that needed to be done in order to reduce
+ * relational complexity. "Needed" might be a strong word.
+ *
+ * Anyway, let's imagine it's "temporary".
+ */
 
 fun stubProject() = Project(
   id = -1,
   type = Project.Type.COMMERCIAL,
   status = Project.Status.REVIEW,
   userIdType = Project.UserIdType.RANDOM,
+  name = "PN",
+  description = null,
+  logoUrl = null,
+  websiteUrl = null,
+  maxUsers = DEFAULT_MAX_USERS,
+  anyoneCanSearch = false,
+  onHold = false,
+  languageTag = Locale.US.toLanguageTag(),
   createdAt = Date(),
   updatedAt = Date(),
 )
 
-fun stubUserId() = UserId(
-  userId = "id",
-  projectId = -1,
-)
-
-fun stubOrganization() = Organization(
-  name = "name",
-  street = "street",
-  postcode = "postcode",
-  city = "city",
-  countryCode = "countryCode",
-)
-
 fun stubUser() = User(
-  id = stubUserId(),
+  id = UserId(
+    userId = "id",
+    projectId = -1, // stubbed, not used
+  ),
   signature = "signature",
   name = "name",
   type = User.Type.PERSONAL,
@@ -39,7 +49,13 @@ fun stubUser() = User(
   contactType = User.ContactType.CUSTOM,
   verificationToken = "verificationToken",
   birthday = Date(),
-  company = stubOrganization(),
+  company = Organization(
+    name = "name", // stubbed, not used
+    street = "street", // stubbed, not used
+    postcode = "postcode", // stubbed, not used
+    city = "city", // stubbed, not used
+    countryCode = "countryCode", // stubbed, not used
+  ),
   languageTag = null,
   createdAt = Date(),
   updatedAt = Date(),

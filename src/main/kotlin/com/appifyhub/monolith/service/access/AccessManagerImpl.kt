@@ -2,16 +2,15 @@ package com.appifyhub.monolith.service.access
 
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.property.ProjectProperty
-import com.appifyhub.monolith.domain.creator.property.Property
-import com.appifyhub.monolith.domain.creator.setup.ProjectStatus
+import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.service.access.AccessManager.Feature.BASIC
+import com.appifyhub.monolith.service.access.AccessManager.Feature.USERS
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.creator.CreatorService
-import com.appifyhub.monolith.service.creator.PropertyService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
@@ -29,7 +28,6 @@ class AccessManagerImpl(
   private val authService: AuthService,
   private val userService: UserService,
   private val creatorService: CreatorService,
-  private val propertyService: PropertyService,
 ) : AccessManager {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -50,7 +48,7 @@ class AccessManagerImpl(
     // not project creator; validate that the project matches
     val targetProject = fetchProject(normalizedTargetId.projectId)
     val isSameProjectRequest = targetProject.id == tokenDetails.projectId
-    require(isSameProjectRequest) { "Only requests within the same project are allowed" }
+    requireForAuth(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
     // self access is sometimes allowed, check if that's the case
     val requesterUser = fetchUser(tokenDetails.ownerId)
@@ -68,12 +66,12 @@ class AccessManagerImpl(
 
     // check if minimum authorization level is met
     val isPrivileged = requesterUser.isPrivilegedTo(privilege, targetProject)
-    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+    requireForAuth(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
 
     // check if authorization level is enough (mods can't access other mods)
     val targetUser = fetchUser(normalizedTargetId)
     val isHigherAuthority = requesterUser.authority.ordinal > targetUser.authority.ordinal
-    require(isHigherAuthority) { "Only ${targetUser.authority.nextGroupName} are authorized" }
+    requireForAuth(isHigherAuthority) { "Only ${targetUser.authority.nextGroupName} are authorized" }
 
     return fetchUser(normalizedTargetId)
   }
@@ -94,7 +92,7 @@ class AccessManagerImpl(
 
     // not project creator; validate that the project matches
     val isSameProjectRequest = tokenDetails.projectId == normalizedTargetId
-    require(isSameProjectRequest) { "Only requests within the same project are allowed" }
+    requireForAuth(isSameProjectRequest) { "Only requests within the same project are allowed" }
 
     // fail if user is not verified
     val requesterUser = fetchUser(tokenDetails.ownerId)
@@ -109,7 +107,7 @@ class AccessManagerImpl(
 
     // check if minimum authorization level is met
     val isPrivileged = requesterUser.isPrivilegedTo(privilege, targetProject)
-    require(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
+    requireForAuth(isPrivileged) { "Only ${privilege.level.groupName} are authorized" }
 
     return targetProject
   }
@@ -156,8 +154,8 @@ class AccessManagerImpl(
     return fetchUser(tokenDetails.ownerId)
   }
 
-  override fun fetchProjectStatus(targetId: Long): ProjectStatus {
-    log.debug("Fetching project status for $targetId")
+  override fun fetchProjectState(targetId: Long): ProjectState {
+    log.debug("Fetching project state for $targetId")
 
     return resolveProjectSetupStatus(targetId)
   }
@@ -182,60 +180,46 @@ class AccessManagerImpl(
 
   // Helpers
 
-  private fun ProjectStatus.requireFunctional() {
-    if (status != Project.Status.ACTIVE)
-      throwPreconditionFailed { "Project is set to '$status' state" }
+  private fun ProjectState.requireFunctional() {
+    if (project.status != Project.Status.ACTIVE)
+      throwPreconditionFailed { "Project is set to '${project.status}' state" }
 
-    // any required feature must have all of its properties set
+    // all required features must be usable
     unusableFeatures.firstOrNull { it.isRequired }?.let { requiredFeature ->
       throwPreconditionFailed { "Project feature '$requiredFeature' is not configured" }
     }
 
-    // on hold property must be set to
-    properties.firstOrNull { it.config == ProjectProperty.ON_HOLD }
-      .let { (it as? Property.FlagProp)?.typed() ?: true } // assume true if not set
-      .let { onHold -> if (onHold) throwLocked { "Project is 'on hold'" } }
+    // on hold property must be set to false
+    if (project.onHold) throwLocked { "Project is 'on hold'" }
   }
 
-  private fun resolveProjectSetupStatus(targetId: Long): ProjectStatus {
+  private fun resolveProjectSetupStatus(targetId: Long): ProjectState {
     val normalizedTargetId = Normalizers.ProjectId.run(targetId).requireValid { "Project ID" }
-
     val project = fetchProject(normalizedTargetId)
-    val propertyValues = fetchProps(normalizedTargetId)
-    val propertyConfigs = propertyValues.map(Property<*>::config)
 
-    // A feature is supported when either is true:
-    //   - feature requires no properties
-    //   - all required properties are set
-    val featureSupport = Feature.values().associateWith { feature ->
-      feature.properties.isEmpty() || propertyConfigs.containsAll(feature.properties.toList())
-    }
+    // A feature is "supported" when either is true:
+    //   - feature requires no additional properties to be set
+    //   - feature has all of its required properties set
 
-    return ProjectStatus(
-      status = project.status,
+    val featureSupport: Map<Feature, Boolean> =
+      Feature.values().associateWith { feature ->
+        when (feature) {
+          BASIC -> true // always supported
+          USERS -> true // always supported
+        }
+      }
+
+    return ProjectState(
+      project = project,
       usableFeatures = featureSupport.filterValues { it }.keys.toList(),
       unusableFeatures = featureSupport.filterValues { !it }.keys.toList(),
-      properties = propertyValues,
     )
   }
 
   private fun User.isPrivilegedTo(privilege: Privilege, project: Project): Boolean =
     when (privilege) {
       // handle special cases first
-      Privilege.USER_SEARCH -> {
-        val isUserSearchAllowed = silent {
-          propertyService.fetchProperty<Boolean>(
-            projectId = project.id,
-            propName = ProjectProperty.ANYONE_CAN_SEARCH.name,
-          )
-        }?.typed() ?: false
-
-        if (isUserSearchAllowed) true
-        else {
-          // treat as a non-special case
-          this.authority.ordinal >= privilege.level.ordinal
-        }
-      }
+      Privilege.USER_SEARCH -> project.anyoneCanSearch || this.authority.ordinal >= privilege.level.ordinal
       // not a special case
       else -> this.authority.ordinal >= privilege.level.ordinal
     }
@@ -257,11 +241,19 @@ class AccessManagerImpl(
       Privilege.USER_DELETE,
       -> this.id == targetId
 
-      // invalid user privileges
+      // invalid group for user
       Privilege.PROJECT_READ,
       Privilege.PROJECT_WRITE,
       -> error("Users should not ask for self-access on projects")
+
+      // invalid group for user
+      Privilege.MESSAGE_TEMPLATE_READ,
+      Privilege.MESSAGE_TEMPLATE_WRITE,
+      -> error("Users should not ask for self-access on message templates")
     }
+
+  private fun requireForAuth(value: Boolean, lazyMessage: () -> Any) =
+    if (!value) throwUnauthorized(lazyMessage) else Unit
 
   private fun getCreatorProject() = creatorService.getCreatorProject()
 
@@ -272,8 +264,6 @@ class AccessManagerImpl(
   private fun fetchUser(id: UserId) = userService.fetchUserByUserId(id)
 
   private fun fetchProject(id: Long) = creatorService.fetchProjectById(id)
-
-  private fun fetchProps(id: Long) = propertyService.fetchProperties(id, ProjectProperty.names())
 
   private val TokenDetails.projectId get() = ownerId.projectId
 
