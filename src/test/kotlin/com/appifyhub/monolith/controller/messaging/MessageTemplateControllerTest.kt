@@ -9,6 +9,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -82,8 +83,26 @@ class MessageTemplateControllerTest {
     }
   }
 
+  @Test fun `adding template fails when project not functional`() {
+    val creator = stubber.creators.default()
+    val project = stubber.projects.new(owner = creator, status = Project.Status.REVIEW)
+    val token = stubber.tokens(creator).real().token.tokenValue
+    val request = Stubs.messageTemplateCreateRequest
+
+    assertThat(
+      restTemplate.exchange<SimpleResponse>(
+        url = "$baseUrl${Endpoints.TEMPLATES}",
+        method = HttpMethod.POST,
+        requestEntity = bearerBodyRequest(request, token),
+        uriVariables = mapOf("projectId" to project.id),
+      )
+    ).all {
+      transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
+    }
+  }
+
   @Test fun `adding template fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
     val request = Stubs.messageTemplateCreateRequest
@@ -102,7 +121,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `adding template works with valid inputs`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val request = Stubs.messageTemplateCreateRequest
 
@@ -147,7 +166,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `fetching template by ID fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -168,7 +187,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `fetching template by ID works with valid inputs`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val template = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id))
 
@@ -204,7 +223,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `searching templates fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -222,7 +241,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `searching templates works with valid name and language`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
 
     // one matching, one mismatch
@@ -253,7 +272,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `searching templates works with valid name only`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
 
     // one matching, one mismatch
@@ -279,7 +298,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `searching templates works with project ID only`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val template1 = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id, name = "name1"))
     val template2 = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id, name = "name2"))
@@ -325,7 +344,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `updating template fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
     val request = Stubs.messageTemplateUpdateRequest
@@ -347,7 +366,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `updating template works with valid inputs`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val template = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id))
     val request = Stubs.messageTemplateUpdateRequest
@@ -396,7 +415,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `deleting template by ID fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -417,7 +436,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `deleting template by ID works with valid inputs`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val template = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id))
 
@@ -453,7 +472,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `deleting templates fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -471,7 +490,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `deleting templates works with valid name`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
 
     // one matching, one mismatch
@@ -498,7 +517,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `deleting templates works with project ID only`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
 
     service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id, name = "name1"))
@@ -537,7 +556,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `getting defined variables fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
 
@@ -555,7 +574,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `getting defined variables works with valid inputs`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
 
     assertThat(
@@ -591,7 +610,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `detecting variables fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
     val request = DetectVariablesRequest("")
@@ -610,7 +629,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `detecting variables works with valid inputs`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val request = DetectVariablesRequest("invalid {{also_invalid}} {{${Variable.USER_NAME.code}}}")
 
@@ -652,7 +671,7 @@ class MessageTemplateControllerTest {
   }
 
   @Test fun `materialize template fails when not project creator`() {
-    val project = stubber.projects.new()
+    val project = stubber.projects.new(activateNow = true)
     val user = stubber.users(project).owner()
     val token = stubber.tokens(user).real().token.tokenValue
     val request = MessageInputsRequest()
@@ -671,7 +690,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `materialize template fails without template chosen`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
     val request = MessageInputsRequest()
 
@@ -689,7 +708,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `materialize template (by ID) works with user ID in input`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator)
+    val project = stubber.projects.new(owner = creator, activateNow = true)
     val token = stubber.tokens(creator).real().token.tokenValue
 
     val template = service.addTemplate(
@@ -721,7 +740,7 @@ class MessageTemplateControllerTest {
 
   @Test fun `materialize template (by name) works with project ID in input`() {
     val creator = stubber.creators.default()
-    val project = stubber.projects.new(owner = creator, name = "PRO-J")
+    val project = stubber.projects.new(owner = creator, activateNow = true, name = "PRO-J")
     val token = stubber.tokens(creator).real().token.tokenValue
 
     val template = service.addTemplate(
