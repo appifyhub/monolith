@@ -14,7 +14,7 @@ buildscript {
   }
   dependencies {
     classpath("joda-time:joda-time:+")
-    classpath("org.jlleitschuh.gradle:ktlint-gradle:10.+")
+    classpath("org.jlleitschuh.gradle:ktlint-gradle:11.+")
   }
 }
 
@@ -38,6 +38,8 @@ repositories {
 
 @Suppress("GradlePackageUpdate")
 dependencies {
+  // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
+  extra["slf4j.version"] = "2.+"
 
   // language essentials
   implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -63,7 +65,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-rest")
   implementation("org.hibernate:hibernate-core")
 
-  // helpers
+  // 3rd-party
   implementation("com.ip2location:ip2location-java:8.+")
   implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
 
@@ -90,9 +92,6 @@ dependencies {
   testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
   testImplementation("org.mockito:mockito-core:4.4.+")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.+")
-
-  // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
-  extra["slf4j.version"] = "2.+"
 }
 
 // endregion
@@ -185,7 +184,7 @@ githubRelease {
   if (writeToken == Env.INVALID) println("Set 'PACKAGES_TOKEN' environment variable to enable GitHub releases")
 
   val quality = Env.get("BUILD_QUALITY", default = "Debug")
-  println("GitHub release configured for '$quality' quality")
+  println("  GitHub Release configured for '$quality' quality")
 
   val commitish = Env.get("GITHUB_SHA", default = "main")
 
