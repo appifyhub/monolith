@@ -13,6 +13,7 @@ fun MessageTemplateDbm.toDomain(): MessageTemplate = MessageTemplate(
   projectId = project.projectId!!,
   name = name,
   languageTag = languageTag,
+  title = title,
   content = content,
   isHtml = isHtml,
   createdAt = createdAt,
@@ -24,6 +25,7 @@ fun MessageTemplate.toData(): MessageTemplateDbm = MessageTemplateDbm(
   project = stubProject().copy(id = projectId).toData(),
   name = name,
   languageTag = languageTag,
+  title = title,
   content = content,
   isHtml = isHtml,
   createdAt = createdAt,
@@ -37,6 +39,7 @@ fun MessageTemplateCreator.toData(
   project = stubProject().copy(id = projectId).toData(),
   name = name,
   languageTag = languageTag,
+  title = title,
   content = content,
   isHtml = isHtml,
   createdAt = timeProvider.currentDate,
@@ -49,6 +52,7 @@ fun MessageTemplateUpdater.applyTo(
 ): MessageTemplate = template
   .applySettable(name) { copy(name = it) }
   .applySettable(languageTag) { copy(languageTag = it) }
+  .applySettable(title) { copy(title = it) }
   .applySettable(content) { copy(content = it) }
   .applySettable(isHtml) { copy(isHtml = it) }
   .copy(updatedAt = timeProvider.currentDate)

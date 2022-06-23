@@ -77,6 +77,15 @@ class MessageTemplateServiceImplTest {
       }
   }
 
+  @Test fun `adding template fails with invalid title`() {
+    assertThat { service.addTemplate(Stubs.messageTemplateCreator.copy(title = "\n\t")) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Template Title")
+      }
+  }
+
   @Test fun `adding template fails with invalid content`() {
     assertThat { service.addTemplate(Stubs.messageTemplateCreator.copy(content = "\n\t")) }
       .isFailure()
@@ -234,6 +243,15 @@ class MessageTemplateServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Language Tag")
+      }
+  }
+
+  @Test fun `updating template fails with invalid title`() {
+    assertThat { service.updateTemplate(Stubs.messageTemplateUpdater.copy(title = Settable("\n\t"))) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Template Title")
       }
   }
 

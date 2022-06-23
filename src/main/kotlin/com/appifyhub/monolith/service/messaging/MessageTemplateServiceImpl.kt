@@ -47,6 +47,7 @@ class MessageTemplateServiceImpl(
 
     val normalizedProjectId = Normalizers.ProjectId.run(creator.projectId).requireValid { "Project ID" }
     val normalizedName = Normalizers.MessageTemplateName.run(creator.name).requireValid { "Template Name" }
+    val normalizedTitle = Normalizers.MessageTemplate.run(creator.title).requireValid { "Template Title" }
     val normalizedContent = Normalizers.MessageTemplate.run(creator.content).requireValid { "Template Content" }
     val normalizedLanguage = Normalizers.LanguageTag.run(creator.languageTag).requireValid { "Language Tag" }
       .also { if (it == null) throwNormalization { "Language Tag" } } // mandatory in templates
@@ -55,6 +56,7 @@ class MessageTemplateServiceImpl(
       projectId = normalizedProjectId,
       name = normalizedName,
       languageTag = requireNotNull(normalizedLanguage),
+      title = normalizedTitle,
       content = normalizedContent,
       isHtml = creator.isHtml,
     )
@@ -122,6 +124,9 @@ class MessageTemplateServiceImpl(
         .also { if (it == null) throwNormalization { "Language Tag" } } // mandatory in templates
         .let { requireNotNull(it) }
     }
+    val normalizedTitle = updater.title?.mapValueNonNull {
+      Normalizers.MessageTemplate.run(it).requireValid { "Template Title" }
+    }
     val normalizedContent = updater.content?.mapValueNonNull {
       Normalizers.MessageTemplate.run(it).requireValid { "Template Content" }
     }
@@ -130,6 +135,7 @@ class MessageTemplateServiceImpl(
       id = normalizedTemplateId,
       name = normalizedName,
       languageTag = normalizedLanguage,
+      title = normalizedTitle,
       content = normalizedContent,
       isHtml = updater.isHtml,
     )

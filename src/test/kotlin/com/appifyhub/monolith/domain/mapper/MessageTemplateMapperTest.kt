@@ -32,6 +32,7 @@ class MessageTemplateMapperTest {
           project = Stubs.messageTemplateDbm.project,
           name = Stubs.messageTemplateDbm.name,
           languageTag = Stubs.messageTemplateDbm.languageTag,
+          title = Stubs.messageTemplateDbm.title,
           content = Stubs.messageTemplateDbm.content,
           isHtml = Stubs.messageTemplateDbm.isHtml,
           createdAt = timeProvider.currentDate,

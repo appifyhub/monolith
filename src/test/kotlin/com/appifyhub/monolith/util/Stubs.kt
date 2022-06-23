@@ -245,6 +245,7 @@ object Stubs {
     projectId = project.id,
     name = "template",
     languageTag = Locale.US.toLanguageTag(),
+    title = "title",
     content = "content",
     isHtml = true,
     createdAt = Date(0x10000E),
@@ -256,6 +257,7 @@ object Stubs {
     projectId = project.id,
     name = "template1",
     languageTag = Locale.UK.toLanguageTag(),
+    title = "title1",
     content = "content1",
     isHtml = false,
     createdAt = Date(0x10000E),
@@ -342,6 +344,7 @@ object Stubs {
     projectId = project.id,
     name = messageTemplate.name,
     languageTag = messageTemplate.languageTag,
+    title = messageTemplate.title,
     content = messageTemplate.content,
     isHtml = messageTemplate.isHtml,
   )
@@ -350,6 +353,7 @@ object Stubs {
     id = messageTemplate.id,
     name = Settable("template1"),
     languageTag = Settable(Locale.UK.toLanguageTag()),
+    title = Settable("title1"),
     content = Settable("content1"),
     isHtml = Settable(false),
   )
@@ -508,6 +512,7 @@ object Stubs {
     project = projectDbm,
     name = "template",
     languageTag = Locale.US.toLanguageTag(),
+    title = "title",
     content = "content",
     isHtml = true,
     createdAt = Date(0x10000E),
@@ -637,6 +642,7 @@ object Stubs {
     id = messageTemplate.id,
     name = messageTemplate.name,
     languageTag = messageTemplate.languageTag,
+    title = messageTemplate.title,
     content = messageTemplate.content,
     isHtml = messageTemplate.isHtml,
     createdAt = "1970-01-01 00:17",
@@ -727,6 +733,7 @@ object Stubs {
   val messageTemplateCreateRequest = MessageTemplateCreateRequest(
     name = messageTemplateCreator.name,
     languageTag = messageTemplateCreator.languageTag,
+    title = messageTemplateCreator.title,
     content = messageTemplateCreator.content,
     isHtml = messageTemplateCreator.isHtml,
   )
@@ -734,6 +741,7 @@ object Stubs {
   val messageTemplateUpdateRequest = MessageTemplateUpdateRequest(
     name = SettableRequest(messageTemplateUpdater.name!!.value),
     languageTag = SettableRequest(messageTemplateUpdater.languageTag!!.value),
+    title = SettableRequest(messageTemplateUpdater.title!!.value),
     content = SettableRequest(messageTemplateUpdater.content!!.value),
     isHtml = SettableRequest(messageTemplateUpdater.isHtml!!.value),
   )
