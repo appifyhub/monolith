@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.domain.creator
 
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import java.util.Date
 
 data class Project(
@@ -15,6 +16,7 @@ data class Project(
   val anyoneCanSearch: Boolean,
   val onHold: Boolean,
   val languageTag: String?,
+  val mailgunConfig: MailgunConfig?,
   val createdAt: Date,
   val updatedAt: Date,
 ) {

@@ -114,6 +114,7 @@ class SchemaInitializerTest {
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        mailgunConfig = null, // TODO MM use configured value
       ),
     )
     verify(userService) {
@@ -176,6 +177,7 @@ class SchemaInitializerTest {
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        mailgunConfig = null, // TODO MM use configured value
       ),
     )
 

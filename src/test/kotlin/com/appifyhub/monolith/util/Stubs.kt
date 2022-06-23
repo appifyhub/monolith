@@ -4,14 +4,15 @@ import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.Variable
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
@@ -25,6 +26,7 @@ import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
@@ -195,6 +197,20 @@ object Stubs {
     updatedAt = Date(0xA00001),
   )
 
+  private val mailgunConfig = MailgunConfig(
+    apiKey = "apiKey",
+    domain = "domain",
+    senderName = "senderName",
+    senderEmail = "senderEmail",
+  )
+
+  private val mailgunConfigUpdated = MailgunConfig(
+    apiKey = "apiKey1",
+    domain = "domain1",
+    senderName = "senderName1",
+    senderEmail = "senderEmail1",
+  )
+
   val project = Project(
     id = userId.projectId,
     type = Project.Type.OPENSOURCE,
@@ -208,6 +224,7 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfig,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -225,6 +242,7 @@ object Stubs {
     anyoneCanSearch = false,
     onHold = false,
     languageTag = Locale.UK.toLanguageTag(),
+    mailgunConfig = mailgunConfigUpdated,
     createdAt = project.createdAt,
     updatedAt = Date(0xA20001),
   )
@@ -324,6 +342,7 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfig,
   )
 
   val projectUpdater = ProjectUpdater(
@@ -338,6 +357,7 @@ object Stubs {
     anyoneCanSearch = Settable(false),
     onHold = Settable(false),
     languageTag = Settable(Locale.UK.toLanguageTag()),
+    mailgunConfig = Settable(mailgunConfigUpdated),
   )
 
   val messageTemplateCreator = MessageTemplateCreator(
@@ -426,6 +446,10 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunApiKey = mailgunConfig.apiKey,
+    mailgunDomain = mailgunConfig.domain,
+    mailgunSenderName = mailgunConfig.senderName,
+    mailgunSenderEmail = mailgunConfig.senderEmail,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -616,6 +640,20 @@ object Stubs {
     unusableFeatures = emptyList(),
   )
 
+  private val mailgunConfigDto = MailgunConfigDto(
+    apiKey = mailgunConfig.apiKey,
+    domain = mailgunConfig.domain,
+    senderName = mailgunConfig.senderName,
+    senderEmail = mailgunConfig.senderEmail,
+  )
+
+  private val mailgunConfigDtoUpdated = MailgunConfigDto(
+    apiKey = mailgunConfigUpdated.apiKey,
+    domain = mailgunConfigUpdated.domain,
+    senderName = mailgunConfigUpdated.senderName,
+    senderEmail = mailgunConfigUpdated.senderEmail,
+  )
+
   val projectResponse = ProjectResponse(
     projectId = userId.projectId,
     type = project.type.name,
@@ -629,6 +667,7 @@ object Stubs {
     anyoneCanSearch = project.anyoneCanSearch,
     onHold = project.onHold,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfigDto,
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
   )
@@ -715,6 +754,7 @@ object Stubs {
     logoUrl = project.logoUrl,
     websiteUrl = project.websiteUrl,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfigDto,
   )
 
   val projectUpdateRequest = ProjectUpdateRequest(
@@ -728,6 +768,7 @@ object Stubs {
     anyoneCanSearch = SettableRequest(false),
     onHold = SettableRequest(false),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
+    mailgunConfig = SettableRequest(mailgunConfigDtoUpdated),
   )
 
   val messageTemplateCreateRequest = MessageTemplateCreateRequest(

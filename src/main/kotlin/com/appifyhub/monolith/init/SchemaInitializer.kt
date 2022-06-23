@@ -84,6 +84,7 @@ class SchemaInitializer(
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        mailgunConfig = null, // TODO MM use configured data
       ),
     )
 

@@ -1,7 +1,9 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
+import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
@@ -19,6 +21,13 @@ fun ProjectState.toNetwork(): ProjectStateResponse = ProjectStateResponse(
   unusableFeatures = unusableFeatures.map(Feature::toNetwork),
 )
 
+fun MailgunConfig.toNetwork(): MailgunConfigDto = MailgunConfigDto(
+  apiKey = apiKey,
+  domain = domain,
+  senderName = senderName,
+  senderEmail = senderEmail,
+)
+
 fun Project.toNetwork(
   projectState: ProjectState,
 ): ProjectResponse = ProjectResponse(
@@ -34,6 +43,7 @@ fun Project.toNetwork(
   anyoneCanSearch = anyoneCanSearch,
   onHold = onHold,
   languageTag = languageTag,
+  mailgunConfig = mailgunConfig?.toNetwork(),
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
   updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
 )

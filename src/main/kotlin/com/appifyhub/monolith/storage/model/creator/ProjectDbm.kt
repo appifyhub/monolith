@@ -51,6 +51,18 @@ class ProjectDbm(
   @Column(nullable = true, length = 8)
   var languageTag: String?,
 
+  @Column(nullable = true, length = 64)
+  var mailgunApiKey: String?,
+
+  @Column(nullable = true, length = 64)
+  var mailgunDomain: String?,
+
+  @Column(nullable = true, length = 32)
+  var mailgunSenderName: String?,
+
+  @Column(nullable = true, length = 64)
+  var mailgunSenderEmail: String?,
+
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   var createdAt: Date,
@@ -71,6 +83,10 @@ class ProjectDbm(
     if (status != other.status) return false
     if (userIdType != other.userIdType) return false
     if (languageTag != other.languageTag) return false
+    if (mailgunApiKey != other.mailgunApiKey) return false
+    if (mailgunDomain != other.mailgunDomain) return false
+    if (mailgunSenderName != other.mailgunSenderName) return false
+    if (mailgunSenderEmail != other.mailgunSenderEmail) return false
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
 
@@ -83,6 +99,10 @@ class ProjectDbm(
     result = 31 * result + status.hashCode()
     result = 31 * result + userIdType.hashCode()
     result = 31 * result + languageTag.hashCode()
+    result = 31 * result + mailgunApiKey.hashCode()
+    result = 31 * result + mailgunDomain.hashCode()
+    result = 31 * result + mailgunSenderName.hashCode()
+    result = 31 * result + mailgunSenderEmail.hashCode()
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
     return result
@@ -95,6 +115,10 @@ class ProjectDbm(
       "status='$status', " +
       "userIdType='$userIdType', " +
       "languageTag='$languageTag', " +
+      "mailgunApiKey='$mailgunApiKey', " +
+      "mailgunDomain='$mailgunDomain', " +
+      "mailgunSenderName='$mailgunSenderName', " +
+      "mailgunSenderEmail='$mailgunSenderEmail', " +
       "createdAt=$createdAt, " +
       "updatedAt=$updatedAt" +
       ")"

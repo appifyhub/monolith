@@ -31,6 +31,7 @@ fun stubProject() = Project(
   anyoneCanSearch = false,
   onHold = false,
   languageTag = Locale.US.toLanguageTag(),
+  mailgunConfig = null,
   createdAt = Date(),
   updatedAt = Date(),
 )

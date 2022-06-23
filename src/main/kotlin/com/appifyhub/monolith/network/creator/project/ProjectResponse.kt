@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.network.creator.project
 
+import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -19,6 +20,7 @@ data class ProjectResponse(
   @JsonProperty("anyone_can_search") val anyoneCanSearch: Boolean,
   @JsonProperty("on_hold") val onHold: Boolean,
   @JsonProperty("language_tag") val languageTag: String?,
+  @JsonProperty("mailgun_config") val mailgunConfig: MailgunConfigDto?,
   @JsonProperty("created_at") val createdAt: String,
   @JsonProperty("updated_at") val updatedAt: String,
 ) : Serializable

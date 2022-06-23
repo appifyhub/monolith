@@ -1,12 +1,21 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
+
+fun MailgunConfigDto.toDomain(): MailgunConfig = MailgunConfig(
+  apiKey = apiKey,
+  domain = domain,
+  senderName = senderName,
+  senderEmail = senderEmail,
+)
 
 fun ProjectCreateRequest.toDomain(
   owner: User? = null,
@@ -23,6 +32,7 @@ fun ProjectCreateRequest.toDomain(
   anyoneCanSearch = false,
   onHold = true,
   languageTag = languageTag,
+  mailgunConfig = mailgunConfig?.toDomain(),
 )
 
 fun ProjectUpdateRequest.toDomain(
@@ -39,4 +49,5 @@ fun ProjectUpdateRequest.toDomain(
   anyoneCanSearch = anyoneCanSearch.toDomainNonNull(),
   onHold = onHold.toDomainNonNull(),
   languageTag = languageTag.toDomainNullable(),
+  mailgunConfig = mailgunConfig.mapToDomainNullable { it.toDomain() },
 )

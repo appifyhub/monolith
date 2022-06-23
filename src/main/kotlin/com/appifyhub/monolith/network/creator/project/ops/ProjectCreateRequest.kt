@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.network.creator.project.ops
 
+import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -13,5 +14,6 @@ data class ProjectCreateRequest(
   @JsonProperty("description") val description: String? = null,
   @JsonProperty("logo_url") val logoUrl: String? = null,
   @JsonProperty("website_url") val websiteUrl: String? = null,
-  @JsonProperty("language_tag") val languageTag: String?,
+  @JsonProperty("language_tag") val languageTag: String? = null,
+  @JsonProperty("mailgun_config") val mailgunConfig: MailgunConfigDto? = null,
 )

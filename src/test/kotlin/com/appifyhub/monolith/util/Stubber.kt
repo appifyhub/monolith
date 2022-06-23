@@ -59,6 +59,7 @@ class Stubber(
   fun tokenDetailsOf(tokenValue: String): TokenDetails =
     jwtHelper.extractPropertiesFromJwt(tokenValue).toTokenDetails()
 
+  @Suppress("unused")
   fun isAuthorized(jwt: JwtAuthenticationToken) = authRepo.isTokenValid(jwt, shallow = false)
 
   fun isAuthorized(tokenValue: String) = authRepo.isTokenValid(tokenValue.toJwt(), shallow = false)
@@ -91,6 +92,7 @@ class Stubber(
         anyoneCanSearch = anyoneCanSearch,
         onHold = !activateNow,
         languageTag = language,
+        mailgunConfig = null,
       )
     )
 
@@ -126,6 +128,7 @@ class Stubber(
       language: String = Locale.US.toLanguageTag(),
     ) = ensureUser(ADMIN, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
 
+    @Suppress("unused")
     fun mod(
       idSuffix: String = "",
       autoVerified: Boolean = true,
