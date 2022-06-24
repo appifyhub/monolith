@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.validation.impl
 
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.hasNoSpaces
@@ -122,5 +123,15 @@ object Validators {
     it.all { char -> char.isLetterOrDigit() || char in setOf('-', '_') }
   }
   val MessageTemplate = NotBlank
+
+  // Integrations validators
+
+  val MailgunConfigData = validatesAs<MailgunConfig>("MailgunConfig") {
+    it == null ||
+      NoSpaces.isValid(it.apiKey) && // mailgun kay format is 'api-key:123456'
+      NoSpaces.isValid(it.domain) && // mailgun is not enforcing any regex here
+      NotBlank.isValid(it.senderName) && // person or organization
+      Email.isValid(it.senderEmail) // standard email
+  }
 
 }

@@ -64,4 +64,8 @@ object Normalizers {
   val MessageTemplateName = normalizesNonNull(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
   val MessageTemplate = normalizesNonNull(Validators.MessageTemplate, Cleaners.MessageTemplate)
 
+  // Integrations normalizers
+
+  val MailgunConfigData = normalizesNullable(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
+
 }

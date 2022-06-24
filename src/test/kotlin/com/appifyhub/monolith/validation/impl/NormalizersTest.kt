@@ -219,6 +219,15 @@ class NormalizersTest {
 
   // endregion
 
+  // region Integrations normalizers
+
+  @Test fun `mailgun config data = mailgun config data + mailgun config data`() {
+    assertThat(Normalizers.MailgunConfigData)
+      .consistsOf(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
+  }
+
+  // endregion
+
   // region Helpers
 
   // doing a shallow comparison because it's just config testing

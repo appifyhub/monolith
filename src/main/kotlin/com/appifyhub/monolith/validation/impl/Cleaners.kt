@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.validation.impl
 
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.takeIfNotBlank
@@ -104,5 +105,20 @@ object Cleaners {
     it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_') }.orEmpty()
   }
   val MessageTemplate = Trim
+
+  // Integrations cleaners
+
+  val MailgunConfigData = cleansToNullable<MailgunConfig>("MailgunConfig") {
+    if (it == null) return@cleansToNullable null
+    val props = setOf(it.apiKey, it.domain, it.senderName, it.senderEmail)
+    if (props.any(String::isBlank)) return@cleansToNullable null
+
+    MailgunConfig(
+      apiKey = RemoveSpaces.clean(it.apiKey),
+      domain = RemoveSpaces.clean(it.domain),
+      senderName = Trim.clean(it.senderName),
+      senderEmail = Email.clean(it.senderEmail),
+    )
+  }
 
 }

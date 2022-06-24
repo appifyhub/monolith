@@ -4,6 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
@@ -528,6 +529,70 @@ class ValidatorsTest {
   @Test fun `message template is non blank`() {
     assertThat(Validators.MessageTemplate)
       .isEqualTo(Validators.NotBlank)
+  }
+
+  // endregion
+
+  // region Integrations validators
+
+  @Test fun `mailgun config fails with invalid API key`() {
+    val config = MailgunConfig(
+      apiKey = "api-key 123456 abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config fails with invalid domain`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config fails with invalid sender name`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain.com",
+      senderName = "",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config fails with invalid sender email`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "not_an_email",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config succeeds with null`() {
+    assertThat(Validators.MailgunConfigData.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `mailgun config succeeds with valid data`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isTrue()
   }
 
   // endregion

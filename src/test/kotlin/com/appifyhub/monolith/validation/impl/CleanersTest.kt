@@ -1,12 +1,15 @@
 package com.appifyhub.monolith.validation.impl
 
 import assertk.assertThat
+import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import assertk.assertions.isZero
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
@@ -390,6 +393,33 @@ class CleanersTest {
   @Test fun `message template is trimming`() {
     assertThat(Cleaners.MessageTemplate)
       .isEqualTo(Cleaners.Trim)
+  }
+
+  // endregion
+
+  // region Integrations cleaners
+
+  @Test fun `mailgun config is cleaning with null`() {
+    assertThat(Cleaners.MailgunConfigData.clean(null))
+      .isNull()
+  }
+
+  @Test fun `mailgun config is cleaning`() {
+    val dirty = MailgunConfig(
+      apiKey = "a b c",
+      domain = " domain. com ",
+      senderName = " na me ",
+      senderEmail = " email@domain.com ",
+    )
+    val expected = MailgunConfig(
+      apiKey = "abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Cleaners.MailgunConfigData.clean(dirty))
+      .isNotNull()
+      .isDataClassEqualTo(expected)
   }
 
   // endregion
