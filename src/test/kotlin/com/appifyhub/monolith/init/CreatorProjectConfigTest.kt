@@ -28,6 +28,10 @@ class CreatorProjectConfigTest {
         transform { it.ownerName }.isEqualTo("Owner")
         transform { it.ownerSignature }.isEmpty()
         transform { it.ownerEmail }.isEqualTo("creator@appifyhub.com")
+        transform { it.mailgunApiKey }.isEmpty()
+        transform { it.mailgunDomain }.isEqualTo("mailgun.appifyhub.com")
+        transform { it.mailgunSenderName }.isEqualTo("AppifyHub")
+        transform { it.mailgunSenderEmail }.isEqualTo("no-reply@appifyhub.com")
       }
   }
 

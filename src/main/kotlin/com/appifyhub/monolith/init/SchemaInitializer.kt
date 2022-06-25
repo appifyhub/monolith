@@ -2,6 +2,7 @@ package com.appifyhub.monolith.init
 
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
@@ -14,6 +15,7 @@ import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_M
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.validation.impl.Normalizers
 import java.util.Locale
 import org.slf4j.LoggerFactory
@@ -68,6 +70,16 @@ class SchemaInitializer(
     val creatorProjectName = Normalizers.ProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
     val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
+    val mailgunConfig = silent {
+      Normalizers.MailgunConfigData.run(
+        MailgunConfig(
+          apiKey = creatorConfig.mailgunApiKey,
+          domain = creatorConfig.mailgunDomain,
+          senderName = creatorConfig.mailgunSenderName,
+          senderEmail = creatorConfig.mailgunSenderEmail,
+        )
+      ).requireValid { "Mailgun Config" }
+    }
 
     // create the creator project
     val project = creatorService.addProject(
@@ -84,7 +96,7 @@ class SchemaInitializer(
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
-        mailgunConfig = null, // TODO MM use configured data
+        mailgunConfig = mailgunConfig,
       ),
     )
 

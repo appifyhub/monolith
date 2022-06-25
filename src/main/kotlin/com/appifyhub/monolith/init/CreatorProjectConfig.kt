@@ -18,4 +18,16 @@ class CreatorProjectConfig {
   @Value("\${app.creator.properties.name}")
   lateinit var projectName: String
 
+  @Value("\${app.creator.integrations.mailgun.api-key}")
+  lateinit var mailgunApiKey: String
+
+  @Value("\${app.creator.integrations.mailgun.domain}")
+  lateinit var mailgunDomain: String
+
+  @Value("\${app.creator.integrations.mailgun.sender-name}")
+  lateinit var mailgunSenderName: String
+
+  @Value("\${app.creator.integrations.mailgun.sender-email}")
+  lateinit var mailgunSenderEmail: String
+
 }

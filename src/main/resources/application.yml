@@ -35,6 +35,12 @@ app:
       email: ${CREATOR_OWNER_EMAIL:creator@appifyhub.com}
     properties:
       name: ${CREATOR_PROP_PROJECT_NAME:AppifyHub}
+    integrations:
+      mailgun:
+        api-key: ${MAILGUN_API_KEY:}
+        domain: ${MAILGUN_DOMAIN:mailgun.appifyhub.com}
+        sender-name: ${MAILGUN_SENDER_NAME:AppifyHub}
+        sender-email: ${MAILGUN_SENDER_EMAIL:no-reply@appifyhub.com}
   ip2location:
     file: ${IP_2_LOCATION_FILE:}
 
