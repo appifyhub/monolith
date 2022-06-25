@@ -55,7 +55,8 @@ class CreatorServiceImpl(
       .requireValid { "Project's On Hold" }
     val normalizedLanguageTag = Normalizers.LanguageTag.run(projectData.languageTag)
       .requireValid { "Project's Language Tag" }
-    val normalizedMailgunConfig = projectData.mailgunConfig // TODO MM validate
+    val normalizedMailgunConfig = Normalizers.MailgunConfigData.run(projectData.mailgunConfig)
+      .requireValid { "Mailgun Config" }
 
     val normalizedProjectCreator = ProjectCreator(
       owner = projectData.owner,
@@ -143,7 +144,9 @@ class CreatorServiceImpl(
     val normalizedLanguageTag = updater.languageTag?.mapValueNullable {
       Normalizers.LanguageTag.run(it).requireValid { "Language Tag" }
     }
-    val normalizedMailgunConfig = updater.mailgunConfig // TODO MM validate
+    val normalizedMailgunConfig = updater.mailgunConfig?.mapValueNullable {
+      Normalizers.MailgunConfigData.run(it).requireValid { "Mailgun Config" }
+    }
 
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,

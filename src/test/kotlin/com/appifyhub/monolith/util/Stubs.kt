@@ -199,16 +199,16 @@ object Stubs {
 
   private val mailgunConfig = MailgunConfig(
     apiKey = "apiKey",
-    domain = "domain",
+    domain = "domain.com",
     senderName = "senderName",
-    senderEmail = "senderEmail",
+    senderEmail = "senderEmail@domain.com",
   )
 
   private val mailgunConfigUpdated = MailgunConfig(
     apiKey = "apiKey1",
-    domain = "domain1",
+    domain = "domain1.com",
     senderName = "senderName1",
-    senderEmail = "senderEmail1",
+    senderEmail = "senderEmail1@domain.com",
   )
 
   val project = Project(

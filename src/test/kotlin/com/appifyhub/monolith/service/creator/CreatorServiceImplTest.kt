@@ -12,6 +12,7 @@ import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.common.mapValueNullable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.util.Stubber
@@ -119,6 +120,23 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Max Users")
+      }
+  }
+
+  @Test fun `add project fails with invalid mailgun config`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = null,
+      websiteUrl = null,
+      mailgunConfig = Stubs.projectCreator.mailgunConfig?.copy(senderEmail = "invalid")
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Mailgun Config")
       }
   }
 
@@ -303,6 +321,25 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Name")
+      }
+  }
+
+  @Test fun `update project fails with invalid mailgun config`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = null,
+      websiteUrl = null,
+      mailgunConfig = Stubs.projectUpdater.mailgunConfig?.mapValueNullable {
+        it.copy(senderEmail = "invalid")
+      }
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Mailgun Config")
       }
   }
 
