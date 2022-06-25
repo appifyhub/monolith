@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
-import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ProjectStateResponse

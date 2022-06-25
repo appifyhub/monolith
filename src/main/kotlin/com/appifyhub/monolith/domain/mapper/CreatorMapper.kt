@@ -2,7 +2,7 @@ package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm

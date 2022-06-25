@@ -2,7 +2,7 @@ package com.appifyhub.monolith.init
 
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User

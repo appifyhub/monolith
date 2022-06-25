@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.validation.impl
 
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.hasNoSpaces

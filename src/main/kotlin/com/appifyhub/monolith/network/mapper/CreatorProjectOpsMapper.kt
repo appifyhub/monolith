@@ -1,11 +1,11 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS

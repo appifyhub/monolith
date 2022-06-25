@@ -3,7 +3,7 @@ package com.appifyhub.monolith.domain.creator.ops
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.Status
 import com.appifyhub.monolith.domain.creator.Project.Type
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 
 data class ProjectUpdater(
   val id: Long,

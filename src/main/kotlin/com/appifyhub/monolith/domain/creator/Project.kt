@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.domain.creator
 
-import com.appifyhub.monolith.domain.creator.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import java.util.Date
 
 data class Project(

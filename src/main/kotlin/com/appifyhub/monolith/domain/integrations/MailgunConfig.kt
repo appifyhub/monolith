@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.creator.integrations
+package com.appifyhub.monolith.domain.integrations
 
 data class MailgunConfig(
   val apiKey: String,

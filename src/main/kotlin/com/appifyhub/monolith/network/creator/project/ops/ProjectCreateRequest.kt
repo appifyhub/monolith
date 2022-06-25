@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.network.creator.project.ops
 
-import com.appifyhub.monolith.network.creator.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
