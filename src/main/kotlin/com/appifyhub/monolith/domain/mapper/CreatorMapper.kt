@@ -2,9 +2,9 @@ package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.util.TimeProvider
 
@@ -66,7 +66,7 @@ fun ProjectDbm.toDomain(): Project = Project(
     domain = mailgunDomain.orEmpty(),
     senderName = mailgunSenderName.orEmpty(),
     senderEmail = mailgunSenderEmail.orEmpty(),
-  ),
+  ).takeIf { setOf(it.apiKey, it.domain, it.senderName, it.senderEmail).none(String::isEmpty) },
   createdAt = createdAt,
   updatedAt = updatedAt,
 )

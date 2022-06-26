@@ -4,10 +4,10 @@ import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
 import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.repository.messaging.MessageTemplateRepository
@@ -20,13 +20,13 @@ import com.appifyhub.monolith.util.ext.throwNotFound
 import com.appifyhub.monolith.util.ext.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 
 private const val DEFAULT_VALUE = "******"
 private const val VAR_PREFIX = "{{"
 private const val VAR_SUFFIX = "}}"
 
-@Component
+@Service
 class MessageTemplateServiceImpl(
   private val repository: MessageTemplateRepository,
   private val userService: UserService,

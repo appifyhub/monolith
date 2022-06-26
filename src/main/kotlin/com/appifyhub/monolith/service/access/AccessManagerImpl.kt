@@ -7,6 +7,7 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Feature.BASIC
+import com.appifyhub.monolith.service.access.AccessManager.Feature.EMAILS
 import com.appifyhub.monolith.service.access.AccessManager.Feature.USERS
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
@@ -206,6 +207,7 @@ class AccessManagerImpl(
         when (feature) {
           BASIC -> true // always supported
           USERS -> true // always supported
+          EMAILS -> project.mailgunConfig != null
         }
       }
 

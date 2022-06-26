@@ -31,6 +31,7 @@ interface AccessManager {
   enum class Feature(val isRequired: Boolean) {
     BASIC(isRequired = true), // core functionality: readiness, security, templating, ...
     USERS(isRequired = true), // user functionality: signup, login, user data updates, ...
+    EMAILS(isRequired = false), // sending emails to users
   }
 
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User

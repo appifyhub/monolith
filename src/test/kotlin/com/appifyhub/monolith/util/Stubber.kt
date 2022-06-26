@@ -12,6 +12,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
+import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.auth.AuthRepository
@@ -106,12 +107,16 @@ class Stubber(
       idSuffix: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
     ) = ensureUser(
       DEFAULT,
       project = projects.creator(),
       idSuffix = idSuffix,
       autoVerified = autoVerified,
       language = language,
+      contact = contact,
+      contactType = contactType,
     )
   }
 
@@ -120,26 +125,66 @@ class Stubber(
       idSuffix: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(OWNER, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = OWNER,
+      project = project,
+      idSuffix = idSuffix,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
 
     fun admin(
       idSuffix: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(ADMIN, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = ADMIN,
+      project = project,
+      idSuffix = idSuffix,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
 
     @Suppress("unused")
     fun mod(
       idSuffix: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(MODERATOR, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = MODERATOR,
+      project = project,
+      idSuffix = idSuffix,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
 
     fun default(
       idSuffix: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(DEFAULT, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = DEFAULT,
+      project = project,
+      idSuffix = idSuffix,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
   }
 
   inner class ProjectTokens(private val project: Project) {
@@ -158,6 +203,8 @@ class Stubber(
       idSuffix: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
     ) = createToken(
       user = ensureUser(
         authority = authority,
@@ -165,6 +212,8 @@ class Stubber(
         idSuffix = idSuffix,
         autoVerified = autoVerified,
         language = language,
+        contact = contact,
+        contactType = contactType,
       ),
       shouldStore = true,
       isStatic = isStatic,
@@ -186,6 +235,8 @@ class Stubber(
     idSuffix: String,
     autoVerified: Boolean,
     language: String,
+    contact: String,
+    contactType: ContactType,
   ): User = when {
     authority == OWNER && project == projects.creator() -> creators.owner()
     else -> "username_${authority.name.lowercase()}$idSuffix".let { userId ->
@@ -198,6 +249,8 @@ class Stubber(
             type = User.Type.PERSONAL,
             authority = authority,
             languageTag = language,
+            contact = contact,
+            contactType = contactType,
           ),
           userIdType = project.userIdType,
         ).let { user ->

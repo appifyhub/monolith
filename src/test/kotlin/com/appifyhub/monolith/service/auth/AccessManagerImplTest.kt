@@ -653,7 +653,7 @@ class AccessManagerImplTest {
         ProjectState(
           project = project,
           usableFeatures = listOf(Feature.BASIC, Feature.USERS),
-          unusableFeatures = emptyList(),
+          unusableFeatures = listOf(Feature.EMAILS),
         )
       )
   }
