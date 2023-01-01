@@ -5,6 +5,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
@@ -592,6 +593,109 @@ class ValidatorsTest {
       senderEmail = "email@domain.com",
     )
     assertThat(Validators.MailgunConfigData.isValid(config))
+      .isTrue()
+  }
+
+  @Test fun `twilio config fails with invalid account SID`() {
+    val config = TwilioConfig(
+      accountSid = "account sid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid auth token`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "auth token",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid messaging service ID`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messaging service id",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid max price`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = -1,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid max retries`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = -1,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid default sender number`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "abcdefgh",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config succeeds with null`() {
+    assertThat(Validators.TwilioConfigData.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `twilio config succeeds with valid data`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
       .isTrue()
   }
 

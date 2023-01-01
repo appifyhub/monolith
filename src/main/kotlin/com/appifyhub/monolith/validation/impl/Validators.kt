@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.validation.impl
 
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.hasNoSpaces
@@ -132,6 +133,17 @@ object Validators {
       NoSpaces.isValid(it.domain) && // mailgun is not enforcing any regex here
       NotBlank.isValid(it.senderName) && // person or organization
       Email.isValid(it.senderEmail) // standard email
+  }
+
+  val TwilioConfigData = validatesAs<TwilioConfig>("TwilioConfig") {
+    it == null ||
+      NoSpaces.isValid(it.accountSid) && // twilio ASID format is "abcdefgh"
+      NoSpaces.isValid(it.authToken) && // twilio token format is "abcdefgh"
+      NoSpaces.isValid(it.messagingServiceId) && // twilio MSID format is "abcdefgh"
+      PositiveLong.isValid(it.maxPricePerMessage.toLong()) && // can't be negative
+      PositiveLong.isValid(it.maxRetryAttempts.toLong()) && // can't be negative
+      // [true]: default sender name can be blank, keeping it for consistency
+      Phone.isValid(it.defaultSenderNumber) // international phone number
   }
 
 }

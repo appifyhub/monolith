@@ -67,5 +67,6 @@ object Normalizers {
   // Integrations normalizers
 
   val MailgunConfigData = normalizesNullable(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
+  val TwilioConfigData = normalizesNullable(Validators.TwilioConfigData, Cleaners.TwilioConfigData)
 
 }

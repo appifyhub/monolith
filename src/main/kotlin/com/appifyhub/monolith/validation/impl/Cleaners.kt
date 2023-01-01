@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.validation.impl
 
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.takeIfNotBlank
@@ -118,6 +119,22 @@ object Cleaners {
       domain = RemoveSpaces.clean(it.domain),
       senderName = Trim.clean(it.senderName),
       senderEmail = Email.clean(it.senderEmail),
+    )
+  }
+
+  val TwilioConfigData = cleansToNullable<TwilioConfig>("TwilioConfig") {
+    if (it == null) return@cleansToNullable null
+    val mandatoryProps = setOf(it.accountSid, it.authToken, it.messagingServiceId, it.defaultSenderNumber)
+    if (mandatoryProps.any(String::isBlank)) return@cleansToNullable null
+
+    TwilioConfig(
+      accountSid = RemoveSpaces.clean(it.accountSid),
+      authToken = RemoveSpaces.clean(it.authToken),
+      messagingServiceId = RemoveSpaces.clean(it.messagingServiceId),
+      maxPricePerMessage = LongToCardinal.clean(it.maxPricePerMessage.toLong()).toInt(),
+      maxRetryAttempts = LongToCardinal.clean(it.maxRetryAttempts.toLong()).toInt(),
+      defaultSenderName = Trim.clean(it.defaultSenderName),
+      defaultSenderNumber = Phone.clean(it.defaultSenderNumber),
     )
   }
 

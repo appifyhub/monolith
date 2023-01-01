@@ -226,6 +226,11 @@ class NormalizersTest {
       .consistsOf(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
   }
 
+  @Test fun `twilio config data = twilio config data + twilio config data`() {
+    assertThat(Normalizers.TwilioConfigData)
+      .consistsOf(Validators.TwilioConfigData, Cleaners.TwilioConfigData)
+  }
+
   // endregion
 
   // region Helpers
