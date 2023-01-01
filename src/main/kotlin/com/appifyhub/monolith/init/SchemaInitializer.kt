@@ -4,6 +4,7 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -81,7 +82,17 @@ class SchemaInitializer(
       ).requireValid { "Mailgun Config" }
     }
     val twilioConfig = silent {
-      null // TODO MM use configured data
+      Normalizers.TwilioConfigData.run(
+        TwilioConfig(
+          accountSid = creatorConfig.twilioAccountSid,
+          authToken = creatorConfig.twilioAuthToken,
+          messagingServiceId = creatorConfig.twilioMessagingServiceId,
+          maxPricePerMessage = creatorConfig.twilioMaxPricePerMessage.toInt(),
+          maxRetryAttempts = creatorConfig.twilioMaxRetryAttempts.toInt(),
+          defaultSenderName = creatorConfig.twilioDefaultSenderName,
+          defaultSenderNumber = creatorConfig.twilioDefaultSenderNumber,
+        ),
+      ).requireValid { "Twilio Config" }
     }
 
     // create the creator project

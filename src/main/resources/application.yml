@@ -41,6 +41,14 @@ app:
         domain: ${MAILGUN_DOMAIN:mailgun.appifyhub.com}
         sender-name: ${MAILGUN_SENDER_NAME:AppifyHub}
         sender-email: ${MAILGUN_SENDER_EMAIL:no-reply@appifyhub.com}
+      twilio:
+        account-sid: ${TWILIO_ACCOUNT_SID:}
+        auth-token: ${TWILIO_AUTH_TOKEN:}
+        messaging-service-id: ${TWILIO_MESSAGING_SERVICE_ID:}
+        max-price-per-message: ${TWILIO_MAX_PRICE_PER_MESSAGE:2}
+        max-retry-attempts: ${TWILIO_MAX_RETRY_ATTEMPTS:2}
+        default-sender-name: ${TWILIO_DEFAULT_SENDER_NAME:APPIFY}
+        default-sender-number: ${TWILIO_DEFAULT_SENDER:}
   ip2location:
     file: ${IP_2_LOCATION_FILE:}
 
