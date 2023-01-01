@@ -5,6 +5,7 @@ import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.util.TimeProvider
 
@@ -23,6 +24,7 @@ fun ProjectUpdater.applyTo(
   .applySettable(onHold) { copy(onHold = it) }
   .applySettable(languageTag) { copy(languageTag = it) }
   .applySettable(mailgunConfig) { copy(mailgunConfig = it) }
+  .applySettable(twilioConfig) { copy(twilioConfig = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun ProjectCreator.toProjectData(
@@ -44,6 +46,13 @@ fun ProjectCreator.toProjectData(
   mailgunDomain = mailgunConfig?.domain,
   mailgunSenderName = mailgunConfig?.senderName,
   mailgunSenderEmail = mailgunConfig?.senderEmail,
+  twilioAccountSid = twilioConfig?.accountSid,
+  twilioAuthToken = twilioConfig?.authToken,
+  twilioMessagingServiceId = twilioConfig?.messagingServiceId,
+  twilioMaxPricePerMessage = twilioConfig?.maxPricePerMessage,
+  twilioMaxRetryAttempts = twilioConfig?.maxRetryAttempts,
+  twilioDefaultSenderName = twilioConfig?.defaultSenderName,
+  twilioDefaultSenderNumber = twilioConfig?.defaultSenderNumber,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
 )
@@ -67,6 +76,15 @@ fun ProjectDbm.toDomain(): Project = Project(
     senderName = mailgunSenderName.orEmpty(),
     senderEmail = mailgunSenderEmail.orEmpty(),
   ).takeIf { setOf(it.apiKey, it.domain, it.senderName, it.senderEmail).none(String::isEmpty) },
+  twilioConfig = TwilioConfig(
+    accountSid = twilioAccountSid.orEmpty(),
+    authToken = twilioAuthToken.orEmpty(),
+    messagingServiceId = twilioMessagingServiceId.orEmpty(),
+    maxPricePerMessage = twilioMaxPricePerMessage ?: 0,
+    maxRetryAttempts = twilioMaxRetryAttempts ?: 0,
+    defaultSenderName = twilioDefaultSenderName.orEmpty(),
+    defaultSenderNumber = twilioDefaultSenderNumber.orEmpty(),
+  ).takeIf { setOf(it.accountSid, it.authToken, it.messagingServiceId, it.defaultSenderNumber).none(String::isEmpty) },
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
@@ -88,6 +106,13 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   mailgunDomain = mailgunConfig?.domain,
   mailgunSenderName = mailgunConfig?.senderName,
   mailgunSenderEmail = mailgunConfig?.senderEmail,
+  twilioAccountSid = twilioConfig?.accountSid,
+  twilioAuthToken = twilioConfig?.authToken,
+  twilioMessagingServiceId = twilioConfig?.messagingServiceId,
+  twilioMaxPricePerMessage = twilioConfig?.maxPricePerMessage,
+  twilioMaxRetryAttempts = twilioConfig?.maxRetryAttempts,
+  twilioDefaultSenderName = twilioConfig?.defaultSenderName,
+  twilioDefaultSenderNumber = twilioConfig?.defaultSenderNumber,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )

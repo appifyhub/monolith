@@ -1,12 +1,14 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
-import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 
@@ -28,6 +30,16 @@ fun MailgunConfig.toNetwork(): MailgunConfigDto = MailgunConfigDto(
   senderEmail = senderEmail,
 )
 
+fun TwilioConfig.toNetwork(): TwilioConfigDto = TwilioConfigDto(
+  accountSid = accountSid,
+  authToken = authToken,
+  messagingServiceId = messagingServiceId,
+  maxPricePerMessage = maxPricePerMessage,
+  maxRetryAttempts = maxRetryAttempts,
+  defaultSenderName = defaultSenderName,
+  defaultSenderNumber = defaultSenderNumber,
+)
+
 fun Project.toNetwork(
   projectState: ProjectState,
 ): ProjectResponse = ProjectResponse(
@@ -44,6 +56,7 @@ fun Project.toNetwork(
   onHold = onHold,
   languageTag = languageTag,
   mailgunConfig = mailgunConfig?.toNetwork(),
+  twilioConfig = twilioConfig?.toNetwork(),
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
   updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
 )

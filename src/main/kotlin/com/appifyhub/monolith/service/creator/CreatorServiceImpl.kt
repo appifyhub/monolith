@@ -32,8 +32,9 @@ class CreatorServiceImpl(
       // creator project is already created
       if (projectData.owner == null) error("Project creator must be provided")
 
-      if (projectData.owner.id.projectId != creatorProject.id)
+      if (projectData.owner.id.projectId != creatorProject.id) {
         throwLocked { "Projects can be added only by creator project users" }
+      }
     } else {
       // looks like we're creating the creator project
       if (projectData.owner != null) error("Project's future owner must not be provided for creator project")
@@ -57,6 +58,7 @@ class CreatorServiceImpl(
       .requireValid { "Project's Language Tag" }
     val normalizedMailgunConfig = Normalizers.MailgunConfigData.run(projectData.mailgunConfig)
       .requireValid { "Mailgun Config" }
+    val normalizedTwilioConfig = projectData.twilioConfig // TODO MM validate
 
     val normalizedProjectCreator = ProjectCreator(
       owner = projectData.owner,
@@ -72,6 +74,7 @@ class CreatorServiceImpl(
       onHold = normalizedOnHold,
       languageTag = normalizedLanguageTag,
       mailgunConfig = normalizedMailgunConfig,
+      twilioConfig = normalizedTwilioConfig,
     )
 
     return creatorRepository.addProject(normalizedProjectCreator)
@@ -101,8 +104,9 @@ class CreatorServiceImpl(
   override fun fetchAllProjectsByCreator(creator: User): List<Project> {
     log.debug("Fetching all projects for creator $creator")
 
-    if (creator.id.projectId != getCreatorProject().id)
+    if (creator.id.projectId != getCreatorProject().id) {
       throwNotFound { "Non-service creators don't have any projects" }
+    }
 
     return creatorRepository.fetchAllProjectsByCreatorUserId(creator.id)
   }
@@ -147,6 +151,10 @@ class CreatorServiceImpl(
     val normalizedMailgunConfig = updater.mailgunConfig?.mapValueNullable {
       Normalizers.MailgunConfigData.run(it).requireValid { "Mailgun Config" }
     }
+    val normalizedTwilioConfig = updater.twilioConfig?.mapValueNullable {
+      // TODO MM validate
+      it
+    }
 
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,
@@ -161,6 +169,7 @@ class CreatorServiceImpl(
       onHold = normalizedOnHold,
       languageTag = normalizedLanguageTag,
       mailgunConfig = normalizedMailgunConfig,
+      twilioConfig = normalizedTwilioConfig,
     )
 
     return creatorRepository.updateProject(normalizedUpdater)
@@ -172,8 +181,9 @@ class CreatorServiceImpl(
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
 
     // we can't delete the creator project
-    if (getCreatorProject().id == projectId)
+    if (getCreatorProject().id == projectId) {
       throwLocked { "Creator project can't be deleted" }
+    }
 
     return creatorRepository.removeProjectById(normalizedProjectId)
   }
@@ -182,8 +192,9 @@ class CreatorServiceImpl(
     log.debug("Removing all projects for creator $creatorId")
 
     // we can't delete the creator project
-    if (creatorId.projectId != getCreatorProject().id)
+    if (creatorId.projectId != getCreatorProject().id) {
       throwLocked { "Projects can be removed only by creator project users" }
+    }
 
     creatorRepository.removeAllProjectsByCreator(creatorId)
   }

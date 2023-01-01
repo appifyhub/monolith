@@ -48,20 +48,41 @@ class ProjectDbm(
   @Column(nullable = false, updatable = true)
   var onHold: Boolean,
 
-  @Column(nullable = true, length = 8)
+  @Column(nullable = true, length = 8, updatable = true)
   var languageTag: String?,
 
-  @Column(nullable = true, length = 64)
+  @Column(nullable = true, length = 64, updatable = true)
   var mailgunApiKey: String?,
 
-  @Column(nullable = true, length = 64)
+  @Column(nullable = true, length = 64, updatable = true)
   var mailgunDomain: String?,
 
-  @Column(nullable = true, length = 32)
+  @Column(nullable = true, length = 32, updatable = true)
   var mailgunSenderName: String?,
 
-  @Column(nullable = true, length = 64)
+  @Column(nullable = true, length = 64, updatable = true)
   var mailgunSenderEmail: String?,
+
+  @Column(nullable = true, length = 64, updatable = true)
+  val twilioAccountSid: String?,
+
+  @Column(nullable = true, length = 64, updatable = true)
+  val twilioAuthToken: String?,
+
+  @Column(nullable = true, length = 64, updatable = true)
+  val twilioMessagingServiceId: String?,
+
+  @Column(nullable = true, updatable = true)
+  val twilioMaxPricePerMessage: Int?,
+
+  @Column(nullable = true, updatable = true)
+  val twilioMaxRetryAttempts: Int?,
+
+  @Column(nullable = true, length = 16, updatable = true)
+  val twilioDefaultSenderName: String?,
+
+  @Column(nullable = true, length = 32, updatable = true)
+  val twilioDefaultSenderNumber: String?,
 
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
@@ -83,28 +104,50 @@ class ProjectDbm(
     if (status != other.status) return false
     if (userIdType != other.userIdType) return false
     if (languageTag != other.languageTag) return false
+
     if (mailgunApiKey != other.mailgunApiKey) return false
     if (mailgunDomain != other.mailgunDomain) return false
     if (mailgunSenderName != other.mailgunSenderName) return false
     if (mailgunSenderEmail != other.mailgunSenderEmail) return false
+
+    if (twilioAccountSid != other.twilioAccountSid) return false
+    if (twilioAuthToken != other.twilioAuthToken) return false
+    if (twilioMessagingServiceId != other.twilioMessagingServiceId) return false
+    if (twilioMaxPricePerMessage != other.twilioMaxPricePerMessage) return false
+    if (twilioMaxRetryAttempts != other.twilioMaxRetryAttempts) return false
+    if (twilioDefaultSenderName != other.twilioDefaultSenderName) return false
+    if (twilioDefaultSenderNumber != other.twilioDefaultSenderNumber) return false
+
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
 
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = projectId?.hashCode() ?: 0
     result = 31 * result + type.hashCode()
     result = 31 * result + status.hashCode()
     result = 31 * result + userIdType.hashCode()
     result = 31 * result + languageTag.hashCode()
+
     result = 31 * result + mailgunApiKey.hashCode()
     result = 31 * result + mailgunDomain.hashCode()
     result = 31 * result + mailgunSenderName.hashCode()
     result = 31 * result + mailgunSenderEmail.hashCode()
+
+    result = 31 * result + twilioAccountSid.hashCode()
+    result = 31 * result + twilioAuthToken.hashCode()
+    result = 31 * result + twilioMessagingServiceId.hashCode()
+    result = 31 * result + twilioMaxPricePerMessage.hashCode()
+    result = 31 * result + twilioMaxRetryAttempts.hashCode()
+    result = 31 * result + twilioDefaultSenderName.hashCode()
+    result = 31 * result + twilioDefaultSenderNumber.hashCode()
+
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
+
     return result
   }
 
@@ -115,10 +158,20 @@ class ProjectDbm(
       "status='$status', " +
       "userIdType='$userIdType', " +
       "languageTag='$languageTag', " +
+
       "mailgunApiKey='$mailgunApiKey', " +
       "mailgunDomain='$mailgunDomain', " +
       "mailgunSenderName='$mailgunSenderName', " +
       "mailgunSenderEmail='$mailgunSenderEmail', " +
+
+      "twilioAccountSid='$twilioAccountSid', " +
+      "twilioAuthToken='$twilioAuthToken', " +
+      "twilioMessagingServiceId='$twilioMessagingServiceId', " +
+      "twilioMaxPricePerMessage='$twilioMaxPricePerMessage', " +
+      "twilioMaxRetryAttempts='$twilioMaxRetryAttempts', " +
+      "twilioDefaultSenderName='$twilioDefaultSenderName', " +
+      "twilioDefaultSenderNumber='$twilioDefaultSenderNumber', " +
+
       "createdAt=$createdAt, " +
       "updatedAt=$updatedAt" +
       ")"

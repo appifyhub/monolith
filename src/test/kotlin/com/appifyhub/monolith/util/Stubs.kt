@@ -4,11 +4,12 @@ import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.messaging.Variable
@@ -26,13 +27,14 @@ import com.appifyhub.monolith.network.auth.TokenDetailsResponse
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.auth.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
-import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.messaging.MessageResponse
 import com.appifyhub.monolith.network.messaging.MessageTemplateResponse
 import com.appifyhub.monolith.network.messaging.VariableResponse
@@ -211,6 +213,26 @@ object Stubs {
     senderEmail = "senderEmail1@domain.com",
   )
 
+  private val twilioConfig = TwilioConfig(
+    accountSid = "accountSid",
+    authToken = "authToken",
+    messagingServiceId = "messagingServiceId",
+    maxPricePerMessage = 2,
+    maxRetryAttempts = 2,
+    defaultSenderName = "defSenderName",
+    defaultSenderNumber = "+491760000000",
+  )
+
+  private val twilioConfigUpdated = TwilioConfig(
+    accountSid = "accountSid1",
+    authToken = "authToken1",
+    messagingServiceId = "messagingServiceId1",
+    maxPricePerMessage = 3,
+    maxRetryAttempts = 3,
+    defaultSenderName = "defSenderName1",
+    defaultSenderNumber = "+491760000001",
+  )
+
   val project = Project(
     id = userId.projectId,
     type = Project.Type.OPENSOURCE,
@@ -225,6 +247,7 @@ object Stubs {
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfig,
+    twilioConfig = twilioConfig,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -243,6 +266,7 @@ object Stubs {
     onHold = false,
     languageTag = Locale.UK.toLanguageTag(),
     mailgunConfig = mailgunConfigUpdated,
+    twilioConfig = twilioConfigUpdated,
     createdAt = project.createdAt,
     updatedAt = Date(0xA20001),
   )
@@ -343,6 +367,7 @@ object Stubs {
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfig,
+    twilioConfig = twilioConfig,
   )
 
   val projectUpdater = ProjectUpdater(
@@ -358,6 +383,7 @@ object Stubs {
     onHold = Settable(false),
     languageTag = Settable(Locale.UK.toLanguageTag()),
     mailgunConfig = Settable(mailgunConfigUpdated),
+    twilioConfig = Settable(twilioConfigUpdated),
   )
 
   val messageTemplateCreator = MessageTemplateCreator(
@@ -450,6 +476,13 @@ object Stubs {
     mailgunDomain = mailgunConfig.domain,
     mailgunSenderName = mailgunConfig.senderName,
     mailgunSenderEmail = mailgunConfig.senderEmail,
+    twilioAccountSid = twilioConfig.accountSid,
+    twilioAuthToken = twilioConfig.authToken,
+    twilioMessagingServiceId = twilioConfig.messagingServiceId,
+    twilioMaxPricePerMessage = twilioConfig.maxPricePerMessage,
+    twilioMaxRetryAttempts = twilioConfig.maxRetryAttempts,
+    twilioDefaultSenderName = twilioConfig.defaultSenderName,
+    twilioDefaultSenderNumber = twilioConfig.defaultSenderNumber,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -654,6 +687,26 @@ object Stubs {
     senderEmail = mailgunConfigUpdated.senderEmail,
   )
 
+  private val twilioConfigDto = TwilioConfigDto(
+    accountSid = twilioConfig.accountSid,
+    authToken = twilioConfig.authToken,
+    messagingServiceId = twilioConfig.messagingServiceId,
+    maxPricePerMessage = twilioConfig.maxPricePerMessage,
+    maxRetryAttempts = twilioConfig.maxRetryAttempts,
+    defaultSenderName = twilioConfig.defaultSenderName.trim(),
+    defaultSenderNumber = twilioConfig.defaultSenderNumber,
+  )
+
+  private val twilioConfigDtoUpdated = TwilioConfigDto(
+    accountSid = twilioConfigUpdated.accountSid,
+    authToken = twilioConfigUpdated.authToken,
+    messagingServiceId = twilioConfigUpdated.messagingServiceId,
+    maxPricePerMessage = twilioConfigUpdated.maxPricePerMessage,
+    maxRetryAttempts = twilioConfigUpdated.maxRetryAttempts,
+    defaultSenderName = twilioConfigUpdated.defaultSenderName.trim(),
+    defaultSenderNumber = twilioConfigUpdated.defaultSenderNumber,
+  )
+
   val projectResponse = ProjectResponse(
     projectId = userId.projectId,
     type = project.type.name,
@@ -668,6 +721,7 @@ object Stubs {
     onHold = project.onHold,
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfigDto,
+    twilioConfig = twilioConfigDto,
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
   )
@@ -755,6 +809,7 @@ object Stubs {
     websiteUrl = project.websiteUrl,
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfigDto,
+    twilioConfig = twilioConfigDto,
   )
 
   val projectUpdateRequest = ProjectUpdateRequest(
@@ -769,6 +824,7 @@ object Stubs {
     onHold = SettableRequest(false),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
     mailgunConfig = SettableRequest(mailgunConfigDtoUpdated),
+    twilioConfig = SettableRequest(twilioConfigDtoUpdated),
   )
 
   val messageTemplateCreateRequest = MessageTemplateCreateRequest(

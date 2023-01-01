@@ -2,8 +2,8 @@ package com.appifyhub.monolith.init
 
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -17,11 +17,11 @@ import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.validation.impl.Normalizers
-import java.util.Locale
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
+import java.util.Locale
 
 @Component
 class SchemaInitializer(
@@ -77,8 +77,11 @@ class SchemaInitializer(
           domain = creatorConfig.mailgunDomain,
           senderName = creatorConfig.mailgunSenderName,
           senderEmail = creatorConfig.mailgunSenderEmail,
-        )
+        ),
       ).requireValid { "Mailgun Config" }
+    }
+    val twilioConfig = silent {
+      null // TODO MM use configured data
     }
 
     // create the creator project
@@ -97,6 +100,7 @@ class SchemaInitializer(
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
         mailgunConfig = mailgunConfig,
+        twilioConfig = twilioConfig,
       ),
     )
 
@@ -115,7 +119,7 @@ class SchemaInitializer(
         birthday = null,
         company = null,
         languageTag = Locale.US.toLanguageTag(),
-      )
+      ),
     )
 
     // clear the verification token
@@ -123,7 +127,7 @@ class SchemaInitializer(
       updater = UserUpdater(
         id = owner.id,
         verificationToken = Settable(null),
-      )
+      ),
     )
 
     // prepare printable credentials
@@ -150,7 +154,7 @@ class SchemaInitializer(
         
         [[ SECRET SECTION END ]]
         $margin
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
 

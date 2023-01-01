@@ -1,13 +1,15 @@
 package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
 
 fun MailgunConfigDto.toDomain(): MailgunConfig = MailgunConfig(
@@ -15,6 +17,16 @@ fun MailgunConfigDto.toDomain(): MailgunConfig = MailgunConfig(
   domain = domain,
   senderName = senderName,
   senderEmail = senderEmail,
+)
+
+fun TwilioConfigDto.toDomain(): TwilioConfig = TwilioConfig(
+  accountSid = accountSid,
+  authToken = authToken,
+  messagingServiceId = messagingServiceId,
+  maxPricePerMessage = maxPricePerMessage,
+  maxRetryAttempts = maxRetryAttempts,
+  defaultSenderName = defaultSenderName,
+  defaultSenderNumber = defaultSenderNumber,
 )
 
 fun ProjectCreateRequest.toDomain(
@@ -33,6 +45,7 @@ fun ProjectCreateRequest.toDomain(
   onHold = true,
   languageTag = languageTag,
   mailgunConfig = mailgunConfig?.toDomain(),
+  twilioConfig = twilioConfig?.toDomain(),
 )
 
 fun ProjectUpdateRequest.toDomain(
@@ -50,4 +63,5 @@ fun ProjectUpdateRequest.toDomain(
   onHold = onHold.toDomainNonNull(),
   languageTag = languageTag.toDomainNullable(),
   mailgunConfig = mailgunConfig.mapToDomainNullable { it.toDomain() },
+  twilioConfig = twilioConfig.mapToDomainNullable { it.toDomain() },
 )

@@ -32,6 +32,7 @@ fun stubProject() = Project(
   onHold = false,
   languageTag = Locale.US.toLanguageTag(),
   mailgunConfig = null,
+  twilioConfig = null,
   createdAt = Date(),
   updatedAt = Date(),
 )

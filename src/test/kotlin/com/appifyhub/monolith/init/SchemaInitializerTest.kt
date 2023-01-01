@@ -16,7 +16,6 @@ import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
-import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,6 +28,7 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.boot.ApplicationArguments
+import java.util.Locale
 
 class SchemaInitializerTest {
 
@@ -115,6 +115,7 @@ class SchemaInitializerTest {
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
         mailgunConfig = null,
+        twilioConfig = null,
       ),
     )
     verify(userService) {
@@ -132,13 +133,13 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
-        )
+        ),
       )
       mock.updateUser(
         updater = UserUpdater(
           id = UserId(user.contact!!, project.id),
           verificationToken = Settable(null),
-        )
+        ),
       )
     }
   }
@@ -178,6 +179,7 @@ class SchemaInitializerTest {
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
         mailgunConfig = null,
+        twilioConfig = null,
       ),
     )
 
@@ -196,13 +198,13 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
-        )
+        ),
       )
       mock.updateUser(
         updater = UserUpdater(
           id = UserId(user.contact!!, project.id),
           verificationToken = Settable(null),
-        )
+        ),
       )
     }
   }

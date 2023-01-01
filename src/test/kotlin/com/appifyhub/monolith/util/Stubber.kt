@@ -23,13 +23,13 @@ import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.util.ext.silent
 import com.auth0.jwt.JWT
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 private const val EXPIRATION_DAYS_DELTA: Long = 1
 
@@ -94,7 +94,8 @@ class Stubber(
         onHold = !activateNow,
         languageTag = language,
         mailgunConfig = null,
-      )
+        twilioConfig = null,
+      ),
     )
 
     val all: List<Project>
@@ -260,7 +261,7 @@ class Stubber(
               updater = UserUpdater(
                 id = user.id,
                 verificationToken = Settable(null),
-              )
+              ),
             )
           } else user
         }
@@ -304,7 +305,7 @@ class Stubber(
           ipAddress = null,
           geo = null,
           isStatic = isStatic,
-        )
+        ),
       )
     }
 
