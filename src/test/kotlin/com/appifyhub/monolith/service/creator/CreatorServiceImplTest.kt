@@ -129,7 +129,7 @@ class CreatorServiceImplTest {
       owner = owner,
       logoUrl = null,
       websiteUrl = null,
-      mailgunConfig = Stubs.projectCreator.mailgunConfig?.copy(senderEmail = "invalid")
+      mailgunConfig = Stubs.projectCreator.mailgunConfig?.copy(senderEmail = "invalid"),
     )
 
     assertThat { service.addProject(projectData) }
@@ -137,6 +137,23 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Mailgun Config")
+      }
+  }
+
+  @Test fun `add project fails with invalid twilio config`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = null,
+      websiteUrl = null,
+      twilioConfig = Stubs.projectCreator.twilioConfig?.copy(defaultSenderNumber = "invalid"),
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Twilio Config")
       }
   }
 
@@ -199,13 +216,13 @@ class CreatorServiceImplTest {
     )
 
     assertThat(
-      service.addProject(projectData).cleanDates()
+      service.addProject(projectData).cleanDates(),
     ).isDataClassEqualTo(
       Stubs.project.copy(
         id = Stubs.project.id + 1,
         logoUrl = "https://www.example.com/logo.png",
         websiteUrl = "https://www.example.com",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     )
   }
 
@@ -332,7 +349,7 @@ class CreatorServiceImplTest {
       websiteUrl = null,
       mailgunConfig = Stubs.projectUpdater.mailgunConfig?.mapValueNullable {
         it.copy(senderEmail = "invalid")
-      }
+      },
     )
 
     assertThat { service.updateProject(updater) }
@@ -340,6 +357,25 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Mailgun Config")
+      }
+  }
+
+  @Test fun `update project fails with invalid twilio config`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = null,
+      websiteUrl = null,
+      twilioConfig = Stubs.projectUpdater.twilioConfig?.mapValueNullable {
+        it.copy(defaultSenderNumber = "invalid")
+      },
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Twilio Config")
       }
   }
 
@@ -404,13 +440,13 @@ class CreatorServiceImplTest {
     )
 
     assertThat(
-      service.updateProject(updater).cleanStubArtifacts()
+      service.updateProject(updater).cleanStubArtifacts(),
     ).isDataClassEqualTo(
       Stubs.projectUpdated.copy(
         id = project.id,
         logoUrl = "https://www.example1.com/logo1.png",
         websiteUrl = "https://www.example1.com",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     )
   }
 

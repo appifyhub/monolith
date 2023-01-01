@@ -58,7 +58,8 @@ class CreatorServiceImpl(
       .requireValid { "Project's Language Tag" }
     val normalizedMailgunConfig = Normalizers.MailgunConfigData.run(projectData.mailgunConfig)
       .requireValid { "Mailgun Config" }
-    val normalizedTwilioConfig = projectData.twilioConfig // TODO MM validate
+    val normalizedTwilioConfig = Normalizers.TwilioConfigData.run(projectData.twilioConfig)
+      .requireValid { "Twilio Config" }
 
     val normalizedProjectCreator = ProjectCreator(
       owner = projectData.owner,
@@ -152,8 +153,7 @@ class CreatorServiceImpl(
       Normalizers.MailgunConfigData.run(it).requireValid { "Mailgun Config" }
     }
     val normalizedTwilioConfig = updater.twilioConfig?.mapValueNullable {
-      // TODO MM validate
-      it
+      Normalizers.TwilioConfigData.run(it).requireValid { "Twilio Config" }
     }
 
     val normalizedUpdater = ProjectUpdater(
