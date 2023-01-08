@@ -32,6 +32,7 @@ interface AccessManager {
     BASIC(isRequired = true), // core functionality: readiness, security, templating, ...
     USERS(isRequired = true), // user functionality: signup, login, user data updates, ...
     EMAILS(isRequired = false), // sending emails to users
+    SMS(isRequired = false), // sending SMS to users
   }
 
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User

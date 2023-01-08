@@ -17,10 +17,11 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.integrations.CommunicationsService.Type
 import com.appifyhub.monolith.service.integrations.email.LogEmailSender
 import com.appifyhub.monolith.service.integrations.email.LogEmailSender.SentEmail
+import com.appifyhub.monolith.service.integrations.sms.LogSmsSender
+import com.appifyhub.monolith.service.integrations.sms.LogSmsSender.SentSms
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
-import java.util.Locale
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,6 +31,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.util.Locale
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -40,15 +42,16 @@ class CommunicationsServiceImplTest {
   @Autowired lateinit var service: CommunicationsService
   @Autowired lateinit var templateService: MessageTemplateService
   @Autowired lateinit var emailSender: LogEmailSender // always configured
+  @Autowired lateinit var smsSender: LogSmsSender // always configured
   @Autowired lateinit var stubber: Stubber
 
-  @Test fun `sending with template ID fails with invalid project ID`() {
+  @Test fun `sending anything with template ID fails with invalid project ID`() {
     assertThat {
       service.sendTo(
         projectId = -1,
         userId = Stubs.userId,
         templateId = Stubs.messageTemplate.id,
-        type = Type.EMAIL,
+        type = Type.SMS,
       )
     }
       .isFailure()
@@ -58,7 +61,7 @@ class CommunicationsServiceImplTest {
       }
   }
 
-  @Test fun `sending with template ID fails with invalid user ID`() {
+  @Test fun `sending anything with template ID fails with invalid user ID`() {
     assertThat {
       service.sendTo(
         projectId = Stubs.project.id,
@@ -74,13 +77,13 @@ class CommunicationsServiceImplTest {
       }
   }
 
-  @Test fun `sending with template ID fails with invalid template ID`() {
+  @Test fun `sending anything with template ID fails with invalid template ID`() {
     assertThat {
       service.sendTo(
         projectId = Stubs.project.id,
         userId = Stubs.userId,
         templateId = -1,
-        type = Type.EMAIL,
+        type = Type.SMS,
       )
     }
       .isFailure()
@@ -90,7 +93,55 @@ class CommunicationsServiceImplTest {
       }
   }
 
-  @Test fun `sending with template ID works with valid data (email as user ID)`() {
+  @Test fun `sending anything with template name fails with invalid project ID`() {
+    assertThat {
+      service.sendTo(
+        projectId = -1,
+        userId = Stubs.userId,
+        templateName = Stubs.messageTemplate.name,
+        type = Type.EMAIL,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project ID")
+      }
+  }
+
+  @Test fun `sending anything with template name fails with invalid user ID`() {
+    assertThat {
+      service.sendTo(
+        projectId = Stubs.project.id,
+        userId = UserId("", -1),
+        templateName = Stubs.messageTemplate.name,
+        type = Type.SMS,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("User ID")
+      }
+  }
+
+  @Test fun `sending anything with template name fails with invalid template ID`() {
+    assertThat {
+      service.sendTo(
+        projectId = Stubs.project.id,
+        userId = Stubs.userId,
+        templateName = "",
+        type = Type.EMAIL,
+      )
+    }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Template Name")
+      }
+  }
+
+  @Test fun `sending email with template ID works with valid data (email as user ID)`() {
     val owner = stubber.creators.default()
     val project = stubber.projects.new(owner = owner, userIdType = Project.UserIdType.EMAIL, name = "Best")
     val user = stubber.users(project).default(idSuffix = "@domain.com")
@@ -102,7 +153,7 @@ class CommunicationsServiceImplTest {
         title = "Welcome",
         content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
         isHtml = true,
-      )
+      ),
     )
 
     assertThat {
@@ -124,60 +175,49 @@ class CommunicationsServiceImplTest {
             title = "Welcome",
             body = "Welcome User's Name to Best",
             isHtml = true,
-          )
+          ),
         )
       }
   }
 
-  @Test fun `sending with template name fails with invalid project ID`() {
+  @Test fun `sending sms with template ID works with valid data (phone as user ID)`() {
+    val owner = stubber.creators.default()
+    val project = stubber.projects.new(owner = owner, userIdType = Project.UserIdType.PHONE, name = "Best")
+    val user = stubber.users(project).default(idReplace = "+491746000000")
+    val template = templateService.addTemplate(
+      MessageTemplateCreator(
+        projectId = project.id,
+        name = "template",
+        languageTag = Locale.US.toLanguageTag(),
+        title = "Welcome",
+        content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
+        isHtml = false,
+      ),
+    )
+
     assertThat {
       service.sendTo(
-        projectId = -1,
-        userId = Stubs.userId,
-        templateName = Stubs.messageTemplate.name,
-        type = Type.EMAIL,
+        projectId = project.id,
+        userId = user.id,
+        templateId = template.id,
+        type = Type.SMS,
       )
-    }
-      .isFailure()
+    }.isSuccess()
+
+    assertThat(smsSender)
       .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Project ID")
+        transform { it.history }.hasSize(1)
+        transform { it.history.first() }.isDataClassEqualTo(
+          SentSms(
+            projectId = project.id,
+            toNumber = "+491746000000",
+            body = "Welcome User's Name to Best",
+          ),
+        )
       }
   }
 
-  @Test fun `sending with template name fails with invalid user ID`() {
-    assertThat {
-      service.sendTo(
-        projectId = Stubs.project.id,
-        userId = UserId("", -1),
-        templateName = Stubs.messageTemplate.name,
-        type = Type.EMAIL,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("User ID")
-      }
-  }
-
-  @Test fun `sending with template name fails with invalid template ID`() {
-    assertThat {
-      service.sendTo(
-        projectId = Stubs.project.id,
-        userId = Stubs.userId,
-        templateName = "",
-        type = Type.EMAIL,
-      )
-    }
-      .isFailure()
-      .all {
-        hasClass(ResponseStatusException::class)
-        messageContains("Template Name")
-      }
-  }
-
-  @Test fun `sending with template name works with valid data (email as contact)`() {
+  @Test fun `sending email with template name works with valid data (email as contact)`() {
     val owner = stubber.creators.default()
     val project = stubber.projects.new(owner = owner, name = "Best")
     val user = stubber.users(project).default(contactType = ContactType.EMAIL, contact = "user@domain.com")
@@ -189,7 +229,7 @@ class CommunicationsServiceImplTest {
         title = "Welcome",
         content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
         isHtml = true,
-      )
+      ),
     )
 
     assertThat {
@@ -211,7 +251,44 @@ class CommunicationsServiceImplTest {
             title = "Welcome",
             body = "Welcome User's Name to Best",
             isHtml = true,
-          )
+          ),
+        )
+      }
+  }
+
+  @Test fun `sending sms with template name works with valid data (email as contact)`() {
+    val owner = stubber.creators.default()
+    val project = stubber.projects.new(owner = owner, name = "Best")
+    val user = stubber.users(project).default(contactType = ContactType.PHONE, contact = "+491746000000")
+    val template = templateService.addTemplate(
+      MessageTemplateCreator(
+        projectId = project.id,
+        name = "template",
+        languageTag = Locale.US.toLanguageTag(),
+        title = "Welcome",
+        content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
+        isHtml = true,
+      ),
+    )
+
+    assertThat {
+      service.sendTo(
+        projectId = project.id,
+        userId = user.id,
+        templateName = template.name,
+        type = Type.SMS,
+      )
+    }.isSuccess()
+
+    assertThat(smsSender)
+      .all {
+        transform { it.history }.hasSize(1)
+        transform { it.history.first() }.isDataClassEqualTo(
+          SentSms(
+            projectId = project.id,
+            toNumber = "+491746000000",
+            body = "Welcome User's Name to Best",
+          ),
         )
       }
   }

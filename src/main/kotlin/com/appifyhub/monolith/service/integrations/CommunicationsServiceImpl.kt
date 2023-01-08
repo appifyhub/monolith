@@ -8,8 +8,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.integrations.CommunicationsService.Type
 import com.appifyhub.monolith.service.integrations.email.EmailSender
-import com.appifyhub.monolith.service.integrations.email.EmailSender.Type.LOG
-import com.appifyhub.monolith.service.integrations.email.EmailSender.Type.MAILGUN
+import com.appifyhub.monolith.service.integrations.sms.SmsSender
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.service.user.UserService
@@ -25,6 +24,7 @@ class CommunicationsServiceImpl(
   private val userService: UserService,
   private val templateService: MessageTemplateService,
   private val emailSenders: List<EmailSender>,
+  private val smsSenders: List<SmsSender>,
 ) : CommunicationsService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -48,6 +48,12 @@ class CommunicationsServiceImpl(
         body = message.materialized,
         isHtml = message.template.isHtml,
       )
+
+      Type.SMS -> resolveSmsSender(project).send(
+        project = project,
+        toNumber = resolvePhoneNumber(project, user),
+        body = message.materialized,
+      )
     }
   }
 
@@ -70,20 +76,35 @@ class CommunicationsServiceImpl(
         body = message.materialized,
         isHtml = message.template.isHtml,
       )
+
+      Type.SMS -> resolveSmsSender(project).send(
+        project = project,
+        toNumber = resolvePhoneNumber(project, user),
+        body = message.materialized,
+      )
     }
   }
 
-  private fun resolveEmailSender(project: Project) = when {
-    project.mailgunConfig != null -> emailSenders.first { it.type == MAILGUN }
-    else -> emailSenders.first { it.type == LOG }
+  private fun resolveEmailSender(project: Project): EmailSender = when {
+    project.mailgunConfig != null -> emailSenders.first { it.type == EmailSender.Type.MAILGUN }
+    else -> emailSenders.first { it.type == EmailSender.Type.LOG }
   }
 
-  private fun resolveEmail(project: Project, user: User): String {
-    return when {
-      project.userIdType == UserIdType.EMAIL -> user.id.userId
-      user.contactType == ContactType.EMAIL -> requireNotNull(user.contact)
-      else -> throwNotFound { "Email not found" }
-    }
+  private fun resolveSmsSender(project: Project): SmsSender = when {
+    project.twilioConfig != null -> smsSenders.first { it.type == SmsSender.Type.TWILIO }
+    else -> smsSenders.first { it.type == SmsSender.Type.LOG }
+  }
+
+  private fun resolveEmail(project: Project, user: User): String = when {
+    project.userIdType == UserIdType.EMAIL -> user.id.userId
+    user.contactType == ContactType.EMAIL -> requireNotNull(user.contact)
+    else -> throwNotFound { "Email not found" }
+  }
+
+  private fun resolvePhoneNumber(project: Project, user: User): String = when {
+    project.userIdType == UserIdType.PHONE -> user.id.userId
+    user.contactType == ContactType.PHONE -> requireNotNull(user.contact)
+    else -> throwNotFound { "Phone number not found" }
   }
 
 }

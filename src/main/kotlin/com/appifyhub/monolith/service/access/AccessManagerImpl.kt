@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Feature.BASIC
 import com.appifyhub.monolith.service.access.AccessManager.Feature.EMAILS
+import com.appifyhub.monolith.service.access.AccessManager.Feature.SMS
 import com.appifyhub.monolith.service.access.AccessManager.Feature.USERS
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.auth.AuthService
@@ -116,7 +117,7 @@ class AccessManagerImpl(
   override fun requestCreator(authData: Authentication, matchesId: UserId?, requireVerified: Boolean): User {
     log.debug(
       "Authentication $authData requesting creator access," +
-        " matchingId = $matchesId, mustBeVerified = $requireVerified"
+        " matchingId = $matchesId, mustBeVerified = $requireVerified",
     )
 
     // validate request data and token
@@ -208,6 +209,7 @@ class AccessManagerImpl(
           BASIC -> true // always supported
           USERS -> true // always supported
           EMAILS -> project.mailgunConfig != null
+          SMS -> project.twilioConfig != null
         }
       }
 
