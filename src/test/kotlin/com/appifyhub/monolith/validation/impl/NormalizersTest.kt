@@ -231,6 +231,11 @@ class NormalizersTest {
       .consistsOf(Validators.TwilioConfigData, Cleaners.TwilioConfigData)
   }
 
+  @Test fun `firebase config data = firebase config data + firebase config data`() {
+    assertThat(Normalizers.FirebaseConfigData)
+      .consistsOf(Validators.FirebaseConfigData, Cleaners.FirebaseConfigData)
+  }
+
   // endregion
 
   // region Helpers

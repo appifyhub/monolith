@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.validation.impl
 
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
@@ -9,13 +10,14 @@ import com.appifyhub.monolith.util.ext.isNullOrNotBlank
 import com.appifyhub.monolith.validation.validatesAs
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN
+import org.apache.commons.codec.binary.Base64
+import org.slf4j.LoggerFactory
 import java.sql.Timestamp
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.regex.Pattern
 import java.util.regex.Pattern.CASE_INSENSITIVE
-import org.slf4j.LoggerFactory
 
 object Validators {
 
@@ -128,22 +130,32 @@ object Validators {
   // Integrations validators
 
   val MailgunConfigData = validatesAs<MailgunConfig>("MailgunConfig") {
-    it == null ||
-      NoSpaces.isValid(it.apiKey) && // mailgun kay format is 'api-key:123456'
+    if (it == null) return@validatesAs true
+
+    NoSpaces.isValid(it.apiKey) && // mailgun kay format is 'api-key:123456'
       NoSpaces.isValid(it.domain) && // mailgun is not enforcing any regex here
       NotBlank.isValid(it.senderName) && // person or organization
       Email.isValid(it.senderEmail) // standard email
   }
 
   val TwilioConfigData = validatesAs<TwilioConfig>("TwilioConfig") {
-    it == null ||
-      NoSpaces.isValid(it.accountSid) && // twilio ASID format is "abcdefgh"
+    if (it == null) return@validatesAs true
+
+    NoSpaces.isValid(it.accountSid) && // twilio ASID format is "abcdefgh"
       NoSpaces.isValid(it.authToken) && // twilio token format is "abcdefgh"
       NoSpaces.isValid(it.messagingServiceId) && // twilio MSID format is "abcdefgh"
       PositiveLong.isValid(it.maxPricePerMessage.toLong()) && // can't be negative
       PositiveLong.isValid(it.maxRetryAttempts.toLong()) && // can't be negative
       // [true]: default sender name can be blank, keeping it for consistency
       Phone.isValid(it.defaultSenderNumber) // international phone number
+  }
+
+  val FirebaseConfigData = validatesAs<FirebaseConfig>("FirebaseConfig") {
+    if (it == null) return@validatesAs true
+
+    NotBlank.isValid(it.projectName) && // firebase project display name can contain spaces
+      Base64.isBase64(it.serviceAccountKeyJsonBase64) && // a quick base64 validation (this check allows spaces)
+      NoSpaces.isValid(it.serviceAccountKeyJsonBase64) // base64 should not contain any spaces
   }
 
 }

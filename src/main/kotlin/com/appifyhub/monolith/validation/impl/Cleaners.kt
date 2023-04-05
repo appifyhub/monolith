@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.validation.impl
 
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
@@ -135,6 +136,17 @@ object Cleaners {
       maxRetryAttempts = LongToCardinal.clean(it.maxRetryAttempts.toLong()).toInt(),
       defaultSenderName = Trim.clean(it.defaultSenderName),
       defaultSenderNumber = Phone.clean(it.defaultSenderNumber),
+    )
+  }
+
+  val FirebaseConfigData = cleansToNullable<FirebaseConfig>("TwilioConfig") {
+    if (it == null) return@cleansToNullable null
+    val mandatoryProps = setOf(it.projectName, it.serviceAccountKeyJsonBase64)
+    if (mandatoryProps.any(String::isBlank)) return@cleansToNullable null
+
+    FirebaseConfig(
+      projectName = Trim.clean(it.projectName),
+      serviceAccountKeyJsonBase64 = RemoveSpaces.clean(it.serviceAccountKeyJsonBase64),
     )
   }
 

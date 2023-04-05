@@ -9,6 +9,7 @@ import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import assertk.assertions.isZero
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
@@ -448,6 +449,25 @@ class CleanersTest {
       defaultSenderNumber = "+123456789",
     )
     assertThat(Cleaners.TwilioConfigData.clean(dirty))
+      .isNotNull()
+      .isDataClassEqualTo(expected)
+  }
+
+  @Test fun `firebase config is cleaning with null`() {
+    assertThat(Cleaners.FirebaseConfigData.clean(null))
+      .isNull()
+  }
+
+  @Test fun `firebase config is cleaning`() {
+    val dirty = FirebaseConfig(
+      projectName = " Name with Spaces around ",
+      serviceAccountKeyJsonBase64 = " 1234 test ",
+    )
+    val expected = FirebaseConfig(
+      projectName = "Name with Spaces around",
+      serviceAccountKeyJsonBase64 = "1234test",
+    )
+    assertThat(Cleaners.FirebaseConfigData.clean(dirty))
       .isNotNull()
       .isDataClassEqualTo(expected)
   }

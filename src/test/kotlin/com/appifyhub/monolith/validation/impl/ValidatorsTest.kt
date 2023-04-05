@@ -4,16 +4,17 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
+import org.junit.jupiter.api.Test
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
-import org.junit.jupiter.api.Test
 
 class ValidatorsTest {
 
@@ -696,6 +697,38 @@ class ValidatorsTest {
       defaultSenderNumber = "+491760000000",
     )
     assertThat(Validators.TwilioConfigData.isValid(config))
+      .isTrue()
+  }
+
+  @Test fun `firebase config fails with invalid project name`() {
+    val config = FirebaseConfig(
+      projectName = "",
+      serviceAccountKeyJsonBase64 = "1234test",
+    )
+    assertThat(Validators.FirebaseConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `firebase config fails with invalid service account key`() {
+    val config = FirebaseConfig(
+      projectName = "Project Name",
+      serviceAccountKeyJsonBase64 = "1234 false",
+    )
+    assertThat(Validators.FirebaseConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `firebase config succeeds with null`() {
+    assertThat(Validators.FirebaseConfigData.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `firebase config succeeds with valid data`() {
+    val config = FirebaseConfig(
+      projectName = "Project Name",
+      serviceAccountKeyJsonBase64 = "c2VydmljZUFjY291bnRLZXlKc29uQmFzZTY0",
+    )
+    assertThat(Validators.FirebaseConfigData.isValid(config))
       .isTrue()
   }
 

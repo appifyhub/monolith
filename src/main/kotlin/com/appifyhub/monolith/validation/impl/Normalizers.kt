@@ -68,5 +68,6 @@ object Normalizers {
 
   val MailgunConfigData = normalizesNullable(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
   val TwilioConfigData = normalizesNullable(Validators.TwilioConfigData, Cleaners.TwilioConfigData)
+  val FirebaseConfigData = normalizesNullable(Validators.FirebaseConfigData, Cleaners.FirebaseConfigData)
 
 }
