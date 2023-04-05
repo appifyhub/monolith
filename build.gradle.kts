@@ -13,13 +13,13 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("joda-time:joda-time:+")
+    classpath("joda-time:joda-time:2.+")
     classpath("org.jlleitschuh.gradle:ktlint-gradle:11.+")
   }
 }
 
 plugins {
-  val kotlinVersion = "1.6.21"
+  val kotlinVersion = "1.8.10"
   kotlin("jvm") version kotlinVersion
   kotlin("plugin.spring") version kotlinVersion
   kotlin("plugin.jpa") version kotlinVersion
@@ -68,6 +68,7 @@ dependencies {
   // 3rd-party
   implementation("com.ip2location:ip2location-java:8.+")
   implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
+  implementation("com.google.firebase:firebase-admin:9.1.1")
 
   // annotation processors
   kapt("org.springframework.boot:spring-boot-configuration-processor")
