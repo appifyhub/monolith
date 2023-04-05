@@ -19,7 +19,6 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
-import java.time.temporal.ChronoUnit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -33,6 +32,7 @@ import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -154,6 +154,23 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Twilio Config")
+      }
+  }
+
+  @Test fun `add project fails with invalid firebase config`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = null,
+      websiteUrl = null,
+      firebaseConfig = Stubs.projectCreator.firebaseConfig?.copy(serviceAccountKeyJsonBase64 = "base!64"),
+    )
+
+    assertThat { service.addProject(projectData) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Firebase Config")
       }
   }
 
@@ -376,6 +393,25 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Twilio Config")
+      }
+  }
+
+  @Test fun `update project fails with invalid firebase config`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = null,
+      websiteUrl = null,
+      firebaseConfig = Stubs.projectUpdater.firebaseConfig?.mapValueNullable {
+        it.copy(serviceAccountKeyJsonBase64 = "base!64")
+      },
+    )
+
+    assertThat { service.updateProject(updater) }
+      .isFailure()
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Firebase Config")
       }
   }
 
