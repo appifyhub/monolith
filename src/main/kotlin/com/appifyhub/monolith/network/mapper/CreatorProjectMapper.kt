@@ -2,11 +2,13 @@ package com.appifyhub.monolith.network.mapper
 
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
+import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
 import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.user.DateTimeMapper
@@ -40,6 +42,11 @@ fun TwilioConfig.toNetwork(): TwilioConfigDto = TwilioConfigDto(
   defaultSenderNumber = defaultSenderNumber,
 )
 
+fun FirebaseConfig.toNetwork(): FirebaseConfigDto = FirebaseConfigDto(
+  projectName = projectName,
+  serviceAccountKeyJsonBase64 = serviceAccountKeyJsonBase64,
+)
+
 fun Project.toNetwork(
   projectState: ProjectState,
 ): ProjectResponse = ProjectResponse(
@@ -57,6 +64,7 @@ fun Project.toNetwork(
   languageTag = languageTag,
   mailgunConfig = mailgunConfig?.toNetwork(),
   twilioConfig = twilioConfig?.toNetwork(),
+  firebaseConfig = firebaseConfig?.toNetwork(),
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
   updatedAt = DateTimeMapper.formatAsDateTime(updatedAt),
 )

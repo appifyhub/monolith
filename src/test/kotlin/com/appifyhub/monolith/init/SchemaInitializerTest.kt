@@ -116,6 +116,7 @@ class SchemaInitializerTest {
         languageTag = Locale.US.toLanguageTag(),
         mailgunConfig = null,
         twilioConfig = null,
+        firebaseConfig = null,
       ),
     )
     verify(userService) {
@@ -180,6 +181,7 @@ class SchemaInitializerTest {
         languageTag = Locale.US.toLanguageTag(),
         mailgunConfig = null,
         twilioConfig = null,
+        firebaseConfig = null,
       ),
     )
 

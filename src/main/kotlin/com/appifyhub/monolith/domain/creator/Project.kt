@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.domain.creator
 
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import java.util.Date
@@ -19,6 +20,7 @@ data class Project(
   val languageTag: String?,
   val mailgunConfig: MailgunConfig?,
   val twilioConfig: TwilioConfig?,
+  val firebaseConfig: FirebaseConfig?,
   val createdAt: Date,
   val updatedAt: Date,
 ) {

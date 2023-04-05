@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.messaging.Message
@@ -33,6 +34,7 @@ import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
+import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
 import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.messaging.MessageResponse
@@ -233,6 +235,16 @@ object Stubs {
     defaultSenderNumber = "+491760000001",
   )
 
+  private val firebaseConfig = FirebaseConfig(
+    projectName = "projectName",
+    serviceAccountKeyJsonBase64 = "c2VydmljZUFjY291bnRLZXlKc29uQmFzZTY0", // base64("serviceAccountKeyJsonBase64")
+  )
+
+  private val firebaseConfigUpdated = FirebaseConfig(
+    projectName = "projectName1",
+    serviceAccountKeyJsonBase64 = "c2VydmljZUFjY291bnRLZXlKc29uQmFzZTY0MQ==", // base64("serviceAccountKeyJsonBase641")
+  )
+
   val project = Project(
     id = userId.projectId,
     type = Project.Type.OPENSOURCE,
@@ -248,6 +260,7 @@ object Stubs {
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfig,
     twilioConfig = twilioConfig,
+    firebaseConfig = firebaseConfig,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -267,6 +280,7 @@ object Stubs {
     languageTag = Locale.UK.toLanguageTag(),
     mailgunConfig = mailgunConfigUpdated,
     twilioConfig = twilioConfigUpdated,
+    firebaseConfig = firebaseConfigUpdated,
     createdAt = project.createdAt,
     updatedAt = Date(0xA20001),
   )
@@ -368,6 +382,7 @@ object Stubs {
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfig,
     twilioConfig = twilioConfig,
+    firebaseConfig = firebaseConfig,
   )
 
   val projectUpdater = ProjectUpdater(
@@ -384,6 +399,7 @@ object Stubs {
     languageTag = Settable(Locale.UK.toLanguageTag()),
     mailgunConfig = Settable(mailgunConfigUpdated),
     twilioConfig = Settable(twilioConfigUpdated),
+    firebaseConfig = Settable(firebaseConfigUpdated),
   )
 
   val messageTemplateCreator = MessageTemplateCreator(
@@ -483,6 +499,8 @@ object Stubs {
     twilioMaxRetryAttempts = twilioConfig.maxRetryAttempts,
     twilioDefaultSenderName = twilioConfig.defaultSenderName,
     twilioDefaultSenderNumber = twilioConfig.defaultSenderNumber,
+    firebaseProjectName = firebaseConfig.projectName,
+    firebaseServiceAccountKeyJsonBase64 = firebaseConfig.serviceAccountKeyJsonBase64,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -707,6 +725,16 @@ object Stubs {
     defaultSenderNumber = twilioConfigUpdated.defaultSenderNumber,
   )
 
+  private val firebaseConfigDto = FirebaseConfigDto(
+    projectName = firebaseConfig.projectName,
+    serviceAccountKeyJsonBase64 = firebaseConfig.serviceAccountKeyJsonBase64,
+  )
+
+  private val firebaseConfigDtoUpdated = FirebaseConfigDto(
+    projectName = firebaseConfigUpdated.projectName,
+    serviceAccountKeyJsonBase64 = firebaseConfigUpdated.serviceAccountKeyJsonBase64,
+  )
+
   val projectResponse = ProjectResponse(
     projectId = userId.projectId,
     type = project.type.name,
@@ -722,6 +750,7 @@ object Stubs {
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfigDto,
     twilioConfig = twilioConfigDto,
+    firebaseConfig = firebaseConfigDto,
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
   )
@@ -810,6 +839,7 @@ object Stubs {
     languageTag = Locale.US.toLanguageTag(),
     mailgunConfig = mailgunConfigDto,
     twilioConfig = twilioConfigDto,
+    firebaseConfig = firebaseConfigDto,
   )
 
   val projectUpdateRequest = ProjectUpdateRequest(
@@ -825,6 +855,7 @@ object Stubs {
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
     mailgunConfig = SettableRequest(mailgunConfigDtoUpdated),
     twilioConfig = SettableRequest(twilioConfigDtoUpdated),
+    firebaseConfig = SettableRequest(firebaseConfigDtoUpdated),
   )
 
   val messageTemplateCreateRequest = MessageTemplateCreateRequest(

@@ -9,6 +9,7 @@ import com.appifyhub.monolith.domain.user.UserId
 interface CreatorService {
 
   companion object {
+    // should be service config probably… but yeah, life's short
     const val DEFAULT_MAX_USERS = 1000
   }
 

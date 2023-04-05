@@ -33,6 +33,7 @@ fun stubProject() = Project(
   languageTag = Locale.US.toLanguageTag(),
   mailgunConfig = null,
   twilioConfig = null,
+  firebaseConfig = null,
   createdAt = Date(),
   updatedAt = Date(),
 )

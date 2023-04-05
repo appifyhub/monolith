@@ -18,10 +18,18 @@ import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.validation.impl.Normalizers
+import com.google.auth.oauth2.GoogleCredentials
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.Message
+import com.google.firebase.messaging.Notification
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
+import org.springframework.util.Base64Utils
+import java.util.Date
 import java.util.Locale
 
 @Component
@@ -94,6 +102,9 @@ class SchemaInitializer(
         ),
       ).requireValid { "Twilio Config" }
     }
+    val firebaseConfig = silent {
+      null // TODO MM use configured data
+    }
 
     // create the creator project
     val project = creatorService.addProject(
@@ -112,6 +123,7 @@ class SchemaInitializer(
         languageTag = Locale.US.toLanguageTag(),
         mailgunConfig = mailgunConfig,
         twilioConfig = twilioConfig,
+        firebaseConfig = firebaseConfig,
       ),
     )
 

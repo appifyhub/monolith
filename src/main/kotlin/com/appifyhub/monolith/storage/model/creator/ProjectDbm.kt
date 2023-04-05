@@ -13,6 +13,8 @@ import javax.persistence.TemporalType
 @Entity(name = "project")
 class ProjectDbm(
 
+  // region Basics
+
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   @Column(unique = true, nullable = false, updatable = false)
@@ -51,6 +53,10 @@ class ProjectDbm(
   @Column(nullable = true, length = 8, updatable = true)
   var languageTag: String?,
 
+  // endregion
+
+  // region Mailgun
+
   @Column(nullable = true, length = 64, updatable = true)
   var mailgunApiKey: String?,
 
@@ -62,6 +68,10 @@ class ProjectDbm(
 
   @Column(nullable = true, length = 64, updatable = true)
   var mailgunSenderEmail: String?,
+
+  // endregion
+
+  // region Twilio
 
   @Column(nullable = true, length = 64, updatable = true)
   val twilioAccountSid: String?,
@@ -84,6 +94,18 @@ class ProjectDbm(
   @Column(nullable = true, length = 32, updatable = true)
   val twilioDefaultSenderNumber: String?,
 
+  // endregion
+
+  // region Firebase
+
+  @Column(nullable = true, length = 64, updatable = true)
+  val firebaseProjectName: String?,
+
+  @Column(nullable = true, length = 8192, updatable = true)
+  val firebaseServiceAccountKeyJsonBase64: String?,
+
+  // endregion
+
   @Column(nullable = false, updatable = false)
   @Temporal(TemporalType.TIMESTAMP)
   var createdAt: Date,
@@ -92,9 +114,9 @@ class ProjectDbm(
   @Temporal(TemporalType.TIMESTAMP)
   var updatedAt: Date = createdAt,
 
-) : Serializable {
+  ) : Serializable {
 
-  @Suppress("DuplicatedCode")
+  @Suppress("DuplicatedCode", "RedundantIf") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is ProjectDbm) return false
@@ -118,6 +140,9 @@ class ProjectDbm(
     if (twilioDefaultSenderName != other.twilioDefaultSenderName) return false
     if (twilioDefaultSenderNumber != other.twilioDefaultSenderNumber) return false
 
+    if (firebaseProjectName != other.firebaseProjectName) return false
+    if (firebaseServiceAccountKeyJsonBase64 != other.firebaseServiceAccountKeyJsonBase64) return false
+
     if (createdAt != other.createdAt) return false
     if (updatedAt != other.updatedAt) return false
 
@@ -127,6 +152,7 @@ class ProjectDbm(
   @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = projectId?.hashCode() ?: 0
+
     result = 31 * result + type.hashCode()
     result = 31 * result + status.hashCode()
     result = 31 * result + userIdType.hashCode()
@@ -144,6 +170,9 @@ class ProjectDbm(
     result = 31 * result + twilioMaxRetryAttempts.hashCode()
     result = 31 * result + twilioDefaultSenderName.hashCode()
     result = 31 * result + twilioDefaultSenderNumber.hashCode()
+
+    result = 31 * result + firebaseProjectName.hashCode()
+    result = 31 * result + firebaseServiceAccountKeyJsonBase64.hashCode()
 
     result = 31 * result + createdAt.hashCode()
     result = 31 * result + updatedAt.hashCode()
@@ -171,6 +200,9 @@ class ProjectDbm(
       "twilioMaxRetryAttempts='$twilioMaxRetryAttempts', " +
       "twilioDefaultSenderName='$twilioDefaultSenderName', " +
       "twilioDefaultSenderNumber='$twilioDefaultSenderNumber', " +
+
+      "firebaseProjectName='$firebaseProjectName', " +
+      "firebaseServiceAccountKeyJsonBase64='$firebaseServiceAccountKeyJsonBase64', " +
 
       "createdAt=$createdAt, " +
       "updatedAt=$updatedAt" +

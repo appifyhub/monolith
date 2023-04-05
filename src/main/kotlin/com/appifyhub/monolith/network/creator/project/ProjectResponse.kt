@@ -1,5 +1,6 @@
 package com.appifyhub.monolith.network.creator.project
 
+import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
 import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.fasterxml.jackson.annotation.JsonInclude
@@ -23,6 +24,7 @@ data class ProjectResponse(
   @JsonProperty("language_tag") val languageTag: String?,
   @JsonProperty("mailgun_config") val mailgunConfig: MailgunConfigDto?,
   @JsonProperty("twilio_config") val twilioConfig: TwilioConfigDto?,
+  @JsonProperty("firebase_config") val firebaseConfig: FirebaseConfigDto?,
   @JsonProperty("created_at") val createdAt: String,
   @JsonProperty("updated_at") val updatedAt: String,
 ) : Serializable

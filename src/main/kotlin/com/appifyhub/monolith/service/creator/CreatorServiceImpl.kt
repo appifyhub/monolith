@@ -60,6 +60,7 @@ class CreatorServiceImpl(
       .requireValid { "Mailgun Config" }
     val normalizedTwilioConfig = Normalizers.TwilioConfigData.run(projectData.twilioConfig)
       .requireValid { "Twilio Config" }
+    val normalizedFirebaseConfig = projectData.firebaseConfig // TODO MM validate
 
     val normalizedProjectCreator = ProjectCreator(
       owner = projectData.owner,
@@ -76,6 +77,7 @@ class CreatorServiceImpl(
       languageTag = normalizedLanguageTag,
       mailgunConfig = normalizedMailgunConfig,
       twilioConfig = normalizedTwilioConfig,
+      firebaseConfig = normalizedFirebaseConfig,
     )
 
     return creatorRepository.addProject(normalizedProjectCreator)
@@ -155,6 +157,10 @@ class CreatorServiceImpl(
     val normalizedTwilioConfig = updater.twilioConfig?.mapValueNullable {
       Normalizers.TwilioConfigData.run(it).requireValid { "Twilio Config" }
     }
+    val normalizedFirebaseConfig = updater.firebaseConfig?.mapValueNullable {
+      // TODO MM validate
+      it
+    }
 
     val normalizedUpdater = ProjectUpdater(
       id = normalizedProjectId,
@@ -170,6 +176,7 @@ class CreatorServiceImpl(
       languageTag = normalizedLanguageTag,
       mailgunConfig = normalizedMailgunConfig,
       twilioConfig = normalizedTwilioConfig,
+      firebaseConfig = normalizedFirebaseConfig,
     )
 
     return creatorRepository.updateProject(normalizedUpdater)

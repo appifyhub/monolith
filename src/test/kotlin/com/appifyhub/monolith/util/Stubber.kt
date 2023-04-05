@@ -24,13 +24,13 @@ import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import com.auth0.jwt.JWT
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 private const val EXPIRATION_DAYS_DELTA: Long = 1
 
@@ -96,6 +96,7 @@ class Stubber(
         languageTag = language,
         mailgunConfig = null,
         twilioConfig = null,
+        firebaseConfig = null,
       ),
     )
 

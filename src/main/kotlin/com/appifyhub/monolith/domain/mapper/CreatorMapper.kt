@@ -4,6 +4,7 @@ import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
@@ -25,6 +26,7 @@ fun ProjectUpdater.applyTo(
   .applySettable(languageTag) { copy(languageTag = it) }
   .applySettable(mailgunConfig) { copy(mailgunConfig = it) }
   .applySettable(twilioConfig) { copy(twilioConfig = it) }
+  .applySettable(firebaseConfig) { copy(firebaseConfig = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun ProjectCreator.toProjectData(
@@ -53,6 +55,8 @@ fun ProjectCreator.toProjectData(
   twilioMaxRetryAttempts = twilioConfig?.maxRetryAttempts,
   twilioDefaultSenderName = twilioConfig?.defaultSenderName,
   twilioDefaultSenderNumber = twilioConfig?.defaultSenderNumber,
+  firebaseProjectName = firebaseConfig?.projectName,
+  firebaseServiceAccountKeyJsonBase64 = firebaseConfig?.serviceAccountKeyJsonBase64,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
 )
@@ -85,6 +89,10 @@ fun ProjectDbm.toDomain(): Project = Project(
     defaultSenderName = twilioDefaultSenderName.orEmpty(),
     defaultSenderNumber = twilioDefaultSenderNumber.orEmpty(),
   ).takeIf { setOf(it.accountSid, it.authToken, it.messagingServiceId, it.defaultSenderNumber).none(String::isEmpty) },
+  firebaseConfig = FirebaseConfig(
+    projectName = firebaseProjectName.orEmpty(),
+    serviceAccountKeyJsonBase64 = firebaseServiceAccountKeyJsonBase64.orEmpty(),
+  ).takeIf { setOf(it.projectName, it.serviceAccountKeyJsonBase64).none(String::isEmpty) },
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
@@ -113,6 +121,8 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   twilioMaxRetryAttempts = twilioConfig?.maxRetryAttempts,
   twilioDefaultSenderName = twilioConfig?.defaultSenderName,
   twilioDefaultSenderNumber = twilioConfig?.defaultSenderNumber,
+  firebaseProjectName = firebaseConfig?.projectName,
+  firebaseServiceAccountKeyJsonBase64 = firebaseConfig?.serviceAccountKeyJsonBase64,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )

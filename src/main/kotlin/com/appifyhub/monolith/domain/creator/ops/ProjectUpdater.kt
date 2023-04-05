@@ -3,6 +3,7 @@ package com.appifyhub.monolith.domain.creator.ops
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.Status
 import com.appifyhub.monolith.domain.creator.Project.Type
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 
@@ -20,4 +21,5 @@ data class ProjectUpdater(
   val languageTag: Settable<String?>? = null,
   val mailgunConfig: Settable<MailgunConfig?>? = null,
   val twilioConfig: Settable<TwilioConfig?>? = null,
+  val firebaseConfig: Settable<FirebaseConfig?>? = null,
 )
