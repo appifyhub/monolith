@@ -1,7 +1,7 @@
 # noinspection EditorConfigKeyCorrectness
 [*]
 # also update in build.gradle
-disabled_rules = no-blank-line-before-rbrace, import-ordering
+disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site
 
 charset = utf-8
 end_of_line = lf
