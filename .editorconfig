@@ -1,8 +1,8 @@
 # noinspection EditorConfigKeyCorrectness
-[*]
-# also update in build.gradle
-disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site
 
+root = true
+
+[*]
 charset = utf-8
 end_of_line = lf
 indent_size = 2
@@ -40,7 +40,7 @@ ij_css_value_alignment = do_not_align
 
 # noinspection EditorConfigKeyCorrectness
 [*.java]
-disabled_rules = no-blank-line-before-rbrace, import-ordering
+disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site, multiline-if-else, spacing-between-declarations-with-annotations, annotation
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false
@@ -506,8 +506,8 @@ ij_groovy_while_on_new_line = false
 ij_groovy_wrap_long_lines = false
 
 # noinspection EditorConfigKeyCorrectness
-[*{.kt, .kts}]
-disabled_rules = no-blank-line-before-rbrace, import-ordering
+[*{.kt,.kts}]
+disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site, multiline-if-else, spacing-between-declarations-with-annotations, annotation
 ij_kotlin_align_in_columns_case_branch = false
 ij_kotlin_align_multiline_binary_operation = false
 ij_kotlin_align_multiline_extends_list = false

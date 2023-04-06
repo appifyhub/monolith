@@ -43,7 +43,6 @@ class GlobalExceptionHandler(
   @ExceptionHandler(Throwable::class)
   fun handleThrowable(t: Throwable): ResponseEntity<SimpleResponse> =
     when {
-
       t is AuthenticationException ||
         t is AccessDeniedException ||
         t is IllegalAccessException ||
@@ -117,7 +116,6 @@ class GlobalExceptionHandler(
           HttpHeaders(),
           HttpStatus.INTERNAL_SERVER_ERROR,
         )
-
     }.also {
       log.error("Responding with ${it.statusCodeValue}/${it.statusCode.name}, body=${it.body}", t)
     }

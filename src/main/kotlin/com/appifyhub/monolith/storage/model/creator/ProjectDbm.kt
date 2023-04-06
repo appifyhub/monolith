@@ -114,7 +114,7 @@ class ProjectDbm(
   @Temporal(TemporalType.TIMESTAMP)
   var updatedAt: Date = createdAt,
 
-  ) : Serializable {
+) : Serializable {
 
   @Suppress("DuplicatedCode", "RedundantIf") // false positive
   override fun equals(other: Any?): Boolean {
