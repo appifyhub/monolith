@@ -49,6 +49,9 @@ app:
         max-retry-attempts: ${TWILIO_MAX_RETRY_ATTEMPTS:2}
         default-sender-name: ${TWILIO_DEFAULT_SENDER_NAME:APPIFY}
         default-sender-number: ${TWILIO_DEFAULT_SENDER:}
+      firebase:
+        project-name: ${FIREBASE_PROJECT_NAME:Appify Hub}
+        service-account-key-base64: ${FIREBASE_SERVICE_ACCOUNT_KEY_BASE_64:}
   ip2location:
     file: ${IP_2_LOCATION_FILE:}
 

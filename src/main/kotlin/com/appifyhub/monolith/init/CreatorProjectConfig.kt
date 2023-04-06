@@ -57,4 +57,10 @@ class CreatorProjectConfig {
   @Value("\${app.creator.integrations.twilio.default-sender-number}")
   lateinit var twilioDefaultSenderNumber: String
 
+  @Value("\${app.creator.integrations.firebase.project-name}")
+  lateinit var firebaseProjectName: String
+
+  @Value("\${app.creator.integrations.firebase.service-account-key-base64}")
+  lateinit var firebaseServiceAccountKeyBase64: String
+
 }

@@ -24,6 +24,7 @@ class CreatorProjectConfigTest {
     assertThat(creatorProjectConfig)
       .all {
         isNotNull()
+
         transform { it.ownerName }.isEqualTo("Owner")
         transform { it.ownerSignature }.isEmpty()
         transform { it.ownerEmail }.isEqualTo("creator@appifyhub.com")
@@ -42,6 +43,9 @@ class CreatorProjectConfigTest {
         transform { it.twilioMaxRetryAttempts }.isEqualTo("2")
         transform { it.twilioDefaultSenderName }.isEqualTo("APPIFY")
         transform { it.twilioDefaultSenderNumber }.isEmpty()
+
+        transform { it.firebaseProjectName }.isEqualTo("Appify Hub")
+        transform { it.firebaseServiceAccountKeyBase64 }.isEmpty()
       }
   }
 
