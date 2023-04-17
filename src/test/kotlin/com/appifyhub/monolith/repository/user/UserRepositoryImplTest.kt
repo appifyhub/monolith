@@ -15,13 +15,12 @@ import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.repository.messaging.PushDeviceRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import java.util.Date
-import java.util.Optional
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,11 +31,14 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
+import java.util.Date
+import java.util.Optional
 
 class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
   private val tokenDetailsRepository = mock<TokenDetailsRepository>()
+  private val pushDeviceRepository = mock<PushDeviceRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
@@ -44,10 +46,13 @@ class UserRepositoryImplTest {
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
     tokenDetailsRepository = tokenDetailsRepository,
+    pushDeviceRepository = pushDeviceRepository,
     passwordEncoder = passwordEncoder,
     springSecurityUserManager = springUserManager,
     timeProvider = timeProvider,
   )
+
+  // region Setup
 
   @BeforeEach fun setup() {
     userDao.stub {
@@ -62,6 +67,9 @@ class UserRepositoryImplTest {
       onGeneric { fetchAllValidTokens(any(), anyOrNull()) } doReturn listOf(Stubs.tokenDetails)
       onGeneric { removeTokensFor(Stubs.user, null) } doAnswer {}
     }
+    pushDeviceRepository.stub {
+      onGeneric { deleteAllDevicesByUser(any()) } doAnswer {}
+    }
   }
 
   @AfterEach fun teardown() {
@@ -70,6 +78,8 @@ class UserRepositoryImplTest {
     TokenGenerator.emailInterceptor = { null }
     TokenGenerator.phoneInterceptor = { null }
   }
+
+  // endregion
 
   // region Add user
 
@@ -106,7 +116,7 @@ class UserRepositoryImplTest {
 
     assertThat(repository.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
-        Stubs.user.copy(id = UserId("randomUserId", creator.projectId))
+        Stubs.user.copy(id = UserId("randomUserId", creator.projectId)),
       )
   }
 
@@ -134,8 +144,8 @@ class UserRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.user.copy(
           id = UserId(creator.userId!!, creator.projectId),
-          verificationToken = "123456"
-        )
+          verificationToken = "123456",
+        ),
       )
   }
 
@@ -385,7 +395,7 @@ class UserRepositoryImplTest {
           contact = updater.contact!!.value,
           verificationToken = "abcd12341",
           updatedAt = Date(0xA00001),
-        )
+        ),
       )
   }
 
@@ -403,7 +413,7 @@ class UserRepositoryImplTest {
         Stubs.userUpdated.copy(
           contact = updater.contact!!.value,
           verificationToken = "abcd12342",
-        )
+        ),
       )
   }
 

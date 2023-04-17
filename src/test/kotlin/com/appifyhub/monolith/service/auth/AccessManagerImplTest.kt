@@ -28,8 +28,6 @@ import com.appifyhub.monolith.service.access.AccessManager.Privilege.USER_WRITE_
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
-import java.time.Duration
-import java.time.temporal.ChronoUnit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -37,15 +35,17 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class AccessManagerImplTest {
 
   @Autowired lateinit var manager: AccessManager
@@ -183,7 +183,7 @@ class AccessManagerImplTest {
         authData = stubber.creatorTokens().real(DEFAULT),
         targetId = stubber.creators.default().id,
         privilege = USER_READ_DATA,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
 
@@ -193,7 +193,7 @@ class AccessManagerImplTest {
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.owner().id,
         privilege = USER_WRITE_TOKEN,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(stubber.creators.owner().cleanStubArtifacts())
   }
 
@@ -203,7 +203,7 @@ class AccessManagerImplTest {
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.default().id,
         privilege = USER_READ_DATA,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
 
@@ -213,7 +213,7 @@ class AccessManagerImplTest {
         authData = stubber.creatorTokens().real(OWNER),
         targetId = stubber.creators.default().id,
         privilege = USER_WRITE_TOKEN,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(stubber.creators.default().cleanStubArtifacts())
   }
 
@@ -225,7 +225,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(creator).real(),
         targetId = stubber.users(project).default().id,
         privilege = USER_WRITE_TOKEN,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(stubber.users(project).default().cleanStubArtifacts())
   }
 
@@ -238,7 +238,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(owner).real(isStatic = true),
         targetId = targetOwner.id,
         privilege = USER_WRITE_TOKEN,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(targetOwner.cleanStubArtifacts())
   }
 
@@ -363,7 +363,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(project).real(OWNER),
         targetId = project.id,
         privilege = PROJECT_READ,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
@@ -374,7 +374,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(project).real(OWNER, isStatic = true),
         targetId = project.id,
         privilege = PROJECT_WRITE,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
@@ -385,7 +385,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(project).real(OWNER),
         targetId = project.id,
         privilege = PROJECT_WRITE,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
@@ -397,7 +397,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(creator).real(),
         targetId = project.id,
         privilege = PROJECT_WRITE,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
@@ -470,7 +470,7 @@ class AccessManagerImplTest {
 
     assertThat(
       manager.requestCreator(token, matchesId = creator.id, requireVerified = true)
-        .cleanDates()
+        .cleanDates(),
     ).isDataClassEqualTo(creator.cleanDates())
   }
 
@@ -480,7 +480,7 @@ class AccessManagerImplTest {
 
     assertThat(
       manager.requestCreator(token, matchesId = null, requireVerified = true)
-        .cleanDates()
+        .cleanDates(),
     ).isDataClassEqualTo(creator.cleanDates())
   }
 
@@ -491,7 +491,7 @@ class AccessManagerImplTest {
 
     assertThat(
       manager.requestCreator(token, matchesId = creator.id, requireVerified = false)
-        .cleanDates()
+        .cleanDates(),
     ).isDataClassEqualTo(creator.cleanDates())
   }
 
@@ -546,7 +546,7 @@ class AccessManagerImplTest {
     val token = stubber.tokens(creator).real()
 
     assertThat(
-      manager.requestSuperCreator(token)
+      manager.requestSuperCreator(token),
     ).isDataClassEqualTo(creator)
   }
 
@@ -583,7 +583,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(user).real(),
         targetId = project.id,
         privilege = USER_SEARCH,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
@@ -597,7 +597,7 @@ class AccessManagerImplTest {
         authData = stubber.tokens(user).real(),
         targetId = project.id,
         privilege = USER_SEARCH,
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(project.cleanStubArtifacts())
   }
 
@@ -623,7 +623,7 @@ class AccessManagerImplTest {
 
     assertThat(
       manager.requestUserAccess(token, self.id, USER_WRITE_AUTHORITY)
-        .cleanStubArtifacts()
+        .cleanStubArtifacts(),
     ).isDataClassEqualTo(self.cleanStubArtifacts())
   }
 
@@ -647,14 +647,14 @@ class AccessManagerImplTest {
 
     assertThat(
       manager.fetchProjectState(project.id)
-        .cleanStubArtifacts()
+        .cleanStubArtifacts(),
     )
       .isDataClassEqualTo(
         ProjectState(
           project = project,
           usableFeatures = listOf(Feature.BASIC, Feature.USERS),
           unusableFeatures = listOf(Feature.EMAILS, Feature.SMS),
-        )
+        ),
       )
   }
 

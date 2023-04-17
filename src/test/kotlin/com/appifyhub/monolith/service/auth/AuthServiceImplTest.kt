@@ -24,10 +24,6 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import java.util.Base64
-import java.util.Date
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,15 +31,19 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.Base64
+import java.util.Date
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 class AuthServiceImplTest {
 
   @Autowired lateinit var service: AuthService
@@ -67,7 +67,7 @@ class AuthServiceImplTest {
       service.requireValidJwt(
         authData = authData,
         shallow = false,
-      )
+      ),
     ).isEqualTo(authData)
   }
 
@@ -77,7 +77,7 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat(
-      service.resolveShallowSelf(token)
+      service.resolveShallowSelf(token),
     ).isDataClassEqualTo(
       // no rich data in shallow user
       stubber.creators.default().copy(
@@ -92,7 +92,7 @@ class AuthServiceImplTest {
         languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
-      )
+      ),
     )
   }
 
@@ -129,7 +129,7 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat()),
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
@@ -147,7 +147,7 @@ class AuthServiceImplTest {
         languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
-      )
+      ),
     )
   }
 
@@ -158,7 +158,7 @@ class AuthServiceImplTest {
     val token = stubber.tokens(owner).real()
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat()),
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
@@ -176,7 +176,7 @@ class AuthServiceImplTest {
         languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
-      )
+      ),
     )
   }
 
@@ -249,9 +249,9 @@ class AuthServiceImplTest {
       service.resolveUser(
         universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "password",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(
-      stubber.creators.default().cleanStubArtifacts()
+      stubber.creators.default().cleanStubArtifacts(),
     )
   }
 
@@ -320,9 +320,9 @@ class AuthServiceImplTest {
       service.resolveUser(
         universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "password",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(
-      stubber.creators.default().cleanStubArtifacts()
+      stubber.creators.default().cleanStubArtifacts(),
     )
   }
 
@@ -423,8 +423,8 @@ class AuthServiceImplTest {
       service.createStaticTokenFor(
         user = owner,
         origin = "Some Origin",
-        ipAddress = Stubs.ipAddress
-      )
+        ipAddress = Stubs.ipAddress,
+      ),
     )
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
@@ -556,7 +556,7 @@ class AuthServiceImplTest {
     val defaultUser = stubber.creators.default()
 
     assertThat(
-      service.fetchTokenDetails(jwt).cleanStubArtifacts()
+      service.fetchTokenDetails(jwt).cleanStubArtifacts(),
     )
       .isDataClassEqualTo(
         TokenDetails(
@@ -570,7 +570,7 @@ class AuthServiceImplTest {
           ipAddress = null,
           geo = null,
           isStatic = false,
-        ).cleanStubArtifacts()
+        ).cleanStubArtifacts(),
       )
   }
 
@@ -588,13 +588,12 @@ class AuthServiceImplTest {
       }
   }
 
-  @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token details succeeds with valid data`() {
     val jwt = stubber.creatorTokens().real(DEFAULT)
     val defaultUser = stubber.creators.default()
 
     assertThat(
-      service.fetchAllTokenDetails(jwt, valid = null).map { it.cleanStubArtifacts() }
+      service.fetchAllTokenDetails(jwt, valid = null).map { it.cleanStubArtifacts() },
     )
       .isEqualTo(
         listOf(
@@ -610,7 +609,7 @@ class AuthServiceImplTest {
             geo = null,
             isStatic = false,
           ).cleanStubArtifacts(),
-        )
+        ),
       )
   }
 
@@ -643,7 +642,6 @@ class AuthServiceImplTest {
       }
   }
 
-  @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token for others details succeeds with valid data`() {
     val defaultJwt = stubber.creatorTokens().real(DEFAULT)
     val defaultUser = stubber.creators.default()
@@ -652,7 +650,7 @@ class AuthServiceImplTest {
 
     assertThat(
       service.fetchAllTokenDetailsFor(ownerJwt, valid = true, targetId = defaultUser.id)
-        .map { it.cleanStubArtifacts() }
+        .map { it.cleanStubArtifacts() },
     )
       .isEqualTo(
         listOf(
@@ -668,7 +666,7 @@ class AuthServiceImplTest {
             geo = null,
             isStatic = false,
           ).cleanStubArtifacts(),
-        )
+        ),
       )
   }
 
