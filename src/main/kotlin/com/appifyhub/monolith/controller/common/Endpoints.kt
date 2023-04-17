@@ -19,6 +19,8 @@ object Endpoints {
   const val UNIVERSAL_USER_SIGNATURE = "/v1/universal/users/{universalId}/signature"
   const val UNIVERSAL_USER_SIGNATURE_RESET = "/v1/universal/users/{universalId}/signature/reset"
   const val UNIVERSAL_USER_VERIFY = "/v1/universal/users/{universalId}/verify/{verificationToken}"
+  const val UNIVERSAL_USER_PUSH_DEVICE = "/v1/universal/users/{universalId}/push-devices/{deviceId}"
+  const val UNIVERSAL_USER_PUSH_DEVICES = "/v1/universal/users/{universalId}/push-devices"
 
   /* ******************** CREATORS ******************** */
 

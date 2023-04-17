@@ -217,6 +217,11 @@ class NormalizersTest {
       .consistsOf(Validators.MessageTemplate, Cleaners.MessageTemplate)
   }
 
+  @Test fun `push device token = push device token + push device token`() {
+    assertThat(Normalizers.PushDeviceToken)
+      .consistsOf(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
+  }
+
   // endregion
 
   // region Integrations normalizers

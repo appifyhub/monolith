@@ -13,6 +13,7 @@ import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.messaging.PushDevice
 import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
@@ -39,10 +40,13 @@ import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.messaging.MessageResponse
 import com.appifyhub.monolith.network.messaging.MessageTemplateResponse
+import com.appifyhub.monolith.network.messaging.PushDeviceResponse
+import com.appifyhub.monolith.network.messaging.PushDevicesResponse
 import com.appifyhub.monolith.network.messaging.VariableResponse
 import com.appifyhub.monolith.network.messaging.ops.MessageInputsRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateCreateRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
+import com.appifyhub.monolith.network.messaging.ops.PushDeviceRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
@@ -59,6 +63,7 @@ import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
+import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
@@ -323,6 +328,12 @@ object Stubs {
   val message = Message(
     template = messageTemplate,
     materialized = "content",
+  )
+
+  val pushDevice = PushDevice(
+    deviceId = "push_token",
+    type = PushDevice.Type.ANDROID,
+    owner = user,
   )
 
   // endregion
@@ -594,6 +605,12 @@ object Stubs {
     updatedAt = Date(0x1F0000),
   )
 
+  val pushDeviceDbm = PushDeviceDbm(
+    deviceId = pushDevice.deviceId,
+    type = PushDevice.Type.ANDROID.name,
+    owner = userDbm,
+  )
+
   // endregion
 
   // region Network Models
@@ -776,6 +793,15 @@ object Stubs {
     materialized = "content",
   )
 
+  val pushDeviceResponse = PushDeviceResponse(
+    deviceId = pushDevice.deviceId,
+    type = pushDevice.type.name,
+  )
+
+  val pushDevicesResponse = PushDevicesResponse(
+    devices = listOf(pushDeviceResponse),
+  )
+
   // endregion
 
   // region Network Ops Models
@@ -877,6 +903,11 @@ object Stubs {
   val messageInputsRequest = MessageInputsRequest(
     universalUserId = messageInputs.userId?.toUniversalFormat(),
     projectId = messageInputs.projectId,
+  )
+
+  val pushDeviceRequest = PushDeviceRequest(
+    deviceId = pushDevice.deviceId,
+    type = pushDevice.type.name,
   )
 
   // endregion

@@ -107,6 +107,7 @@ object Cleaners {
     it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_') }.orEmpty()
   }
   val MessageTemplate = Trim
+  val PushDeviceToken = RemoveSpaces
 
   // Integrations cleaners
 

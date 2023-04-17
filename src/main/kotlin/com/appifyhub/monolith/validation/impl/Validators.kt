@@ -10,14 +10,14 @@ import com.appifyhub.monolith.util.ext.isNullOrNotBlank
 import com.appifyhub.monolith.validation.validatesAs
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN
-import org.apache.commons.codec.binary.Base64
-import org.slf4j.LoggerFactory
 import java.sql.Timestamp
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.regex.Pattern
 import java.util.regex.Pattern.CASE_INSENSITIVE
+import org.apache.commons.codec.binary.Base64
+import org.slf4j.LoggerFactory
 
 object Validators {
 
@@ -126,6 +126,7 @@ object Validators {
     it.all { char -> char.isLetterOrDigit() || char in setOf('-', '_') }
   }
   val MessageTemplate = NotBlank
+  val PushDeviceToken = NoSpaces
 
   // Integrations validators
 

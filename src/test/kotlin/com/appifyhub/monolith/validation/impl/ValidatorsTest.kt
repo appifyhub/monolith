@@ -533,6 +533,11 @@ class ValidatorsTest {
       .isEqualTo(Validators.NotBlank)
   }
 
+  @Test fun `push device token is without spaces`() {
+    assertThat(Validators.PushDeviceToken)
+      .isEqualTo(Validators.NoSpaces)
+  }
+
   // endregion
 
   // region Integrations validators

@@ -397,6 +397,11 @@ class CleanersTest {
       .isEqualTo(Cleaners.Trim)
   }
 
+  @Test fun `push device token is removing spaces`() {
+    assertThat(Cleaners.PushDeviceToken)
+      .isEqualTo(Cleaners.RemoveSpaces)
+  }
+
   // endregion
 
   // region Integrations cleaners

@@ -8,6 +8,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.access.AccessManager.Feature
 import com.appifyhub.monolith.service.access.AccessManager.Feature.BASIC
 import com.appifyhub.monolith.service.access.AccessManager.Feature.EMAILS
+import com.appifyhub.monolith.service.access.AccessManager.Feature.PUSH
 import com.appifyhub.monolith.service.access.AccessManager.Feature.SMS
 import com.appifyhub.monolith.service.access.AccessManager.Feature.USERS
 import com.appifyhub.monolith.service.access.AccessManager.Privilege
@@ -210,6 +211,7 @@ class AccessManagerImpl(
           USERS -> true // always supported
           EMAILS -> project.mailgunConfig != null
           SMS -> project.twilioConfig != null
+          PUSH -> project.firebaseConfig != null
         }
       }
 
@@ -238,10 +240,13 @@ class AccessManagerImpl(
       // non-secure user properties can be used for self
       Privilege.USER_SEARCH,
       Privilege.USER_READ_TOKEN,
+      Privilege.USER_READ_PUSH_DEVICE,
       Privilege.USER_READ_DATA,
       Privilege.USER_WRITE_TOKEN,
       Privilege.USER_WRITE_DATA,
       Privilege.USER_WRITE_SIGNATURE,
+      Privilege.USER_WRITE_PUSH_DEVICE,
+      Privilege.USER_DELETE_PUSH_DEVICE,
       Privilege.USER_DELETE,
       -> this.id == targetId
 
