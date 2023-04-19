@@ -7,6 +7,7 @@ interface CommunicationsService {
   enum class Type {
     EMAIL,
     SMS,
+    PUSH,
   }
 
   @Throws fun sendTo(projectId: Long, userId: UserId, templateId: Long, type: Type)

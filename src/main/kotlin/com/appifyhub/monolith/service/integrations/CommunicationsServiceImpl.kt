@@ -2,15 +2,19 @@ package com.appifyhub.monolith.service.integrations
 
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
+import com.appifyhub.monolith.domain.messaging.Message
+import com.appifyhub.monolith.domain.messaging.PushDevice
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.integrations.CommunicationsService.Type
 import com.appifyhub.monolith.service.integrations.email.EmailSender
+import com.appifyhub.monolith.service.integrations.push.PushSender
 import com.appifyhub.monolith.service.integrations.sms.SmsSender
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
+import com.appifyhub.monolith.service.messaging.PushDeviceService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.throwNotFound
@@ -23,8 +27,10 @@ class CommunicationsServiceImpl(
   private val creatorService: CreatorService,
   private val userService: UserService,
   private val templateService: MessageTemplateService,
+  private val pushDeviceService: PushDeviceService,
   private val emailSenders: List<EmailSender>,
   private val smsSenders: List<SmsSender>,
+  private val pushSenders: List<PushSender>,
 ) : CommunicationsService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -40,21 +46,7 @@ class CommunicationsServiceImpl(
     val user = userService.fetchUserByUserId(normalizedUserId)
     val message = templateService.materializeById(normalizedTemplateId, Inputs(user.id, project.id))
 
-    when (type) {
-      Type.EMAIL -> resolveEmailSender(project).send(
-        project = project,
-        toEmail = resolveEmail(project, user),
-        title = message.template.title,
-        body = message.materialized,
-        isHtml = message.template.isHtml,
-      )
-
-      Type.SMS -> resolveSmsSender(project).send(
-        project = project,
-        toNumber = resolvePhoneNumber(project, user),
-        body = message.materialized,
-      )
-    }
+    sendNotification(type, project, user, message)
   }
 
   override fun sendTo(projectId: Long, userId: UserId, templateName: String, type: Type) {
@@ -68,20 +60,37 @@ class CommunicationsServiceImpl(
     val user = userService.fetchUserByUserId(normalizedUserId)
     val message = templateService.materializeByName(project.id, normalizedTemplateName, Inputs(user.id, project.id))
 
-    when (type) {
-      Type.EMAIL -> resolveEmailSender(project).send(
-        project = project,
-        toEmail = resolveEmail(project, user),
-        title = message.template.title,
-        body = message.materialized,
-        isHtml = message.template.isHtml,
-      )
+    sendNotification(type, project, user, message)
+  }
 
-      Type.SMS -> resolveSmsSender(project).send(
-        project = project,
-        toNumber = resolvePhoneNumber(project, user),
-        body = message.materialized,
-      )
+  private fun sendNotification(type: Type, project: Project, user: User, message: Message) = when (type) {
+    Type.EMAIL -> resolveEmailSender(project).send(
+      project = project,
+      toEmail = resolveEmail(project, user),
+      title = message.template.title,
+      body = message.materialized,
+      isHtml = message.template.isHtml,
+    )
+
+    Type.SMS -> resolveSmsSender(project).send(
+      project = project,
+      toNumber = resolvePhoneNumber(project, user),
+      body = message.materialized,
+    )
+
+    Type.PUSH -> resolvePushSender(project).let { sender ->
+      resolvePushDeviceIds(user).forEach { deviceId ->
+        sender.send(
+          project = project,
+          receiverToken = deviceId,
+          notification = PushSender.Notification(
+            title = message.template.title,
+            body = message.materialized,
+            imageUrl = null,
+          ),
+          data = null,
+        )
+      }
     }
   }
 
@@ -95,6 +104,11 @@ class CommunicationsServiceImpl(
     else -> smsSenders.first { it.type == SmsSender.Type.LOG }
   }
 
+  private fun resolvePushSender(project: Project): PushSender = when {
+    project.firebaseConfig != null -> pushSenders.first { it.type == PushSender.Type.FIREBASE }
+    else -> pushSenders.first { it.type == PushSender.Type.LOG }
+  }
+
   private fun resolveEmail(project: Project, user: User): String = when {
     project.userIdType == UserIdType.EMAIL -> user.id.userId
     user.contactType == ContactType.EMAIL -> requireNotNull(user.contact)
@@ -106,5 +120,11 @@ class CommunicationsServiceImpl(
     user.contactType == ContactType.PHONE -> requireNotNull(user.contact)
     else -> throwNotFound { "Phone number not found" }
   }
+
+  private fun resolvePushDeviceIds(user: User): List<String> =
+    pushDeviceService.fetchAllDevicesByUser(user)
+      .map(PushDevice::deviceId)
+      .takeIf(List<String>::isNotEmpty)
+      ?: throwNotFound { "Push devices not found" }
 
 }

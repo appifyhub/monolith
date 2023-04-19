@@ -17,9 +17,12 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.integrations.CommunicationsService.Type
 import com.appifyhub.monolith.service.integrations.email.LogEmailSender
 import com.appifyhub.monolith.service.integrations.email.LogEmailSender.SentEmail
+import com.appifyhub.monolith.service.integrations.push.LogPushSender
+import com.appifyhub.monolith.service.integrations.push.LogPushSender.SentPush
 import com.appifyhub.monolith.service.integrations.sms.LogSmsSender
 import com.appifyhub.monolith.service.integrations.sms.LogSmsSender.SentSms
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
+import com.appifyhub.monolith.service.messaging.PushDeviceService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
@@ -41,8 +44,10 @@ class CommunicationsServiceImplTest {
 
   @Autowired lateinit var service: CommunicationsService
   @Autowired lateinit var templateService: MessageTemplateService
+  @Autowired lateinit var pushDeviceService: PushDeviceService
   @Autowired lateinit var emailSender: LogEmailSender // always configured
   @Autowired lateinit var smsSender: LogSmsSender // always configured
+  @Autowired lateinit var pushSender: LogPushSender // always configured
   @Autowired lateinit var stubber: Stubber
 
   @Test fun `sending anything with template ID fails with invalid project ID`() {
@@ -180,43 +185,6 @@ class CommunicationsServiceImplTest {
       }
   }
 
-  @Test fun `sending sms with template ID works with valid data (phone as user ID)`() {
-    val owner = stubber.creators.default()
-    val project = stubber.projects.new(owner = owner, userIdType = Project.UserIdType.PHONE, name = "Best")
-    val user = stubber.users(project).default(idReplace = "+491746000000")
-    val template = templateService.addTemplate(
-      MessageTemplateCreator(
-        projectId = project.id,
-        name = "template",
-        languageTag = Locale.US.toLanguageTag(),
-        title = "Welcome",
-        content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
-        isHtml = false,
-      ),
-    )
-
-    assertThat {
-      service.sendTo(
-        projectId = project.id,
-        userId = user.id,
-        templateId = template.id,
-        type = Type.SMS,
-      )
-    }.isSuccess()
-
-    assertThat(smsSender)
-      .all {
-        transform { it.history }.hasSize(1)
-        transform { it.history.first() }.isDataClassEqualTo(
-          SentSms(
-            projectId = project.id,
-            toNumber = "+491746000000",
-            body = "Welcome User's Name to Best",
-          ),
-        )
-      }
-  }
-
   @Test fun `sending email with template name works with valid data (email as contact)`() {
     val owner = stubber.creators.default()
     val project = stubber.projects.new(owner = owner, name = "Best")
@@ -256,6 +224,43 @@ class CommunicationsServiceImplTest {
       }
   }
 
+  @Test fun `sending sms with template ID works with valid data (phone as user ID)`() {
+    val owner = stubber.creators.default()
+    val project = stubber.projects.new(owner = owner, userIdType = Project.UserIdType.PHONE, name = "Best")
+    val user = stubber.users(project).default(idReplace = "+491746000000")
+    val template = templateService.addTemplate(
+      MessageTemplateCreator(
+        projectId = project.id,
+        name = "template",
+        languageTag = Locale.US.toLanguageTag(),
+        title = "Welcome",
+        content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
+        isHtml = false,
+      ),
+    )
+
+    assertThat {
+      service.sendTo(
+        projectId = project.id,
+        userId = user.id,
+        templateId = template.id,
+        type = Type.SMS,
+      )
+    }.isSuccess()
+
+    assertThat(smsSender)
+      .all {
+        transform { it.history }.hasSize(1)
+        transform { it.history.first() }.isDataClassEqualTo(
+          SentSms(
+            projectId = project.id,
+            toNumber = "+491746000000",
+            body = "Welcome User's Name to Best",
+          ),
+        )
+      }
+  }
+
   @Test fun `sending sms with template name works with valid data (email as contact)`() {
     val owner = stubber.creators.default()
     val project = stubber.projects.new(owner = owner, name = "Best")
@@ -288,6 +293,88 @@ class CommunicationsServiceImplTest {
             projectId = project.id,
             toNumber = "+491746000000",
             body = "Welcome User's Name to Best",
+          ),
+        )
+      }
+  }
+
+  @Test fun `sending push with template ID works with valid data`() {
+    val owner = stubber.creators.default()
+    val project = stubber.projects.new(owner = owner, name = "Best")
+    val user = stubber.users(project).default()
+    val template = templateService.addTemplate(
+      MessageTemplateCreator(
+        projectId = project.id,
+        name = "template",
+        languageTag = Locale.US.toLanguageTag(),
+        title = "Welcome",
+        content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
+        isHtml = false,
+      ),
+    )
+    val pushDevice = pushDeviceService.addDevice(Stubs.pushDevice.copy(owner = user))
+
+    assertThat {
+      service.sendTo(
+        projectId = project.id,
+        userId = user.id,
+        templateId = template.id,
+        type = Type.PUSH,
+      )
+    }.isSuccess()
+
+    assertThat(pushSender)
+      .all {
+        transform { it.history }.hasSize(1)
+        transform { it.history.first() }.isDataClassEqualTo(
+          SentPush(
+            projectId = project.id,
+            receiverToken = pushDevice.deviceId,
+            body = "Welcome User's Name to Best",
+            title = template.title,
+            imageUrl = null,
+            data = null,
+          ),
+        )
+      }
+  }
+
+  @Test fun `sending push with template name works with valid data`() {
+    val owner = stubber.creators.default()
+    val project = stubber.projects.new(owner = owner, name = "Best")
+    val user = stubber.users(project).default()
+    val template = templateService.addTemplate(
+      MessageTemplateCreator(
+        projectId = project.id,
+        name = "template",
+        languageTag = Locale.US.toLanguageTag(),
+        title = "Welcome",
+        content = "Welcome {{${Variable.USER_NAME.code}}} to {{${Variable.PROJECT_NAME.code}}}",
+        isHtml = false,
+      ),
+    )
+    val pushDevice = pushDeviceService.addDevice(Stubs.pushDevice.copy(owner = user))
+
+    assertThat {
+      service.sendTo(
+        projectId = project.id,
+        userId = user.id,
+        templateName = template.name,
+        type = Type.PUSH,
+      )
+    }.isSuccess()
+
+    assertThat(pushSender)
+      .all {
+        transform { it.history }.hasSize(1)
+        transform { it.history.first() }.isDataClassEqualTo(
+          SentPush(
+            projectId = project.id,
+            receiverToken = pushDevice.deviceId,
+            body = "Welcome User's Name to Best",
+            title = template.title,
+            imageUrl = null,
+            data = null,
           ),
         )
       }
