@@ -248,6 +248,7 @@ class AccessManagerImpl(
       Privilege.USER_WRITE_PUSH_DEVICE,
       Privilege.USER_DELETE_PUSH_DEVICE,
       Privilege.USER_DELETE,
+      Privilege.MESSAGE_TEMPLATE_SEND,
       -> this.id == targetId
 
       // invalid group for user

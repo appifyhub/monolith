@@ -35,7 +35,7 @@ class FirebasePushSender : PushSender {
     } ?: throwPreconditionFailed { "Service Account Key could not be decoded" }
 
     val firebase = silent { FirebaseApp.getInstance(uniqueName) }
-      ?: silent {
+      ?: silent(log = true) {
         FirebaseApp.initializeApp(
           FirebaseOptions.builder()
             .setCredentials(GoogleCredentials.fromStream(serviceAccountKey.byteInputStream()))

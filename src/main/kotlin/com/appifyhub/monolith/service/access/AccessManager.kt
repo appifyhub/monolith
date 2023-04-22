@@ -29,6 +29,7 @@ interface AccessManager {
     USER_DELETE(OWNER),
     MESSAGE_TEMPLATE_READ(OWNER),
     MESSAGE_TEMPLATE_WRITE(OWNER),
+    MESSAGE_TEMPLATE_SEND(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean) {

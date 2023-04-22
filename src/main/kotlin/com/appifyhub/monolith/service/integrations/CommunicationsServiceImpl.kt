@@ -46,7 +46,7 @@ class CommunicationsServiceImpl(
     val user = userService.fetchUserByUserId(normalizedUserId)
     val message = templateService.materializeById(normalizedTemplateId, Inputs(user.id, project.id))
 
-    sendNotification(type, project, user, message)
+    execute(type, project, user, message)
   }
 
   override fun sendTo(projectId: Long, userId: UserId, templateName: String, type: Type) {
@@ -60,10 +60,10 @@ class CommunicationsServiceImpl(
     val user = userService.fetchUserByUserId(normalizedUserId)
     val message = templateService.materializeByName(project.id, normalizedTemplateName, Inputs(user.id, project.id))
 
-    sendNotification(type, project, user, message)
+    execute(type, project, user, message)
   }
 
-  private fun sendNotification(type: Type, project: Project, user: User, message: Message) = when (type) {
+  private fun execute(type: Type, project: Project, user: User, message: Message) = when (type) {
     Type.EMAIL -> resolveEmailSender(project).send(
       project = project,
       toEmail = resolveEmail(project, user),

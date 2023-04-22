@@ -44,6 +44,7 @@ import com.appifyhub.monolith.network.messaging.PushDeviceResponse
 import com.appifyhub.monolith.network.messaging.PushDevicesResponse
 import com.appifyhub.monolith.network.messaging.VariableResponse
 import com.appifyhub.monolith.network.messaging.ops.MessageInputsRequest
+import com.appifyhub.monolith.network.messaging.ops.MessageSendRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateCreateRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
 import com.appifyhub.monolith.network.messaging.ops.PushDeviceRequest
@@ -57,6 +58,7 @@ import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.service.integrations.CommunicationsService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
@@ -908,6 +910,12 @@ object Stubs {
   val pushDeviceRequest = PushDeviceRequest(
     deviceId = pushDevice.deviceId,
     type = pushDevice.type.name,
+  )
+
+  val messageSendRequest = MessageSendRequest(
+    type = CommunicationsService.Type.EMAIL.name,
+    templateId = messageTemplate.id,
+    templateName = messageTemplate.name,
   )
 
   // endregion

@@ -1,0 +1,63 @@
+package com.appifyhub.monolith.controller.messaging
+
+import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.network.messaging.ops.MessageSendRequest
+import com.appifyhub.monolith.service.access.AccessManager
+import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.service.access.AccessManager.Privilege
+import com.appifyhub.monolith.service.integrations.CommunicationsService
+import com.appifyhub.monolith.service.integrations.CommunicationsService.Type
+import com.appifyhub.monolith.util.ext.throwPreconditionFailed
+import org.slf4j.LoggerFactory
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RestController
+
+@RestController
+class CommunicationsController(
+  private val communicationsService: CommunicationsService,
+  private val accessManager: AccessManager,
+) {
+
+  private val log = LoggerFactory.getLogger(this::class.java)
+
+  @PostMapping(Endpoints.MESSAGING_SEND)
+  fun sendMessage(
+    authentication: Authentication,
+    @PathVariable projectId: Long,
+    @PathVariable universalId: String,
+    @RequestBody messageSendRequest: MessageSendRequest,
+  ): SimpleResponse {
+    log.debug("[POST] sending a message $messageSendRequest to user $universalId in project $projectId")
+
+    if (messageSendRequest.templateId == null && messageSendRequest.templateName == null) {
+      throwPreconditionFailed { "Template name or template ID not found" }
+    }
+
+    accessManager.requireProjectFunctional(projectId)
+
+    val type = Type.find(messageSendRequest.type)
+    val feature = when (type) {
+      Type.EMAIL -> Feature.EMAILS
+      Type.SMS -> Feature.SMS
+      Type.PUSH -> Feature.PUSH
+    }
+    accessManager.requireProjectFeaturesFunctional(projectId, feature)
+
+    val userId = UserId.fromUniversalFormat(universalId)
+    val user = accessManager.requestUserAccess(authentication, userId, Privilege.MESSAGE_TEMPLATE_SEND)
+
+    if (messageSendRequest.templateId != null) {
+      communicationsService.sendTo(projectId, user.id, messageSendRequest.templateId, type)
+    } else if (messageSendRequest.templateName != null) {
+      communicationsService.sendTo(projectId, user.id, messageSendRequest.templateName, type)
+    }
+
+    return SimpleResponse.DONE
+  }
+
+}
