@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.service.messaging
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.messaging.PushDevice
@@ -76,8 +76,7 @@ class PushDeviceServiceImplTest {
 
     service.deleteDeviceById(device1.deviceId)
 
-    assertThat { service.fetchDeviceById(device1.deviceId) }
-      .isFailure()
+    assertFailure { service.fetchDeviceById(device1.deviceId) }
       .messageContains("No value present")
   }
 

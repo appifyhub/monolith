@@ -1,12 +1,12 @@
 package com.appifyhub.monolith.controller.user
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
-import assertk.assertions.isSuccess
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_USER_SEARCH
@@ -17,6 +17,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATU
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATURE_RESET
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
@@ -504,22 +505,21 @@ class UserControllerTest {
         ),
       )
       // check if changing worked
-      assertThat {
+      assertFailure {
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureOld,
         )
-      }.isFailure()
-      assertThat {
+      }
+      assertThat(
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureNew,
-        )
-      }.isSuccess()
+        ),
+      ).isInstanceOf(User::class)
       // check if logout param was respected
-      assertThat {
-        authService.refreshAuth(token, ipAddress = null)
-      }.isSuccess()
+      assertThat(authService.refreshAuth(token, ipAddress = null))
+        .isInstanceOf(String::class)
     }
   }
 
@@ -551,22 +551,22 @@ class UserControllerTest {
         ),
       )
       // check if changing worked
-      assertThat {
+      assertFailure {
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureOld,
         )
-      }.isFailure()
-      assertThat {
+      }
+      assertThat(
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureNew,
-        )
-      }.isSuccess()
+        ),
+      ).isInstanceOf(User::class)
       // check if logout param was respected
-      assertThat {
+      assertFailure {
         authService.refreshAuth(token, ipAddress = null)
-      }.isFailure()
+      }
     }
   }
 
@@ -651,16 +651,16 @@ class UserControllerTest {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
       // check if changing worked
-      assertThat {
+      assertFailure {
         authService.resolveUser(
           user.id.toUniversalFormat(),
           Stubs.userCreator.rawSignature,
         )
-      }.isFailure()
+      }
       // check if tokens are invalid
-      assertThat {
+      assertFailure {
         authService.refreshAuth(token, ipAddress = null)
-      }.isFailure()
+      }
     }
   }
 
@@ -717,9 +717,9 @@ class UserControllerTest {
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
-      assertThat {
+      assertFailure {
         authService.resolveUser(self.id.toUniversalFormat(), Stubs.userCreator.rawSignature)
-      }.isFailure()
+      }
     }
   }
 

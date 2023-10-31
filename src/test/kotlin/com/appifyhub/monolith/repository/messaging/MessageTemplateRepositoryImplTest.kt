@@ -4,7 +4,6 @@ import assertk.assertAll
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isSuccess
 import com.appifyhub.monolith.storage.dao.MessageTemplateDao
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.util.Stubs
@@ -80,7 +79,7 @@ class MessageTemplateRepositoryImplTest {
         Stubs.project.id,
         Stubs.messageTemplate.name,
         Stubs.messageTemplate.languageTag,
-      )
+      ),
     ).isEqualTo(listOf(Stubs.messageTemplate))
   }
 
@@ -101,8 +100,8 @@ class MessageTemplateRepositoryImplTest {
     }
 
     assertAll {
-      assertThat { repository.deleteTemplateById(Stubs.messageTemplate.id) }
-        .isSuccess()
+      assertThat(repository.deleteTemplateById(Stubs.messageTemplate.id))
+        .isEqualTo(Unit)
       verify(messageTemplateDao).deleteById(Stubs.messageTemplate.id)
     }
   }
@@ -113,8 +112,8 @@ class MessageTemplateRepositoryImplTest {
     }
 
     assertAll {
-      assertThat { repository.deleteAllTemplatesByProjectId(Stubs.project.id) }
-        .isSuccess()
+      assertThat(repository.deleteAllTemplatesByProjectId(Stubs.project.id))
+        .isEqualTo(Unit)
       verify(messageTemplateDao).deleteAllByProject_ProjectId(Stubs.project.id)
     }
   }
@@ -125,8 +124,8 @@ class MessageTemplateRepositoryImplTest {
     }
 
     assertAll {
-      assertThat { repository.deleteAllTemplatesByName(Stubs.project.id, Stubs.messageTemplate.name) }
-        .isSuccess()
+      assertThat(repository.deleteAllTemplatesByName(Stubs.project.id, Stubs.messageTemplate.name))
+        .isEqualTo(Unit)
       verify(messageTemplateDao).deleteAllByProject_ProjectIdAndName(Stubs.project.id, Stubs.messageTemplate.name)
     }
   }

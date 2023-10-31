@@ -1,11 +1,11 @@
 package com.appifyhub.monolith.controller.messaging
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
@@ -383,7 +383,7 @@ class PushDevicesControllerTest {
       ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
-      assertThat { service.fetchDeviceById(device.deviceId) }.isFailure()
+      assertFailure { service.fetchDeviceById(device.deviceId) }
     }
   }
 

@@ -1,14 +1,13 @@
 package com.appifyhub.monolith.repository.user
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.hasMessage
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
@@ -86,8 +85,7 @@ class UserRepositoryImplTest {
   @Test fun `adding user fails with null ID and non-random ID type`() {
     val creator = Stubs.userCreator.copy(userId = null)
 
-    assertThat { repository.addUser(creator, UserIdType.USERNAME) }
-      .isFailure()
+    assertFailure { repository.addUser(creator, UserIdType.USERNAME) }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Missing user ID")
@@ -97,8 +95,7 @@ class UserRepositoryImplTest {
   @Test fun `adding user fails with existing ID and random ID type`() {
     val creator = Stubs.userCreator.copy(userId = "non-null")
 
-    assertThat { repository.addUser(creator, UserIdType.RANDOM) }
-      .isFailure()
+    assertFailure { repository.addUser(creator, UserIdType.RANDOM) }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Provided user ID")
@@ -158,8 +155,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUserId(Stubs.userId) }
-      .isFailure()
+    assertFailure { repository.fetchUserByUserId(Stubs.userId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -180,8 +176,7 @@ class UserRepositoryImplTest {
   // region Fetch by universal ID
 
   @Test fun `fetching user by malformed universal ID throws`() {
-    assertThat { repository.fetchUserByUniversalId("malformed") }
-      .isFailure()
+    assertFailure { repository.fetchUserByUniversalId("malformed") }
       .hasClass(NumberFormatException::class)
   }
 
@@ -190,8 +185,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUniversalId(Stubs.universalUserId) }
-      .isFailure()
+    assertFailure { repository.fetchUserByUniversalId(Stubs.universalUserId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -216,8 +210,7 @@ class UserRepositoryImplTest {
       onGeneric { findAllByProject_ProjectId(Stubs.project.id) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchAllUsersByProjectId(Stubs.project.id) }
-      .isFailure()
+    assertFailure { repository.fetchAllUsersByProjectId(Stubs.project.id) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -250,8 +243,7 @@ class UserRepositoryImplTest {
       } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!) }
-      .isFailure()
+    assertFailure { repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -283,8 +275,7 @@ class UserRepositoryImplTest {
       } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.searchByName(Stubs.project.id, Stubs.user.name!!) }
-      .isFailure()
+    assertFailure { repository.searchByName(Stubs.project.id, Stubs.user.name!!) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -316,8 +307,7 @@ class UserRepositoryImplTest {
       } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.searchByContact(Stubs.project.id, Stubs.user.contact!!) }
-      .isFailure()
+    assertFailure { repository.searchByContact(Stubs.project.id, Stubs.user.contact!!) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -362,8 +352,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType) }
-      .isFailure()
+    assertFailure { repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -427,8 +416,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeUserById(Stubs.userId) }
-      .isFailure()
+    assertFailure { repository.removeUserById(Stubs.userId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -441,13 +429,12 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
-    assertThat { repository.removeUserById(Stubs.userId) }
-      .isSuccess()
+    assertThat(repository.removeUserById(Stubs.userId))
+      .isEqualTo(Unit)
   }
 
   @Test fun `removing user by malformed universal ID throws`() {
-    assertThat { repository.removeUserByUniversalId("malformed") }
-      .isFailure()
+    assertFailure { repository.removeUserByUniversalId("malformed") }
       .hasClass(NumberFormatException::class)
   }
 
@@ -457,8 +444,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
-      .isFailure()
+    assertFailure { repository.removeUserByUniversalId(Stubs.universalUserId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -471,8 +457,8 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
-    assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
-      .isSuccess()
+    assertThat(repository.removeUserByUniversalId(Stubs.universalUserId))
+      .isEqualTo(Unit)
   }
 
   @Test fun `removing user by invalid project ID throws`() {
@@ -481,8 +467,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
-      .isFailure()
+    assertFailure { repository.removeAllUsersByProjectId(Stubs.project.id) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -495,8 +480,8 @@ class UserRepositoryImplTest {
       onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doAnswer {}
     }
 
-    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
-      .isSuccess()
+    assertThat(repository.removeAllUsersByProjectId(Stubs.project.id))
+      .isEqualTo(Unit)
   }
 
   // endregion

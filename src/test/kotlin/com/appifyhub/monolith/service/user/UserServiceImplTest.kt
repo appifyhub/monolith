@@ -2,14 +2,14 @@ package com.appifyhub.monolith.service.user
 
 import assertk.all
 import assertk.assertAll
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isGreaterThan
-import assertk.assertions.isSuccess
+import assertk.assertions.isInstanceOf
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
@@ -75,8 +75,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
     val creator = Stubs.userCreator.copy(userId = " ", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Username ID")
@@ -87,8 +86,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.EMAIL)
     val creator = Stubs.userCreator.copy(userId = "invalid", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Email ID")
@@ -99,8 +97,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.PHONE)
     val creator = Stubs.userCreator.copy(userId = "invalid", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Phone ID")
@@ -111,8 +108,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.CUSTOM)
     val creator = Stubs.userCreator.copy(userId = " ", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -123,8 +119,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(rawSignature = " ", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Signature")
@@ -135,8 +130,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(name = " ", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Name")
@@ -147,8 +141,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(contactType = ContactType.EMAIL, contact = "invalid", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact Email")
@@ -159,8 +152,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(contactType = ContactType.PHONE, contact = "invalid", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact Phone")
@@ -171,8 +163,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(contactType = ContactType.CUSTOM, contact = " ", projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact")
@@ -185,8 +176,7 @@ class UserServiceImplTest {
     val birthday = Date(timeProvider.currentMillis - fiveYearsMillis)
     val creator = Stubs.userCreator.copy(birthday = birthday, projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Birthday")
@@ -197,8 +187,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val creator = Stubs.userCreator.copy(company = Stubs.company.copy(countryCode = "D"), projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Company")
@@ -211,8 +200,7 @@ class UserServiceImplTest {
     stubber.users(project).default(idSuffix = "_2")
     val creator = Stubs.userCreator.copy(projectId = project.id)
 
-    assertThat { service.addUser(creator) }
-      .isFailure()
+    assertFailure { service.addUser(creator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Maximum users")
@@ -232,7 +220,7 @@ class UserServiceImplTest {
           verificationToken = TokenGenerator.nextEmailToken,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
-        )
+        ),
       )
   }
 
@@ -249,7 +237,7 @@ class UserServiceImplTest {
           verificationToken = TokenGenerator.nextEmailToken,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
-        )
+        ),
       )
   }
 
@@ -266,7 +254,7 @@ class UserServiceImplTest {
           verificationToken = TokenGenerator.nextEmailToken,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
-        )
+        ),
       )
   }
 
@@ -291,7 +279,7 @@ class UserServiceImplTest {
           contact = "+491760000000",
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
-        )
+        ),
       )
   }
 
@@ -302,7 +290,7 @@ class UserServiceImplTest {
       userId = "custom_id",
       contactType = ContactType.CUSTOM,
       contact = null,
-      projectId = project.id
+      projectId = project.id,
     )
     stubGenerators()
 
@@ -315,7 +303,7 @@ class UserServiceImplTest {
           contact = null,
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
-        )
+        ),
       )
   }
 
@@ -355,7 +343,7 @@ class UserServiceImplTest {
           updatedAt = timeProvider.currentDate,
           company = null,
           languageTag = null,
-        )
+        ),
       )
   }
 
@@ -364,8 +352,7 @@ class UserServiceImplTest {
   @Test fun `fetching user fails with invalid user ID`() {
     val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val targetId = UserId(" ", project.id)
-    assertThat { service.fetchUserByUserId(targetId) }
-      .isFailure()
+    assertFailure { service.fetchUserByUserId(targetId) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -383,8 +370,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `fetching user fails with invalid universal ID`() {
-    assertThat { service.fetchUserByUniversalId(" ") }
-      .isFailure()
+    assertFailure { service.fetchUserByUniversalId(" ") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -402,8 +388,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `fetching users fails with invalid project ID`() {
-    assertThat { service.fetchAllUsersByProjectId(-1) }
-      .isFailure()
+    assertFailure { service.fetchAllUsersByProjectId(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -422,8 +407,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `fetching user by verification token fails with invalid user ID`() {
-    assertThat { service.fetchUserByUserIdAndVerificationToken(UserId("invalid", -1), "token") }
-      .isFailure()
+    assertFailure { service.fetchUserByUserIdAndVerificationToken(UserId("invalid", -1), "token") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -431,8 +415,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `fetching user by verification token fails with invalid token`() {
-    assertThat { service.fetchUserByUserIdAndVerificationToken(Stubs.userId, "\t \n") }
-      .isFailure()
+    assertFailure { service.fetchUserByUserIdAndVerificationToken(Stubs.userId, "\t \n") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Verification Token")
@@ -443,8 +426,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new()
     val user = stubber.users(project).default(autoVerified = false)
 
-    assertThat { service.fetchUserByUserIdAndVerificationToken(user.id, "invalid") }
-      .isFailure()
+    assertFailure { service.fetchUserByUserIdAndVerificationToken(user.id, "invalid") }
       .all {
         hasClass(EmptyResultDataAccessException::class)
       }
@@ -457,14 +439,13 @@ class UserServiceImplTest {
 
     assertThat(
       service.fetchUserByUserIdAndVerificationToken(user.id, user.verificationToken!!)
-        .cleanDates()
+        .cleanDates(),
     )
       .isDataClassEqualTo(user)
   }
 
   @Test fun `searching users by name fails with invalid project ID`() {
-    assertThat { service.searchByName(-1, Stubs.user.name!!) }
-      .isFailure()
+    assertFailure { service.searchByName(-1, Stubs.user.name!!) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -472,8 +453,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `searching users by name fails with invalid name`() {
-    assertThat { service.searchByName(Stubs.project.id, " ") }
-      .isFailure()
+    assertFailure { service.searchByName(Stubs.project.id, " ") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Name")
@@ -492,8 +472,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `searching users by contact fails with invalid project ID`() {
-    assertThat { service.searchByContact(-1, Stubs.user.contact!!) }
-      .isFailure()
+    assertFailure { service.searchByContact(-1, Stubs.user.contact!!) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -501,8 +480,7 @@ class UserServiceImplTest {
   }
 
   @Test fun `searching users by contact fails with invalid contact`() {
-    assertThat { service.searchByContact(Stubs.project.id, " ") }
-      .isFailure()
+    assertFailure { service.searchByContact(Stubs.project.id, " ") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact")
@@ -525,8 +503,7 @@ class UserServiceImplTest {
   @Test fun `updating user fails with invalid project ID`() {
     val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(projectId = -1))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -537,8 +514,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.USERNAME)
     val updater = Stubs.userUpdater.copy(id = UserId(" ", projectId = project.id))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -549,8 +525,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.EMAIL)
     val updater = Stubs.userUpdater.copy(id = UserId("invalid", project.id))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Email ID")
@@ -561,8 +536,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.PHONE)
     val updater = Stubs.userUpdater.copy(id = UserId("invalid", project.id))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Phone ID")
@@ -573,8 +547,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.CUSTOM)
     val updater = Stubs.userUpdater.copy(id = UserId(" ", project.id))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -585,8 +558,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = UserIdType.RANDOM)
     val updater = Stubs.userUpdater.copy(id = UserId(" ", project.id))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -597,8 +569,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(projectId = project.id), rawSignature = Settable(" "))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Signature")
@@ -613,8 +584,7 @@ class UserServiceImplTest {
       contact = Settable("invalid"),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact Email")
@@ -629,8 +599,7 @@ class UserServiceImplTest {
       contact = Settable("invalid"),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact Phone")
@@ -645,8 +614,7 @@ class UserServiceImplTest {
       contact = Settable(" "),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Contact")
@@ -657,8 +625,7 @@ class UserServiceImplTest {
     val project = stubber.projects.new(userIdType = Stubs.project.userIdType)
     val updater = Stubs.userUpdater.copy(id = Stubs.userId.copy(projectId = project.id), name = Settable(" "))
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Name")
@@ -672,8 +639,7 @@ class UserServiceImplTest {
       verificationToken = Settable(" "),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Verification Token")
@@ -685,12 +651,11 @@ class UserServiceImplTest {
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
-        Stubs.companyUpdater.copy(name = Settable(" "))
+        Stubs.companyUpdater.copy(name = Settable(" ")),
       ),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Company Name")
@@ -702,12 +667,11 @@ class UserServiceImplTest {
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
-        Stubs.companyUpdater.copy(street = Settable(" "))
+        Stubs.companyUpdater.copy(street = Settable(" ")),
       ),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Company Street")
@@ -719,12 +683,11 @@ class UserServiceImplTest {
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
-        Stubs.companyUpdater.copy(postcode = Settable(" "))
+        Stubs.companyUpdater.copy(postcode = Settable(" ")),
       ),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Company Postcode")
@@ -736,12 +699,11 @@ class UserServiceImplTest {
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
-        Stubs.companyUpdater.copy(city = Settable(" "))
+        Stubs.companyUpdater.copy(city = Settable(" ")),
       ),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Company City")
@@ -753,12 +715,11 @@ class UserServiceImplTest {
     val updater = Stubs.userUpdater.copy(
       id = Stubs.userId.copy(projectId = project.id),
       company = Settable(
-        Stubs.companyUpdater.copy(countryCode = Settable("d"))
+        Stubs.companyUpdater.copy(countryCode = Settable("d")),
       ),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Company Country Code")
@@ -774,8 +735,7 @@ class UserServiceImplTest {
       birthday = Settable(tooYoungDate),
     )
 
-    assertThat { service.updateUser(updater) }
-      .isFailure()
+    assertFailure { service.updateUser(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Birthday")
@@ -803,7 +763,7 @@ class UserServiceImplTest {
           verificationToken = TokenGenerator.nextPhoneToken,
           createdAt = storedUser.createdAt,
           updatedAt = timeProvider.currentDate,
-        ).cleanDates()
+        ).cleanDates(),
       )
   }
 
@@ -845,13 +805,12 @@ class UserServiceImplTest {
           company = null,
           createdAt = storedUser.createdAt,
           updatedAt = timeProvider.currentDate,
-        ).cleanDates()
+        ).cleanDates(),
       )
   }
 
   @Test fun `resetting signature by ID fails with invalid user ID`() {
-    assertThat { service.resetSignatureById(UserId("invalid", -1)) }
-      .isFailure()
+    assertFailure { service.resetSignatureById(UserId("invalid", -1)) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -870,8 +829,7 @@ class UserServiceImplTest {
   // Removing
 
   @Test fun `removing user fails with invalid user ID`() {
-    assertThat { service.removeUserById(Stubs.userId.copy(projectId = -1)) }
-      .isFailure()
+    assertFailure { service.removeUserById(Stubs.userId.copy(projectId = -1)) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -884,18 +842,16 @@ class UserServiceImplTest {
     val storedUser = service.addUser(creator)
 
     assertAll {
-      assertThat { service.fetchUserByUserId(storedUser.id) }
-        .isSuccess() // user is there
-      assertThat { service.removeUserById(storedUser.id) }
-        .isSuccess()
-      assertThat { service.fetchUserByUserId(storedUser.id) }
-        .isFailure() // user is not there anymore
+      assertThat(service.fetchUserByUserId(storedUser.id))
+        .isInstanceOf(User::class) // user is there
+      assertThat(service.removeUserById(storedUser.id))
+        .isEqualTo(Unit)
+      assertFailure { service.fetchUserByUserId(storedUser.id) } // user is not there anymore
     }
   }
 
   @Test fun `removing user fails with invalid universal user ID`() {
-    assertThat { service.removeUserByUniversalId("invalid") }
-      .isFailure()
+    assertFailure { service.removeUserByUniversalId("invalid") }
   }
 
   @Test fun `removing user works with a universal user ID`() {
@@ -904,18 +860,16 @@ class UserServiceImplTest {
     val storedUser = service.addUser(creator)
 
     assertAll {
-      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()) }
-        .isSuccess() // user is there
-      assertThat { service.removeUserByUniversalId(storedUser.id.toUniversalFormat()) }
-        .isSuccess()
-      assertThat { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()) }
-        .isFailure() // user is not there anymore
+      assertThat(service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()))
+        .isInstanceOf(User::class) // user is there
+      assertThat(service.removeUserByUniversalId(storedUser.id.toUniversalFormat()))
+        .isEqualTo(Unit)
+      assertFailure { service.fetchUserByUniversalId(storedUser.id.toUniversalFormat()) } // user is not there anymore
     }
   }
 
   @Test fun `removing users fails with invalid project ID`() {
-    assertThat { service.removeAllUsersByProjectId(-1) }
-      .isFailure()
+    assertFailure { service.removeAllUsersByProjectId(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -931,8 +885,8 @@ class UserServiceImplTest {
     assertAll {
       assertThat(service.fetchAllUsersByProjectId(storedUser.id.projectId).size)
         .isGreaterThan(0)
-      assertThat { service.removeAllUsersByProjectId(storedUser.id.projectId) }
-        .isSuccess()
+      assertThat(service.removeAllUsersByProjectId(storedUser.id.projectId))
+        .isEqualTo(Unit)
       assertThat(service.fetchAllUsersByProjectId(storedUser.id.projectId))
         .isEmpty()
     }

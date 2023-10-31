@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.init
 
+import assertk.assertFailure
 import assertk.assertThat
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
+import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
@@ -59,24 +59,21 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if project name is blank`() {
-    assertThat { runInitializer(creatorProjectName = " ") }
-      .isFailure()
+    assertFailure { runInitializer(creatorProjectName = " ") }
       .messageContains("Project Name")
 
     verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
-    assertThat { runInitializer(superCreatorName = " ") }
-      .isFailure()
+    assertFailure { runInitializer(superCreatorName = " ") }
       .messageContains("Owner Name")
 
     verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
-    assertThat { runInitializer(superCreatorEmail = " ") }
-      .isFailure()
+    assertFailure { runInitializer(superCreatorEmail = " ") }
       .messageContains("Owner Email")
 
     verifyNoMoreInteractions(creatorService, userService)
@@ -97,8 +94,8 @@ class SchemaInitializerTest {
       on { updateUser(any()) } doReturn user
     }
 
-    assertThat { runInitializer(superCreatorSignature = "root secret") }
-      .isSuccess()
+    assertThat(runInitializer(superCreatorSignature = "root secret"))
+      .isEqualTo(Unit)
 
     verify(creatorService).addProject(
       projectData = ProjectCreator(
@@ -162,8 +159,8 @@ class SchemaInitializerTest {
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(superCreatorSignature = " \t\n ") }
-      .isSuccess()
+    assertThat(runInitializer(superCreatorSignature = " \t\n "))
+      .isEqualTo(Unit)
 
     verify(creatorService).addProject(
       projectData = ProjectCreator(

@@ -1,12 +1,12 @@
 package com.appifyhub.monolith.service.integrations
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
+import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.creator.Project
@@ -51,7 +51,7 @@ class CommunicationsServiceImplTest {
   @Autowired lateinit var stubber: Stubber
 
   @Test fun `sending anything with template ID fails with invalid project ID`() {
-    assertThat {
+    assertFailure {
       service.sendTo(
         projectId = -1,
         userId = Stubs.userId,
@@ -59,7 +59,6 @@ class CommunicationsServiceImplTest {
         type = Type.SMS,
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -67,7 +66,7 @@ class CommunicationsServiceImplTest {
   }
 
   @Test fun `sending anything with template ID fails with invalid user ID`() {
-    assertThat {
+    assertFailure {
       service.sendTo(
         projectId = Stubs.project.id,
         userId = UserId("", -1),
@@ -75,7 +74,6 @@ class CommunicationsServiceImplTest {
         type = Type.EMAIL,
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -83,7 +81,7 @@ class CommunicationsServiceImplTest {
   }
 
   @Test fun `sending anything with template ID fails with invalid template ID`() {
-    assertThat {
+    assertFailure {
       service.sendTo(
         projectId = Stubs.project.id,
         userId = Stubs.userId,
@@ -91,7 +89,6 @@ class CommunicationsServiceImplTest {
         type = Type.SMS,
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template ID")
@@ -99,7 +96,7 @@ class CommunicationsServiceImplTest {
   }
 
   @Test fun `sending anything with template name fails with invalid project ID`() {
-    assertThat {
+    assertFailure {
       service.sendTo(
         projectId = -1,
         userId = Stubs.userId,
@@ -107,7 +104,6 @@ class CommunicationsServiceImplTest {
         type = Type.EMAIL,
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -115,7 +111,7 @@ class CommunicationsServiceImplTest {
   }
 
   @Test fun `sending anything with template name fails with invalid user ID`() {
-    assertThat {
+    assertFailure {
       service.sendTo(
         projectId = Stubs.project.id,
         userId = UserId("", -1),
@@ -123,7 +119,6 @@ class CommunicationsServiceImplTest {
         type = Type.SMS,
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -131,7 +126,7 @@ class CommunicationsServiceImplTest {
   }
 
   @Test fun `sending anything with template name fails with invalid template ID`() {
-    assertThat {
+    assertFailure {
       service.sendTo(
         projectId = Stubs.project.id,
         userId = Stubs.userId,
@@ -139,7 +134,6 @@ class CommunicationsServiceImplTest {
         type = Type.EMAIL,
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -161,14 +155,14 @@ class CommunicationsServiceImplTest {
       ),
     )
 
-    assertThat {
+    assertThat(
       service.sendTo(
         projectId = project.id,
         userId = user.id,
         templateId = template.id,
         type = Type.EMAIL,
-      )
-    }.isSuccess()
+      ),
+    ).isEqualTo(Unit)
 
     assertThat(emailSender)
       .all {
@@ -200,14 +194,14 @@ class CommunicationsServiceImplTest {
       ),
     )
 
-    assertThat {
+    assertThat(
       service.sendTo(
         projectId = project.id,
         userId = user.id,
         templateName = template.name,
         type = Type.EMAIL,
-      )
-    }.isSuccess()
+      ),
+    ).isEqualTo(Unit)
 
     assertThat(emailSender)
       .all {
@@ -239,14 +233,14 @@ class CommunicationsServiceImplTest {
       ),
     )
 
-    assertThat {
+    assertThat(
       service.sendTo(
         projectId = project.id,
         userId = user.id,
         templateId = template.id,
         type = Type.SMS,
-      )
-    }.isSuccess()
+      ),
+    ).isEqualTo(Unit)
 
     assertThat(smsSender)
       .all {
@@ -276,14 +270,14 @@ class CommunicationsServiceImplTest {
       ),
     )
 
-    assertThat {
+    assertThat(
       service.sendTo(
         projectId = project.id,
         userId = user.id,
         templateName = template.name,
         type = Type.SMS,
-      )
-    }.isSuccess()
+      ),
+    ).isEqualTo(Unit)
 
     assertThat(smsSender)
       .all {
@@ -314,14 +308,14 @@ class CommunicationsServiceImplTest {
     )
     val pushDevice = pushDeviceService.addDevice(Stubs.pushDevice.copy(owner = user))
 
-    assertThat {
+    assertThat(
       service.sendTo(
         projectId = project.id,
         userId = user.id,
         templateId = template.id,
         type = Type.PUSH,
-      )
-    }.isSuccess()
+      ),
+    ).isEqualTo(Unit)
 
     assertThat(pushSender)
       .all {
@@ -355,14 +349,14 @@ class CommunicationsServiceImplTest {
     )
     val pushDevice = pushDeviceService.addDevice(Stubs.pushDevice.copy(owner = user))
 
-    assertThat {
+    assertThat(
       service.sendTo(
         projectId = project.id,
         userId = user.id,
         templateName = template.name,
         type = Type.PUSH,
-      )
-    }.isSuccess()
+      ),
+    ).isEqualTo(Unit)
 
     assertThat(pushSender)
       .all {
