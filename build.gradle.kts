@@ -90,7 +90,7 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.hibernate:hibernate-testing")
   testImplementation("com.h2database:h2")
-  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
+  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.27.+")
   testImplementation("org.mockito:mockito-core:4.4.+")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.+")
 }
@@ -128,7 +128,7 @@ tasks {
             version=$version
             quality=${Env.get("BUILD_QUALITY", default = "Debug").toLowerCase()}
           """.trimIndent(),
-          Charsets.UTF_8
+          Charsets.UTF_8,
         )
     }
   }
@@ -242,13 +242,13 @@ githubRelease {
     when {
       changes.isNotEmpty() -> "## Latest changes\n${changes.joinToString(separator = bullet, prefix = bullet)}"
       else -> "See commit history for latest changes."
-    }
+    },
   )
 
   releaseAssets(
     arrayOf(
-      file("${project.buildDir}/libs/$artifact.jar")
-    )
+      file("${project.buildDir}/libs/$artifact.jar"),
+    ),
   )
 }
 apply(plugin = "com.github.breadmoirai.github-release")
