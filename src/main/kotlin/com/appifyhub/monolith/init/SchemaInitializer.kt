@@ -6,6 +6,7 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -14,6 +15,7 @@ import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
+import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
@@ -30,6 +32,7 @@ class SchemaInitializer(
   private val creatorService: CreatorService,
   private val userService: UserService,
   private val schemaService: SchemaService,
+  private val messageTemplateService: MessageTemplateService,
   private val creatorConfig: CreatorProjectConfig,
 ) : ApplicationRunner {
 
@@ -104,7 +107,7 @@ class SchemaInitializer(
       ).requireValid { "Firebase Config" }
     }
 
-    // create the creator project
+    // create the root creator project
     val project = creatorService.addProject(
       projectData = ProjectCreator(
         owner = null,
@@ -148,6 +151,18 @@ class SchemaInitializer(
       updater = UserUpdater(
         id = owner.id,
         verificationToken = Settable(null),
+      ),
+    )
+
+    // add some default templates
+    messageTemplateService.addTemplate(
+      MessageTemplateCreator(
+        projectId = project.id,
+        name = MessageTemplateService.NAME_PROJECT_CREATED,
+        languageTag = Locale.US.toLanguageTag(),
+        title = MessageTemplateService.TITLE_PROJECT_CREATED,
+        content = MessageTemplateService.CONTENT_PROJECT_CREATED,
+        isHtml = false,
       ),
     )
 

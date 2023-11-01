@@ -7,12 +7,14 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
@@ -35,6 +37,7 @@ class SchemaInitializerTest {
   private val creatorService = mock<CreatorService>()
   private val userService = mock<UserService>()
   private val schemaService = mock<SchemaService>()
+  private val messageTemplateService = mock<MessageTemplateService>()
 
   @BeforeEach fun setup() {
     schemaService.stub {
@@ -140,6 +143,18 @@ class SchemaInitializerTest {
         ),
       )
     }
+    verify(messageTemplateService) {
+      mock.addTemplate(
+        MessageTemplateCreator(
+          projectId = project.id,
+          name = MessageTemplateService.NAME_PROJECT_CREATED,
+          languageTag = Locale.US.toLanguageTag(),
+          title = MessageTemplateService.TITLE_PROJECT_CREATED,
+          content = MessageTemplateService.CONTENT_PROJECT_CREATED,
+          isHtml = false,
+        ),
+      )
+    }
   }
 
   @Test fun `initial seed generates a new signature if configured signature is blank`() {
@@ -206,6 +221,18 @@ class SchemaInitializerTest {
         ),
       )
     }
+    verify(messageTemplateService) {
+      mock.addTemplate(
+        MessageTemplateCreator(
+          projectId = project.id,
+          name = MessageTemplateService.NAME_PROJECT_CREATED,
+          languageTag = Locale.US.toLanguageTag(),
+          title = MessageTemplateService.TITLE_PROJECT_CREATED,
+          content = MessageTemplateService.CONTENT_PROJECT_CREATED,
+          isHtml = false,
+        ),
+      )
+    }
   }
 
   // Helpers
@@ -220,6 +247,7 @@ class SchemaInitializerTest {
     creatorService = creatorService,
     userService = userService,
     schemaService = schemaService,
+    messageTemplateService = messageTemplateService,
     creatorConfig = CreatorProjectConfig().apply {
       this.ownerName = superCreatorName
       this.ownerSignature = superCreatorSignature

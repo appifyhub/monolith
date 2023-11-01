@@ -228,7 +228,7 @@ class MessageTemplateServiceImpl(
       project = projectId?.let {
         val normalized = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
         creatorService.fetchProjectById(normalized)
-      }
+      },
     )
   }
 

@@ -7,6 +7,8 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.eventbus.EventPublisher
+import com.appifyhub.monolith.eventbus.ProjectCreated
 import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.util.ext.requireValid
 import com.appifyhub.monolith.util.ext.silent
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service
 @Service
 class CreatorServiceImpl(
   private val creatorRepository: CreatorRepository,
+  private val eventPublisher: EventPublisher,
 ) : CreatorService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
@@ -26,17 +29,17 @@ class CreatorServiceImpl(
   override fun addProject(projectData: ProjectCreator): Project {
     log.debug("Adding project $projectData")
 
-    // hack it for the main creator project
+    // hack it for the root creator project (this service itself)
     val creatorProject = silent(log = false) { getCreatorProject() }
     if (creatorProject != null) {
-      // creator project is already created
+      // root creator project is already created
       if (projectData.owner == null) error("Project creator must be provided")
 
       if (projectData.owner.id.projectId != creatorProject.id) {
         throwLocked { "Projects can be added only by creator project users" }
       }
     } else {
-      // looks like we're creating the creator project
+      // looks like we're setting up the root creator project
       if (projectData.owner != null) error("Project's future owner must not be provided for creator project")
     }
 
@@ -82,6 +85,12 @@ class CreatorServiceImpl(
     )
 
     return creatorRepository.addProject(normalizedProjectCreator)
+      // notify about standard project creation
+      .also { result ->
+        creatorProject?.let {
+          eventPublisher.publish(ProjectCreated(ownerProject = it, payload = result))
+        }
+      }
   }
 
   override fun fetchAllProjects(): List<Project> {

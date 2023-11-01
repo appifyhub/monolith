@@ -2,12 +2,18 @@ package com.appifyhub.monolith.service.messaging
 
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.Variable
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.user.UserId
 
 interface MessageTemplateService {
+
+  companion object Defaults {
+    const val NAME_PROJECT_CREATED = "project_created"
+    const val TITLE_PROJECT_CREATED = "Project Created"
+    const val CONTENT_PROJECT_CREATED = "Hey {{user.name}}, '{{project.name}}' was just created."
+  }
 
   data class Inputs(
     val userId: UserId? = null,

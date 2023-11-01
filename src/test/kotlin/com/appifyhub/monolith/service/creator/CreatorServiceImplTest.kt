@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.service.creator
 
 import assertk.all
+import assertk.assertAll
 import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
@@ -14,7 +15,9 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNullable
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.eventbus.ProjectCreated
 import com.appifyhub.monolith.repository.creator.CreatorRepository
+import com.appifyhub.monolith.util.EventBusFake
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -42,6 +45,7 @@ class CreatorServiceImplTest {
   @Autowired lateinit var service: CreatorService
   @Autowired lateinit var creatorRepo: CreatorRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
+  @Autowired lateinit var eventBus: EventBusFake
   @Autowired lateinit var stubber: Stubber
 
   private val creatorProject: Project by lazy { creatorRepo.getCreatorProject() }
@@ -78,7 +82,10 @@ class CreatorServiceImplTest {
     val mockRepo = mock<CreatorRepository> {
       onGeneric { getCreatorProject() } doThrow UninitializedPropertyAccessException("Not initialized")
     }
-    val service: CreatorService = CreatorServiceImpl(mockRepo)
+    val service: CreatorService = CreatorServiceImpl(
+      creatorRepository = mockRepo,
+      eventPublisher = eventBus,
+    )
 
     assertFailure {
       service.addProject(Stubs.projectCreator.copy(owner = stubber.creators.owner()))
@@ -224,15 +231,23 @@ class CreatorServiceImplTest {
       websiteUrl = "https://www.example.com",
     )
 
-    assertThat(
-      service.addProject(projectData).cleanDates(),
-    ).isDataClassEqualTo(
-      Stubs.project.copy(
-        id = Stubs.project.id + 1,
-        logoUrl = "https://www.example.com/logo.png",
-        websiteUrl = "https://www.example.com",
-      ).cleanStubArtifacts(),
+    val expectedProject = Stubs.project.copy(
+      id = Stubs.project.id + 1,
+      logoUrl = "https://www.example.com/logo.png",
+      websiteUrl = "https://www.example.com",
+    ).cleanStubArtifacts()
+    val expectedEvent = ProjectCreated(
+      ownerProject = creatorProject,
+      payload = expectedProject,
     )
+
+    assertAll {
+      assertThat(service.addProject(projectData).cleanDates())
+        .isDataClassEqualTo(expectedProject)
+
+      assertThat(eventBus.nextPublished)
+        .isEqualTo(expectedEvent)
+    }
   }
 
   @Test fun `get creator project succeeds`() {
