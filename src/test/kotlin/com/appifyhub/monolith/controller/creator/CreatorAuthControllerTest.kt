@@ -18,8 +18,8 @@ import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.bearerEmptyRequest
-import com.appifyhub.monolith.util.emptyUriVariables
 import com.appifyhub.monolith.util.bodyRequest
+import com.appifyhub.monolith.util.emptyUriVariables
 import java.time.Duration
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -33,17 +33,17 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class CreatorAuthControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -74,7 +74,7 @@ class CreatorAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -93,7 +93,7 @@ class CreatorAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.tokenValue }.isNotEmpty()
@@ -107,7 +107,7 @@ class CreatorAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -124,7 +124,7 @@ class CreatorAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(keyData, ownerToken),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.tokenValue }.isNotEmpty()

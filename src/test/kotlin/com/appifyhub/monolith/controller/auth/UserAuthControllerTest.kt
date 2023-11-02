@@ -26,9 +26,8 @@ import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerEmptyRequest
-import com.appifyhub.monolith.util.emptyUriVariables
 import com.appifyhub.monolith.util.bodyRequest
-import java.time.Duration
+import com.appifyhub.monolith.util.emptyUriVariables
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,17 +40,18 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.time.Duration
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class UserAuthControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -82,7 +82,7 @@ class UserAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -101,7 +101,7 @@ class UserAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -120,7 +120,7 @@ class UserAuthControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(credentials),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.tokenValue }.isNotEmpty()
@@ -134,7 +134,7 @@ class UserAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -150,7 +150,7 @@ class UserAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -166,11 +166,11 @@ class UserAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
-        stubber.latestTokenOf(user).toNetwork()
+        stubber.latestTokenOf(user).toNetwork(),
       )
     }
   }
@@ -182,7 +182,7 @@ class UserAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -198,7 +198,7 @@ class UserAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -216,13 +216,13 @@ class UserAuthControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token1),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
         listOf(token1, token2).map {
           stubber.tokenDetailsOf(it).toNetwork()
-        }
+        },
       )
     }
   }
@@ -243,11 +243,11 @@ class UserAuthControllerTest {
         uriVariables = mapOf(
           "user_id" to target.id.toUniversalFormat(),
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
-        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() }
+        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() },
       )
     }
   }
@@ -268,11 +268,11 @@ class UserAuthControllerTest {
         uriVariables = mapOf(
           "user_id" to target.id.toUniversalFormat(),
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isEqualTo(
-        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() }
+        listOf(targetToken).map { stubber.tokenDetailsOf(it).toNetwork() },
       )
     }
   }
@@ -284,7 +284,7 @@ class UserAuthControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -300,7 +300,7 @@ class UserAuthControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -315,7 +315,7 @@ class UserAuthControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.tokenValue }.all {
@@ -332,7 +332,7 @@ class UserAuthControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("all" to null),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -348,7 +348,7 @@ class UserAuthControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("all" to null),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -364,7 +364,7 @@ class UserAuthControllerTest {
           method = HttpMethod.DELETE,
           requestEntity = bearerEmptyRequest(token),
           uriVariables = mapOf("all" to false),
-        )
+        ),
       ).all {
         transform { it.statusCode }.isEqualTo(HttpStatus.OK)
         transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
@@ -387,7 +387,7 @@ class UserAuthControllerTest {
           method = HttpMethod.DELETE,
           requestEntity = bearerEmptyRequest(token1),
           uriVariables = mapOf("all" to true),
-        )
+        ),
       ).all {
         transform { it.statusCode }.isEqualTo(HttpStatus.OK)
         transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
@@ -408,7 +408,7 @@ class UserAuthControllerTest {
           "token1" to null,
           "token2" to null,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -427,7 +427,7 @@ class UserAuthControllerTest {
           "token1" to null,
           "token2" to null,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -451,7 +451,7 @@ class UserAuthControllerTest {
             "token1" to token1,
             "token2" to token2,
           ),
-        )
+        ),
       ).all {
         transform { it.statusCode }.isEqualTo(HttpStatus.OK)
         transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
@@ -474,7 +474,7 @@ class UserAuthControllerTest {
         uriVariables = mapOf(
           "user_id" to targetId.toUniversalFormat(),
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -496,7 +496,7 @@ class UserAuthControllerTest {
           uriVariables = mapOf(
             "user_id" to self.id.toUniversalFormat(),
           ),
-        )
+        ),
       ).all {
         transform { it.statusCode }.isEqualTo(HttpStatus.OK)
         transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
@@ -526,7 +526,7 @@ class UserAuthControllerTest {
           uriVariables = mapOf(
             "user_id" to target.id.toUniversalFormat(),
           ),
-        )
+        ),
       ).all {
         transform { it.statusCode }.isEqualTo(HttpStatus.OK)
         transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
@@ -557,7 +557,7 @@ class UserAuthControllerTest {
           uriVariables = mapOf(
             "user_id" to target.id.toUniversalFormat(),
           ),
-        )
+        ),
       ).all {
         transform { it.statusCode }.isEqualTo(HttpStatus.OK)
         transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)

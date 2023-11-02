@@ -3,6 +3,9 @@ package com.appifyhub.monolith.init
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -11,21 +14,24 @@ import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
+import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.ext.requireValid
+import com.appifyhub.monolith.util.ext.silent
 import com.appifyhub.monolith.validation.impl.Normalizers
-import java.util.Locale
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
+import java.util.Locale
 
 @Component
 class SchemaInitializer(
   private val creatorService: CreatorService,
   private val userService: UserService,
   private val schemaService: SchemaService,
+  private val messageTemplateService: MessageTemplateService,
   private val creatorConfig: CreatorProjectConfig,
 ) : ApplicationRunner {
 
@@ -68,8 +74,39 @@ class SchemaInitializer(
     val creatorProjectName = Normalizers.ProjectName.run(creatorConfig.projectName)
       .requireValid { "Project Name" }
     val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
+    val mailgunConfig = silent {
+      Normalizers.MailgunConfigData.run(
+        MailgunConfig(
+          apiKey = creatorConfig.mailgunApiKey,
+          domain = creatorConfig.mailgunDomain,
+          senderName = creatorConfig.mailgunSenderName,
+          senderEmail = creatorConfig.mailgunSenderEmail,
+        ),
+      ).requireValid { "Mailgun Config" }
+    }
+    val twilioConfig = silent {
+      Normalizers.TwilioConfigData.run(
+        TwilioConfig(
+          accountSid = creatorConfig.twilioAccountSid,
+          authToken = creatorConfig.twilioAuthToken,
+          messagingServiceId = creatorConfig.twilioMessagingServiceId,
+          maxPricePerMessage = creatorConfig.twilioMaxPricePerMessage.toInt(),
+          maxRetryAttempts = creatorConfig.twilioMaxRetryAttempts.toInt(),
+          defaultSenderName = creatorConfig.twilioDefaultSenderName,
+          defaultSenderNumber = creatorConfig.twilioDefaultSenderNumber,
+        ),
+      ).requireValid { "Twilio Config" }
+    }
+    val firebaseConfig = silent {
+      Normalizers.FirebaseConfigData.run(
+        FirebaseConfig(
+          projectName = creatorConfig.firebaseProjectName,
+          serviceAccountKeyJsonBase64 = creatorConfig.firebaseServiceAccountKeyBase64,
+        ),
+      ).requireValid { "Firebase Config" }
+    }
 
-    // create the creator project
+    // create the root creator project
     val project = creatorService.addProject(
       projectData = ProjectCreator(
         owner = null,
@@ -84,6 +121,9 @@ class SchemaInitializer(
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        mailgunConfig = mailgunConfig,
+        twilioConfig = twilioConfig,
+        firebaseConfig = firebaseConfig,
       ),
     )
 
@@ -102,7 +142,7 @@ class SchemaInitializer(
         birthday = null,
         company = null,
         languageTag = Locale.US.toLanguageTag(),
-      )
+      ),
     )
 
     // clear the verification token
@@ -110,8 +150,11 @@ class SchemaInitializer(
       updater = UserUpdater(
         id = owner.id,
         verificationToken = Settable(null),
-      )
+      ),
     )
+
+    // add some default templates
+    messageTemplateService.initializeDefaults()
 
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
@@ -137,7 +180,7 @@ class SchemaInitializer(
         
         [[ SECRET SECTION END ]]
         $margin
-      """.trimIndent()
+      """.trimIndent(),
     )
   }
 

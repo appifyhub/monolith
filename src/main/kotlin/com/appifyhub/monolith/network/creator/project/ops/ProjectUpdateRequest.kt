@@ -1,6 +1,9 @@
 package com.appifyhub.monolith.network.creator.project.ops
 
 import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
@@ -17,4 +20,7 @@ data class ProjectUpdateRequest(
   @JsonProperty("anyone_can_search") val anyoneCanSearch: SettableRequest<Boolean>? = null,
   @JsonProperty("on_hold") val onHold: SettableRequest<Boolean>? = null,
   @JsonProperty("language_tag") val languageTag: SettableRequest<String?>? = null,
+  @JsonProperty("mailgun_config") val mailgunConfig: SettableRequest<MailgunConfigDto?>? = null,
+  @JsonProperty("twilio_config") val twilioConfig: SettableRequest<TwilioConfigDto?>? = null,
+  @JsonProperty("firebase_config") val firebaseConfig: SettableRequest<FirebaseConfigDto?>? = null,
 )

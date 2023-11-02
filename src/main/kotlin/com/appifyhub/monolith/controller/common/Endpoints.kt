@@ -19,6 +19,8 @@ object Endpoints {
   const val UNIVERSAL_USER_SIGNATURE = "/v1/universal/users/{universalId}/signature"
   const val UNIVERSAL_USER_SIGNATURE_RESET = "/v1/universal/users/{universalId}/signature/reset"
   const val UNIVERSAL_USER_VERIFY = "/v1/universal/users/{universalId}/verify/{verificationToken}"
+  const val UNIVERSAL_USER_PUSH_DEVICE = "/v1/universal/users/{universalId}/push-devices/{deviceId}"
+  const val UNIVERSAL_USER_PUSH_DEVICES = "/v1/universal/users/{universalId}/push-devices"
 
   /* ******************** CREATORS ******************** */
 
@@ -37,13 +39,14 @@ object Endpoints {
   const val CREATOR_SIGNUP = "/v1/creator/signup"
   const val UNIVERSAL_USER_FORCE_VERIFY = "/v1/universal/users/{universalId}/force-verify"
 
-  // Messaging
+  // Templating and messaging
 
   const val TEMPLATES = "/v1/projects/{projectId}/messaging/template"
   const val TEMPLATE = "/v1/projects/{projectId}/messaging/templates/{templateId}"
   const val TEMPLATE_SEARCH = "/v1/projects/{projectId}/messaging/template-search"
   const val TEMPLATE_VARIABLES = "/v1/projects/{projectId}/messaging/template-variables"
   const val TEMPLATE_MATERIALIZE = "/v1/projects/{projectId}/messaging/template-materialize"
+  const val MESSAGING_SEND = "/v1/projects/{projectId}/users/{universalId}/message"
 
   /* ***************** UNAUTHENTICATED ****************** */
 

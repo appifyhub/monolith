@@ -1,27 +1,25 @@
 package com.appifyhub.monolith.repository.user
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.hasMessage
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.repository.messaging.PushDeviceRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import java.util.Date
-import java.util.Optional
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,11 +30,14 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
+import java.util.Date
+import java.util.Optional
 
 class UserRepositoryImplTest {
 
   private val userDao = mock<UserDao>()
   private val tokenDetailsRepository = mock<TokenDetailsRepository>()
+  private val pushDeviceRepository = mock<PushDeviceRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
@@ -44,10 +45,13 @@ class UserRepositoryImplTest {
   private val repository: UserRepository = UserRepositoryImpl(
     userDao = userDao,
     tokenDetailsRepository = tokenDetailsRepository,
+    pushDeviceRepository = pushDeviceRepository,
     passwordEncoder = passwordEncoder,
     springSecurityUserManager = springUserManager,
     timeProvider = timeProvider,
   )
+
+  // region Setup
 
   @BeforeEach fun setup() {
     userDao.stub {
@@ -62,6 +66,9 @@ class UserRepositoryImplTest {
       onGeneric { fetchAllValidTokens(any(), anyOrNull()) } doReturn listOf(Stubs.tokenDetails)
       onGeneric { removeTokensFor(Stubs.user, null) } doAnswer {}
     }
+    pushDeviceRepository.stub {
+      onGeneric { deleteAllDevicesByUser(any()) } doAnswer {}
+    }
   }
 
   @AfterEach fun teardown() {
@@ -71,13 +78,14 @@ class UserRepositoryImplTest {
     TokenGenerator.phoneInterceptor = { null }
   }
 
+  // endregion
+
   // region Add user
 
   @Test fun `adding user fails with null ID and non-random ID type`() {
     val creator = Stubs.userCreator.copy(userId = null)
 
-    assertThat { repository.addUser(creator, UserIdType.USERNAME) }
-      .isFailure()
+    assertFailure { repository.addUser(creator, UserIdType.USERNAME) }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Missing user ID")
@@ -87,8 +95,7 @@ class UserRepositoryImplTest {
   @Test fun `adding user fails with existing ID and random ID type`() {
     val creator = Stubs.userCreator.copy(userId = "non-null")
 
-    assertThat { repository.addUser(creator, UserIdType.RANDOM) }
-      .isFailure()
+    assertFailure { repository.addUser(creator, UserIdType.RANDOM) }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Provided user ID")
@@ -106,7 +113,7 @@ class UserRepositoryImplTest {
 
     assertThat(repository.addUser(creator, UserIdType.RANDOM))
       .isDataClassEqualTo(
-        Stubs.user.copy(id = UserId("randomUserId", creator.projectId))
+        Stubs.user.copy(id = UserId("randomUserId", creator.projectId)),
       )
   }
 
@@ -134,8 +141,8 @@ class UserRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.user.copy(
           id = UserId(creator.userId!!, creator.projectId),
-          verificationToken = "123456"
-        )
+          verificationToken = "123456",
+        ),
       )
   }
 
@@ -148,8 +155,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUserId(Stubs.userId) }
-      .isFailure()
+    assertFailure { repository.fetchUserByUserId(Stubs.userId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -170,8 +176,7 @@ class UserRepositoryImplTest {
   // region Fetch by universal ID
 
   @Test fun `fetching user by malformed universal ID throws`() {
-    assertThat { repository.fetchUserByUniversalId("malformed") }
-      .isFailure()
+    assertFailure { repository.fetchUserByUniversalId("malformed") }
       .hasClass(NumberFormatException::class)
   }
 
@@ -180,8 +185,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUniversalId(Stubs.universalUserId) }
-      .isFailure()
+    assertFailure { repository.fetchUserByUniversalId(Stubs.universalUserId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -206,8 +210,7 @@ class UserRepositoryImplTest {
       onGeneric { findAllByProject_ProjectId(Stubs.project.id) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchAllUsersByProjectId(Stubs.project.id) }
-      .isFailure()
+    assertFailure { repository.fetchAllUsersByProjectId(Stubs.project.id) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -240,8 +243,7 @@ class UserRepositoryImplTest {
       } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!) }
-      .isFailure()
+    assertFailure { repository.fetchUserByUserIdAndVerificationToken(Stubs.userId, Stubs.user.verificationToken!!) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -273,8 +275,7 @@ class UserRepositoryImplTest {
       } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.searchByName(Stubs.project.id, Stubs.user.name!!) }
-      .isFailure()
+    assertFailure { repository.searchByName(Stubs.project.id, Stubs.user.name!!) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -306,8 +307,7 @@ class UserRepositoryImplTest {
       } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.searchByContact(Stubs.project.id, Stubs.user.contact!!) }
-      .isFailure()
+    assertFailure { repository.searchByContact(Stubs.project.id, Stubs.user.contact!!) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -352,8 +352,7 @@ class UserRepositoryImplTest {
       onGeneric { findById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType) }
-      .isFailure()
+    assertFailure { repository.updateUser(Stubs.userUpdater, Stubs.project.userIdType) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -385,7 +384,7 @@ class UserRepositoryImplTest {
           contact = updater.contact!!.value,
           verificationToken = "abcd12341",
           updatedAt = Date(0xA00001),
-        )
+        ),
       )
   }
 
@@ -403,7 +402,7 @@ class UserRepositoryImplTest {
         Stubs.userUpdated.copy(
           contact = updater.contact!!.value,
           verificationToken = "abcd12342",
-        )
+        ),
       )
   }
 
@@ -417,8 +416,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeUserById(Stubs.userId) }
-      .isFailure()
+    assertFailure { repository.removeUserById(Stubs.userId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -431,13 +429,12 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
-    assertThat { repository.removeUserById(Stubs.userId) }
-      .isSuccess()
+    assertThat(repository.removeUserById(Stubs.userId))
+      .isEqualTo(Unit)
   }
 
   @Test fun `removing user by malformed universal ID throws`() {
-    assertThat { repository.removeUserByUniversalId("malformed") }
-      .isFailure()
+    assertFailure { repository.removeUserByUniversalId("malformed") }
       .hasClass(NumberFormatException::class)
   }
 
@@ -447,8 +444,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
-      .isFailure()
+    assertFailure { repository.removeUserByUniversalId(Stubs.universalUserId) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -461,8 +457,8 @@ class UserRepositoryImplTest {
       onGeneric { deleteById(Stubs.userIdDbm) } doAnswer {}
     }
 
-    assertThat { repository.removeUserByUniversalId(Stubs.universalUserId) }
-      .isSuccess()
+    assertThat(repository.removeUserByUniversalId(Stubs.universalUserId))
+      .isEqualTo(Unit)
   }
 
   @Test fun `removing user by invalid project ID throws`() {
@@ -471,8 +467,7 @@ class UserRepositoryImplTest {
       onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doThrow IllegalArgumentException("failed")
     }
 
-    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
-      .isFailure()
+    assertFailure { repository.removeAllUsersByProjectId(Stubs.project.id) }
       .all {
         hasClass(IllegalArgumentException::class)
         hasMessage("failed")
@@ -485,8 +480,8 @@ class UserRepositoryImplTest {
       onGeneric { deleteAllByProject_ProjectId(Stubs.project.id) } doAnswer {}
     }
 
-    assertThat { repository.removeAllUsersByProjectId(Stubs.project.id) }
-      .isSuccess()
+    assertThat(repository.removeAllUsersByProjectId(Stubs.project.id))
+      .isEqualTo(Unit)
   }
 
   // endregion

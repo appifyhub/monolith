@@ -1,12 +1,11 @@
 package com.appifyhub.monolith.util.ext
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.isNull
-import assertk.assertions.isSuccess
 import assertk.assertions.prop
 import com.appifyhub.monolith.validation.Normalizer
 import org.junit.jupiter.api.Test
@@ -16,8 +15,7 @@ import org.springframework.web.server.ResponseStatusException
 class ErrorExtensionsTest {
 
   @Test fun `throwUnauthorized throws correctly`() {
-    assertThat { throwUnauthorized { "Message" } }
-      .isFailure()
+    assertFailure { throwUnauthorized { "Message" } }
       .all {
         hasClass(ResponseStatusException::class)
         prop("status") { (it as ResponseStatusException).status }
@@ -28,8 +26,7 @@ class ErrorExtensionsTest {
   }
 
   @Test fun `throwNormalization throws correctly`() {
-    assertThat { throwNormalization { "Message" } }
-      .isFailure()
+    assertFailure { throwNormalization { "Message" } }
       .all {
         hasClass(ResponseStatusException::class)
         prop("status") { (it as ResponseStatusException).status }
@@ -40,8 +37,7 @@ class ErrorExtensionsTest {
   }
 
   @Test fun `throwLocked throws correctly`() {
-    assertThat { throwLocked { "Message" } }
-      .isFailure()
+    assertFailure { throwLocked { "Message" } }
       .all {
         hasClass(ResponseStatusException::class)
         prop("status") { (it as ResponseStatusException).status }
@@ -52,8 +48,7 @@ class ErrorExtensionsTest {
   }
 
   @Test fun `throwNotFound throws correctly`() {
-    assertThat { throwNotFound { "Message" } }
-      .isFailure()
+    assertFailure { throwNotFound { "Message" } }
       .all {
         hasClass(ResponseStatusException::class)
         prop("status") { (it as ResponseStatusException).status }
@@ -64,8 +59,7 @@ class ErrorExtensionsTest {
   }
 
   @Test fun `throwPreconditionFailed throws correctly`() {
-    assertThat { throwPreconditionFailed { "Message" } }
-      .isFailure()
+    assertFailure { throwPreconditionFailed { "Message" } }
       .all {
         hasClass(ResponseStatusException::class)
         prop("status") { (it as ResponseStatusException).status }
@@ -76,8 +70,7 @@ class ErrorExtensionsTest {
   }
 
   @Test fun `throwNotVerified throws correctly`() {
-    assertThat { throwNotVerified { "Message" } }
-      .isFailure()
+    assertFailure { throwNotVerified { "Message" } }
       .all {
         hasClass(ResponseStatusException::class)
         prop("status") { (it as ResponseStatusException).status }
@@ -98,8 +91,7 @@ class ErrorExtensionsTest {
   @Test fun `requireValid throws on invalid data`() {
     val result = Normalizer.Result("something", isValid = false)
 
-    assertThat { result.requireValid { "Test" } }
-      .isFailure()
+    assertFailure { result.requireValid { "Test" } }
       .all {
         hasClass(ResponseStatusException::class.java)
         prop("status") { (it as ResponseStatusException).status }
@@ -110,18 +102,12 @@ class ErrorExtensionsTest {
   }
 
   @Test fun `silent wrapper succeeds if action does not throw`() {
-    assertThat {
-      silent { 1 + 1 }
-    }
-      .isSuccess()
+    assertThat(silent { 1 + 1 })
       .isEqualTo(2)
   }
 
   @Test fun `silent wrapper ignores the error if action throws`() {
-    assertThat {
-      silent { error("fail") }
-    }
-      .isSuccess()
+    assertThat(silent { error("fail") })
       .isNull()
   }
 

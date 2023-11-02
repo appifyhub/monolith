@@ -4,6 +4,9 @@ import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.util.TimeProvider
 
@@ -21,6 +24,9 @@ fun ProjectUpdater.applyTo(
   .applySettable(anyoneCanSearch) { copy(anyoneCanSearch = it) }
   .applySettable(onHold) { copy(onHold = it) }
   .applySettable(languageTag) { copy(languageTag = it) }
+  .applySettable(mailgunConfig) { copy(mailgunConfig = it) }
+  .applySettable(twilioConfig) { copy(twilioConfig = it) }
+  .applySettable(firebaseConfig) { copy(firebaseConfig = it) }
   .copy(updatedAt = timeProvider.currentDate)
 
 fun ProjectCreator.toProjectData(
@@ -38,6 +44,19 @@ fun ProjectCreator.toProjectData(
   anyoneCanSearch = anyoneCanSearch,
   onHold = onHold,
   languageTag = languageTag,
+  mailgunApiKey = mailgunConfig?.apiKey,
+  mailgunDomain = mailgunConfig?.domain,
+  mailgunSenderName = mailgunConfig?.senderName,
+  mailgunSenderEmail = mailgunConfig?.senderEmail,
+  twilioAccountSid = twilioConfig?.accountSid,
+  twilioAuthToken = twilioConfig?.authToken,
+  twilioMessagingServiceId = twilioConfig?.messagingServiceId,
+  twilioMaxPricePerMessage = twilioConfig?.maxPricePerMessage,
+  twilioMaxRetryAttempts = twilioConfig?.maxRetryAttempts,
+  twilioDefaultSenderName = twilioConfig?.defaultSenderName,
+  twilioDefaultSenderNumber = twilioConfig?.defaultSenderNumber,
+  firebaseProjectName = firebaseConfig?.projectName,
+  firebaseServiceAccountKeyJsonBase64 = firebaseConfig?.serviceAccountKeyJsonBase64,
   createdAt = timeProvider.currentDate,
   updatedAt = timeProvider.currentDate,
 )
@@ -55,6 +74,25 @@ fun ProjectDbm.toDomain(): Project = Project(
   anyoneCanSearch = anyoneCanSearch,
   onHold = onHold,
   languageTag = languageTag,
+  mailgunConfig = MailgunConfig(
+    apiKey = mailgunApiKey.orEmpty(),
+    domain = mailgunDomain.orEmpty(),
+    senderName = mailgunSenderName.orEmpty(),
+    senderEmail = mailgunSenderEmail.orEmpty(),
+  ).takeIf { setOf(it.apiKey, it.domain, it.senderName, it.senderEmail).none(String::isEmpty) },
+  twilioConfig = TwilioConfig(
+    accountSid = twilioAccountSid.orEmpty(),
+    authToken = twilioAuthToken.orEmpty(),
+    messagingServiceId = twilioMessagingServiceId.orEmpty(),
+    maxPricePerMessage = twilioMaxPricePerMessage ?: 0,
+    maxRetryAttempts = twilioMaxRetryAttempts ?: 0,
+    defaultSenderName = twilioDefaultSenderName.orEmpty(),
+    defaultSenderNumber = twilioDefaultSenderNumber.orEmpty(),
+  ).takeIf { setOf(it.accountSid, it.authToken, it.messagingServiceId, it.defaultSenderNumber).none(String::isEmpty) },
+  firebaseConfig = FirebaseConfig(
+    projectName = firebaseProjectName.orEmpty(),
+    serviceAccountKeyJsonBase64 = firebaseServiceAccountKeyJsonBase64.orEmpty(),
+  ).takeIf { setOf(it.projectName, it.serviceAccountKeyJsonBase64).none(String::isEmpty) },
   createdAt = createdAt,
   updatedAt = updatedAt,
 )
@@ -72,6 +110,19 @@ fun Project.toData(): ProjectDbm = ProjectDbm(
   anyoneCanSearch = anyoneCanSearch,
   onHold = onHold,
   languageTag = languageTag,
+  mailgunApiKey = mailgunConfig?.apiKey,
+  mailgunDomain = mailgunConfig?.domain,
+  mailgunSenderName = mailgunConfig?.senderName,
+  mailgunSenderEmail = mailgunConfig?.senderEmail,
+  twilioAccountSid = twilioConfig?.accountSid,
+  twilioAuthToken = twilioConfig?.authToken,
+  twilioMessagingServiceId = twilioConfig?.messagingServiceId,
+  twilioMaxPricePerMessage = twilioConfig?.maxPricePerMessage,
+  twilioMaxRetryAttempts = twilioConfig?.maxRetryAttempts,
+  twilioDefaultSenderName = twilioConfig?.defaultSenderName,
+  twilioDefaultSenderNumber = twilioConfig?.defaultSenderNumber,
+  firebaseProjectName = firebaseConfig?.projectName,
+  firebaseServiceAccountKeyJsonBase64 = firebaseConfig?.serviceAccountKeyJsonBase64,
   createdAt = createdAt,
   updatedAt = updatedAt,
 )

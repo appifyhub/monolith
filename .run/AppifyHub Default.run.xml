@@ -1,8 +1,5 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="AppifyHub Default" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
-    <module name="AppifyHub_Service.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.appifyhub.monolith.AppifyHubApplication" />
-    <option name="ALTERNATIVE_JRE_PATH" />
     <additionalParameters>
       <param>
         <option name="enabled" value="true" />
@@ -10,6 +7,8 @@
         <option name="value" value="12345678!!!!!!!!abcdefgh" />
       </param>
     </additionalParameters>
+    <module name="AppifyHub_Service.main" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.appifyhub.monolith.AppifyHubApplication" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

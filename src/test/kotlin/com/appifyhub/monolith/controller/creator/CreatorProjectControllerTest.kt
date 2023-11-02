@@ -36,17 +36,17 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class CreatorProjectControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -72,7 +72,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -90,7 +90,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -108,7 +108,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -129,7 +129,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -150,7 +150,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -166,7 +166,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -187,7 +187,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -213,7 +213,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -232,7 +232,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("creator_id" to creator2.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -253,7 +253,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -282,7 +282,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -307,7 +307,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -326,7 +326,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -349,7 +349,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -372,7 +372,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -396,7 +396,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -421,7 +421,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to projectResponse.projectId,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -455,7 +455,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to projectResponse.projectId,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -489,7 +489,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to projectResponse.projectId,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -523,7 +523,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to projectResponse.projectId,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -548,7 +548,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -567,7 +567,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -592,7 +592,7 @@ class CreatorProjectControllerTest {
         uriVariables = mapOf(
           "projectId" to project.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -612,7 +612,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -630,7 +630,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -654,7 +654,7 @@ class CreatorProjectControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("creator_id" to creator.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 

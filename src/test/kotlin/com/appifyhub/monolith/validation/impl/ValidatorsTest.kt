@@ -4,14 +4,17 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
+import org.junit.jupiter.api.Test
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
-import org.junit.jupiter.api.Test
 
 class ValidatorsTest {
 
@@ -528,6 +531,210 @@ class ValidatorsTest {
   @Test fun `message template is non blank`() {
     assertThat(Validators.MessageTemplate)
       .isEqualTo(Validators.NotBlank)
+  }
+
+  @Test fun `push device token is without spaces`() {
+    assertThat(Validators.PushDeviceToken)
+      .isEqualTo(Validators.NoSpaces)
+  }
+
+  // endregion
+
+  // region Integrations validators
+
+  @Test fun `mailgun config fails with invalid API key`() {
+    val config = MailgunConfig(
+      apiKey = "api-key 123456 abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config fails with invalid domain`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config fails with invalid sender name`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain.com",
+      senderName = "",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config fails with invalid sender email`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "not_an_email",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `mailgun config succeeds with null`() {
+    assertThat(Validators.MailgunConfigData.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `mailgun config succeeds with valid data`() {
+    val config = MailgunConfig(
+      apiKey = "api-key:123456abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Validators.MailgunConfigData.isValid(config))
+      .isTrue()
+  }
+
+  @Test fun `twilio config fails with invalid account SID`() {
+    val config = TwilioConfig(
+      accountSid = "account sid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid auth token`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "auth token",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid messaging service ID`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messaging service id",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid max price`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = -1,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid max retries`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = -1,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config fails with invalid default sender number`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "abcdefgh",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `twilio config succeeds with null`() {
+    assertThat(Validators.TwilioConfigData.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `twilio config succeeds with valid data`() {
+    val config = TwilioConfig(
+      accountSid = "accountSid",
+      authToken = "authToken",
+      messagingServiceId = "messagingServiceId",
+      maxPricePerMessage = 2,
+      maxRetryAttempts = 2,
+      defaultSenderName = "defSenderName",
+      defaultSenderNumber = "+491760000000",
+    )
+    assertThat(Validators.TwilioConfigData.isValid(config))
+      .isTrue()
+  }
+
+  @Test fun `firebase config fails with invalid project name`() {
+    val config = FirebaseConfig(
+      projectName = "",
+      serviceAccountKeyJsonBase64 = "1234test",
+    )
+    assertThat(Validators.FirebaseConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `firebase config fails with invalid service account key`() {
+    val config = FirebaseConfig(
+      projectName = "Project Name",
+      serviceAccountKeyJsonBase64 = "1234 false",
+    )
+    assertThat(Validators.FirebaseConfigData.isValid(config))
+      .isFalse()
+  }
+
+  @Test fun `firebase config succeeds with null`() {
+    assertThat(Validators.FirebaseConfigData.isValid(null))
+      .isTrue()
+  }
+
+  @Test fun `firebase config succeeds with valid data`() {
+    val config = FirebaseConfig(
+      projectName = "Project Name",
+      serviceAccountKeyJsonBase64 = "c2VydmljZUFjY291bnRLZXlKc29uQmFzZTY0",
+    )
+    assertThat(Validators.FirebaseConfigData.isValid(config))
+      .isTrue()
   }
 
   // endregion

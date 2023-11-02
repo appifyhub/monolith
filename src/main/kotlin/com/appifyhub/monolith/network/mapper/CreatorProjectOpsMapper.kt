@@ -3,10 +3,38 @@ package com.appifyhub.monolith.network.mapper
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
+import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
+
+fun MailgunConfigDto.toDomain(): MailgunConfig = MailgunConfig(
+  apiKey = apiKey,
+  domain = domain,
+  senderName = senderName,
+  senderEmail = senderEmail,
+)
+
+fun TwilioConfigDto.toDomain(): TwilioConfig = TwilioConfig(
+  accountSid = accountSid,
+  authToken = authToken,
+  messagingServiceId = messagingServiceId,
+  maxPricePerMessage = maxPricePerMessage,
+  maxRetryAttempts = maxRetryAttempts,
+  defaultSenderName = defaultSenderName,
+  defaultSenderNumber = defaultSenderNumber,
+)
+
+fun FirebaseConfigDto.toDomain(): FirebaseConfig = FirebaseConfig(
+  projectName = projectName,
+  serviceAccountKeyJsonBase64 = serviceAccountKeyJsonBase64,
+)
 
 fun ProjectCreateRequest.toDomain(
   owner: User? = null,
@@ -23,6 +51,9 @@ fun ProjectCreateRequest.toDomain(
   anyoneCanSearch = false,
   onHold = true,
   languageTag = languageTag,
+  mailgunConfig = mailgunConfig?.toDomain(),
+  twilioConfig = twilioConfig?.toDomain(),
+  firebaseConfig = firebaseConfig?.toDomain(),
 )
 
 fun ProjectUpdateRequest.toDomain(
@@ -39,4 +70,7 @@ fun ProjectUpdateRequest.toDomain(
   anyoneCanSearch = anyoneCanSearch.toDomainNonNull(),
   onHold = onHold.toDomainNonNull(),
   languageTag = languageTag.toDomainNullable(),
+  mailgunConfig = mailgunConfig.mapToDomainNullable { it.toDomain() },
+  twilioConfig = twilioConfig.mapToDomainNullable { it.toDomain() },
+  firebaseConfig = firebaseConfig.mapToDomainNullable { it.toDomain() },
 )

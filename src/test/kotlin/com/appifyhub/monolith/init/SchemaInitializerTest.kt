@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.init
 
+import assertk.assertFailure
 import assertk.assertThat
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
+import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
@@ -13,10 +13,10 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.Stubs
-import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,12 +29,14 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.boot.ApplicationArguments
+import java.util.Locale
 
 class SchemaInitializerTest {
 
   private val creatorService = mock<CreatorService>()
   private val userService = mock<UserService>()
   private val schemaService = mock<SchemaService>()
+  private val messageTemplateService = mock<MessageTemplateService>()
 
   @BeforeEach fun setup() {
     schemaService.stub {
@@ -59,24 +61,21 @@ class SchemaInitializerTest {
   }
 
   @Test fun `initial seed fails if project name is blank`() {
-    assertThat { runInitializer(creatorProjectName = " ") }
-      .isFailure()
+    assertFailure { runInitializer(creatorProjectName = " ") }
       .messageContains("Project Name")
 
     verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed fails if owner name is blank`() {
-    assertThat { runInitializer(superCreatorName = " ") }
-      .isFailure()
+    assertFailure { runInitializer(superCreatorName = " ") }
       .messageContains("Owner Name")
 
     verifyNoMoreInteractions(creatorService, userService)
   }
 
   @Test fun `initial seed fails if owner email is blank`() {
-    assertThat { runInitializer(superCreatorEmail = " ") }
-      .isFailure()
+    assertFailure { runInitializer(superCreatorEmail = " ") }
       .messageContains("Owner Email")
 
     verifyNoMoreInteractions(creatorService, userService)
@@ -97,8 +96,8 @@ class SchemaInitializerTest {
       on { updateUser(any()) } doReturn user
     }
 
-    assertThat { runInitializer(superCreatorSignature = "root secret") }
-      .isSuccess()
+    assertThat(runInitializer(superCreatorSignature = "root secret"))
+      .isEqualTo(Unit)
 
     verify(creatorService).addProject(
       projectData = ProjectCreator(
@@ -114,6 +113,9 @@ class SchemaInitializerTest {
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        mailgunConfig = null,
+        twilioConfig = null,
+        firebaseConfig = null,
       ),
     )
     verify(userService) {
@@ -131,15 +133,16 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
-        )
+        ),
       )
       mock.updateUser(
         updater = UserUpdater(
           id = UserId(user.contact!!, project.id),
           verificationToken = Settable(null),
-        )
+        ),
       )
     }
+    verify(messageTemplateService).initializeDefaults()
   }
 
   @Test fun `initial seed generates a new signature if configured signature is blank`() {
@@ -159,8 +162,8 @@ class SchemaInitializerTest {
 
     SignatureGenerator.interceptor = { "generated sig" }
 
-    assertThat { runInitializer(superCreatorSignature = " \t\n ") }
-      .isSuccess()
+    assertThat(runInitializer(superCreatorSignature = " \t\n "))
+      .isEqualTo(Unit)
 
     verify(creatorService).addProject(
       projectData = ProjectCreator(
@@ -176,6 +179,9 @@ class SchemaInitializerTest {
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        mailgunConfig = null,
+        twilioConfig = null,
+        firebaseConfig = null,
       ),
     )
 
@@ -194,15 +200,16 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
-        )
+        ),
       )
       mock.updateUser(
         updater = UserUpdater(
           id = UserId(user.contact!!, project.id),
           verificationToken = Settable(null),
-        )
+        ),
       )
     }
+    verify(messageTemplateService).initializeDefaults()
   }
 
   // Helpers
@@ -217,6 +224,7 @@ class SchemaInitializerTest {
     creatorService = creatorService,
     userService = userService,
     schemaService = schemaService,
+    messageTemplateService = messageTemplateService,
     creatorConfig = CreatorProjectConfig().apply {
       this.ownerName = superCreatorName
       this.ownerSignature = superCreatorSignature

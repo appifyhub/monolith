@@ -12,6 +12,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.repository.messaging.PushDeviceRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.TimeProvider
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Repository
 class UserRepositoryImpl(
   private val userDao: UserDao,
   private val tokenDetailsRepository: TokenDetailsRepository,
+  private val pushDeviceRepository: PushDeviceRepository,
   private val passwordEncoder: PasswordEncoder,
   private val springSecurityUserManager: SpringSecurityUserManager,
   private val timeProvider: TimeProvider,
@@ -105,6 +107,7 @@ class UserRepositoryImpl(
     val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
     tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
     tokenDetailsRepository.removeTokensFor(user, project = null)
+    pushDeviceRepository.deleteAllDevicesByUser(user)
 
     // finally remove
     userDao.deleteById(id.toData())
@@ -119,6 +122,7 @@ class UserRepositoryImpl(
     val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
     tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
     tokenDetailsRepository.removeTokensFor(user, project = null)
+    pushDeviceRepository.deleteAllDevicesByUser(user)
 
     // finally remove
     userDao.deleteById(userId.toData())
@@ -134,6 +138,7 @@ class UserRepositoryImpl(
         val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
         tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
         tokenDetailsRepository.removeTokensFor(user, project = null)
+        pushDeviceRepository.deleteAllDevicesByUser(user)
       }
 
     // finally, remove the user

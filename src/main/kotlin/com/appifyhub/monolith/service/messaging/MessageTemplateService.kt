@@ -2,17 +2,21 @@ package com.appifyhub.monolith.service.messaging
 
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.Variable
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 
 interface MessageTemplateService {
 
   data class Inputs(
     val userId: UserId? = null,
+    val overrideUser: User? = null, // used when raw password is passed around
     val projectId: Long? = null,
   )
+
+  @Throws fun initializeDefaults()
 
   @Throws fun addTemplate(creator: MessageTemplateCreator): MessageTemplate
 

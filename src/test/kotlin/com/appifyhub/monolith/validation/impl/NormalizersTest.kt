@@ -217,6 +217,30 @@ class NormalizersTest {
       .consistsOf(Validators.MessageTemplate, Cleaners.MessageTemplate)
   }
 
+  @Test fun `push device token = push device token + push device token`() {
+    assertThat(Normalizers.PushDeviceToken)
+      .consistsOf(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
+  }
+
+  // endregion
+
+  // region Integrations normalizers
+
+  @Test fun `mailgun config data = mailgun config data + mailgun config data`() {
+    assertThat(Normalizers.MailgunConfigData)
+      .consistsOf(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
+  }
+
+  @Test fun `twilio config data = twilio config data + twilio config data`() {
+    assertThat(Normalizers.TwilioConfigData)
+      .consistsOf(Validators.TwilioConfigData, Cleaners.TwilioConfigData)
+  }
+
+  @Test fun `firebase config data = firebase config data + firebase config data`() {
+    assertThat(Normalizers.FirebaseConfigData)
+      .consistsOf(Validators.FirebaseConfigData, Cleaners.FirebaseConfigData)
+  }
+
   // endregion
 
   // region Helpers

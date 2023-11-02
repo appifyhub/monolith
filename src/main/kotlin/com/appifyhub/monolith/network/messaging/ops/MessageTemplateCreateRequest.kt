@@ -9,6 +9,7 @@ import java.io.Serializable
 data class MessageTemplateCreateRequest(
   @JsonProperty("name") val name: String,
   @JsonProperty("language_tag") val languageTag: String,
+  @JsonProperty("title") val title: String,
   @JsonProperty("content") val content: String,
   @JsonProperty("is_html") val isHtml: Boolean,
 ) : Serializable
