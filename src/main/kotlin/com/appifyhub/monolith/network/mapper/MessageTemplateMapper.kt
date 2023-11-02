@@ -24,6 +24,7 @@ fun MessageTemplate.toNetwork() = MessageTemplateResponse(
   id = id,
   name = name,
   languageTag = languageTag,
+  title = title,
   content = content,
   isHtml = isHtml,
   createdAt = DateTimeMapper.formatAsDateTime(createdAt),
@@ -41,6 +42,7 @@ fun MessageTemplateCreateRequest.toDomain(
   projectId = projectId,
   name = name,
   languageTag = languageTag,
+  title = title,
   content = content,
   isHtml = isHtml,
 )
@@ -51,6 +53,7 @@ fun MessageTemplateUpdateRequest.toDomain(
   id = templateId,
   name = name.toDomainNonNull(),
   languageTag = languageTag.toDomainNonNull(),
+  title = title.toDomainNonNull(),
   content = content.toDomainNonNull(),
   isHtml = isHtml.toDomainNonNull(),
 )

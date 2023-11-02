@@ -31,6 +31,9 @@ fun stubProject() = Project(
   anyoneCanSearch = false,
   onHold = false,
   languageTag = Locale.US.toLanguageTag(),
+  mailgunConfig = null,
+  twilioConfig = null,
+  firebaseConfig = null,
   createdAt = Date(),
   updatedAt = Date(),
 )

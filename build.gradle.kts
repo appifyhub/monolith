@@ -13,13 +13,13 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath("joda-time:joda-time:+")
-    classpath("org.jlleitschuh.gradle:ktlint-gradle:10.+")
+    classpath("joda-time:joda-time:2.+")
+    classpath("org.jlleitschuh.gradle:ktlint-gradle:11.+")
   }
 }
 
 plugins {
-  val kotlinVersion = "1.6.21"
+  val kotlinVersion = "1.8.10"
   kotlin("jvm") version kotlinVersion
   kotlin("plugin.spring") version kotlinVersion
   kotlin("plugin.jpa") version kotlinVersion
@@ -38,6 +38,8 @@ repositories {
 
 @Suppress("GradlePackageUpdate")
 dependencies {
+  // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
+  extra["slf4j.version"] = "2.+"
 
   // language essentials
   implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -63,9 +65,10 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-rest")
   implementation("org.hibernate:hibernate-core")
 
-  // helpers
+  // 3rd-party
   implementation("com.ip2location:ip2location-java:8.+")
   implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
+  implementation("com.google.firebase:firebase-admin:9.1.1")
 
   // annotation processors
   kapt("org.springframework.boot:spring-boot-configuration-processor")
@@ -87,12 +90,9 @@ dependencies {
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.hibernate:hibernate-testing")
   testImplementation("com.h2database:h2")
-  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.+")
+  testImplementation("com.willowtreeapps.assertk:assertk-jvm:0.27.+")
   testImplementation("org.mockito:mockito-core:4.4.+")
   testImplementation("org.mockito.kotlin:mockito-kotlin:4.+")
-
-  // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
-  extra["slf4j.version"] = "2.+"
 }
 
 // endregion
@@ -128,7 +128,7 @@ tasks {
             version=$version
             quality=${Env.get("BUILD_QUALITY", default = "Debug").toLowerCase()}
           """.trimIndent(),
-          Charsets.UTF_8
+          Charsets.UTF_8,
         )
     }
   }
@@ -185,7 +185,7 @@ githubRelease {
   if (writeToken == Env.INVALID) println("Set 'PACKAGES_TOKEN' environment variable to enable GitHub releases")
 
   val quality = Env.get("BUILD_QUALITY", default = "Debug")
-  println("GitHub release configured for '$quality' quality")
+  println("  GitHub Release configured for '$quality' quality")
 
   val commitish = Env.get("GITHUB_SHA", default = "main")
 
@@ -195,6 +195,7 @@ githubRelease {
       val timestamp = Instant.now().toString(formatter)
       "v$version.${quality.toLowerCase()}.$timestamp"
     }
+
     else -> "v$version.${quality.toLowerCase()}"
   }
 
@@ -241,13 +242,13 @@ githubRelease {
     when {
       changes.isNotEmpty() -> "## Latest changes\n${changes.joinToString(separator = bullet, prefix = bullet)}"
       else -> "See commit history for latest changes."
-    }
+    },
   )
 
   releaseAssets(
     arrayOf(
-      file("${project.buildDir}/libs/$artifact.jar")
-    )
+      file("${project.buildDir}/libs/$artifact.jar"),
+    ),
   )
 }
 apply(plugin = "com.github.breadmoirai.github-release")
@@ -255,8 +256,6 @@ apply(plugin = "com.github.breadmoirai.github-release")
 apply(plugin = "org.jlleitschuh.gradle.ktlint")
 configure<KtlintExtension> {
   verbose.set(true)
-  // also update in .editorconfig
-  disabledRules.set(setOf("import-ordering", "no-blank-line-before-rbrace"))
 }
 
 // endregion

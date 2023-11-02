@@ -24,10 +24,28 @@ class CreatorProjectConfigTest {
     assertThat(creatorProjectConfig)
       .all {
         isNotNull()
-        transform { it.projectName }.isEqualTo("AppifyHub")
+
         transform { it.ownerName }.isEqualTo("Owner")
         transform { it.ownerSignature }.isEmpty()
         transform { it.ownerEmail }.isEqualTo("creator@appifyhub.com")
+
+        transform { it.projectName }.isEqualTo("AppifyHub")
+
+        transform { it.mailgunApiKey }.isEmpty()
+        transform { it.mailgunDomain }.isEqualTo("mailgun.appifyhub.com")
+        transform { it.mailgunSenderName }.isEqualTo("AppifyHub")
+        transform { it.mailgunSenderEmail }.isEqualTo("no-reply@appifyhub.com")
+
+        transform { it.twilioAccountSid }.isEmpty()
+        transform { it.twilioAuthToken }.isEmpty()
+        transform { it.twilioMessagingServiceId }.isEmpty()
+        transform { it.twilioMaxPricePerMessage }.isEqualTo("2")
+        transform { it.twilioMaxRetryAttempts }.isEqualTo("2")
+        transform { it.twilioDefaultSenderName }.isEqualTo("APPIFY")
+        transform { it.twilioDefaultSenderNumber }.isEmpty()
+
+        transform { it.firebaseProjectName }.isEqualTo("Appify Hub")
+        transform { it.firebaseServiceAccountKeyBase64 }.isEmpty()
       }
   }
 

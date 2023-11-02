@@ -1,24 +1,27 @@
 package com.appifyhub.monolith.service.creator
 
 import assertk.all
+import assertk.assertAll
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
-import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.domain.common.mapValueNullable
 import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.eventbus.ProjectCreated
 import com.appifyhub.monolith.repository.creator.CreatorRepository
+import com.appifyhub.monolith.util.EventBusFake
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
-import java.time.temporal.ChronoUnit
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -32,6 +35,7 @@ import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.time.temporal.ChronoUnit
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -41,6 +45,7 @@ class CreatorServiceImplTest {
   @Autowired lateinit var service: CreatorService
   @Autowired lateinit var creatorRepo: CreatorRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
+  @Autowired lateinit var eventBus: EventBusFake
   @Autowired lateinit var stubber: Stubber
 
   private val creatorProject: Project by lazy { creatorRepo.getCreatorProject() }
@@ -55,10 +60,9 @@ class CreatorServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `add a standard project fails if creator is null`() {
-    assertThat {
+    assertFailure {
       service.addProject(Stubs.projectCreator)
     }
-      .isFailure()
       .messageContains("must be provided")
   }
 
@@ -67,10 +71,9 @@ class CreatorServiceImplTest {
     val project = stubber.projects.new()
     val owner = stubber.users(project).owner()
 
-    assertThat {
+    assertFailure {
       service.addProject(Stubs.projectCreator.copy(owner = owner))
     }
-      .isFailure()
       .messageContains("only by creator project users")
   }
 
@@ -79,12 +82,14 @@ class CreatorServiceImplTest {
     val mockRepo = mock<CreatorRepository> {
       onGeneric { getCreatorProject() } doThrow UninitializedPropertyAccessException("Not initialized")
     }
-    val service: CreatorService = CreatorServiceImpl(mockRepo)
+    val service: CreatorService = CreatorServiceImpl(
+      creatorRepository = mockRepo,
+      eventPublisher = eventBus,
+    )
 
-    assertThat {
+    assertFailure {
       service.addProject(Stubs.projectCreator.copy(owner = stubber.creators.owner()))
     }
-      .isFailure()
       .messageContains("must not be provided")
   }
 
@@ -97,8 +102,7 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.addProject(projectData) }
-      .isFailure()
+    assertFailure { service.addProject(projectData) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Name")
@@ -114,11 +118,58 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.addProject(projectData) }
-      .isFailure()
+    assertFailure { service.addProject(projectData) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Max Users")
+      }
+  }
+
+  @Test fun `add project fails with invalid mailgun config`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = null,
+      websiteUrl = null,
+      mailgunConfig = Stubs.projectCreator.mailgunConfig?.copy(senderEmail = "invalid"),
+    )
+
+    assertFailure { service.addProject(projectData) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Mailgun Config")
+      }
+  }
+
+  @Test fun `add project fails with invalid twilio config`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = null,
+      websiteUrl = null,
+      twilioConfig = Stubs.projectCreator.twilioConfig?.copy(defaultSenderNumber = "invalid"),
+    )
+
+    assertFailure { service.addProject(projectData) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Twilio Config")
+      }
+  }
+
+  @Test fun `add project fails with invalid firebase config`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      logoUrl = null,
+      websiteUrl = null,
+      firebaseConfig = Stubs.projectCreator.firebaseConfig?.copy(serviceAccountKeyJsonBase64 = "base!64"),
+    )
+
+    assertFailure { service.addProject(projectData) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Firebase Config")
       }
   }
 
@@ -131,8 +182,8 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.addProject(projectData) }
-      .isSuccess()
+    assertThat(service.addProject(projectData))
+      .isInstanceOf(Project::class)
   }
 
   @Test fun `add project succeeds with invalid logo URL`() {
@@ -143,8 +194,8 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.addProject(projectData) }
-      .isSuccess()
+    assertThat(service.addProject(projectData))
+      .isInstanceOf(Project::class)
   }
 
   @Test fun `add project succeeds with invalid website URL`() {
@@ -155,8 +206,8 @@ class CreatorServiceImplTest {
       logoUrl = null,
     )
 
-    assertThat { service.addProject(projectData) }
-      .isSuccess()
+    assertThat(service.addProject(projectData))
+      .isInstanceOf(Project::class)
   }
 
   @Test fun `add project succeeds with invalid language tag`() {
@@ -168,8 +219,8 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.addProject(projectData) }
-      .isSuccess()
+    assertThat(service.addProject(projectData))
+      .isInstanceOf(Project::class)
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
@@ -180,15 +231,24 @@ class CreatorServiceImplTest {
       websiteUrl = "https://www.example.com",
     )
 
-    assertThat(
-      service.addProject(projectData).cleanDates()
-    ).isDataClassEqualTo(
-      Stubs.project.copy(
-        id = Stubs.project.id + 1,
+    assertAll {
+      val expectedProject = Stubs.project.copy(
+        id = 5, // there are other stubs using the same incrementor
         logoUrl = "https://www.example.com/logo.png",
         websiteUrl = "https://www.example.com",
       ).cleanStubArtifacts()
-    )
+      val expectedEvent = ProjectCreated(
+        ownerProject = creatorProject,
+        payload = expectedProject,
+      )
+
+      assertThat(service.addProject(projectData).cleanDates())
+        .isDataClassEqualTo(expectedProject)
+
+      assertThat(eventBus.lastPublished)
+        .transform { it as ProjectCreated }
+        .isDataClassEqualTo(expectedEvent)
+    }
   }
 
   @Test fun `get creator project succeeds`() {
@@ -207,10 +267,9 @@ class CreatorServiceImplTest {
   }
 
   @Test fun `fetch project by ID fails with invalid account ID`() {
-    assertThat {
+    assertFailure {
       service.fetchProjectById(-1)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -227,10 +286,9 @@ class CreatorServiceImplTest {
     val project = stubber.projects.new()
     val creator = stubber.users(project).owner()
 
-    assertThat {
+    assertFailure {
       service.fetchAllProjectsByCreator(creator)
     }
-      .isFailure()
       .messageContains("don't have any projects")
   }
 
@@ -243,10 +301,9 @@ class CreatorServiceImplTest {
   }
 
   @Test fun `fetch project creator fails with invalid project ID`() {
-    assertThat {
+    assertFailure {
       service.fetchProjectCreator(-1)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -262,10 +319,9 @@ class CreatorServiceImplTest {
   }
 
   @Test fun `update project fails with invalid project ID`() {
-    assertThat {
+    assertFailure {
       service.updateProject(Stubs.projectUpdater.copy(id = -1))
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -281,8 +337,7 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.updateProject(updater) }
-      .isFailure()
+    assertFailure { service.updateProject(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Max Users")
@@ -298,11 +353,64 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.updateProject(updater) }
-      .isFailure()
+    assertFailure { service.updateProject(updater) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Name")
+      }
+  }
+
+  @Test fun `update project fails with invalid mailgun config`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = null,
+      websiteUrl = null,
+      mailgunConfig = Stubs.projectUpdater.mailgunConfig?.mapValueNullable {
+        it.copy(senderEmail = "invalid")
+      },
+    )
+
+    assertFailure { service.updateProject(updater) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Mailgun Config")
+      }
+  }
+
+  @Test fun `update project fails with invalid twilio config`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = null,
+      websiteUrl = null,
+      twilioConfig = Stubs.projectUpdater.twilioConfig?.mapValueNullable {
+        it.copy(defaultSenderNumber = "invalid")
+      },
+    )
+
+    assertFailure { service.updateProject(updater) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Twilio Config")
+      }
+  }
+
+  @Test fun `update project fails with invalid firebase config`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      logoUrl = null,
+      websiteUrl = null,
+      firebaseConfig = Stubs.projectUpdater.firebaseConfig?.mapValueNullable {
+        it.copy(serviceAccountKeyJsonBase64 = "base!64")
+      },
+    )
+
+    assertFailure { service.updateProject(updater) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Firebase Config")
       }
   }
 
@@ -315,8 +423,8 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.updateProject(updater) }
-      .isSuccess()
+    assertThat(service.updateProject(updater))
+      .isInstanceOf(Project::class)
   }
 
   @Test fun `update project succeeds with invalid logo URL`() {
@@ -327,8 +435,8 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.updateProject(updater) }
-      .isSuccess()
+    assertThat(service.updateProject(updater))
+      .isInstanceOf(Project::class)
   }
 
   @Test fun `update project succeeds with invalid website URL`() {
@@ -339,8 +447,8 @@ class CreatorServiceImplTest {
       logoUrl = null,
     )
 
-    assertThat { service.updateProject(updater) }
-      .isSuccess()
+    assertThat(service.updateProject(updater))
+      .isInstanceOf(Project::class)
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
@@ -353,8 +461,8 @@ class CreatorServiceImplTest {
       websiteUrl = null,
     )
 
-    assertThat { service.updateProject(updater) }
-      .isSuccess()
+    assertThat(service.updateProject(updater))
+      .isInstanceOf(Project::class)
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
@@ -367,21 +475,20 @@ class CreatorServiceImplTest {
     )
 
     assertThat(
-      service.updateProject(updater).cleanStubArtifacts()
+      service.updateProject(updater).cleanStubArtifacts(),
     ).isDataClassEqualTo(
       Stubs.projectUpdated.copy(
         id = project.id,
         logoUrl = "https://www.example1.com/logo1.png",
         websiteUrl = "https://www.example1.com",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     )
   }
 
   @Test fun `remove project by ID fails with invalid project ID`() {
-    assertThat {
+    assertFailure {
       service.removeProjectById(-1)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -389,18 +496,16 @@ class CreatorServiceImplTest {
   }
 
   @Test fun `remove project by ID fails for creator project`() {
-    assertThat {
+    assertFailure {
       service.removeProjectById(stubber.projects.creator().id)
     }
-      .isFailure()
       .messageContains("Creator project can't")
   }
 
   @Test fun `remove project by ID fails with creator project ID`() {
-    assertThat {
+    assertFailure {
       service.removeProjectById(creatorProject.id)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Creator project")
@@ -413,9 +518,8 @@ class CreatorServiceImplTest {
     stubber.users(project).admin()
     stubber.users(project).default()
 
-    assertThat {
-      service.removeProjectById(project.id)
-    }.isSuccess()
+    assertThat(service.removeProjectById(project.id))
+      .isEqualTo(Unit)
   }
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
@@ -423,10 +527,9 @@ class CreatorServiceImplTest {
     val project = stubber.projects.new()
     val creator = stubber.users(project).owner()
 
-    assertThat {
+    assertFailure {
       service.removeAllProjectsByCreator(creator.id)
     }
-      .isFailure()
       .messageContains("only by creator project users")
   }
 
@@ -434,9 +537,8 @@ class CreatorServiceImplTest {
   @Test fun `remove all projects by creator succeeds`() {
     stubber.projects.new()
 
-    assertThat {
-      service.removeAllProjectsByCreator(stubber.creators.owner().id)
-    }.isSuccess()
+    assertThat(service.removeAllProjectsByCreator(stubber.creators.owner().id))
+      .isEqualTo(Unit)
   }
 
   // Helpers

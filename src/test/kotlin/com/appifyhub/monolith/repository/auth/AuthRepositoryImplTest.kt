@@ -5,7 +5,6 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
-import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.domain.auth.TokenDetails
 import com.appifyhub.monolith.domain.auth.ops.TokenCreator
@@ -92,7 +91,7 @@ class AuthRepositoryImplTest {
           ipAddress = null,
           geo = null,
           isStatic = false,
-        )
+        ),
       )
 
     verify(jwtHelper).createJwtForClaims(
@@ -119,7 +118,7 @@ class AuthRepositoryImplTest {
         Stubs.tokenDetails.copy(
           expiresAt = expireTime,
           isBlocked = false,
-        )
+        ),
       )
 
     verify(jwtHelper).createJwtForClaims(
@@ -161,7 +160,7 @@ class AuthRepositoryImplTest {
           ipAddress = null,
           geo = null,
           isStatic = true,
-        )
+        ),
       )
 
     verify(jwtHelper).createJwtForClaims(
@@ -189,7 +188,7 @@ class AuthRepositoryImplTest {
           expiresAt = expireTime,
           isBlocked = false,
           isStatic = true,
-        )
+        ),
       )
 
     verify(jwtHelper).createJwtForClaims(
@@ -282,8 +281,8 @@ class AuthRepositoryImplTest {
           createdAt = Stubs.tokenDetails.createdAt,
           expiresAt = Stubs.tokenDetails.expiresAt,
           claims = Stubs.jwtClaims,
-        )
-      )
+        ),
+      ),
     ).isDataClassEqualTo(
       Stubs.user.copy(
         // lots of changes for shallow user...
@@ -299,7 +298,7 @@ class AuthRepositoryImplTest {
         languageTag = null,
         createdAt = timeProvider.currentDate,
         updatedAt = timeProvider.currentDate,
-      )
+      ),
     )
   }
 
@@ -362,8 +361,7 @@ class AuthRepositoryImplTest {
       onGeneric { blockToken(any()) } doReturn Stubs.tokenDetails
     }
 
-    assertThat { repository.unauthorizeToken(newJwt()) }
-      .isSuccess()
+    assertThat(repository.unauthorizeToken(newJwt())).isEqualTo(Unit)
   }
 
   @Test fun `unauthorize all tokens succeeds`() {
@@ -371,8 +369,7 @@ class AuthRepositoryImplTest {
       onGeneric { fetchAllValidTokens(Stubs.user, project = null) } doReturn listOf(Stubs.tokenDetails)
     }
 
-    assertThat { repository.unauthorizeAllTokens(newJwt()) }
-      .isSuccess()
+    assertThat(repository.unauthorizeAllTokens(newJwt())).isEqualTo(Unit)
     verify(tokenDetailsRepo).blockAllTokens(listOf(Stubs.tokenDetails.tokenValue))
   }
 
@@ -381,8 +378,7 @@ class AuthRepositoryImplTest {
       onGeneric { fetchAllValidTokens(Stubs.user, project = null) } doReturn listOf(Stubs.tokenDetails)
     }
 
-    assertThat { repository.unauthorizeAllTokensFor(Stubs.userId) }
-      .isSuccess()
+    assertThat(repository.unauthorizeAllTokensFor(Stubs.userId)).isEqualTo(Unit)
     verify(tokenDetailsRepo).blockAllTokens(listOf(Stubs.tokenDetails.tokenValue))
   }
 
@@ -391,8 +387,7 @@ class AuthRepositoryImplTest {
       onGeneric { blockAllTokens(any()) } doReturn listOf(Stubs.tokenDetails)
     }
 
-    assertThat { repository.unauthorizeAllTokens(listOf(Stubs.tokenValue)) }
-      .isSuccess()
+    assertThat(repository.unauthorizeAllTokens(listOf(Stubs.tokenValue))).isEqualTo(Unit)
   }
 
   // Helpers

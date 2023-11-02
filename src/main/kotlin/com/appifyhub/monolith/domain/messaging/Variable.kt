@@ -15,6 +15,14 @@ enum class Variable(
     example = "Mortgage Calculator",
   ),
 
-  ;
+  VERIFICATION_CODE(
+    code = "user.code",
+    example = "123456",
+  ),
+
+  SIGNATURE(
+    code = "user.signature",
+    example = "123456",
+  ),
 
 }

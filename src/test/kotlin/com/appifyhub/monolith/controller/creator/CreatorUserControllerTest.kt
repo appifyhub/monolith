@@ -33,18 +33,17 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class CreatorUserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -73,7 +72,7 @@ class CreatorUserControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(request),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
@@ -85,7 +84,7 @@ class CreatorUserControllerTest {
           contact = request.userId,
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -108,7 +107,7 @@ class CreatorUserControllerTest {
         uriVariables = mapOf(
           "universalId" to user.id.toUniversalFormat(),
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -128,7 +127,7 @@ class CreatorUserControllerTest {
         uriVariables = mapOf(
           "universalId" to user.id.toUniversalFormat(),
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)

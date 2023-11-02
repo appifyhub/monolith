@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.storage.dao.impl
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
-import assertk.assertions.isFailure
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.storage.dao.GeolocationDao
@@ -26,8 +26,7 @@ class GeolocationDaoLocalFileTest {
   }
 
   @Test fun `fetching blank IP throws`() {
-    assertThat { dao.fetchGeolocationForIp("\n \t") }
-      .isFailure()
+    assertFailure { dao.fetchGeolocationForIp("\n \t") }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("IP address is blank")
@@ -35,8 +34,7 @@ class GeolocationDaoLocalFileTest {
   }
 
   @Test fun `fetching invalid IP throws`() {
-    assertThat { dao.fetchGeolocationForIp("invalid") }
-      .isFailure()
+    assertFailure { dao.fetchGeolocationForIp("invalid") }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Invalid IP address")
@@ -44,8 +42,7 @@ class GeolocationDaoLocalFileTest {
   }
 
   @Test fun `fetching missing IP throws`() {
-    assertThat { dao.fetchGeolocationForIp("255.255.255.255") }
-      .isFailure()
+    assertFailure { dao.fetchGeolocationForIp("255.255.255.255") }
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("IP geolocation not found")
@@ -65,7 +62,7 @@ class GeolocationDaoLocalFileTest {
           countryName = "Germany",
           region = "Berlin",
           city = "Berlin",
-        )
+        ),
       )
   }
 

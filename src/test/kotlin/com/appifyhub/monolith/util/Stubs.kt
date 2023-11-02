@@ -8,10 +8,14 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
+import com.appifyhub.monolith.domain.messaging.PushDevice
 import com.appifyhub.monolith.domain.messaging.Variable
+import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
@@ -31,12 +35,19 @@ import com.appifyhub.monolith.network.creator.project.ProjectStateResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
+import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
+import com.appifyhub.monolith.network.integrations.MailgunConfigDto
+import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.messaging.MessageResponse
 import com.appifyhub.monolith.network.messaging.MessageTemplateResponse
+import com.appifyhub.monolith.network.messaging.PushDeviceResponse
+import com.appifyhub.monolith.network.messaging.PushDevicesResponse
 import com.appifyhub.monolith.network.messaging.VariableResponse
 import com.appifyhub.monolith.network.messaging.ops.MessageInputsRequest
+import com.appifyhub.monolith.network.messaging.ops.MessageSendRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateCreateRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
+import com.appifyhub.monolith.network.messaging.ops.PushDeviceRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
@@ -47,12 +58,14 @@ import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
 import com.appifyhub.monolith.security.JwtClaims
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.service.integrations.CommunicationsService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
+import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
@@ -195,6 +208,50 @@ object Stubs {
     updatedAt = Date(0xA00001),
   )
 
+  private val mailgunConfig = MailgunConfig(
+    apiKey = "apiKey",
+    domain = "domain.com",
+    senderName = "senderName",
+    senderEmail = "senderEmail@domain.com",
+  )
+
+  private val mailgunConfigUpdated = MailgunConfig(
+    apiKey = "apiKey1",
+    domain = "domain1.com",
+    senderName = "senderName1",
+    senderEmail = "senderEmail1@domain.com",
+  )
+
+  private val twilioConfig = TwilioConfig(
+    accountSid = "accountSid",
+    authToken = "authToken",
+    messagingServiceId = "messagingServiceId",
+    maxPricePerMessage = 2,
+    maxRetryAttempts = 2,
+    defaultSenderName = "defSenderName",
+    defaultSenderNumber = "+491760000000",
+  )
+
+  private val twilioConfigUpdated = TwilioConfig(
+    accountSid = "accountSid1",
+    authToken = "authToken1",
+    messagingServiceId = "messagingServiceId1",
+    maxPricePerMessage = 3,
+    maxRetryAttempts = 3,
+    defaultSenderName = "defSenderName1",
+    defaultSenderNumber = "+491760000001",
+  )
+
+  private val firebaseConfig = FirebaseConfig(
+    projectName = "projectName",
+    serviceAccountKeyJsonBase64 = "c2VydmljZUFjY291bnRLZXlKc29uQmFzZTY0", // base64("serviceAccountKeyJsonBase64")
+  )
+
+  private val firebaseConfigUpdated = FirebaseConfig(
+    projectName = "projectName1",
+    serviceAccountKeyJsonBase64 = "c2VydmljZUFjY291bnRLZXlKc29uQmFzZTY0MQ==", // base64("serviceAccountKeyJsonBase641")
+  )
+
   val project = Project(
     id = userId.projectId,
     type = Project.Type.OPENSOURCE,
@@ -208,6 +265,9 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfig,
+    twilioConfig = twilioConfig,
+    firebaseConfig = firebaseConfig,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -225,6 +285,9 @@ object Stubs {
     anyoneCanSearch = false,
     onHold = false,
     languageTag = Locale.UK.toLanguageTag(),
+    mailgunConfig = mailgunConfigUpdated,
+    twilioConfig = twilioConfigUpdated,
+    firebaseConfig = firebaseConfigUpdated,
     createdAt = project.createdAt,
     updatedAt = Date(0xA20001),
   )
@@ -245,6 +308,7 @@ object Stubs {
     projectId = project.id,
     name = "template",
     languageTag = Locale.US.toLanguageTag(),
+    title = "title",
     content = "content",
     isHtml = true,
     createdAt = Date(0x10000E),
@@ -256,6 +320,7 @@ object Stubs {
     projectId = project.id,
     name = "template1",
     languageTag = Locale.UK.toLanguageTag(),
+    title = "title1",
     content = "content1",
     isHtml = false,
     createdAt = Date(0x10000E),
@@ -265,6 +330,12 @@ object Stubs {
   val message = Message(
     template = messageTemplate,
     materialized = "content",
+  )
+
+  val pushDevice = PushDevice(
+    deviceId = "push_token",
+    type = PushDevice.Type.ANDROID,
+    owner = user,
   )
 
   // endregion
@@ -322,6 +393,9 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfig,
+    twilioConfig = twilioConfig,
+    firebaseConfig = firebaseConfig,
   )
 
   val projectUpdater = ProjectUpdater(
@@ -336,12 +410,16 @@ object Stubs {
     anyoneCanSearch = Settable(false),
     onHold = Settable(false),
     languageTag = Settable(Locale.UK.toLanguageTag()),
+    mailgunConfig = Settable(mailgunConfigUpdated),
+    twilioConfig = Settable(twilioConfigUpdated),
+    firebaseConfig = Settable(firebaseConfigUpdated),
   )
 
   val messageTemplateCreator = MessageTemplateCreator(
     projectId = project.id,
     name = messageTemplate.name,
     languageTag = messageTemplate.languageTag,
+    title = messageTemplate.title,
     content = messageTemplate.content,
     isHtml = messageTemplate.isHtml,
   )
@@ -350,6 +428,7 @@ object Stubs {
     id = messageTemplate.id,
     name = Settable("template1"),
     languageTag = Settable(Locale.UK.toLanguageTag()),
+    title = Settable("title1"),
     content = Settable("content1"),
     isHtml = Settable(false),
   )
@@ -422,6 +501,19 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunApiKey = mailgunConfig.apiKey,
+    mailgunDomain = mailgunConfig.domain,
+    mailgunSenderName = mailgunConfig.senderName,
+    mailgunSenderEmail = mailgunConfig.senderEmail,
+    twilioAccountSid = twilioConfig.accountSid,
+    twilioAuthToken = twilioConfig.authToken,
+    twilioMessagingServiceId = twilioConfig.messagingServiceId,
+    twilioMaxPricePerMessage = twilioConfig.maxPricePerMessage,
+    twilioMaxRetryAttempts = twilioConfig.maxRetryAttempts,
+    twilioDefaultSenderName = twilioConfig.defaultSenderName,
+    twilioDefaultSenderNumber = twilioConfig.defaultSenderNumber,
+    firebaseProjectName = firebaseConfig.projectName,
+    firebaseServiceAccountKeyJsonBase64 = firebaseConfig.serviceAccountKeyJsonBase64,
     createdAt = Date(0xC20000),
     updatedAt = Date(0xA20000),
   )
@@ -508,10 +600,17 @@ object Stubs {
     project = projectDbm,
     name = "template",
     languageTag = Locale.US.toLanguageTag(),
+    title = "title",
     content = "content",
     isHtml = true,
     createdAt = Date(0x10000E),
     updatedAt = Date(0x1F0000),
+  )
+
+  val pushDeviceDbm = PushDeviceDbm(
+    deviceId = pushDevice.deviceId,
+    type = PushDevice.Type.ANDROID.name,
+    owner = userDbm,
   )
 
   // endregion
@@ -611,6 +710,50 @@ object Stubs {
     unusableFeatures = emptyList(),
   )
 
+  private val mailgunConfigDto = MailgunConfigDto(
+    apiKey = mailgunConfig.apiKey,
+    domain = mailgunConfig.domain,
+    senderName = mailgunConfig.senderName,
+    senderEmail = mailgunConfig.senderEmail,
+  )
+
+  private val mailgunConfigDtoUpdated = MailgunConfigDto(
+    apiKey = mailgunConfigUpdated.apiKey,
+    domain = mailgunConfigUpdated.domain,
+    senderName = mailgunConfigUpdated.senderName,
+    senderEmail = mailgunConfigUpdated.senderEmail,
+  )
+
+  private val twilioConfigDto = TwilioConfigDto(
+    accountSid = twilioConfig.accountSid,
+    authToken = twilioConfig.authToken,
+    messagingServiceId = twilioConfig.messagingServiceId,
+    maxPricePerMessage = twilioConfig.maxPricePerMessage,
+    maxRetryAttempts = twilioConfig.maxRetryAttempts,
+    defaultSenderName = twilioConfig.defaultSenderName.trim(),
+    defaultSenderNumber = twilioConfig.defaultSenderNumber,
+  )
+
+  private val twilioConfigDtoUpdated = TwilioConfigDto(
+    accountSid = twilioConfigUpdated.accountSid,
+    authToken = twilioConfigUpdated.authToken,
+    messagingServiceId = twilioConfigUpdated.messagingServiceId,
+    maxPricePerMessage = twilioConfigUpdated.maxPricePerMessage,
+    maxRetryAttempts = twilioConfigUpdated.maxRetryAttempts,
+    defaultSenderName = twilioConfigUpdated.defaultSenderName.trim(),
+    defaultSenderNumber = twilioConfigUpdated.defaultSenderNumber,
+  )
+
+  private val firebaseConfigDto = FirebaseConfigDto(
+    projectName = firebaseConfig.projectName,
+    serviceAccountKeyJsonBase64 = firebaseConfig.serviceAccountKeyJsonBase64,
+  )
+
+  private val firebaseConfigDtoUpdated = FirebaseConfigDto(
+    projectName = firebaseConfigUpdated.projectName,
+    serviceAccountKeyJsonBase64 = firebaseConfigUpdated.serviceAccountKeyJsonBase64,
+  )
+
   val projectResponse = ProjectResponse(
     projectId = userId.projectId,
     type = project.type.name,
@@ -624,6 +767,9 @@ object Stubs {
     anyoneCanSearch = project.anyoneCanSearch,
     onHold = project.onHold,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfigDto,
+    twilioConfig = twilioConfigDto,
+    firebaseConfig = firebaseConfigDto,
     createdAt = "1970-01-01 03:31",
     updatedAt = "1970-01-01 02:56",
   )
@@ -637,6 +783,7 @@ object Stubs {
     id = messageTemplate.id,
     name = messageTemplate.name,
     languageTag = messageTemplate.languageTag,
+    title = messageTemplate.title,
     content = messageTemplate.content,
     isHtml = messageTemplate.isHtml,
     createdAt = "1970-01-01 00:17",
@@ -646,6 +793,15 @@ object Stubs {
   val messageResponse = MessageResponse(
     template = messageTemplateResponse,
     materialized = "content",
+  )
+
+  val pushDeviceResponse = PushDeviceResponse(
+    deviceId = pushDevice.deviceId,
+    type = pushDevice.type.name,
+  )
+
+  val pushDevicesResponse = PushDevicesResponse(
+    devices = listOf(pushDeviceResponse),
   )
 
   // endregion
@@ -709,6 +865,9 @@ object Stubs {
     logoUrl = project.logoUrl,
     websiteUrl = project.websiteUrl,
     languageTag = Locale.US.toLanguageTag(),
+    mailgunConfig = mailgunConfigDto,
+    twilioConfig = twilioConfigDto,
+    firebaseConfig = firebaseConfigDto,
   )
 
   val projectUpdateRequest = ProjectUpdateRequest(
@@ -722,11 +881,15 @@ object Stubs {
     anyoneCanSearch = SettableRequest(false),
     onHold = SettableRequest(false),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
+    mailgunConfig = SettableRequest(mailgunConfigDtoUpdated),
+    twilioConfig = SettableRequest(twilioConfigDtoUpdated),
+    firebaseConfig = SettableRequest(firebaseConfigDtoUpdated),
   )
 
   val messageTemplateCreateRequest = MessageTemplateCreateRequest(
     name = messageTemplateCreator.name,
     languageTag = messageTemplateCreator.languageTag,
+    title = messageTemplateCreator.title,
     content = messageTemplateCreator.content,
     isHtml = messageTemplateCreator.isHtml,
   )
@@ -734,6 +897,7 @@ object Stubs {
   val messageTemplateUpdateRequest = MessageTemplateUpdateRequest(
     name = SettableRequest(messageTemplateUpdater.name!!.value),
     languageTag = SettableRequest(messageTemplateUpdater.languageTag!!.value),
+    title = SettableRequest(messageTemplateUpdater.title!!.value),
     content = SettableRequest(messageTemplateUpdater.content!!.value),
     isHtml = SettableRequest(messageTemplateUpdater.isHtml!!.value),
   )
@@ -741,6 +905,17 @@ object Stubs {
   val messageInputsRequest = MessageInputsRequest(
     universalUserId = messageInputs.userId?.toUniversalFormat(),
     projectId = messageInputs.projectId,
+  )
+
+  val pushDeviceRequest = PushDeviceRequest(
+    deviceId = pushDevice.deviceId,
+    type = pushDevice.type.name,
+  )
+
+  val messageSendRequest = MessageSendRequest(
+    type = CommunicationsService.Type.EMAIL.name,
+    templateId = messageTemplate.id,
+    templateName = messageTemplate.name,
   )
 
   // endregion

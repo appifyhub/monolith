@@ -5,7 +5,6 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
-import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.security.JwtHelper
@@ -240,9 +239,7 @@ class TokenDetailsRepositoryImplTest {
       onGeneric { deleteAllByOwner(any()) } doAnswer {}
     }
 
-    assertThat {
-      repository.removeTokensFor(Stubs.user, Stubs.project)
-    }.isSuccess()
+    assertThat(repository.removeTokensFor(Stubs.user, Stubs.project)).isEqualTo(Unit)
 
     verify(tokenDetailsDao).deleteAllByOwner(Stubs.userDbm)
   }

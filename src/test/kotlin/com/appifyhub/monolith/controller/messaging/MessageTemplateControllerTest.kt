@@ -25,7 +25,6 @@ import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.TimeProviderSystem
 import com.appifyhub.monolith.util.bearerBodyRequest
 import com.appifyhub.monolith.util.bearerEmptyRequest
-import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,17 +37,18 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.util.Locale
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class MessageTemplateControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -77,7 +77,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, "invalid"),
         uriVariables = mapOf("projectId" to Stubs.project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -95,7 +95,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -113,7 +113,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -131,7 +131,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -159,7 +159,7 @@ class MessageTemplateControllerTest {
           "projectId" to Stubs.project.id,
           "templateId" to Stubs.messageTemplate.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -179,7 +179,7 @@ class MessageTemplateControllerTest {
           "projectId" to project.id,
           "templateId" to Stubs.messageTemplate.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -200,7 +200,7 @@ class MessageTemplateControllerTest {
           "projectId" to project.id,
           "templateId" to template.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -216,7 +216,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("projectId" to Stubs.project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -233,7 +233,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -250,7 +250,7 @@ class MessageTemplateControllerTest {
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         languageTag = Locale.GERMAN.toLanguageTag(),
-      )
+      ),
     )
 
     assertThat(
@@ -259,7 +259,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -285,7 +285,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -309,7 +309,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -337,7 +337,7 @@ class MessageTemplateControllerTest {
           "projectId" to Stubs.project.id,
           "templateId" to Stubs.messageTemplate.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -358,7 +358,7 @@ class MessageTemplateControllerTest {
           "projectId" to project.id,
           "templateId" to Stubs.messageTemplate.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -380,7 +380,7 @@ class MessageTemplateControllerTest {
           "projectId" to project.id,
           "templateId" to template.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -408,7 +408,7 @@ class MessageTemplateControllerTest {
           "projectId" to Stubs.project.id,
           "templateId" to Stubs.messageTemplate.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -428,7 +428,7 @@ class MessageTemplateControllerTest {
           "projectId" to project.id,
           "templateId" to Stubs.messageTemplate.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -449,7 +449,7 @@ class MessageTemplateControllerTest {
           "projectId" to project.id,
           "templateId" to template.id,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -465,7 +465,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("projectId" to Stubs.project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -482,7 +482,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -503,7 +503,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -529,7 +529,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -549,7 +549,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("projectId" to Stubs.project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -566,7 +566,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -583,7 +583,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -603,7 +603,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, "invalid"),
         uriVariables = mapOf("projectId" to Stubs.project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -621,7 +621,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -639,7 +639,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -664,7 +664,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("projectId" to Stubs.project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -682,7 +682,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -700,7 +700,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
     }
@@ -715,7 +715,7 @@ class MessageTemplateControllerTest {
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         content = "OK for {{${Variable.USER_NAME.code}}}",
-      )
+      ),
     )
     val target = stubber.users(project).default()
     val request = MessageInputsRequest(universalUserId = target.id.toUniversalFormat())
@@ -726,7 +726,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 
@@ -747,7 +747,7 @@ class MessageTemplateControllerTest {
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         content = "OK for {{${Variable.PROJECT_NAME.code}}}",
-      )
+      ),
     )
     val request = MessageInputsRequest(projectId = project.id)
 
@@ -757,7 +757,7 @@ class MessageTemplateControllerTest {
         method = HttpMethod.POST,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
 

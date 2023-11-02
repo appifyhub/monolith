@@ -1,11 +1,11 @@
 package com.appifyhub.monolith.service.schema
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
-import assertk.assertions.isFailure
+import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
-import assertk.assertions.isSuccess
 import assertk.assertions.isTrue
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
@@ -28,8 +28,7 @@ class SchemaServiceImplTest {
   @Autowired lateinit var service: SchemaService
 
   @Test fun `update fails with invalid schema version`() {
-    assertThat { service.update(Schema(-1, false)) }
-      .isFailure()
+    assertFailure { service.update(Schema(-1, false)) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Schema Version")
@@ -38,13 +37,12 @@ class SchemaServiceImplTest {
 
   @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
   @Test fun `update succeeds with valid schema version`() {
-    assertThat { service.update(Schema(2, true)) }
-      .isSuccess()
+    assertThat(service.update(Schema(2, true)))
+      .isEqualTo(Unit)
   }
 
   @Test fun `is initialized fails with invalid schema version`() {
-    assertThat { service.isInitialized(-1) }
-      .isFailure()
+    assertFailure { service.isInitialized(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Schema Version")

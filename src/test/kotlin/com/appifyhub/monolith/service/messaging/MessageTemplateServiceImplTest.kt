@@ -1,19 +1,24 @@
 package com.appifyhub.monolith.service.messaging
 
 import assertk.all
+import assertk.assertAll
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
+import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
 import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.ProjectCreated
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.UserAuthResetCompleted
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.UserCreated
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
@@ -50,9 +55,27 @@ class MessageTemplateServiceImplTest {
     timeProvider.staticTime = { null }
   }
 
+  @Test fun `initializing defaults works`() {
+    assertAll {
+      val creatorProjectId = stubber.projects.creator().id
+
+      assertThat(service.deleteAllTemplatesByProjectId(creatorProjectId))
+        .isEqualTo(Unit)
+
+      assertThat(service.initializeDefaults())
+        .isEqualTo(Unit)
+
+      assertThat(service.fetchTemplatesByName(projectId = creatorProjectId, name = ProjectCreated.NAME))
+        .hasSize(1)
+      assertThat(service.fetchTemplatesByName(projectId = creatorProjectId, name = UserCreated.NAME))
+        .hasSize(1)
+      assertThat(service.fetchTemplatesByName(projectId = creatorProjectId, name = UserAuthResetCompleted.NAME))
+        .hasSize(1)
+    }
+  }
+
   @Test fun `adding template fails with invalid project ID`() {
-    assertThat { service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = -1)) }
-      .isFailure()
+    assertFailure { service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = -1)) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -60,8 +83,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `adding template fails with invalid template name`() {
-    assertThat { service.addTemplate(Stubs.messageTemplateCreator.copy(name = "\n\t")) }
-      .isFailure()
+    assertFailure { service.addTemplate(Stubs.messageTemplateCreator.copy(name = "\n\t")) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -69,17 +91,23 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `adding template fails with invalid language tag`() {
-    assertThat { service.addTemplate(Stubs.messageTemplateCreator.copy(languageTag = "und")) }
-      .isFailure()
+    assertFailure { service.addTemplate(Stubs.messageTemplateCreator.copy(languageTag = "und")) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Language Tag")
       }
   }
 
+  @Test fun `adding template fails with invalid title`() {
+    assertFailure { service.addTemplate(Stubs.messageTemplateCreator.copy(title = "\n\t")) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Template Title")
+      }
+  }
+
   @Test fun `adding template fails with invalid content`() {
-    assertThat { service.addTemplate(Stubs.messageTemplateCreator.copy(content = "\n\t")) }
-      .isFailure()
+    assertFailure { service.addTemplate(Stubs.messageTemplateCreator.copy(content = "\n\t")) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Content")
@@ -89,8 +117,7 @@ class MessageTemplateServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   @Test fun `adding template fails with an already matching name-language combination`() {
     service.addTemplate(Stubs.messageTemplateCreator)
-    assertThat { service.addTemplate(Stubs.messageTemplateCreator) }
-      .isFailure()
+    assertFailure { service.addTemplate(Stubs.messageTemplateCreator) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Duplicate")
@@ -102,16 +129,15 @@ class MessageTemplateServiceImplTest {
     assertThat(service.addTemplate(Stubs.messageTemplateCreator))
       .isDataClassEqualTo(
         Stubs.messageTemplate.copy(
-          id = 2,
+          id = 5, // there are some default templates
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
-        )
+        ),
       )
   }
 
   @Test fun `fetching template by ID fails with invalid ID`() {
-    assertThat { service.fetchTemplateById(-1) }
-      .isFailure()
+    assertFailure { service.fetchTemplateById(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template ID")
@@ -127,8 +153,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `fetching template by name fails with invalid project ID`() {
-    assertThat { service.fetchTemplatesByName(-1, "name") }
-      .isFailure()
+    assertFailure { service.fetchTemplatesByName(-1, "name") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -136,8 +161,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `fetching template by name fails with invalid name`() {
-    assertThat { service.fetchTemplatesByName(1, "") }
-      .isFailure()
+    assertFailure { service.fetchTemplatesByName(1, "") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -154,8 +178,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `fetching template by project ID fails with invalid project ID`() {
-    assertThat { service.fetchTemplatesByProjectId(-1) }
-      .isFailure()
+    assertFailure { service.fetchTemplatesByProjectId(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -172,8 +195,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `fetching template by name and language fails with invalid project ID`() {
-    assertThat { service.fetchTemplatesByNameAndLanguage(-1, "name", "lang") }
-      .isFailure()
+    assertFailure { service.fetchTemplatesByNameAndLanguage(-1, "name", "lang") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -181,8 +203,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `fetching template by name and language fails with invalid name`() {
-    assertThat { service.fetchTemplatesByNameAndLanguage(1, "", "lang") }
-      .isFailure()
+    assertFailure { service.fetchTemplatesByNameAndLanguage(1, "", "lang") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -190,8 +211,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `fetching template by name and language fails with invalid language tag`() {
-    assertThat { service.fetchTemplatesByNameAndLanguage(1, "name", "asoiasjdoaisjdo") }
-      .isFailure()
+    assertFailure { service.fetchTemplatesByNameAndLanguage(1, "name", "asoiasjdoaisjdo") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Language Tag")
@@ -205,14 +225,13 @@ class MessageTemplateServiceImplTest {
 
     assertThat(
       service.fetchTemplatesByNameAndLanguage(project.id, template.name, template.languageTag)
-        .map { it.cleanDates() }
+        .map { it.cleanDates() },
     )
       .isEqualTo(listOf(template.cleanDates()))
   }
 
   @Test fun `updating template fails with invalid template ID`() {
-    assertThat { service.updateTemplate(Stubs.messageTemplateUpdater.copy(id = -1)) }
-      .isFailure()
+    assertFailure { service.updateTemplate(Stubs.messageTemplateUpdater.copy(id = -1)) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template ID")
@@ -220,8 +239,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `updating template fails with invalid template name`() {
-    assertThat { service.updateTemplate(Stubs.messageTemplateUpdater.copy(name = Settable("\n\t"))) }
-      .isFailure()
+    assertFailure { service.updateTemplate(Stubs.messageTemplateUpdater.copy(name = Settable("\n\t"))) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -229,17 +247,23 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `updating template fails with invalid language tag`() {
-    assertThat { service.updateTemplate(Stubs.messageTemplateUpdater.copy(languageTag = Settable("und"))) }
-      .isFailure()
+    assertFailure { service.updateTemplate(Stubs.messageTemplateUpdater.copy(languageTag = Settable("und"))) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Language Tag")
       }
   }
 
+  @Test fun `updating template fails with invalid title`() {
+    assertFailure { service.updateTemplate(Stubs.messageTemplateUpdater.copy(title = Settable("\n\t"))) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Template Title")
+      }
+  }
+
   @Test fun `updating template fails with invalid content`() {
-    assertThat { service.updateTemplate(Stubs.messageTemplateUpdater.copy(content = Settable("\n\t"))) }
-      .isFailure()
+    assertFailure { service.updateTemplate(Stubs.messageTemplateUpdater.copy(content = Settable("\n\t"))) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Content")
@@ -247,8 +271,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `updating template fails with missing template`() {
-    assertThat { service.updateTemplate(Stubs.messageTemplateUpdater) }
-      .isFailure()
+    assertFailure { service.updateTemplate(Stubs.messageTemplateUpdater) }
       .all {
         hasClass(NoSuchElementException::class)
       }
@@ -265,13 +288,12 @@ class MessageTemplateServiceImplTest {
           id = template.id,
           createdAt = template.createdAt,
           updatedAt = timeProvider.currentDate,
-        ).cleanDates()
+        ).cleanDates(),
       )
   }
 
   @Test fun `deleting template fails with invalid template ID`() {
-    assertThat { service.deleteTemplateById(-1) }
-      .isFailure()
+    assertFailure { service.deleteTemplateById(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template ID")
@@ -283,21 +305,19 @@ class MessageTemplateServiceImplTest {
     val template1 = service.addTemplate(Stubs.messageTemplateCreator)
     val template2 = service.addTemplate(Stubs.messageTemplateCreator.copy(name = "another"))
 
-    assertThat { service.deleteTemplateById(template1.id) }
-      .isSuccess()
-      .all {
-        assertThat { service.fetchTemplateById(template1.id) }
-          .isFailure()
-          .hasClass(NoSuchElementException::class)
-        assertThat(service.fetchTemplateById(template2.id))
-          .transform { it.id }
-          .isEqualTo(template2.id)
-      }
+    assertAll {
+      assertThat(service.deleteTemplateById(template1.id))
+        .isEqualTo(Unit)
+      assertFailure { service.fetchTemplateById(template1.id) }
+        .hasClass(NoSuchElementException::class)
+      assertThat(service.fetchTemplateById(template2.id))
+        .transform { it.id }
+        .isEqualTo(template2.id)
+    }
   }
 
   @Test fun `deleting all project templates fails with invalid project ID`() {
-    assertThat { service.deleteAllTemplatesByProjectId(-1) }
-      .isFailure()
+    assertFailure { service.deleteAllTemplatesByProjectId(-1) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -312,24 +332,21 @@ class MessageTemplateServiceImplTest {
     val template12 = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project1.id, name = "another"))
     val template21 = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project2.id))
 
-    assertThat { service.deleteAllTemplatesByProjectId(project1.id) }
-      .isSuccess()
-      .all {
-        assertThat { service.fetchTemplateById(template11.id) }
-          .isFailure()
-          .hasClass(NoSuchElementException::class)
-        assertThat { service.fetchTemplateById(template12.id) }
-          .isFailure()
-          .hasClass(NoSuchElementException::class)
-        assertThat(service.fetchTemplateById(template21.id))
-          .transform { it.id }
-          .isEqualTo(template21.id)
-      }
+    assertAll {
+      assertThat(service.deleteAllTemplatesByProjectId(project1.id))
+        .isEqualTo(Unit)
+      assertFailure { service.fetchTemplateById(template11.id) }
+        .hasClass(NoSuchElementException::class)
+      assertFailure { service.fetchTemplateById(template12.id) }
+        .hasClass(NoSuchElementException::class)
+      assertThat(service.fetchTemplateById(template21.id))
+        .transform { it.id }
+        .isEqualTo(template21.id)
+    }
   }
 
   @Test fun `deleting all project templates by name fails with invalid project ID`() {
-    assertThat { service.deleteAllTemplatesByName(-1, "name") }
-      .isFailure()
+    assertFailure { service.deleteAllTemplatesByName(-1, "name") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -337,8 +354,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `deleting all project templates by name fails with invalid name`() {
-    assertThat { service.deleteAllTemplatesByName(1, "\n\t") }
-      .isFailure()
+    assertFailure { service.deleteAllTemplatesByName(1, "\n\t") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -354,24 +370,21 @@ class MessageTemplateServiceImplTest {
     val template1Uk = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id, languageTag = uk))
     val template2 = service.addTemplate(Stubs.messageTemplateCreator.copy(projectId = project.id, name = "another"))
 
-    assertThat { service.deleteAllTemplatesByName(project.id, name = Stubs.messageTemplateCreator.name) }
-      .isSuccess()
-      .all {
-        assertThat { service.fetchTemplateById(template1Us.id) }
-          .isFailure()
-          .hasClass(NoSuchElementException::class)
-        assertThat { service.fetchTemplateById(template1Uk.id) }
-          .isFailure()
-          .hasClass(NoSuchElementException::class)
-        assertThat(service.fetchTemplateById(template2.id))
-          .transform { it.id }
-          .isEqualTo(template2.id)
-      }
+    assertAll {
+      assertThat(service.deleteAllTemplatesByName(project.id, name = Stubs.messageTemplateCreator.name))
+        .isEqualTo(Unit)
+      assertFailure { service.fetchTemplateById(template1Us.id) }
+        .hasClass(NoSuchElementException::class)
+      assertFailure { service.fetchTemplateById(template1Uk.id) }
+        .hasClass(NoSuchElementException::class)
+      assertThat(service.fetchTemplateById(template2.id))
+        .transform { it.id }
+        .isEqualTo(template2.id)
+    }
   }
 
   @Test fun `getting variables fails with blank content`() {
-    assertThat { service.detectVariables(" \n\t ") }
-      .isFailure()
+    assertFailure { service.detectVariables(" \n\t ") }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Content")
@@ -389,8 +402,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `materializing template by ID fails with invalid template ID`() {
-    assertThat { service.materializeById(-1, Inputs()) }
-      .isFailure()
+    assertFailure { service.materializeById(-1, Inputs()) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template ID")
@@ -398,8 +410,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `materializing template by ID fails with missing template`() {
-    assertThat { service.materializeById(1, Inputs()) }
-      .isFailure()
+    assertFailure { service.materializeById(1, Inputs()) }
       .all {
         hasClass(NoSuchElementException::class)
       }
@@ -419,32 +430,41 @@ class MessageTemplateServiceImplTest {
         Message(
           template = template.cleanDates(),
           materialized = creator.content,
-        )
+        ),
       )
   }
 
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   @Test fun `materializing template by ID works (with replacements)`() {
     val project = stubber.projects.new(name = "Templated Project")
+    val user = stubber.users(project).default(autoVerified = false)
+    val content = Variable.values().joinToString(" # ") { "{{${it.code}}}" }
+
     val creator = Stubs.messageTemplateCreator.copy(
       projectId = project.id,
-      content = "{{${PROJECT_NAME.code}}} works",
+      content = content,
     )
+
     val template = service.addTemplate(creator)
-    val inputs = Inputs(projectId = project.id)
+    val inputs = Inputs(projectId = project.id, userId = user.id)
+    val expectedContent = listOf(
+      user.name,
+      project.name,
+      user.verificationToken,
+      user.signature,
+    ).joinToString(" # ")
 
     assertThat(service.materializeById(template.id, inputs).cleanDates())
       .isDataClassEqualTo(
         Message(
           template = template.cleanDates(),
-          materialized = "${project.name} works",
-        )
+          materialized = expectedContent,
+        ),
       )
   }
 
   @Test fun `materializing template by name fails with invalid project ID`() {
-    assertThat { service.materializeByName(-1, "name", Inputs()) }
-      .isFailure()
+    assertFailure { service.materializeByName(-1, "name", Inputs()) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project ID")
@@ -452,8 +472,7 @@ class MessageTemplateServiceImplTest {
   }
 
   @Test fun `materializing template by name fails with invalid template name`() {
-    assertThat { service.materializeByName(1, "\n\t", Inputs()) }
-      .isFailure()
+    assertFailure { service.materializeByName(1, "\n\t", Inputs()) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Template Name")
@@ -464,8 +483,7 @@ class MessageTemplateServiceImplTest {
   @Test fun `materializing template by name fails with no templates`() {
     val project = stubber.projects.new()
 
-    assertThat { service.materializeByName(project.id, "name", Inputs()) }
-      .isFailure()
+    assertFailure { service.materializeByName(project.id, "name", Inputs()) }
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("No matching templates")
@@ -481,14 +499,14 @@ class MessageTemplateServiceImplTest {
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         content = "Static content",
-      )
+      ),
     )
     val template = service.addTemplate(
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         languageTag = Locale.GERMANY.toLanguageTag(),
         content = "{{${USER_NAME.code}}} works",
-      )
+      ),
     )
 
     assertThat(service.materializeByName(project.id, template.name, inputs).cleanDates())
@@ -496,7 +514,7 @@ class MessageTemplateServiceImplTest {
         Message(
           template = template.cleanDates(),
           materialized = "${user.name} works",
-        )
+        ),
       )
   }
 
@@ -508,14 +526,14 @@ class MessageTemplateServiceImplTest {
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         content = "Static content",
-      )
+      ),
     )
     val template = service.addTemplate(
       Stubs.messageTemplateCreator.copy(
         projectId = project.id,
         languageTag = Locale.GERMANY.toLanguageTag(),
         content = "{{${PROJECT_NAME.code}}} works",
-      )
+      ),
     )
 
     assertThat(service.materializeByName(project.id, template.name, inputs).cleanDates())
@@ -523,7 +541,7 @@ class MessageTemplateServiceImplTest {
         Message(
           template = template.cleanDates(),
           materialized = "${project.name} works",
-        )
+        ),
       )
   }
 
