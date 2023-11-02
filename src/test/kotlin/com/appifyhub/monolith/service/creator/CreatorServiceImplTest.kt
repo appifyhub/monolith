@@ -231,22 +231,23 @@ class CreatorServiceImplTest {
       websiteUrl = "https://www.example.com",
     )
 
-    val expectedProject = Stubs.project.copy(
-      id = Stubs.project.id + 1,
-      logoUrl = "https://www.example.com/logo.png",
-      websiteUrl = "https://www.example.com",
-    ).cleanStubArtifacts()
-    val expectedEvent = ProjectCreated(
-      ownerProject = creatorProject,
-      payload = expectedProject,
-    )
-
     assertAll {
+      val expectedProject = Stubs.project.copy(
+        id = 5, // there are other stubs using the same incrementor
+        logoUrl = "https://www.example.com/logo.png",
+        websiteUrl = "https://www.example.com",
+      ).cleanStubArtifacts()
+      val expectedEvent = ProjectCreated(
+        ownerProject = creatorProject,
+        payload = expectedProject,
+      )
+
       assertThat(service.addProject(projectData).cleanDates())
         .isDataClassEqualTo(expectedProject)
 
-      assertThat(eventBus.nextPublished)
-        .isEqualTo(expectedEvent)
+      assertThat(eventBus.lastPublished)
+        .transform { it as ProjectCreated }
+        .isDataClassEqualTo(expectedEvent)
     }
   }
 

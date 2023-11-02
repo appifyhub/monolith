@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.service.integrations
 
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.domain.user.User
 
 interface CommunicationsService {
 
@@ -15,8 +16,8 @@ interface CommunicationsService {
     }
   }
 
-  @Throws fun sendTo(projectId: Long, userId: UserId, templateId: Long, type: Type)
+  @Throws fun sendTo(projectId: Long, userId: UserId, overrideUser: User? = null, templateId: Long, type: Type)
 
-  @Throws fun sendTo(projectId: Long, userId: UserId, templateName: String, type: Type)
+  @Throws fun sendTo(projectId: Long, userId: UserId, overrideUser: User? = null, templateName: String, type: Type)
 
 }

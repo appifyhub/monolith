@@ -85,7 +85,6 @@ class CreatorServiceImpl(
     )
 
     return creatorRepository.addProject(normalizedProjectCreator)
-      // notify about standard project creation
       .also { result ->
         creatorProject?.let {
           eventPublisher.publish(ProjectCreated(ownerProject = it, payload = result))

@@ -21,9 +21,12 @@ import com.appifyhub.monolith.domain.user.User.Type
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.eventbus.UserAuthResetCompleted
+import com.appifyhub.monolith.eventbus.UserCreated
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
+import com.appifyhub.monolith.util.EventBusFake
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
@@ -53,6 +56,7 @@ class UserServiceImplTest {
   @Autowired lateinit var service: UserService
   @Autowired lateinit var passwordEncoder: PasswordEncoder
   @Autowired lateinit var timeProvider: TimeProviderFake
+  @Autowired lateinit var eventBus: EventBusFake
   @Autowired lateinit var stubber: Stubber
 
   @BeforeEach fun setup() {
@@ -345,6 +349,30 @@ class UserServiceImplTest {
           languageTag = null,
         ),
       )
+  }
+
+  @DirtiesContext(methodMode = MethodMode.BEFORE_METHOD)
+  @Test fun `adding user notifies subscribers`() {
+    val project = stubber.projects.new(userIdType = UserIdType.CUSTOM)
+    val creator = Stubs.userCreator.copy(
+      userId = "custom_id",
+      projectId = project.id,
+      rawSignature = "12345678",
+    )
+    stubGenerators()
+
+    assertAll {
+      val expectedUserId = UserId(creator.userId!!, project.id)
+
+      assertThat(service.addUser(creator))
+        .isInstanceOf(User::class)
+
+      assertThat(eventBus.lastPublished)
+        .transform { it as UserCreated }
+        // check IDs only, as the rest is already tested elsewhere
+        .transform { it.ownerProject.id to it.payload.id }
+        .isEqualTo(project.id to expectedUserId)
+    }
   }
 
   // Fetching
@@ -819,11 +847,22 @@ class UserServiceImplTest {
 
   @Test fun `resetting signature by ID succeeds`() {
     stubGenerators()
+
     val user = stubber.creators.default()
     val expectedSignature = passwordEncoder.encode(SignatureGenerator.nextSignature)
 
-    assertThat(service.resetSignatureById(user.id))
-      .isDataClassEqualTo(user.copy(signature = expectedSignature))
+    assertAll {
+      val expectedUser = user.copy(signature = expectedSignature)
+      val expectedPayload = user.copy(signature = SignatureGenerator.nextSignature)
+      val expectedEvent = UserAuthResetCompleted(stubber.projects.creator(), expectedPayload)
+
+      assertThat(service.resetSignatureById(user.id))
+        .isDataClassEqualTo(expectedUser)
+
+      assertThat(eventBus.lastPublished)
+        .transform { it as UserAuthResetCompleted }
+        .isDataClassEqualTo(expectedEvent)
+    }
   }
 
   // Removing

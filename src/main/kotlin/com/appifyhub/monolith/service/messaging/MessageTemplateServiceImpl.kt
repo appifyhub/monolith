@@ -1,12 +1,15 @@
 package com.appifyhub.monolith.service.messaging
 
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults as Defaults
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
+import com.appifyhub.monolith.domain.messaging.Variable.SIGNATURE
 import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME
+import com.appifyhub.monolith.domain.messaging.Variable.VERIFICATION_CODE
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.user.User
@@ -19,6 +22,7 @@ import com.appifyhub.monolith.util.ext.throwNormalization
 import com.appifyhub.monolith.util.ext.throwNotFound
 import com.appifyhub.monolith.util.ext.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
+import java.util.Locale
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -41,6 +45,41 @@ class MessageTemplateServiceImpl(
   private val log = LoggerFactory.getLogger(this::class.java)
 
   // Storage-related
+
+  override fun initializeDefaults() {
+    val creatorProject = creatorService.getCreatorProject()
+    val defaultLanguage = Locale.US.toLanguageTag() // just an opinionated choice
+    addTemplate(
+      MessageTemplateCreator(
+        projectId = creatorProject.id,
+        name = Defaults.ProjectCreated.NAME,
+        languageTag = defaultLanguage,
+        title = Defaults.ProjectCreated.TITLE,
+        content = Defaults.ProjectCreated.CONTENT,
+        isHtml = false,
+      ),
+    )
+    addTemplate(
+      MessageTemplateCreator(
+        projectId = creatorProject.id,
+        name = Defaults.UserCreated.NAME,
+        languageTag = defaultLanguage,
+        title = Defaults.UserCreated.TITLE,
+        content = Defaults.UserCreated.CONTENT,
+        isHtml = false,
+      ),
+    )
+    addTemplate(
+      MessageTemplateCreator(
+        projectId = creatorProject.id,
+        name = Defaults.UserAuthResetCompleted.NAME,
+        languageTag = defaultLanguage,
+        title = Defaults.UserAuthResetCompleted.TITLE,
+        content = Defaults.UserAuthResetCompleted.CONTENT,
+        isHtml = false,
+      ),
+    )
+  }
 
   override fun addTemplate(creator: MessageTemplateCreator): MessageTemplate {
     log.debug("Adding template using $creator")
@@ -221,7 +260,7 @@ class MessageTemplateServiceImpl(
     log.debug("Resolving inputs $this")
 
     return ResolvedInputs(
-      user = userId?.let {
+      user = overrideUser ?: userId?.let {
         val normalized = Normalizers.UserId.run(userId).requireValid { "User ID" }
         userService.fetchUserByUserId(normalized)
       },
@@ -238,6 +277,8 @@ class MessageTemplateServiceImpl(
       val value = when (type) {
         USER_NAME -> resolvedInputs.user?.name
         PROJECT_NAME -> resolvedInputs.project?.name
+        VERIFICATION_CODE -> resolvedInputs.user?.verificationToken
+        SIGNATURE -> resolvedInputs.user?.signature
       } ?: DEFAULT_VALUE
       result = result.replace(wrapped, value)
     }

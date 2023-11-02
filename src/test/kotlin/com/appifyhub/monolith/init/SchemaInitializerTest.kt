@@ -7,7 +7,6 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -143,18 +142,7 @@ class SchemaInitializerTest {
         ),
       )
     }
-    verify(messageTemplateService) {
-      mock.addTemplate(
-        MessageTemplateCreator(
-          projectId = project.id,
-          name = MessageTemplateService.NAME_PROJECT_CREATED,
-          languageTag = Locale.US.toLanguageTag(),
-          title = MessageTemplateService.TITLE_PROJECT_CREATED,
-          content = MessageTemplateService.CONTENT_PROJECT_CREATED,
-          isHtml = false,
-        ),
-      )
-    }
+    verify(messageTemplateService).initializeDefaults()
   }
 
   @Test fun `initial seed generates a new signature if configured signature is blank`() {
@@ -221,18 +209,7 @@ class SchemaInitializerTest {
         ),
       )
     }
-    verify(messageTemplateService) {
-      mock.addTemplate(
-        MessageTemplateCreator(
-          projectId = project.id,
-          name = MessageTemplateService.NAME_PROJECT_CREATED,
-          languageTag = Locale.US.toLanguageTag(),
-          title = MessageTemplateService.TITLE_PROJECT_CREATED,
-          content = MessageTemplateService.CONTENT_PROJECT_CREATED,
-          isHtml = false,
-        ),
-      )
-    }
+    verify(messageTemplateService).initializeDefaults()
   }
 
   // Helpers

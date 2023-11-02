@@ -5,6 +5,7 @@ import assertk.assertAll
 import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
+import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
@@ -12,8 +13,12 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.messaging.Message
 import com.appifyhub.monolith.domain.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.messaging.Variable
 import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
 import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.ProjectCreated
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.UserAuthResetCompleted
+import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.UserCreated
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
@@ -48,6 +53,25 @@ class MessageTemplateServiceImplTest {
 
   @AfterEach fun teardown() {
     timeProvider.staticTime = { null }
+  }
+
+  @Test fun `initializing defaults works`() {
+    assertAll {
+      val creatorProjectId = stubber.projects.creator().id
+
+      assertThat(service.deleteAllTemplatesByProjectId(creatorProjectId))
+        .isEqualTo(Unit)
+
+      assertThat(service.initializeDefaults())
+        .isEqualTo(Unit)
+
+      assertThat(service.fetchTemplatesByName(projectId = creatorProjectId, name = ProjectCreated.NAME))
+        .hasSize(1)
+      assertThat(service.fetchTemplatesByName(projectId = creatorProjectId, name = UserCreated.NAME))
+        .hasSize(1)
+      assertThat(service.fetchTemplatesByName(projectId = creatorProjectId, name = UserAuthResetCompleted.NAME))
+        .hasSize(1)
+    }
   }
 
   @Test fun `adding template fails with invalid project ID`() {
@@ -105,7 +129,7 @@ class MessageTemplateServiceImplTest {
     assertThat(service.addTemplate(Stubs.messageTemplateCreator))
       .isDataClassEqualTo(
         Stubs.messageTemplate.copy(
-          id = 2,
+          id = 5, // there are some default templates
           createdAt = timeProvider.currentDate,
           updatedAt = timeProvider.currentDate,
         ),
@@ -413,18 +437,28 @@ class MessageTemplateServiceImplTest {
   @DirtiesContext(methodMode = MethodMode.AFTER_METHOD)
   @Test fun `materializing template by ID works (with replacements)`() {
     val project = stubber.projects.new(name = "Templated Project")
+    val user = stubber.users(project).default(autoVerified = false)
+    val content = Variable.values().joinToString(" # ") { "{{${it.code}}}" }
+
     val creator = Stubs.messageTemplateCreator.copy(
       projectId = project.id,
-      content = "{{${PROJECT_NAME.code}}} works",
+      content = content,
     )
+
     val template = service.addTemplate(creator)
-    val inputs = Inputs(projectId = project.id)
+    val inputs = Inputs(projectId = project.id, userId = user.id)
+    val expectedContent = listOf(
+      user.name,
+      project.name,
+      user.verificationToken,
+      user.signature,
+    ).joinToString(" # ")
 
     assertThat(service.materializeById(template.id, inputs).cleanDates())
       .isDataClassEqualTo(
         Message(
           template = template.cleanDates(),
-          materialized = "${project.name} works",
+          materialized = expectedContent,
         ),
       )
   }

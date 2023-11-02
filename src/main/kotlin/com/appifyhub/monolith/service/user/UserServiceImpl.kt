@@ -10,6 +10,9 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.eventbus.EventPublisher
+import com.appifyhub.monolith.eventbus.UserAuthResetCompleted
+import com.appifyhub.monolith.eventbus.UserCreated
 import com.appifyhub.monolith.repository.creator.SignatureGenerator
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.service.creator.CreatorService
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
   private val creatorService: CreatorService,
+  private val eventPublisher: EventPublisher,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
@@ -32,7 +36,8 @@ class UserServiceImpl(
   override fun addUser(creator: UserCreator): User {
     log.debug("Adding user $creator")
 
-    val userIdType = creatorService.fetchProjectById(creator.projectId).userIdType
+    val project = creatorService.fetchProjectById(creator.projectId)
+    val userIdType = project.userIdType
     val normalizedId = when (userIdType) {
       UserIdType.USERNAME -> Normalizers.Username.run(creator.userId).requireValid { "Username ID" }
       UserIdType.EMAIL -> Normalizers.Email.run(creator.userId).requireValid { "Email ID" }
@@ -72,6 +77,9 @@ class UserServiceImpl(
     if (totalUsers >= maxUsers) throwPreconditionFailed { "Maximum users reached" }
 
     return userRepository.addUser(normalizedCreator, userIdType)
+      .also { result ->
+        eventPublisher.publish(UserCreated(ownerProject = project, payload = result))
+      }
   }
 
   override fun fetchUserByUserId(id: UserId): User {
@@ -147,6 +155,7 @@ class UserServiceImpl(
         normalizedContactType = null
         normalizedContact = null
       }
+
       else -> {
         normalizedContactType = updater.contactType
         normalizedContact = updater.contact.mapValueNullable {
@@ -213,13 +222,18 @@ class UserServiceImpl(
     log.debug("Resetting signature by $id")
 
     val normalizedUserId = Normalizers.UserId.run(id).requireValid { "User ID" }
-    val userIdType = creatorService.fetchProjectById(id.projectId).userIdType
+    val project = creatorService.fetchProjectById(normalizedUserId.projectId)
+    val newSignature = SignatureGenerator.nextSignature
     val updater = UserUpdater(
       id = normalizedUserId,
-      rawSignature = Settable(SignatureGenerator.nextSignature),
+      rawSignature = Settable(newSignature),
     )
 
-    return userRepository.updateUser(updater, userIdType)
+    return userRepository.updateUser(updater, project.userIdType)
+      .also { result ->
+        val payload = result.copy(signature = newSignature)
+        eventPublisher.publish(UserAuthResetCompleted(ownerProject = project, payload = payload))
+      }
   }
 
   override fun removeUserById(id: UserId) {

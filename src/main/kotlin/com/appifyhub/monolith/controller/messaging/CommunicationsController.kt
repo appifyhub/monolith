@@ -52,9 +52,9 @@ class CommunicationsController(
     val user = accessManager.requestUserAccess(authentication, userId, Privilege.MESSAGE_TEMPLATE_SEND)
 
     if (messageSendRequest.templateId != null) {
-      communicationsService.sendTo(projectId, user.id, messageSendRequest.templateId, type)
+      communicationsService.sendTo(projectId, user.id, null, messageSendRequest.templateId, type)
     } else if (messageSendRequest.templateName != null) {
-      communicationsService.sendTo(projectId, user.id, messageSendRequest.templateName, type)
+      communicationsService.sendTo(projectId, user.id, null, messageSendRequest.templateName, type)
     }
 
     return SimpleResponse.DONE

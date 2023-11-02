@@ -6,7 +6,6 @@ import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
 import com.appifyhub.monolith.domain.integrations.FirebaseConfig
 import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.ops.UserCreator
@@ -155,16 +154,7 @@ class SchemaInitializer(
     )
 
     // add some default templates
-    messageTemplateService.addTemplate(
-      MessageTemplateCreator(
-        projectId = project.id,
-        name = MessageTemplateService.NAME_PROJECT_CREATED,
-        languageTag = Locale.US.toLanguageTag(),
-        title = MessageTemplateService.TITLE_PROJECT_CREATED,
-        content = MessageTemplateService.CONTENT_PROJECT_CREATED,
-        isHtml = false,
-      ),
-    )
+    messageTemplateService.initializeDefaults()
 
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature

@@ -35,7 +35,7 @@ class CommunicationsServiceImpl(
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
-  override fun sendTo(projectId: Long, userId: UserId, templateId: Long, type: Type) {
+  override fun sendTo(projectId: Long, userId: UserId, overrideUser: User?, templateId: Long, type: Type) {
     log.debug("Sending $type template $templateId to $userId")
 
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
@@ -44,12 +44,13 @@ class CommunicationsServiceImpl(
 
     val project = creatorService.fetchProjectById(normalizedProjectId)
     val user = userService.fetchUserByUserId(normalizedUserId)
-    val message = templateService.materializeById(normalizedTemplateId, Inputs(user.id, project.id))
+    val inputs = Inputs(userId = user.id, projectId = project.id, overrideUser = overrideUser)
+    val message = templateService.materializeById(normalizedTemplateId, inputs)
 
     execute(type, project, user, message)
   }
 
-  override fun sendTo(projectId: Long, userId: UserId, templateName: String, type: Type) {
+  override fun sendTo(projectId: Long, userId: UserId, overrideUser: User?, templateName: String, type: Type) {
     log.debug("Sending $type template $templateName to $userId")
 
     val normalizedProjectId = Normalizers.ProjectId.run(projectId).requireValid { "Project ID" }
@@ -58,7 +59,8 @@ class CommunicationsServiceImpl(
 
     val project = creatorService.fetchProjectById(normalizedProjectId)
     val user = userService.fetchUserByUserId(normalizedUserId)
-    val message = templateService.materializeByName(project.id, normalizedTemplateName, Inputs(user.id, project.id))
+    val inputs = Inputs(userId = user.id, projectId = project.id, overrideUser = overrideUser)
+    val message = templateService.materializeByName(project.id, normalizedTemplateName, inputs)
 
     execute(type, project, user, message)
   }
