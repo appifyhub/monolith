@@ -123,7 +123,7 @@ object Validators {
   val MessageTemplateId = PositiveLong
   val MessageTemplateName = validatesAs<String>("MessageTemplateName") {
     if (it.isNullOrBlank()) return@validatesAs false
-    it.all { char -> char.isLetterOrDigit() || char in setOf('-', '_') }
+    it.all { char -> char.isLetterOrDigit() || char in setOf('-', '_', '.') }
   }
   val MessageTemplate = NotBlank
   val PushDeviceToken = NoSpaces

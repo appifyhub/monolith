@@ -104,7 +104,7 @@ object Cleaners {
   }
   val MessageTemplateId = LongToCardinal
   val MessageTemplateName = cleansToNonNull<String>("MessageTemplateName") {
-    it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_') }.orEmpty()
+    it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_', '.') }.orEmpty()
   }
   val MessageTemplate = Trim
   val PushDeviceToken = RemoveSpaces
