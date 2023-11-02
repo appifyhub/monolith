@@ -1,5 +1,8 @@
 package com.appifyhub.monolith.validation.impl
 
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.ext.takeIfNotBlank
@@ -101,8 +104,51 @@ object Cleaners {
   }
   val MessageTemplateId = LongToCardinal
   val MessageTemplateName = cleansToNonNull<String>("MessageTemplateName") {
-    it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_') }.orEmpty()
+    it?.filter { char -> char.isLetterOrDigit() || char in setOf('-', '_', '.') }.orEmpty()
   }
   val MessageTemplate = Trim
+  val PushDeviceToken = RemoveSpaces
+
+  // Integrations cleaners
+
+  val MailgunConfigData = cleansToNullable<MailgunConfig>("MailgunConfig") {
+    if (it == null) return@cleansToNullable null
+    val props = setOf(it.apiKey, it.domain, it.senderName, it.senderEmail)
+    if (props.any(String::isBlank)) return@cleansToNullable null
+
+    MailgunConfig(
+      apiKey = RemoveSpaces.clean(it.apiKey),
+      domain = RemoveSpaces.clean(it.domain),
+      senderName = Trim.clean(it.senderName),
+      senderEmail = Email.clean(it.senderEmail),
+    )
+  }
+
+  val TwilioConfigData = cleansToNullable<TwilioConfig>("TwilioConfig") {
+    if (it == null) return@cleansToNullable null
+    val mandatoryProps = setOf(it.accountSid, it.authToken, it.messagingServiceId, it.defaultSenderNumber)
+    if (mandatoryProps.any(String::isBlank)) return@cleansToNullable null
+
+    TwilioConfig(
+      accountSid = RemoveSpaces.clean(it.accountSid),
+      authToken = RemoveSpaces.clean(it.authToken),
+      messagingServiceId = RemoveSpaces.clean(it.messagingServiceId),
+      maxPricePerMessage = LongToCardinal.clean(it.maxPricePerMessage.toLong()).toInt(),
+      maxRetryAttempts = LongToCardinal.clean(it.maxRetryAttempts.toLong()).toInt(),
+      defaultSenderName = Trim.clean(it.defaultSenderName),
+      defaultSenderNumber = Phone.clean(it.defaultSenderNumber),
+    )
+  }
+
+  val FirebaseConfigData = cleansToNullable<FirebaseConfig>("TwilioConfig") {
+    if (it == null) return@cleansToNullable null
+    val mandatoryProps = setOf(it.projectName, it.serviceAccountKeyJsonBase64)
+    if (mandatoryProps.any(String::isBlank)) return@cleansToNullable null
+
+    FirebaseConfig(
+      projectName = Trim.clean(it.projectName),
+      serviceAccountKeyJsonBase64 = RemoveSpaces.clean(it.serviceAccountKeyJsonBase64),
+    )
+  }
 
 }

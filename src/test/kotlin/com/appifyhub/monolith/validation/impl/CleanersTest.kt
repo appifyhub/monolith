@@ -1,19 +1,24 @@
 package com.appifyhub.monolith.validation.impl
 
 import assertk.assertThat
+import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
+import assertk.assertions.isNotNull
 import assertk.assertions.isNull
 import assertk.assertions.isTrue
 import assertk.assertions.isZero
+import com.appifyhub.monolith.domain.integrations.FirebaseConfig
+import com.appifyhub.monolith.domain.integrations.MailgunConfig
+import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs
-import java.util.Date
-import java.util.Locale
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
+import java.util.Date
+import java.util.Locale
 
 class CleanersTest {
 
@@ -275,8 +280,8 @@ class CleanersTest {
           postcode = " \t\n ",
           city = " \t\n ",
           countryCode = " \t\n ",
-        )
-      )
+        ),
+      ),
     ).isNull()
   }
 
@@ -289,8 +294,8 @@ class CleanersTest {
           postcode = " \t\n ",
           city = null,
           countryCode = null,
-        )
-      )
+        ),
+      ),
     ).isEqualTo(
       Organization(
         name = "",
@@ -298,7 +303,7 @@ class CleanersTest {
         postcode = "",
         city = null,
         countryCode = null,
-      )
+      ),
     )
   }
 
@@ -390,6 +395,86 @@ class CleanersTest {
   @Test fun `message template is trimming`() {
     assertThat(Cleaners.MessageTemplate)
       .isEqualTo(Cleaners.Trim)
+  }
+
+  @Test fun `push device token is removing spaces`() {
+    assertThat(Cleaners.PushDeviceToken)
+      .isEqualTo(Cleaners.RemoveSpaces)
+  }
+
+  // endregion
+
+  // region Integrations cleaners
+
+  @Test fun `mailgun config is cleaning with null`() {
+    assertThat(Cleaners.MailgunConfigData.clean(null))
+      .isNull()
+  }
+
+  @Test fun `mailgun config is cleaning`() {
+    val dirty = MailgunConfig(
+      apiKey = "a b c",
+      domain = " domain. com ",
+      senderName = " na me ",
+      senderEmail = " email@domain.com ",
+    )
+    val expected = MailgunConfig(
+      apiKey = "abc",
+      domain = "domain.com",
+      senderName = "na me",
+      senderEmail = "email@domain.com",
+    )
+    assertThat(Cleaners.MailgunConfigData.clean(dirty))
+      .isNotNull()
+      .isDataClassEqualTo(expected)
+  }
+
+  @Test fun `twilio config is cleaning with null`() {
+    assertThat(Cleaners.TwilioConfigData.clean(null))
+      .isNull()
+  }
+
+  @Test fun `twilio config is cleaning`() {
+    val dirty = TwilioConfig(
+      accountSid = "a b c",
+      authToken = "a u t h",
+      messagingServiceId = "m i d",
+      maxPricePerMessage = -10,
+      maxRetryAttempts = -20,
+      defaultSenderName = " \n \t ",
+      defaultSenderNumber = "00123456789",
+    )
+    val expected = TwilioConfig(
+      accountSid = "abc",
+      authToken = "auth",
+      messagingServiceId = "mid",
+      maxPricePerMessage = 0,
+      maxRetryAttempts = 0,
+      defaultSenderName = "",
+      defaultSenderNumber = "+123456789",
+    )
+    assertThat(Cleaners.TwilioConfigData.clean(dirty))
+      .isNotNull()
+      .isDataClassEqualTo(expected)
+  }
+
+  @Test fun `firebase config is cleaning with null`() {
+    assertThat(Cleaners.FirebaseConfigData.clean(null))
+      .isNull()
+  }
+
+  @Test fun `firebase config is cleaning`() {
+    val dirty = FirebaseConfig(
+      projectName = " Name with Spaces around ",
+      serviceAccountKeyJsonBase64 = " 1234 test ",
+    )
+    val expected = FirebaseConfig(
+      projectName = "Name with Spaces around",
+      serviceAccountKeyJsonBase64 = "1234test",
+    )
+    assertThat(Cleaners.FirebaseConfigData.clean(dirty))
+      .isNotNull()
+      .isDataClassEqualTo(expected)
   }
 
   // endregion

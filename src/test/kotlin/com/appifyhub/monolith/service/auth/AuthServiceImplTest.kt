@@ -2,14 +2,13 @@ package com.appifyhub.monolith.service.auth
 
 import assertk.all
 import assertk.assertAll
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.doesNotContain
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
-import assertk.assertions.isSuccess
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.auth.TokenDetails
@@ -24,10 +23,6 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
-import java.time.Duration
-import java.time.temporal.ChronoUnit
-import java.util.Base64
-import java.util.Date
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -35,15 +30,19 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.time.Duration
+import java.time.temporal.ChronoUnit
+import java.util.Base64
+import java.util.Date
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 class AuthServiceImplTest {
 
   @Autowired lateinit var service: AuthService
@@ -67,7 +66,7 @@ class AuthServiceImplTest {
       service.requireValidJwt(
         authData = authData,
         shallow = false,
-      )
+      ),
     ).isEqualTo(authData)
   }
 
@@ -77,7 +76,7 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat(
-      service.resolveShallowSelf(token)
+      service.resolveShallowSelf(token),
     ).isDataClassEqualTo(
       // no rich data in shallow user
       stubber.creators.default().copy(
@@ -92,17 +91,16 @@ class AuthServiceImplTest {
         languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
-      )
+      ),
     )
   }
 
   @Test fun `resolving shallow user with invalid universal ID fails (default authority)`() {
     val moderatorToken = stubber.creatorTokens().real(MODERATOR)
 
-    assertThat {
+    assertFailure {
       service.resolveShallowUser(authData = moderatorToken, universalId = "invalid")
     }
-      .isFailure()
       .all {
         hasClass(NumberFormatException::class)
       }
@@ -112,10 +110,9 @@ class AuthServiceImplTest {
     val moderatorToken = stubber.creatorTokens().real(MODERATOR)
     val targetId = stubber.creators.default().id.toUniversalFormat()
 
-    assertThat {
+    assertFailure {
       service.resolveShallowUser(authData = moderatorToken, universalId = targetId)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID and auth data mismatch")
@@ -129,7 +126,7 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = defaultUser.id.toUniversalFormat()),
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
@@ -147,7 +144,7 @@ class AuthServiceImplTest {
         languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
-      )
+      ),
     )
   }
 
@@ -158,7 +155,7 @@ class AuthServiceImplTest {
     val token = stubber.tokens(owner).real()
 
     assertThat(
-      service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat())
+      service.resolveShallowUser(authData = token, universalId = owner.id.toUniversalFormat()),
     ).isDataClassEqualTo(
       // no rich data in shallow user
       Stubs.user.copy(
@@ -176,7 +173,7 @@ class AuthServiceImplTest {
         languageTag = null,
         createdAt = modernTime,
         updatedAt = modernTime,
-      )
+      ),
     )
   }
 
@@ -185,18 +182,16 @@ class AuthServiceImplTest {
   // region Auth Actions
 
   @Test fun `auth user fails with invalid universal ID`() {
-    assertThat {
+    assertFailure {
       service.resolveUser("invalid", "signature")
     }
-      .isFailure()
       .hasClass(NumberFormatException::class)
   }
 
   @Test fun `auth user fails with invalid user ID`() {
-    assertThat {
+    assertFailure {
       service.resolveUser(UserId("\na b\t", -1).toUniversalFormat(), "signature")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -204,10 +199,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `auth user fails with invalid signature`() {
-    assertThat {
+    assertFailure {
       service.resolveUser(stubber.creators.default().id.toUniversalFormat(), "\n\t")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Signature")
@@ -215,13 +209,12 @@ class AuthServiceImplTest {
   }
 
   @Test fun `auth user fails with wrong signature`() {
-    assertThat {
+    assertFailure {
       service.resolveUser(
         universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "pass",
       )
     }
-      .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Invalid credentials")
@@ -231,13 +224,12 @@ class AuthServiceImplTest {
   @Test fun `auth user fails with unverified user`() {
     val user = stubber.creators.default(autoVerified = false)
 
-    assertThat {
+    assertFailure {
       service.resolveUser(
         universalId = user.id.toUniversalFormat(),
         signature = "password",
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("not verified")
@@ -249,25 +241,23 @@ class AuthServiceImplTest {
       service.resolveUser(
         universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "password",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(
-      stubber.creators.default().cleanStubArtifacts()
+      stubber.creators.default().cleanStubArtifacts(),
     )
   }
 
   @Test fun `auth creator fails with invalid universal ID`() {
-    assertThat {
+    assertFailure {
       service.resolveCreator("invalid", "signature")
     }
-      .isFailure()
       .hasClass(NumberFormatException::class)
   }
 
   @Test fun `auth creator fails with invalid user ID`() {
-    assertThat {
+    assertFailure {
       service.resolveCreator(UserId("\na b\t", -1).toUniversalFormat(), "signature")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -275,10 +265,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `auth creator fails with invalid signature`() {
-    assertThat {
+    assertFailure {
       service.resolveCreator(stubber.creators.owner().id.toUniversalFormat(), "\n\t")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Signature")
@@ -286,13 +275,12 @@ class AuthServiceImplTest {
   }
 
   @Test fun `auth creator fails with wrong signature`() {
-    assertThat {
+    assertFailure {
       service.resolveCreator(
         universalId = stubber.creators.owner().id.toUniversalFormat(),
         signature = "pass",
       )
     }
-      .isFailure()
       .all {
         hasClass(IllegalArgumentException::class)
         messageContains("Invalid credentials")
@@ -302,13 +290,12 @@ class AuthServiceImplTest {
   @Test fun `auth creator fails with unverified user`() {
     val creator = stubber.creators.default(autoVerified = false)
 
-    assertThat {
+    assertFailure {
       service.resolveUser(
         universalId = creator.id.toUniversalFormat(),
         signature = "password",
       )
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("not verified")
@@ -320,9 +307,9 @@ class AuthServiceImplTest {
       service.resolveUser(
         universalId = stubber.creators.default().id.toUniversalFormat(),
         signature = "password",
-      ).cleanStubArtifacts()
+      ).cleanStubArtifacts(),
     ).isDataClassEqualTo(
-      stubber.creators.default().cleanStubArtifacts()
+      stubber.creators.default().cleanStubArtifacts(),
     )
   }
 
@@ -331,10 +318,9 @@ class AuthServiceImplTest {
   // region Tokens
 
   @Test fun `create token fails with invalid origin`() {
-    assertThat {
+    assertFailure {
       service.createTokenFor(stubber.creators.default(), origin = "\n\t", ipAddress = null)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Origin")
@@ -342,10 +328,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `create token fails with invalid IP address`() {
-    assertThat {
+    assertFailure {
       service.createTokenFor(stubber.creators.default(), origin = "origin", ipAddress = "abc")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("IP Address")
@@ -382,10 +367,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `create static token fails with invalid origin`() {
-    assertThat {
+    assertFailure {
       service.createStaticTokenFor(stubber.creators.owner(), origin = "\n\t", ipAddress = null)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Origin")
@@ -393,10 +377,9 @@ class AuthServiceImplTest {
   }
 
   @Test fun `create static token fails with invalid IP address`() {
-    assertThat {
+    assertFailure {
       service.createStaticTokenFor(stubber.creators.owner(), origin = "origin", ipAddress = "abc")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("IP Address")
@@ -406,10 +389,9 @@ class AuthServiceImplTest {
   @Test fun `create static token fails with non-owner user`() {
     val project = stubber.projects.new()
     val adminUser = stubber.users(project).admin()
-    assertThat {
+    assertFailure {
       service.createStaticTokenFor(adminUser, origin = null, ipAddress = null)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Only ${OWNER.groupName} can create static tokens")
@@ -423,8 +405,8 @@ class AuthServiceImplTest {
       service.createStaticTokenFor(
         user = owner,
         origin = "Some Origin",
-        ipAddress = Stubs.ipAddress
-      )
+        ipAddress = Stubs.ipAddress,
+      ),
     )
       .transform { it.split(".")[1] } // take the token content
       .transform { Base64.getDecoder().decode(it).toString(Charsets.UTF_8) } // convert to JSON
@@ -475,10 +457,9 @@ class AuthServiceImplTest {
   @Test fun `refresh token fails with invalid token`() {
     val token = stubber.creatorTokens().stub()
 
-    assertThat {
+    assertFailure {
       service.refreshAuth(token, ipAddress = null)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -488,10 +469,9 @@ class AuthServiceImplTest {
   @Test fun `refresh token fails with invalid IP address`() {
     val token = stubber.creatorTokens().real(DEFAULT)
 
-    assertThat {
+    assertFailure {
       service.refreshAuth(token, ipAddress = "abc")
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("IP Address")
@@ -502,10 +482,9 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.refreshAuth(token, ipAddress = null)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -515,10 +494,9 @@ class AuthServiceImplTest {
   @Test fun `refresh token fails with static token`() {
     val token = stubber.creatorTokens().real(OWNER, isStatic = true)
 
-    assertThat {
+    assertFailure {
       service.refreshAuth(token, ipAddress = null)
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Can't refresh static tokens")
@@ -541,10 +519,9 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.fetchTokenDetails(token)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -556,7 +533,7 @@ class AuthServiceImplTest {
     val defaultUser = stubber.creators.default()
 
     assertThat(
-      service.fetchTokenDetails(jwt).cleanStubArtifacts()
+      service.fetchTokenDetails(jwt).cleanStubArtifacts(),
     )
       .isDataClassEqualTo(
         TokenDetails(
@@ -570,7 +547,7 @@ class AuthServiceImplTest {
           ipAddress = null,
           geo = null,
           isStatic = false,
-        ).cleanStubArtifacts()
+        ).cleanStubArtifacts(),
       )
   }
 
@@ -578,23 +555,21 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.fetchAllTokenDetails(token, valid = true)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
       }
   }
 
-  @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token details succeeds with valid data`() {
     val jwt = stubber.creatorTokens().real(DEFAULT)
     val defaultUser = stubber.creators.default()
 
     assertThat(
-      service.fetchAllTokenDetails(jwt, valid = null).map { it.cleanStubArtifacts() }
+      service.fetchAllTokenDetails(jwt, valid = null).map { it.cleanStubArtifacts() },
     )
       .isEqualTo(
         listOf(
@@ -610,7 +585,7 @@ class AuthServiceImplTest {
             geo = null,
             isStatic = false,
           ).cleanStubArtifacts(),
-        )
+        ),
       )
   }
 
@@ -619,10 +594,9 @@ class AuthServiceImplTest {
     val token = stubber.tokens(owner).real()
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.fetchAllTokenDetailsFor(token, valid = true, targetId = stubber.creators.default().id)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -633,17 +607,15 @@ class AuthServiceImplTest {
     val owner = stubber.creators.owner()
     val token = stubber.tokens(owner).real()
 
-    assertThat {
+    assertFailure {
       service.fetchAllTokenDetailsFor(token, valid = true, targetId = UserId("\t\n", -1))
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
       }
   }
 
-  @Suppress("SpellCheckingInspection")
   @Test fun `fetching all token for others details succeeds with valid data`() {
     val defaultJwt = stubber.creatorTokens().real(DEFAULT)
     val defaultUser = stubber.creators.default()
@@ -652,7 +624,7 @@ class AuthServiceImplTest {
 
     assertThat(
       service.fetchAllTokenDetailsFor(ownerJwt, valid = true, targetId = defaultUser.id)
-        .map { it.cleanStubArtifacts() }
+        .map { it.cleanStubArtifacts() },
     )
       .isEqualTo(
         listOf(
@@ -668,7 +640,7 @@ class AuthServiceImplTest {
             geo = null,
             isStatic = false,
           ).cleanStubArtifacts(),
-        )
+        ),
       )
   }
 
@@ -680,10 +652,9 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.unauthorize(token)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -695,12 +666,11 @@ class AuthServiceImplTest {
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorize(token) }
-        .isSuccess()
+      assertThat(service.unauthorize(token))
+        .isEqualTo(Unit)
 
       // and then try to re-auth with it
-      assertThat { service.refreshAuth(token, ipAddress = null) }
-        .isFailure()
+      assertFailure { service.refreshAuth(token, ipAddress = null) }
     }
   }
 
@@ -708,10 +678,9 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.unauthorizeAll(token)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -725,14 +694,12 @@ class AuthServiceImplTest {
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorizeAll(token1) }
-        .isSuccess()
+      assertThat(service.unauthorizeAll(token1))
+        .isEqualTo(Unit)
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1, ipAddress = null) }
-        .isFailure()
-      assertThat { service.refreshAuth(token2, ipAddress = null) }
-        .isFailure()
+      assertFailure { service.refreshAuth(token1, ipAddress = null) }
+      assertFailure { service.refreshAuth(token2, ipAddress = null) }
     }
   }
 
@@ -740,10 +707,9 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.unauthorizeAllFor(token, targetId = stubber.creators.default().id)
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -753,10 +719,9 @@ class AuthServiceImplTest {
   @Test fun `unauthorize all for others fails with invalid ID`() {
     val token = stubber.creatorTokens().real(DEFAULT)
 
-    assertThat {
+    assertFailure {
       service.unauthorizeAllFor(token, targetId = UserId("\t\n", -1))
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -771,22 +736,19 @@ class AuthServiceImplTest {
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorizeAllFor(ownerToken, targetId = stubber.creators.default().id) }
-        .isSuccess()
+      assertThat(service.unauthorizeAllFor(ownerToken, targetId = stubber.creators.default().id))
+        .isEqualTo(Unit)
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1, ipAddress = null) }
-        .isFailure()
-      assertThat { service.refreshAuth(token2, ipAddress = null) }
-        .isFailure()
+      assertFailure { service.refreshAuth(token1, ipAddress = null) }
+      assertFailure { service.refreshAuth(token2, ipAddress = null) }
     }
   }
 
   @Test fun `unauthorize all by user ID fails with invalid ID`() {
-    assertThat {
+    assertFailure {
       service.unauthorizeAllFor(UserId("\t\n", -1))
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("User ID")
@@ -800,14 +762,12 @@ class AuthServiceImplTest {
 
     assertAll {
       // unauth first
-      assertThat { service.unauthorizeAllFor(stubber.creators.default().id) }
-        .isSuccess()
+      assertThat(service.unauthorizeAllFor(stubber.creators.default().id))
+        .isEqualTo(Unit)
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1, ipAddress = null) }
-        .isFailure()
-      assertThat { service.refreshAuth(token2, ipAddress = null) }
-        .isFailure()
+      assertFailure { service.refreshAuth(token1, ipAddress = null) }
+      assertFailure { service.refreshAuth(token2, ipAddress = null) }
     }
   }
 
@@ -815,10 +775,9 @@ class AuthServiceImplTest {
     val token = stubber.creatorTokens().real(DEFAULT)
     timeProvider.advanceBy(Duration.ofDays(2))
 
-    assertThat {
+    assertFailure {
       service.unauthorizeTokens(token, tokenValues = emptyList())
     }
-      .isFailure()
       .all {
         hasClass(IllegalAccessException::class)
         messageContains("Invalid token for")
@@ -828,10 +787,9 @@ class AuthServiceImplTest {
   @Test fun `unauthorize tokens fails with invalid token`() {
     val token = stubber.creatorTokens().real(DEFAULT)
 
-    assertThat {
+    assertFailure {
       service.unauthorizeTokens(token, tokenValues = listOf("\t\n"))
     }
-      .isFailure()
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Token ID")
@@ -847,14 +805,12 @@ class AuthServiceImplTest {
 
     assertAll {
       // unauth with the token
-      assertThat { service.unauthorizeTokens(token1, tokenValues = tokensToUnauth) }
-        .isSuccess()
+      assertThat(service.unauthorizeTokens(token1, tokenValues = tokensToUnauth))
+        .isEqualTo(Unit)
 
       // and then try to re-auth
-      assertThat { service.refreshAuth(token1, ipAddress = null) }
-        .isFailure()
-      assertThat { service.refreshAuth(token2, ipAddress = null) }
-        .isFailure()
+      assertFailure { service.refreshAuth(token1, ipAddress = null) }
+      assertFailure { service.refreshAuth(token2, ipAddress = null) }
     }
   }
 

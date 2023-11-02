@@ -63,5 +63,12 @@ object Normalizers {
   val MessageTemplateId = normalizesNonNull(Validators.MessageTemplateId, Cleaners.MessageTemplateId)
   val MessageTemplateName = normalizesNonNull(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
   val MessageTemplate = normalizesNonNull(Validators.MessageTemplate, Cleaners.MessageTemplate)
+  val PushDeviceToken = normalizesNonNull(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
+
+  // Integrations normalizers
+
+  val MailgunConfigData = normalizesNullable(Validators.MailgunConfigData, Cleaners.MailgunConfigData)
+  val TwilioConfigData = normalizesNullable(Validators.TwilioConfigData, Cleaners.TwilioConfigData)
+  val FirebaseConfigData = normalizesNullable(Validators.FirebaseConfigData, Cleaners.FirebaseConfigData)
 
 }

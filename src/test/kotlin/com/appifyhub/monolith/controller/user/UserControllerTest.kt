@@ -1,15 +1,15 @@
 package com.appifyhub.monolith.controller.user
 
 import assertk.all
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
+import assertk.assertions.isInstanceOf
 import assertk.assertions.isNull
-import assertk.assertions.isSuccess
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_USER_SEARCH
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_SIGNUP
+import com.appifyhub.monolith.controller.common.Endpoints.PROJECT_USER_SEARCH
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_AUTHORITY
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_DATA
@@ -17,6 +17,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATU
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATURE_RESET
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_VERIFY
 import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
@@ -43,18 +44,17 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class UserControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -84,7 +84,7 @@ class UserControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -99,7 +99,7 @@ class UserControllerTest {
         method = HttpMethod.POST,
         requestEntity = bodyRequest(Stubs.userSignupRequest),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
@@ -110,7 +110,7 @@ class UserControllerTest {
           authority = Authority.DEFAULT.name,
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -129,7 +129,7 @@ class UserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -146,7 +146,7 @@ class UserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -164,7 +164,7 @@ class UserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
@@ -177,7 +177,7 @@ class UserControllerTest {
           birthday = DateTimeMapper.formatAsDate(self.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -198,7 +198,7 @@ class UserControllerTest {
           "projectId" to project.id,
           "userName" to "whatever",
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -218,7 +218,7 @@ class UserControllerTest {
           "projectId" to project.id,
           "userName" to "whatever",
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -235,7 +235,7 @@ class UserControllerTest {
         method = HttpMethod.GET,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("projectId" to project.id),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.NOT_FOUND)
     }
@@ -255,7 +255,7 @@ class UserControllerTest {
           "projectId" to project.id,
           "userName" to admin.name,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.first() }.isDataClassEqualTo(
@@ -268,7 +268,7 @@ class UserControllerTest {
           birthday = DateTimeMapper.formatAsDate(admin.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -287,7 +287,7 @@ class UserControllerTest {
           "projectId" to project.id,
           "userContact" to admin.contact,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!!.first() }.isDataClassEqualTo(
@@ -300,7 +300,7 @@ class UserControllerTest {
           birthday = DateTimeMapper.formatAsDate(admin.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -320,7 +320,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -338,7 +338,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -357,7 +357,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(request, token),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
@@ -370,7 +370,7 @@ class UserControllerTest {
           birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -389,7 +389,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -406,7 +406,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -424,7 +424,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateDataRequest, token),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
@@ -435,7 +435,7 @@ class UserControllerTest {
           authority = targetUser.authority.name,
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
     }
   }
@@ -454,7 +454,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, "invalid"),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -471,7 +471,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -488,7 +488,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token.token.tokenValue),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       // verify response
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -502,25 +502,24 @@ class UserControllerTest {
           birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
       // check if changing worked
-      assertThat {
+      assertFailure {
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureOld,
         )
-      }.isFailure()
-      assertThat {
+      }
+      assertThat(
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureNew,
-        )
-      }.isSuccess()
+        ),
+      ).isInstanceOf(User::class)
       // check if logout param was respected
-      assertThat {
-        authService.refreshAuth(token, ipAddress = null)
-      }.isSuccess()
+      assertThat(authService.refreshAuth(token, ipAddress = null))
+        .isInstanceOf(String::class)
     }
   }
 
@@ -535,7 +534,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = bearerBodyRequest(Stubs.userUpdateSignatureRequest, token.token.tokenValue),
         uriVariables = mapOf("universalId" to targetUser.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       // verify response
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
@@ -549,25 +548,25 @@ class UserControllerTest {
           birthday = DateTimeMapper.formatAsDate(targetUser.birthday!!),
           createdAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
           updatedAt = DateTimeMapper.formatAsDateTime(timeProvider.currentDate),
-        )
+        ),
       )
       // check if changing worked
-      assertThat {
+      assertFailure {
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureOld,
         )
-      }.isFailure()
-      assertThat {
+      }
+      assertThat(
         authService.resolveUser(
           targetUser.id.toUniversalFormat(),
           Stubs.userUpdateSignatureRequest.rawSignatureNew,
-        )
-      }.isSuccess()
+        ),
+      ).isInstanceOf(User::class)
       // check if logout param was respected
-      assertThat {
+      assertFailure {
         authService.refreshAuth(token, ipAddress = null)
-      }.isFailure()
+      }
     }
   }
 
@@ -588,7 +587,7 @@ class UserControllerTest {
           "universalId" to user.id.toUniversalFormat(),
           "verificationToken" to user.verificationToken,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -607,7 +606,7 @@ class UserControllerTest {
           "universalId" to user.id.toUniversalFormat(),
           "verificationToken" to user.verificationToken,
         ),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
@@ -629,7 +628,7 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -646,22 +645,22 @@ class UserControllerTest {
         method = HttpMethod.PUT,
         requestEntity = emptyRequest(),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       // verify response
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
       // check if changing worked
-      assertThat {
+      assertFailure {
         authService.resolveUser(
           user.id.toUniversalFormat(),
           Stubs.userCreator.rawSignature,
         )
-      }.isFailure()
+      }
       // check if tokens are invalid
-      assertThat {
+      assertFailure {
         authService.refreshAuth(token, ipAddress = null)
-      }.isFailure()
+      }
     }
   }
 
@@ -679,7 +678,7 @@ class UserControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest("invalid"),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.UNAUTHORIZED)
     }
@@ -696,7 +695,7 @@ class UserControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to user.id.toUniversalFormat()),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.PRECONDITION_REQUIRED)
     }
@@ -714,13 +713,13 @@ class UserControllerTest {
         method = HttpMethod.DELETE,
         requestEntity = bearerEmptyRequest(token),
         uriVariables = mapOf("universalId" to universalId),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(SimpleResponse.DONE)
-      assertThat {
+      assertFailure {
         authService.resolveUser(self.id.toUniversalFormat(), Stubs.userCreator.rawSignature)
-      }.isFailure()
+      }
     }
   }
 

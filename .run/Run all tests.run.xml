@@ -1,6 +1,15 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run all tests" type="GradleRunConfiguration" factoryName="Gradle">
     <ExternalSystemSettings>
+      <option name="env">
+        <map>
+          <entry key="MAILGUN_API_KEY" value="" />
+          <entry key="TWILIO_ACCOUNT_SID" value="" />
+          <entry key="TWILIO_AUTH_TOKEN" value="" />
+          <entry key="TWILIO_DEFAULT_SENDER" value="" />
+          <entry key="TWILIO_MESSAGING_SERVICE_ID" value="" />
+        </map>
+      </option>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
@@ -20,6 +29,7 @@
     <ExternalSystemDebugServerProcess>false</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
+    <ForceTestExec>false</ForceTestExec>
     <method v="2" />
   </configuration>
 </component>

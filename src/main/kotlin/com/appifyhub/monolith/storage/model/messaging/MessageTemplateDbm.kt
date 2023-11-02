@@ -32,6 +32,9 @@ class MessageTemplateDbm(
   @Column(nullable = false, length = 8, updatable = false)
   var languageTag: String,
 
+  @Column(nullable = false, length = 64, updatable = false)
+  var title: String,
+
   @Column(columnDefinition = "TEXT", nullable = false)
   var content: String,
 
@@ -57,6 +60,7 @@ class MessageTemplateDbm(
     if (project.projectId != other.project.projectId) return false
     if (name != other.name) return false
     if (languageTag != other.languageTag) return false
+    if (title != other.title) return false
     if (content != other.content) return false
     if (isHtml != other.isHtml) return false
     if (createdAt != other.createdAt) return false
@@ -70,6 +74,7 @@ class MessageTemplateDbm(
     result = 31 * result + project.projectId.hashCode()
     result = 31 * result + name.hashCode()
     result = 31 * result + languageTag.hashCode()
+    result = 31 * result + title.hashCode()
     result = 31 * result + content.hashCode()
     result = 31 * result + isHtml.hashCode()
     result = 31 * result + createdAt.hashCode()
@@ -83,6 +88,7 @@ class MessageTemplateDbm(
       "project.id=${project.projectId}, " +
       "name='$name', " +
       "language='$languageTag', " +
+      "title='$title', " +
       "content='$content', " +
       "isHtml=$isHtml, " +
       "createdAt=$createdAt, " +

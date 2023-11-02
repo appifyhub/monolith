@@ -23,17 +23,17 @@ import org.springframework.boot.web.server.LocalServerPort
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 @SpringBootTest(
   classes = [TestAppifyHubApplication::class],
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
 )
-@Suppress("SpringJavaInjectionPointsAutowiringInspection") // some weird thing with restTemplate
 class HeartbeatControllerTest {
 
   @Autowired lateinit var timeProvider: TimeProviderFake
@@ -57,7 +57,7 @@ class HeartbeatControllerTest {
         method = HttpMethod.GET,
         requestEntity = emptyRequest(),
         uriVariables = emptyUriVariables(),
-      )
+      ),
     ).all {
       transform { it.statusCode }.isEqualTo(HttpStatus.OK)
       transform { it.body!! }.isDataClassEqualTo(
@@ -66,7 +66,7 @@ class HeartbeatControllerTest {
           ip = null,
           geo = null,
           version = "1.0.1.test", // from test properties
-        )
+        ),
       )
     }
   }

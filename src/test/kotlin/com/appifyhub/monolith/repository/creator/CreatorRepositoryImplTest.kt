@@ -3,7 +3,6 @@ package com.appifyhub.monolith.repository.creator
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import assertk.assertions.isSuccess
 import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
@@ -120,7 +119,7 @@ class CreatorRepositoryImplTest {
       onGeneric {
         findAllByData_CreatorUserIdAndData_CreatorProjectId(
           userId = Stubs.userId.userId,
-          projectId = Stubs.userId.projectId
+          projectId = Stubs.userId.projectId,
         )
       } doReturn listOf(Stubs.projectCreationDbm)
     }
@@ -155,7 +154,7 @@ class CreatorRepositoryImplTest {
       .isDataClassEqualTo(
         Stubs.project.copy(
           updatedAt = Date(0xA20001),
-        )
+        ),
       )
   }
 
@@ -176,7 +175,7 @@ class CreatorRepositoryImplTest {
       onGeneric { deleteById(Stubs.project.id) } doAnswer { }
     }
 
-    assertThat { repository.removeProjectById(Stubs.project.id) }.isSuccess()
+    assertThat(repository.removeProjectById(Stubs.project.id)).isEqualTo(Unit)
     verify(userRepository).removeAllUsersByProjectId(Stubs.project.id)
     verify(creationDao).deleteAllByData_CreatedProjectId(Stubs.project.id)
     verify(messageTemplateRepository).deleteAllTemplatesByProjectId(Stubs.project.id)
@@ -195,7 +194,7 @@ class CreatorRepositoryImplTest {
       } doReturn listOf(Stubs.projectCreationDbm)
     }
 
-    assertThat { repository.removeAllProjectsByCreator(Stubs.userId) }.isSuccess()
+    assertThat(repository.removeAllProjectsByCreator(Stubs.userId)).isEqualTo(Unit)
     verify(userRepository).removeAllUsersByProjectId(Stubs.project.id)
     verify(messageTemplateRepository).deleteAllTemplatesByProjectId(Stubs.project.id)
     verify(projectDao).deleteAll(listOf(Stubs.projectDbm))

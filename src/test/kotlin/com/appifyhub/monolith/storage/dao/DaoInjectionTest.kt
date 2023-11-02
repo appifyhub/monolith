@@ -13,12 +13,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-class DaoTest {
+class DaoInjectionTest {
 
   @Autowired lateinit var geolocationDao: GeolocationDao
   @Autowired lateinit var messageTemplateDao: MessageTemplateDao
   @Autowired lateinit var projectCreationDao: ProjectCreationDao
   @Autowired lateinit var projectDao: ProjectDao
+  @Autowired lateinit var pushDeviceDao: PushDeviceDao
   @Autowired lateinit var schemaDao: SchemaDao
   @Autowired lateinit var tokenDetailsDao: TokenDetailsDao
   @Autowired lateinit var userDao: UserDao
@@ -28,6 +29,7 @@ class DaoTest {
     assertThat(messageTemplateDao).isNotNull()
     assertThat(projectCreationDao).isNotNull()
     assertThat(projectDao).isNotNull()
+    assertThat(pushDeviceDao).isNotNull()
     assertThat(schemaDao).isNotNull()
     assertThat(tokenDetailsDao).isNotNull()
     assertThat(userDao).isNotNull()

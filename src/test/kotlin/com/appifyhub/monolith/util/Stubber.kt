@@ -12,6 +12,7 @@ import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
+import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.repository.auth.AuthRepository
@@ -21,14 +22,15 @@ import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.security.JwtHelper
 import com.appifyhub.monolith.security.JwtHelper.Claims
 import com.appifyhub.monolith.util.ext.silent
+import com.appifyhub.monolith.util.ext.takeIfNotBlank
 import com.auth0.jwt.JWT
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.TimeUnit
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.stereotype.Component
+import java.util.Date
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 private const val EXPIRATION_DAYS_DELTA: Long = 1
 
@@ -59,6 +61,7 @@ class Stubber(
   fun tokenDetailsOf(tokenValue: String): TokenDetails =
     jwtHelper.extractPropertiesFromJwt(tokenValue).toTokenDetails()
 
+  @Suppress("unused")
   fun isAuthorized(jwt: JwtAuthenticationToken) = authRepo.isTokenValid(jwt, shallow = false)
 
   fun isAuthorized(tokenValue: String) = authRepo.isTokenValid(tokenValue.toJwt(), shallow = false)
@@ -91,7 +94,10 @@ class Stubber(
         anyoneCanSearch = anyoneCanSearch,
         onHold = !activateNow,
         languageTag = language,
-      )
+        mailgunConfig = null,
+        twilioConfig = null,
+        firebaseConfig = null,
+      ),
     )
 
     val all: List<Project>
@@ -102,41 +108,96 @@ class Stubber(
     fun owner() = creatorRepo.getSuperCreator()
     fun default(
       idSuffix: String = "",
+      idReplace: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
     ) = ensureUser(
       DEFAULT,
       project = projects.creator(),
       idSuffix = idSuffix,
+      idReplace = idReplace,
       autoVerified = autoVerified,
       language = language,
+      contact = contact,
+      contactType = contactType,
     )
   }
 
   inner class Users(private val project: Project) {
     fun owner(
       idSuffix: String = "",
+      idReplace: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(OWNER, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = OWNER,
+      project = project,
+      idSuffix = idSuffix,
+      idReplace = idReplace,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
 
     fun admin(
       idSuffix: String = "",
+      idReplace: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(ADMIN, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = ADMIN,
+      project = project,
+      idSuffix = idSuffix,
+      idReplace = idReplace,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
 
+    @Suppress("unused")
     fun mod(
       idSuffix: String = "",
+      idReplace: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(MODERATOR, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = MODERATOR,
+      project = project,
+      idSuffix = idSuffix,
+      idReplace = idReplace,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
 
     fun default(
       idSuffix: String = "",
+      idReplace: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
-    ) = ensureUser(DEFAULT, project = project, idSuffix = idSuffix, autoVerified = autoVerified, language = language)
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
+    ) = ensureUser(
+      authority = DEFAULT,
+      project = project,
+      idSuffix = idSuffix,
+      idReplace = idReplace,
+      autoVerified = autoVerified,
+      language = language,
+      contact = contact,
+      contactType = contactType,
+    )
   }
 
   inner class ProjectTokens(private val project: Project) {
@@ -153,15 +214,21 @@ class Stubber(
       authority: Authority,
       isStatic: Boolean = false,
       idSuffix: String = "",
+      idReplace: String = "",
       autoVerified: Boolean = true,
       language: String = Locale.US.toLanguageTag(),
+      contact: String = "user@example.com",
+      contactType: ContactType = ContactType.EMAIL,
     ) = createToken(
       user = ensureUser(
         authority = authority,
         project = project,
         idSuffix = idSuffix,
+        idReplace = idReplace,
         autoVerified = autoVerified,
         language = language,
+        contact = contact,
+        contactType = contactType,
       ),
       shouldStore = true,
       isStatic = isStatic,
@@ -181,13 +248,17 @@ class Stubber(
     authority: Authority,
     project: Project,
     idSuffix: String,
+    idReplace: String,
     autoVerified: Boolean,
     language: String,
+    contact: String,
+    contactType: ContactType,
   ): User = when {
     authority == OWNER && project == projects.creator() -> creators.owner()
-    else -> "username_${authority.name.lowercase()}$idSuffix".let { userId ->
-      silent {
-        // silently return null on failure (to simplify things)
+    else -> {
+      val userId = idReplace.trim().takeIfNotBlank() ?: "username_${authority.name.lowercase()}$idSuffix"
+      // silently return null on failure (to simplify things)
+      var user = silent {
         userRepo.addUser(
           creator = Stubs.userCreator.copy(
             userId = userId.takeIf { project.userIdType != Project.UserIdType.RANDOM },
@@ -195,20 +266,24 @@ class Stubber(
             type = User.Type.PERSONAL,
             authority = authority,
             languageTag = language,
+            contact = contact,
+            contactType = contactType,
           ),
           userIdType = project.userIdType,
-        ).let { user ->
-          if (autoVerified) {
-            userRepo.updateUser(
-              userIdType = project.userIdType,
-              updater = UserUpdater(
-                id = user.id,
-                verificationToken = Settable(null),
-              )
-            )
-          } else user
-        }
-      } ?: userRepo.fetchUserByUserId(id = UserId(userId, project.id))
+        )
+      }
+      if (user == null) {
+        user = userRepo.fetchUserByUserId(id = UserId(userId, project.id))
+      } else if (autoVerified) {
+        user = userRepo.updateUser(
+          userIdType = project.userIdType,
+          updater = UserUpdater(
+            id = user.id,
+            verificationToken = Settable(null),
+          ),
+        )
+      }
+      user
     }
   }
 
@@ -248,7 +323,7 @@ class Stubber(
           ipAddress = null,
           geo = null,
           isStatic = isStatic,
-        )
+        ),
       )
     }
 

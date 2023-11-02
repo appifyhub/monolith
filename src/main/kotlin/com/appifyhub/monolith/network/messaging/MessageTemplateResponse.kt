@@ -10,6 +10,7 @@ data class MessageTemplateResponse(
   @JsonProperty("id") val id: Long,
   @JsonProperty("name") val name: String,
   @JsonProperty("language_tag") val languageTag: String,
+  @JsonProperty("title") val title: String,
   @JsonProperty("content") val content: String,
   @JsonProperty("is_html") val isHtml: Boolean,
   @JsonProperty("created_at") val createdAt: String,

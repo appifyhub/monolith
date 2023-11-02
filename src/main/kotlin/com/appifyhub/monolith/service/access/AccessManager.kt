@@ -17,20 +17,27 @@ interface AccessManager {
     PROJECT_WRITE(OWNER),
     USER_SEARCH(ADMIN),
     USER_READ_TOKEN(ADMIN),
+    USER_READ_PUSH_DEVICE(OWNER),
     USER_READ_DATA(MODERATOR),
     USER_WRITE_TOKEN(ADMIN),
     USER_WRITE_AUTHORITY(OWNER),
     USER_WRITE_DATA(ADMIN),
     USER_WRITE_SIGNATURE(ADMIN),
     USER_WRITE_VERIFICATION(ADMIN),
+    USER_WRITE_PUSH_DEVICE(OWNER),
+    USER_DELETE_PUSH_DEVICE(OWNER),
     USER_DELETE(OWNER),
     MESSAGE_TEMPLATE_READ(OWNER),
     MESSAGE_TEMPLATE_WRITE(OWNER),
+    MESSAGE_TEMPLATE_SEND(OWNER),
   }
 
   enum class Feature(val isRequired: Boolean) {
     BASIC(isRequired = true), // core functionality: readiness, security, templating, ...
     USERS(isRequired = true), // user functionality: signup, login, user data updates, ...
+    EMAILS(isRequired = false), // sending emails to users
+    SMS(isRequired = false), // sending SMS to users
+    PUSH(isRequired = false), // sending push messages to users
   }
 
   @Throws fun requestUserAccess(authData: Authentication, targetId: UserId, privilege: Privilege): User

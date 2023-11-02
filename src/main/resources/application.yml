@@ -35,6 +35,23 @@ app:
       email: ${CREATOR_OWNER_EMAIL:creator@appifyhub.com}
     properties:
       name: ${CREATOR_PROP_PROJECT_NAME:AppifyHub}
+    integrations:
+      mailgun:
+        api-key: ${MAILGUN_API_KEY:}
+        domain: ${MAILGUN_DOMAIN:mailgun.appifyhub.com}
+        sender-name: ${MAILGUN_SENDER_NAME:AppifyHub}
+        sender-email: ${MAILGUN_SENDER_EMAIL:no-reply@appifyhub.com}
+      twilio:
+        account-sid: ${TWILIO_ACCOUNT_SID:}
+        auth-token: ${TWILIO_AUTH_TOKEN:}
+        messaging-service-id: ${TWILIO_MESSAGING_SERVICE_ID:}
+        max-price-per-message: ${TWILIO_MAX_PRICE_PER_MESSAGE:2}
+        max-retry-attempts: ${TWILIO_MAX_RETRY_ATTEMPTS:2}
+        default-sender-name: ${TWILIO_DEFAULT_SENDER_NAME:APPIFY}
+        default-sender-number: ${TWILIO_DEFAULT_SENDER:}
+      firebase:
+        project-name: ${FIREBASE_PROJECT_NAME:Appify Hub}
+        service-account-key-base64: ${FIREBASE_SERVICE_ACCOUNT_KEY_BASE_64:}
   ip2location:
     file: ${IP_2_LOCATION_FILE:}
 

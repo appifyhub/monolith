@@ -1,13 +1,13 @@
 package com.appifyhub.monolith.network.user
 
+import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isEqualTo
-import assertk.assertions.isFailure
+import org.junit.jupiter.api.Test
 import java.text.ParseException
 import java.util.Calendar
 import java.util.TimeZone
-import org.junit.jupiter.api.Test
 
 class DateTimeMapperTest {
 
@@ -40,8 +40,7 @@ class DateTimeMapperTest {
   }
 
   @Test fun `parsing invalid date throws`() {
-    assertThat { DateTimeMapper.parseAsDate("invalid") }
-      .isFailure()
+    assertFailure { DateTimeMapper.parseAsDate("invalid") }
       .hasClass(ParseException::class)
   }
 
@@ -51,8 +50,7 @@ class DateTimeMapperTest {
   }
 
   @Test fun `parsing invalid datetime throws`() {
-    assertThat { DateTimeMapper.parseAsDateTime("invalid") }
-      .isFailure()
+    assertFailure { DateTimeMapper.parseAsDateTime("invalid") }
       .hasClass(ParseException::class)
   }
 
