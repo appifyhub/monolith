@@ -23,7 +23,7 @@ class PushDeviceDbm(
 
 ) : Serializable {
 
-  @Suppress("RedundantIf")
+  @Suppress("DuplicatedCode") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is PushDeviceDbm) return false
@@ -35,6 +35,7 @@ class PushDeviceDbm(
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = deviceId.hashCode()
     result = 31 * result + type.hashCode()
@@ -42,6 +43,7 @@ class PushDeviceDbm(
     return result
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun toString(): String {
     return "PushDeviceDbm(" +
       "deviceId='$deviceId', " +

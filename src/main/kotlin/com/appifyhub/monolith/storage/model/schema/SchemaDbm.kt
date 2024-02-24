@@ -17,6 +17,7 @@ class SchemaDbm(
 
 ) : Serializable {
 
+  @Suppress("DuplicatedCode") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is SchemaDbm) return false
@@ -27,12 +28,14 @@ class SchemaDbm(
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = version.hashCode()
     result = 31 * result + isInitialized.hashCode()
     return result
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun toString(): String {
     return "SchemaDbm(" +
       "version=$version, " +

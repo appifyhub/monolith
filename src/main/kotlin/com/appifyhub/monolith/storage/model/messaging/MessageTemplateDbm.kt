@@ -51,7 +51,7 @@ class MessageTemplateDbm(
 
 ) : Serializable {
 
-  @Suppress("DuplicatedCode") // random warning, this isn't a duplicate
+  @Suppress("DuplicatedCode") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is MessageTemplateDbm) return false
@@ -69,6 +69,7 @@ class MessageTemplateDbm(
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = id?.hashCode() ?: 0
     result = 31 * result + project.projectId.hashCode()
@@ -82,6 +83,7 @@ class MessageTemplateDbm(
     return result
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun toString(): String {
     return "MessageTemplateDbm(" +
       "id=$id, " +

@@ -15,6 +15,7 @@ class UserIdDbm(
 
 ) : Serializable {
 
+  @Suppress("DuplicatedCode") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is UserIdDbm) return false
@@ -25,12 +26,14 @@ class UserIdDbm(
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = userId.hashCode()
     result = 31 * result + projectId.hashCode()
     return result
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun toString(): String {
     return "UserIdDbm(" +
       "userId='$userId', " +
