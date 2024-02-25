@@ -19,6 +19,7 @@ import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
+import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
@@ -49,6 +50,8 @@ import com.appifyhub.monolith.network.messaging.ops.MessageTemplateCreateRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
 import com.appifyhub.monolith.network.messaging.ops.PushDeviceRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
+import com.appifyhub.monolith.network.user.SignupCodeResponse
+import com.appifyhub.monolith.network.user.SignupCodesResponse
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
 import com.appifyhub.monolith.network.user.ops.UserSignupRequest
@@ -68,6 +71,7 @@ import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
+import com.appifyhub.monolith.storage.model.user.SignupCodeDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm
 import java.util.Date
@@ -340,6 +344,14 @@ object Stubs {
     deviceId = "push_token",
     type = PushDevice.Type.ANDROID,
     owner = user,
+  )
+
+  val signupCode = SignupCode(
+    code = "code",
+    isUsed = false,
+    owner = user,
+    createdAt = Date(0x10000E),
+    usedAt = null,
   )
 
   // endregion
@@ -623,6 +635,14 @@ object Stubs {
     owner = userDbm,
   )
 
+  val signupCodeDbm = SignupCodeDbm(
+    code = "code",
+    isUsed = false,
+    owner = userDbm,
+    createdAt = Date(0x10000E),
+    usedAt = null,
+  )
+
   // endregion
 
   // region Network Models
@@ -814,6 +834,18 @@ object Stubs {
 
   val pushDevicesResponse = PushDevicesResponse(
     devices = listOf(pushDeviceResponse),
+  )
+
+  val signupCodeResponse = SignupCodeResponse(
+    code = signupCode.code,
+    isUsed = false,
+    createdAt = "1970-01-01 00:17",
+    usedAt = null,
+  )
+
+  val signupCodesResponse = SignupCodesResponse(
+    signupCodes = listOf(signupCodeResponse),
+    maxSignupCodes = project.maxSignupCodesPerUser,
   )
 
   // endregion
