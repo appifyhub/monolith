@@ -50,9 +50,6 @@ object Normalizers {
   val ProjectDescription = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullified)
   val ProjectLogoUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
   val ProjectWebsiteUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
-  val MaxUsers = normalizesNonNull(Validators.PositiveLong, Cleaners.LongToCardinal)
-  val AnyoneCanSearch = normalizesNonNull(Validators.Flag, Cleaners.FlagDefFalse)
-  val OnHold = normalizesNonNull(Validators.Flag, Cleaners.FlagDefTrue)
 
   // Other normalizers
 

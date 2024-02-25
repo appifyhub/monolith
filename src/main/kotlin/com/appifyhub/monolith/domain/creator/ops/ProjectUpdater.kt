@@ -19,6 +19,8 @@ data class ProjectUpdater(
   val anyoneCanSearch: Settable<Boolean>? = null,
   val onHold: Settable<Boolean>? = null,
   val languageTag: Settable<String?>? = null,
+  val requiresSignupCodes: Settable<Boolean>? = null,
+  val maxSignupCodesPerUser: Settable<Int>? = null,
   val mailgunConfig: Settable<MailgunConfig?>? = null,
   val twilioConfig: Settable<TwilioConfig?>? = null,
   val firebaseConfig: Settable<FirebaseConfig?>? = null,

@@ -94,6 +94,8 @@ class Stubber(
         anyoneCanSearch = anyoneCanSearch,
         onHold = !activateNow,
         languageTag = language,
+        requiresSignupCodes = false,
+        maxSignupCodesPerUser = Integer.MAX_VALUE,
         mailgunConfig = null,
         twilioConfig = null,
         firebaseConfig = null,

@@ -53,6 +53,12 @@ class ProjectDbm(
   @Column(nullable = true, length = 8, updatable = true)
   var languageTag: String?,
 
+  @Column(nullable = false, updatable = true)
+  var requiresSignupCodes: Boolean,
+
+  @Column(nullable = false, updatable = true)
+  var maxSignupCodesPerUser: Int,
+
   // endregion
 
   // region Mailgun
@@ -126,6 +132,8 @@ class ProjectDbm(
     if (status != other.status) return false
     if (userIdType != other.userIdType) return false
     if (languageTag != other.languageTag) return false
+    if (requiresSignupCodes != other.requiresSignupCodes) return false
+    if (maxSignupCodesPerUser != other.maxSignupCodesPerUser) return false
 
     if (mailgunApiKey != other.mailgunApiKey) return false
     if (mailgunDomain != other.mailgunDomain) return false
@@ -157,6 +165,8 @@ class ProjectDbm(
     result = 31 * result + status.hashCode()
     result = 31 * result + userIdType.hashCode()
     result = 31 * result + languageTag.hashCode()
+    result = 31 * result + requiresSignupCodes.hashCode()
+    result = 31 * result + maxSignupCodesPerUser.hashCode()
 
     result = 31 * result + mailgunApiKey.hashCode()
     result = 31 * result + mailgunDomain.hashCode()
@@ -188,6 +198,8 @@ class ProjectDbm(
       "status='$status', " +
       "userIdType='$userIdType', " +
       "languageTag='$languageTag', " +
+      "requiresSignupCodes='$requiresSignupCodes', " +
+      "maxSignupCodesPerUser='$maxSignupCodesPerUser', " +
 
       "mailgunApiKey='$mailgunApiKey', " +
       "mailgunDomain='$mailgunDomain', " +
