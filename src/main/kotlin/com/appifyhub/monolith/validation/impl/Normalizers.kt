@@ -61,6 +61,7 @@ object Normalizers {
   val MessageTemplateName = normalizesNonNull(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
   val MessageTemplate = normalizesNonNull(Validators.MessageTemplate, Cleaners.MessageTemplate)
   val PushDeviceToken = normalizesNonNull(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
+  val SignupCode = normalizesNonNull(Validators.SignupCode, Cleaners.SignupCode)
 
   // Integrations normalizers
 

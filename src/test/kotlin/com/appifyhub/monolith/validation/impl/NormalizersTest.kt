@@ -207,6 +207,11 @@ class NormalizersTest {
       .consistsOf(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
   }
 
+  @Test fun `signup code = signup code + signup code`() {
+    assertThat(Normalizers.SignupCode)
+      .consistsOf(Validators.SignupCode, Cleaners.SignupCode)
+  }
+
   // endregion
 
   // region Integrations normalizers

@@ -13,7 +13,9 @@ class SignupCodeGeneratorTest {
     val signupCode = SignupCodeGenerator.nextCode
     assertThat(signupCode).all {
       length().isEqualTo(14)
-      transform { it.split("-") }.each {
+      transform {
+        it.split(SignupCodeGenerator.CODE_DELIMITER)
+      }.each {
         it.length().isEqualTo(4)
       }
     }
