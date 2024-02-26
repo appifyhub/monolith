@@ -42,7 +42,7 @@ class SignupCodeRepositoryImpl(
   }
 
   @Transactional // to prevent concurrency issues
-  override fun markCodeUsed(code: String): SignupCode? {
+  override fun markCodeUsed(code: String): SignupCode {
     log.debug("Marking signup code $code as used")
 
     val signupCode = signupCodeDao.findById(code).getOrNull()?.toDomain()

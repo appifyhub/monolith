@@ -11,6 +11,6 @@ interface SignupCodeRepository {
   @Throws fun fetchAllCodesByOwner(owner: User): List<SignupCode>
 
   @Transactional // to prevent concurrency issues
-  @Throws fun markCodeUsed(code: String): SignupCode?
+  @Throws fun markCodeUsed(code: String): SignupCode
 
 }
