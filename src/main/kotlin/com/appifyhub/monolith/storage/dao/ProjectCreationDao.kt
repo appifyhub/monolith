@@ -14,10 +14,10 @@ interface ProjectCreationDao : CrudRepository<ProjectCreationDbm, ProjectCreatio
 
   fun findByData_CreatedProjectId(projectId: Long): ProjectCreationDbm
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByData_CreatorUserIdAndData_CreatorProjectId(userId: String, projectId: Long)
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByData_CreatedProjectId(projectId: Long)
 
 }

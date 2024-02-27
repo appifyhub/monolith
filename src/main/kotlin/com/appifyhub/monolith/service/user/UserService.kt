@@ -4,9 +4,11 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import org.springframework.transaction.annotation.Transactional
 
 interface UserService {
 
+  @Transactional(rollbackFor = [Exception::class])
   @Throws fun addUser(creator: UserCreator): User
 
   @Throws fun fetchUserByUserId(id: UserId): User

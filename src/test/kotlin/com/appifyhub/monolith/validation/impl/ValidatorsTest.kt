@@ -538,6 +538,31 @@ class ValidatorsTest {
       .isEqualTo(Validators.NoSpaces)
   }
 
+  @Test fun `signup code fails with null`() {
+    assertThat(Validators.SignupCode.isValid(null))
+      .isFalse()
+  }
+
+  @Test fun `signup code fails with blank`() {
+    assertThat(Validators.SignupCode.isValid(" \n\t"))
+      .isFalse()
+  }
+
+  @Test fun `signup code fails when not 14 characters`() {
+    assertThat(Validators.SignupCode.isValid("1234-5678-ABCD-XYZ"))
+      .isFalse()
+  }
+
+  @Test fun `signup code fails when not dashed`() {
+    assertThat(Validators.SignupCode.isValid("12345678ABCDXY"))
+      .isFalse()
+  }
+
+  @Test fun `signup code succeeds with valid content`() {
+    assertThat(Validators.SignupCode.isValid("1234-5678-ABCD"))
+      .isTrue()
+  }
+
   // endregion
 
   // region Integrations validators

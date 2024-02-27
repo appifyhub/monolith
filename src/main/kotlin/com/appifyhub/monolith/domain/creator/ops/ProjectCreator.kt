@@ -21,6 +21,8 @@ data class ProjectCreator(
   val anyoneCanSearch: Boolean,
   val onHold: Boolean,
   val languageTag: String?,
+  var requiresSignupCodes: Boolean,
+  var maxSignupCodesPerUser: Int,
   val mailgunConfig: MailgunConfig?,
   val twilioConfig: TwilioConfig?,
   val firebaseConfig: FirebaseConfig?,

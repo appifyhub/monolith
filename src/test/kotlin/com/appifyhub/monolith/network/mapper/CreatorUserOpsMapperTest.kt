@@ -13,6 +13,7 @@ class CreatorUserOpsMapperTest {
     val creator = Stubs.creatorSignupRequest.copy(
       birthday = null,
       company = null,
+      signupCode = null,
     ).toDomain(projectId = Stubs.project.id)
 
     assertThat(creator).isDataClassEqualTo(
@@ -21,6 +22,7 @@ class CreatorUserOpsMapperTest {
         contact = Stubs.userId.userId,
         birthday = null,
         company = null,
+        signupCode = null,
       )
     )
   }

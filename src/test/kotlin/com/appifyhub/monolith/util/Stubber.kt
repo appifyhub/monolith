@@ -80,6 +80,8 @@ class Stubber(
       maxUsers: Int = 1000,
       name: String = "${owner.name}'s Stub Project",
       language: String = Locale.US.toLanguageTag(),
+      requiresSignupCodes: Boolean = false,
+      maxSignupCodesPerUser: Int = Integer.MAX_VALUE,
     ) = creatorRepo.addProject(
       ProjectCreator(
         owner = owner,
@@ -94,6 +96,8 @@ class Stubber(
         anyoneCanSearch = anyoneCanSearch,
         onHold = !activateNow,
         languageTag = language,
+        requiresSignupCodes = requiresSignupCodes,
+        maxSignupCodesPerUser = maxSignupCodesPerUser,
         mailgunConfig = null,
         twilioConfig = null,
         firebaseConfig = null,

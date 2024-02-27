@@ -20,6 +20,8 @@ data class ProjectUpdateRequest(
   @JsonProperty("anyone_can_search") val anyoneCanSearch: SettableRequest<Boolean>? = null,
   @JsonProperty("on_hold") val onHold: SettableRequest<Boolean>? = null,
   @JsonProperty("language_tag") val languageTag: SettableRequest<String?>? = null,
+  @JsonProperty("requires_signup_codes") val requiresSignupCodes: SettableRequest<Boolean>? = null,
+  @JsonProperty("max_signup_codes_per_user") val maxSignupCodesPerUser: SettableRequest<Int>? = null,
   @JsonProperty("mailgun_config") val mailgunConfig: SettableRequest<MailgunConfigDto?>? = null,
   @JsonProperty("twilio_config") val twilioConfig: SettableRequest<TwilioConfigDto?>? = null,
   @JsonProperty("firebase_config") val firebaseConfig: SettableRequest<FirebaseConfigDto?>? = null,

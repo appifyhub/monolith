@@ -21,4 +21,5 @@ fun CreatorSignupRequest.toDomain(
   birthday = birthday?.let { DateTimeMapper.parseAsDate(it) },
   company = company?.toDomain(),
   languageTag = Locale.US.toLanguageTag(),
+  signupCode = signupCode,
 )

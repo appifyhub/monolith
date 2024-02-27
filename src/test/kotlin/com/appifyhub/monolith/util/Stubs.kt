@@ -19,6 +19,7 @@ import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.schema.Schema
 import com.appifyhub.monolith.domain.user.Organization
+import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
@@ -49,6 +50,8 @@ import com.appifyhub.monolith.network.messaging.ops.MessageTemplateCreateRequest
 import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
 import com.appifyhub.monolith.network.messaging.ops.PushDeviceRequest
 import com.appifyhub.monolith.network.user.OrganizationDto
+import com.appifyhub.monolith.network.user.SignupCodeResponse
+import com.appifyhub.monolith.network.user.SignupCodesResponse
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.OrganizationUpdaterDto
 import com.appifyhub.monolith.network.user.ops.UserSignupRequest
@@ -68,6 +71,7 @@ import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
 import com.appifyhub.monolith.storage.model.schema.SchemaDbm
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
+import com.appifyhub.monolith.storage.model.user.SignupCodeDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm
 import java.util.Date
@@ -265,6 +269,8 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    requiresSignupCodes = false,
+    maxSignupCodesPerUser = Integer.MAX_VALUE,
     mailgunConfig = mailgunConfig,
     twilioConfig = twilioConfig,
     firebaseConfig = firebaseConfig,
@@ -285,6 +291,8 @@ object Stubs {
     anyoneCanSearch = false,
     onHold = false,
     languageTag = Locale.UK.toLanguageTag(),
+    requiresSignupCodes = true,
+    maxSignupCodesPerUser = 5,
     mailgunConfig = mailgunConfigUpdated,
     twilioConfig = twilioConfigUpdated,
     firebaseConfig = firebaseConfigUpdated,
@@ -338,6 +346,14 @@ object Stubs {
     owner = user,
   )
 
+  val signupCode = SignupCode(
+    code = "code",
+    isUsed = false,
+    owner = user,
+    createdAt = Date(0x10000E),
+    usedAt = null,
+  )
+
   // endregion
 
   // region Domain Ops Models
@@ -355,6 +371,7 @@ object Stubs {
     birthday = Date(0xB00000),
     company = company,
     languageTag = Locale.US.toLanguageTag(),
+    signupCode = "FAKE-CODE-1234",
   )
 
   val companyUpdater = OrganizationUpdater(
@@ -393,6 +410,8 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    requiresSignupCodes = false,
+    maxSignupCodesPerUser = Integer.MAX_VALUE,
     mailgunConfig = mailgunConfig,
     twilioConfig = twilioConfig,
     firebaseConfig = firebaseConfig,
@@ -410,6 +429,8 @@ object Stubs {
     anyoneCanSearch = Settable(false),
     onHold = Settable(false),
     languageTag = Settable(Locale.UK.toLanguageTag()),
+    requiresSignupCodes = Settable(true),
+    maxSignupCodesPerUser = Settable(5),
     mailgunConfig = Settable(mailgunConfigUpdated),
     twilioConfig = Settable(twilioConfigUpdated),
     firebaseConfig = Settable(firebaseConfigUpdated),
@@ -501,6 +522,8 @@ object Stubs {
     anyoneCanSearch = true,
     onHold = true,
     languageTag = Locale.US.toLanguageTag(),
+    requiresSignupCodes = false,
+    maxSignupCodesPerUser = Integer.MAX_VALUE,
     mailgunApiKey = mailgunConfig.apiKey,
     mailgunDomain = mailgunConfig.domain,
     mailgunSenderName = mailgunConfig.senderName,
@@ -611,6 +634,14 @@ object Stubs {
     deviceId = pushDevice.deviceId,
     type = PushDevice.Type.ANDROID.name,
     owner = userDbm,
+  )
+
+  val signupCodeDbm = SignupCodeDbm(
+    code = "code",
+    isUsed = false,
+    owner = userDbm,
+    createdAt = Date(0x10000E),
+    usedAt = null,
   )
 
   // endregion
@@ -767,6 +798,8 @@ object Stubs {
     anyoneCanSearch = project.anyoneCanSearch,
     onHold = project.onHold,
     languageTag = Locale.US.toLanguageTag(),
+    requiresSignupCodes = project.requiresSignupCodes,
+    maxSignupCodesPerUser = project.maxSignupCodesPerUser,
     mailgunConfig = mailgunConfigDto,
     twilioConfig = twilioConfigDto,
     firebaseConfig = firebaseConfigDto,
@@ -804,6 +837,18 @@ object Stubs {
     devices = listOf(pushDeviceResponse),
   )
 
+  val signupCodeResponse = SignupCodeResponse(
+    code = signupCode.code,
+    isUsed = false,
+    createdAt = "1970-01-01 00:17",
+    usedAt = null,
+  )
+
+  val signupCodesResponse = SignupCodesResponse(
+    signupCodes = listOf(signupCodeResponse),
+    maxSignupCodes = project.maxSignupCodesPerUser,
+  )
+
   // endregion
 
   // region Network Ops Models
@@ -815,6 +860,7 @@ object Stubs {
     type = "ORGANIZATION",
     birthday = "1970-05-14",
     company = companyDto,
+    signupCode = "FAKE-CODE-1234",
   )
 
   val companyUpdaterDto = OrganizationUpdaterDto(
@@ -836,6 +882,7 @@ object Stubs {
     birthday = "1970-05-14",
     company = companyDto,
     languageTag = Locale.US.toLanguageTag(),
+    signupCode = "FAKE-CODE-1234",
   )
 
   val userUpdateAuthorityRequest = UserUpdateAuthorityRequest(authority = User.Authority.MODERATOR.name)
@@ -864,7 +911,11 @@ object Stubs {
     description = project.description,
     logoUrl = project.logoUrl,
     websiteUrl = project.websiteUrl,
-    languageTag = Locale.US.toLanguageTag(),
+    maxUsers = project.maxUsers,
+    anyoneCanSearch = project.anyoneCanSearch,
+    languageTag = project.languageTag,
+    requiresSignupCodes = project.requiresSignupCodes,
+    maxSignupCodesPerUser = project.maxSignupCodesPerUser,
     mailgunConfig = mailgunConfigDto,
     twilioConfig = twilioConfigDto,
     firebaseConfig = firebaseConfigDto,
@@ -881,6 +932,8 @@ object Stubs {
     anyoneCanSearch = SettableRequest(false),
     onHold = SettableRequest(false),
     languageTag = SettableRequest(Locale.UK.toLanguageTag()),
+    requiresSignupCodes = SettableRequest(true),
+    maxSignupCodesPerUser = SettableRequest(5),
     mailgunConfig = SettableRequest(mailgunConfigDtoUpdated),
     twilioConfig = SettableRequest(twilioConfigDtoUpdated),
     firebaseConfig = SettableRequest(firebaseConfigDtoUpdated),

@@ -22,6 +22,7 @@ class ProjectCreationKeyDbm(
 
 ) : Serializable {
 
+  @Suppress("DuplicatedCode") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is ProjectCreationKeyDbm) return false
@@ -33,6 +34,7 @@ class ProjectCreationKeyDbm(
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = creatorUserId.hashCode()
     result = 31 * result + creatorProjectId.hashCode()
@@ -40,6 +42,7 @@ class ProjectCreationKeyDbm(
     return result
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun toString(): String {
     return "ProjectCreationKeyDbm(" +
       "creatorUserId=$creatorUserId, " +

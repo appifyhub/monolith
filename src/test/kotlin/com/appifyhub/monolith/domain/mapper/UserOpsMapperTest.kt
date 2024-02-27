@@ -11,9 +11,9 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.util.PasswordEncoderFake
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
+import org.junit.jupiter.api.Test
 import java.util.Date
 import java.util.Locale
-import org.junit.jupiter.api.Test
 
 class UserOpsMapperTest {
 
@@ -214,6 +214,7 @@ class UserOpsMapperTest {
       birthday = Date(0xB00000),
       company = Stubs.company,
       languageTag = Locale.US.toLanguageTag(),
+      signupCode = "FAKE-CODE-1234",
     )
 
     assertThat(
@@ -245,6 +246,7 @@ class UserOpsMapperTest {
       birthday = Date(0xB00000),
       company = Stubs.company,
       languageTag = Locale.US.toLanguageTag(),
+      signupCode = "FAKE-CODE-1234",
     )
 
     assertThat(

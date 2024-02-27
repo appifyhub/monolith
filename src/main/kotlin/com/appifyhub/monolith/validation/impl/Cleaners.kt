@@ -108,6 +108,7 @@ object Cleaners {
   }
   val MessageTemplate = Trim
   val PushDeviceToken = RemoveSpaces
+  val SignupCode = RemoveSpaces
 
   // Integrations cleaners
 

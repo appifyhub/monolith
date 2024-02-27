@@ -125,6 +125,22 @@ class CreatorServiceImplTest {
       }
   }
 
+  @Test fun `add project fails with invalid requires max signup codes per user`() {
+    val owner = stubber.creators.default()
+    val projectData = Stubs.projectCreator.copy(
+      owner = owner,
+      maxSignupCodesPerUser = -10,
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertFailure { service.addProject(projectData) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project's Max Signup Codes Per User")
+      }
+  }
+
   @Test fun `add project fails with invalid mailgun config`() {
     val owner = stubber.creators.default()
     val projectData = Stubs.projectCreator.copy(
@@ -341,6 +357,22 @@ class CreatorServiceImplTest {
       .all {
         hasClass(ResponseStatusException::class)
         messageContains("Project's Max Users")
+      }
+  }
+
+  @Test fun `update project fails with invalid max signup codes per user`() {
+    val project = stubber.projects.new()
+    val updater = Stubs.projectUpdater.copy(
+      id = project.id,
+      maxSignupCodesPerUser = Settable(-10),
+      logoUrl = null,
+      websiteUrl = null,
+    )
+
+    assertFailure { service.updateProject(updater) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Project's Max Signup Codes Per User")
       }
   }
 

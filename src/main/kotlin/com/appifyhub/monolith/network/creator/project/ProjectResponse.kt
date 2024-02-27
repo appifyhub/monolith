@@ -22,6 +22,8 @@ data class ProjectResponse(
   @JsonProperty("anyone_can_search") val anyoneCanSearch: Boolean,
   @JsonProperty("on_hold") val onHold: Boolean,
   @JsonProperty("language_tag") val languageTag: String?,
+  @JsonProperty("requires_signup_codes") val requiresSignupCodes: Boolean,
+  @JsonProperty("max_signup_codes_per_user") val maxSignupCodesPerUser: Int,
   @JsonProperty("mailgun_config") val mailgunConfig: MailgunConfigDto?,
   @JsonProperty("twilio_config") val twilioConfig: TwilioConfigDto?,
   @JsonProperty("firebase_config") val firebaseConfig: FirebaseConfigDto?,

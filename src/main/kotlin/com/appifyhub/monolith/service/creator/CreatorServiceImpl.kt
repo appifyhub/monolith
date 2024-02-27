@@ -51,14 +51,18 @@ class CreatorServiceImpl(
       .requireValid { "Project's Logo URL" }
     val normalizedWebsiteUrl = Normalizers.ProjectWebsiteUrl.run(projectData.websiteUrl)
       .requireValid { "Project's Website URL" }
-    val normalizedMaxUsers = Normalizers.MaxUsers.run(projectData.maxUsers.toLong())
+    val normalizedMaxUsers = Normalizers.Cardinal.run(projectData.maxUsers.toLong())
       .requireValid { "Project's Max Users" }.toInt()
-    val normalizedAnyoneCanSearch = Normalizers.AnyoneCanSearch.run(projectData.anyoneCanSearch)
+    val normalizedAnyoneCanSearch = Normalizers.FlagDefFalse.run(projectData.anyoneCanSearch)
       .requireValid { "Project's Anyone Can Search" }
-    val normalizedOnHold = Normalizers.OnHold.run(projectData.onHold)
+    val normalizedOnHold = Normalizers.FlagDefTrue.run(projectData.onHold)
       .requireValid { "Project's On Hold" }
     val normalizedLanguageTag = Normalizers.LanguageTag.run(projectData.languageTag)
       .requireValid { "Project's Language Tag" }
+    val normalizedRequiresSignupCodes = Normalizers.FlagDefFalse.run(projectData.requiresSignupCodes)
+      .requireValid { "Project's Requires Signup Codes" }
+    val normalizedMaxSignupCodesPerUser = Normalizers.Cardinal.run(projectData.maxSignupCodesPerUser.toLong())
+      .requireValid { "Project's Max Signup Codes Per User" }.toInt()
     val normalizedMailgunConfig = Normalizers.MailgunConfigData.run(projectData.mailgunConfig)
       .requireValid { "Mailgun Config" }
     val normalizedTwilioConfig = Normalizers.TwilioConfigData.run(projectData.twilioConfig)
@@ -79,6 +83,8 @@ class CreatorServiceImpl(
       anyoneCanSearch = normalizedAnyoneCanSearch,
       onHold = normalizedOnHold,
       languageTag = normalizedLanguageTag,
+      requiresSignupCodes = normalizedRequiresSignupCodes,
+      maxSignupCodesPerUser = normalizedMaxSignupCodesPerUser,
       mailgunConfig = normalizedMailgunConfig,
       twilioConfig = normalizedTwilioConfig,
       firebaseConfig = normalizedFirebaseConfig,
@@ -149,16 +155,22 @@ class CreatorServiceImpl(
       Normalizers.ProjectWebsiteUrl.run(it).requireValid { "Project's Website URL" }
     }
     val normalizedMaxUsers = updater.maxUsers?.mapValueNonNull {
-      Normalizers.MaxUsers.run(it.toLong()).requireValid { "Project's Max Users" }.toInt()
+      Normalizers.Cardinal.run(it.toLong()).requireValid { "Project's Max Users" }.toInt()
     }
     val normalizedAnyoneCanSearch = updater.anyoneCanSearch?.mapValueNonNull {
-      Normalizers.AnyoneCanSearch.run(it).requireValid { "Project's Anyone Can Search" }
+      Normalizers.FlagDefFalse.run(it).requireValid { "Project's Anyone Can Search" }
     }
     val normalizedOnHold = updater.onHold?.mapValueNonNull {
-      Normalizers.OnHold.run(it).requireValid { "Project's On Hold" }
+      Normalizers.FlagDefTrue.run(it).requireValid { "Project's On Hold" }
     }
     val normalizedLanguageTag = updater.languageTag?.mapValueNullable {
       Normalizers.LanguageTag.run(it).requireValid { "Language Tag" }
+    }
+    val normalizedRequiresSignupCodes = updater.requiresSignupCodes?.mapValueNonNull {
+      Normalizers.FlagDefFalse.run(it).requireValid { "Project's Requires Signup Codes" }
+    }
+    val normalizedMaxSignupCodesPerUser = updater.maxSignupCodesPerUser?.mapValueNonNull {
+      Normalizers.Cardinal.run(it.toLong()).requireValid { "Project's Max Signup Codes Per User" }.toInt()
     }
     val normalizedMailgunConfig = updater.mailgunConfig?.mapValueNullable {
       Normalizers.MailgunConfigData.run(it).requireValid { "Mailgun Config" }
@@ -182,6 +194,8 @@ class CreatorServiceImpl(
       anyoneCanSearch = normalizedAnyoneCanSearch,
       onHold = normalizedOnHold,
       languageTag = normalizedLanguageTag,
+      requiresSignupCodes = normalizedRequiresSignupCodes,
+      maxSignupCodesPerUser = normalizedMaxSignupCodesPerUser,
       mailgunConfig = normalizedMailgunConfig,
       twilioConfig = normalizedTwilioConfig,
       firebaseConfig = normalizedFirebaseConfig,

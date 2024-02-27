@@ -23,6 +23,7 @@ class TokenDetailsDbm(
 
 ) : Serializable {
 
+  @Suppress("DuplicatedCode") // false positive
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is TokenDetailsDbm) return false
@@ -34,6 +35,7 @@ class TokenDetailsDbm(
     return true
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun hashCode(): Int {
     var result = tokenValue.hashCode()
     result = 31 * result + blocked.hashCode()
@@ -41,6 +43,7 @@ class TokenDetailsDbm(
     return result
   }
 
+  @Suppress("DuplicatedCode") // false positive
   override fun toString(): String {
     return "TokenDetailsDbm(" +
       "tokenValue='$tokenValue', " +

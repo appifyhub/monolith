@@ -62,6 +62,8 @@ fun Project.toNetwork(
   anyoneCanSearch = anyoneCanSearch,
   onHold = onHold,
   languageTag = languageTag,
+  requiresSignupCodes = requiresSignupCodes,
+  maxSignupCodesPerUser = maxSignupCodesPerUser,
   mailgunConfig = mailgunConfig?.toNetwork(),
   twilioConfig = twilioConfig?.toNetwork(),
   firebaseConfig = firebaseConfig?.toNetwork(),

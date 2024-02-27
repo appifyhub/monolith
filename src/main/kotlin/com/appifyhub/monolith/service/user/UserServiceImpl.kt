@@ -22,17 +22,20 @@ import com.appifyhub.monolith.util.ext.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class UserServiceImpl(
   private val userRepository: UserRepository,
   private val creatorService: CreatorService,
+  private val signupCodeService: SignupCodeService,
   private val eventPublisher: EventPublisher,
   private val timeProvider: TimeProvider,
 ) : UserService {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
+  @Transactional(rollbackFor = [Exception::class])
   override fun addUser(creator: UserCreator): User {
     log.debug("Adding user $creator")
 
@@ -56,6 +59,9 @@ class UserServiceImpl(
     val normalizedCompany = Normalizers.Organization.run(creator.company).requireValid { "Company" }
     val normalizedBirthday = Normalizers.BDay.run(creator.birthday to timeProvider).requireValid { "Birthday" }?.first
     val normalizedLanguageTag = Normalizers.LanguageTag.run(creator.languageTag).requireValid { "Language Tag" }
+    val normalizedSignupCode = if (project.requiresSignupCodes)
+      Normalizers.SignupCode.run(creator.signupCode).requireValid { "Signup Code" }
+    else null
 
     val normalizedCreator = UserCreator(
       userId = normalizedId,
@@ -70,11 +76,20 @@ class UserServiceImpl(
       birthday = normalizedBirthday,
       company = normalizedCompany,
       languageTag = normalizedLanguageTag,
+      signupCode = normalizedSignupCode,
     )
 
+    // check project requirement: max users
     val maxUsers = creatorService.fetchProjectById(normalizedCreator.projectId).maxUsers
-    val totalUsers = userRepository.count(normalizedCreator.projectId)
+    val totalUsers = userRepository.countUsers(normalizedCreator.projectId)
     if (totalUsers >= maxUsers) throwPreconditionFailed { "Maximum users reached" }
+
+    // check project requirements: signup codes
+    if (project.requiresSignupCodes) {
+      // safe because the whole block is transactional
+      val signupCode = signupCodeService.markCodeUsed(normalizedSignupCode!!, normalizedCreator.projectId)
+      log.info("Signup code $signupCode used for user ${normalizedCreator.userId}")
+    }
 
     return userRepository.addUser(normalizedCreator, userIdType)
       .also { result ->

@@ -14,7 +14,6 @@ class CreatorProjectOpsMapperTest {
         Stubs.projectCreator.copy(
           owner = Stubs.user,
           status = Project.Status.REVIEW,
-          anyoneCanSearch = false,
         )
       )
   }
@@ -24,7 +23,6 @@ class CreatorProjectOpsMapperTest {
       .isDataClassEqualTo(
         Stubs.projectCreator.copy(
           status = Project.Status.REVIEW,
-          anyoneCanSearch = false,
         )
       )
   }

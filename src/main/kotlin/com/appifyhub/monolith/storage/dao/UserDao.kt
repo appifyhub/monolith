@@ -20,7 +20,7 @@ interface UserDao : CrudRepository<UserDbm, UserIdDbm> {
 
   fun countAllByProject_ProjectId(projectId: Long): Long
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByProject_ProjectId(projectId: Long)
 
 }

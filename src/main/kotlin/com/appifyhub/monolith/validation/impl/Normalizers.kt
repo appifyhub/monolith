@@ -50,9 +50,6 @@ object Normalizers {
   val ProjectDescription = normalizesNullable(Validators.NotBlankNullable, Cleaners.TrimNullified)
   val ProjectLogoUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
   val ProjectWebsiteUrl = normalizesNullable(Validators.UrlNullable, Cleaners.UrlNullified)
-  val MaxUsers = normalizesNonNull(Validators.PositiveLong, Cleaners.LongToCardinal)
-  val AnyoneCanSearch = normalizesNonNull(Validators.Flag, Cleaners.FlagDefFalse)
-  val OnHold = normalizesNonNull(Validators.Flag, Cleaners.FlagDefTrue)
 
   // Other normalizers
 
@@ -64,6 +61,7 @@ object Normalizers {
   val MessageTemplateName = normalizesNonNull(Validators.MessageTemplateName, Cleaners.MessageTemplateName)
   val MessageTemplate = normalizesNonNull(Validators.MessageTemplate, Cleaners.MessageTemplate)
   val PushDeviceToken = normalizesNonNull(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
+  val SignupCode = normalizesNonNull(Validators.SignupCode, Cleaners.SignupCode)
 
   // Integrations normalizers
 

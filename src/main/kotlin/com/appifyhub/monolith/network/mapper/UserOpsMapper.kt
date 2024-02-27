@@ -30,6 +30,7 @@ fun UserSignupRequest.toDomain(
   birthday = birthday?.let { DateTimeMapper.parseAsDate(it) },
   company = company?.toDomain(),
   languageTag = languageTag,
+  signupCode = signupCode,
 )
 
 fun UserUpdateAuthorityRequest.toDomain(
