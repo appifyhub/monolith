@@ -371,6 +371,7 @@ object Stubs {
     birthday = Date(0xB00000),
     company = company,
     languageTag = Locale.US.toLanguageTag(),
+    signupCode = "FAKE-CODE-1234",
   )
 
   val companyUpdater = OrganizationUpdater(
@@ -859,6 +860,7 @@ object Stubs {
     type = "ORGANIZATION",
     birthday = "1970-05-14",
     company = companyDto,
+    signupCode = "FAKE-CODE-1234",
   )
 
   val companyUpdaterDto = OrganizationUpdaterDto(
@@ -880,6 +882,7 @@ object Stubs {
     birthday = "1970-05-14",
     company = companyDto,
     languageTag = Locale.US.toLanguageTag(),
+    signupCode = "FAKE-CODE-1234",
   )
 
   val userUpdateAuthorityRequest = UserUpdateAuthorityRequest(authority = User.Authority.MODERATOR.name)

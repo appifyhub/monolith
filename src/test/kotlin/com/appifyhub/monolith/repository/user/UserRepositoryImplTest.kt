@@ -339,7 +339,7 @@ class UserRepositoryImplTest {
       } doReturn 10
     }
 
-    assertThat(repository.count(Stubs.project.id))
+    assertThat(repository.countUsers(Stubs.project.id))
       .isEqualTo(10)
   }
 

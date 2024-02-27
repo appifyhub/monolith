@@ -13,7 +13,7 @@ interface TokenDetailsDao : CrudRepository<TokenDetailsDbm, String> {
 
   fun findAllByOwner(owner: UserDbm): List<TokenDetailsDbm>
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByOwner(owner: UserDbm)
 
 }

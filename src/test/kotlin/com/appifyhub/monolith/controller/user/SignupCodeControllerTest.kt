@@ -164,7 +164,7 @@ class SignupCodeControllerTest {
     SignupCodeGenerator.interceptor = { "FAKE-CODE-1234" }
     val signupCode1 = service.createCode(user.id).toNetwork()
     SignupCodeGenerator.interceptor = { "FAKE-CODE-5678" }
-    val signupCode2 = service.createCode(user.id).let { service.markCodeUsed(it.code) }.toNetwork()
+    val signupCode2 = service.createCode(user.id).let { service.markCodeUsed(it.code, project.id) }.toNetwork()
 
     assertThat(
       restTemplate.exchange<SignupCodesResponse>(

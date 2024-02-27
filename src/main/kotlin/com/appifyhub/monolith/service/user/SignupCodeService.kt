@@ -2,7 +2,7 @@ package com.appifyhub.monolith.service.user
 
 import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.UserId
-import javax.transaction.Transactional
+import org.springframework.transaction.annotation.Transactional
 
 interface SignupCodeService {
 
@@ -10,7 +10,7 @@ interface SignupCodeService {
 
   @Throws fun fetchAllCodesByOwner(ownerId: UserId): List<SignupCode>
 
-  @Transactional // to prevent concurrency issues
-  @Throws fun markCodeUsed(code: String): SignupCode
+  @Transactional(rollbackFor = [Exception::class])
+  @Throws fun markCodeUsed(code: String, projectId: Long): SignupCode
 
 }

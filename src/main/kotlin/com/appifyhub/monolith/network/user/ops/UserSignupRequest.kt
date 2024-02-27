@@ -12,10 +12,11 @@ data class UserSignupRequest(
   @JsonProperty("raw_signature") val rawSignature: String,
   @JsonProperty("name") val name: String? = null,
   @JsonProperty("type") val type: String? = null,
-  @JsonProperty("allows_spam") val allowsSpam: Boolean?,
+  @JsonProperty("allows_spam") val allowsSpam: Boolean? = null,
   @JsonProperty("contact") val contact: String? = null,
   @JsonProperty("contact_type") val contactType: String? = null,
   @JsonProperty("birthday") val birthday: String? = null,
-  @JsonProperty("company") val company: OrganizationDto?,
+  @JsonProperty("company") val company: OrganizationDto? = null,
   @JsonProperty("language_tag") val languageTag: String? = null,
+  @JsonProperty("signup_code") val signupCode: String? = null,
 ) : Serializable

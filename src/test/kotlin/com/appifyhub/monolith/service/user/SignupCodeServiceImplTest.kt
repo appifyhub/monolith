@@ -10,7 +10,9 @@ import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.user.SignupCodeGenerator
+import com.appifyhub.monolith.repository.user.SignupCodeRepository
 import com.appifyhub.monolith.util.Stubber
+import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
 import org.junit.jupiter.api.AfterEach
@@ -32,6 +34,7 @@ import java.time.temporal.ChronoUnit
 class SignupCodeServiceImplTest {
 
   @Autowired lateinit var service: SignupCodeService
+  @Autowired lateinit var repository: SignupCodeRepository
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var stubber: Stubber
 
@@ -100,8 +103,38 @@ class SignupCodeServiceImplTest {
   }
 
   @Test fun `marking a signup code as used fails for invalid code`() {
-    assertFailure { service.markCodeUsed("invalid") }
+    assertFailure { service.markCodeUsed("invalid", Stubs.project.id) }
       .messageContains("Signup Code")
+  }
+
+  @Test fun `marking a signup code as used fails for invalid project`() {
+    val project = stubber.projects.new()
+    val owner = stubber.users(project).default()
+
+    val signupCode = service.createCode(owner.id)
+    assertFailure { service.markCodeUsed(signupCode.code, -1) }
+      .messageContains("Project ID")
+  }
+
+  @Test fun `marking a signup code as used fails for already used code`() {
+    val project = stubber.projects.new()
+    val owner = stubber.users(project).default()
+
+    val signupCode = service.createCode(owner.id).copy(isUsed = true, usedAt = timeProvider.currentDate)
+    repository.saveSignupCode(signupCode)
+
+    assertFailure { service.markCodeUsed(signupCode.code, project.id) }
+      .messageContains("Signup code already used")
+  }
+
+  @Test fun `marking a signup code as used fails for different project`() {
+    val project1 = stubber.projects.new()
+    val project2 = stubber.projects.new()
+    val owner = stubber.users(project1).default()
+
+    val signupCode = service.createCode(owner.id)
+    assertFailure { service.markCodeUsed(signupCode.code, project2.id) }
+      .messageContains("Signup code does not belong to the same project as the user")
   }
 
   @Test fun `marking a signup code as used succeeds`() {
@@ -118,70 +151,10 @@ class SignupCodeServiceImplTest {
       usedAt = timeProvider.currentDate,
     )
 
-    assertThat(service.markCodeUsed(code))
+    assertThat(service.markCodeUsed(code, project.id))
       .transform { it.cleanDates() }
       .isDataClassEqualTo(expected)
   }
-
-  // service code yet to be tested:
-  //
-  //  override fun markCodeUsed(code: String): SignupCode? {
-  //    log.debug("Marking a signup code as used $code")
-  //
-  //    val normalizedCode = Normalizers.SignupCode.run(code).requireValid { "Signup Code" }
-  //
-  //    return repository.markCodeUsed(normalizedCode)
-  //  }
-
-  // code from a similar class handling push devices:
-  //
-  //  @Test fun `adding a new push device succeeds`() {
-  //    val owner = stubber.users(stubber.projects.new()).default()
-  //    val device = PushDevice("d e v _ 1", ANDROID, owner)
-  //    val expected = device.copy(deviceId = "dev_1")
-  //
-  //    assertThat(service.addDevice(device).cleanDates())
-  //      .isDataClassEqualTo(expected.cleanDates())
-  //  }
-  //
-  //  @Test fun `fetching a push device works`() {
-  //    val owner = stubber.users(stubber.projects.new()).default()
-  //    val device = service.addDevice(PushDevice("d e v _ 1", ANDROID, owner))
-  //
-  //    assertThat(service.fetchDeviceById("dev_1").cleanDates())
-  //      .isDataClassEqualTo(device.cleanDates())
-  //  }
-  //
-  //  @Test fun `fetching all push devices for user works`() {
-  //    val owner = stubber.users(stubber.projects.new()).default()
-  //    val device1 = service.addDevice(PushDevice("d e v _ 1", ANDROID, owner))
-  //    val device2 = service.addDevice(PushDevice("d e v _ 2", ANDROID, owner))
-  //
-  //    val result = service.fetchAllDevicesByUser(owner).map { it.cleanDates() }
-  //    val expected = listOf(device1, device2).map { it.cleanDates() }
-  //    assertThat(result).isEqualTo(expected)
-  //  }
-  //
-  //  @Test fun `deleting a push device by ID works`() {
-  //    val owner = stubber.users(stubber.projects.new()).default()
-  //    val device1 = service.addDevice(PushDevice("d e v _ 1", ANDROID, owner))
-  //
-  //    service.deleteDeviceById(device1.deviceId)
-  //
-  //    assertFailure { service.fetchDeviceById(device1.deviceId) }
-  //      .messageContains("No value present")
-  //  }
-  //
-  //  @Test fun `deleting all push devices for user works`() {
-  //    val owner = stubber.users(stubber.projects.new()).default()
-  //    service.addDevice(PushDevice("d e v _ 1", ANDROID, owner))
-  //    service.addDevice(PushDevice("d e v _ 2", ANDROID, owner))
-  //
-  //    service.deleteAllDevicesByUser(owner)
-  //
-  //    assertThat(service.fetchAllDevicesByUser(owner))
-  //      .isEmpty()
-  //  }
 
   // Helpers
 

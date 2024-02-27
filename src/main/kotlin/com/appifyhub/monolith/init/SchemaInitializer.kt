@@ -144,6 +144,7 @@ class SchemaInitializer(
         birthday = null,
         company = null,
         languageTag = Locale.US.toLanguageTag(),
+        signupCode = null,
       ),
     )
 

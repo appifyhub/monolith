@@ -25,6 +25,7 @@ class UserOpsMapperTest {
       birthday = null,
       company = null,
       languageTag = null,
+      signupCode = null,
     ).toDomain(projectId = Stubs.project.id)
 
     assertThat(request).isDataClassEqualTo(
@@ -41,6 +42,7 @@ class UserOpsMapperTest {
         birthday = null,
         company = null,
         languageTag = null,
+        signupCode = null,
       )
     )
   }

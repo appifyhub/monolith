@@ -19,4 +19,5 @@ data class UserCreator(
   val birthday: Date?,
   val company: Organization?,
   val languageTag: String?,
+  val signupCode: String?,
 )

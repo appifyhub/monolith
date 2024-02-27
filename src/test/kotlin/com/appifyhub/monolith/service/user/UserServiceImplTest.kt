@@ -31,9 +31,6 @@ import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import com.appifyhub.monolith.util.ext.truncateTo
-import java.time.temporal.ChronoUnit
-import java.util.Date
-import java.util.Locale
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -47,6 +44,9 @@ import org.springframework.test.annotation.DirtiesContext.MethodMode
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.web.server.ResponseStatusException
+import java.time.temporal.ChronoUnit
+import java.util.Date
+import java.util.Locale
 
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
@@ -54,6 +54,7 @@ import org.springframework.web.server.ResponseStatusException
 class UserServiceImplTest {
 
   @Autowired lateinit var service: UserService
+  @Autowired lateinit var signupCodeService: SignupCodeService
   @Autowired lateinit var passwordEncoder: PasswordEncoder
   @Autowired lateinit var timeProvider: TimeProviderFake
   @Autowired lateinit var eventBus: EventBusFake
@@ -198,6 +199,31 @@ class UserServiceImplTest {
       }
   }
 
+  @Test fun `adding user fails with invalid signup code (format)`() {
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType, requiresSignupCodes = true)
+    val creator = Stubs.userCreator.copy(signupCode = "invalid", projectId = project.id)
+
+    assertFailure { service.addUser(creator) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Signup Code")
+      }
+  }
+
+  @Test fun `adding user fails with invalid signup code (already used)`() {
+    val project = stubber.projects.new(userIdType = Stubs.project.userIdType, requiresSignupCodes = true)
+    val signupCodeOwner = stubber.users(project).default()
+    val signupCode = signupCodeService.createCode(signupCodeOwner.id)
+      .let { signupCodeService.markCodeUsed(it.code, project.id) }
+    val creator = Stubs.userCreator.copy(signupCode = signupCode.code, projectId = project.id)
+
+    assertFailure { service.addUser(creator) }
+      .all {
+        hasClass(ResponseStatusException::class)
+        messageContains("Signup code already used")
+      }
+  }
+
   @Test fun `adding user fails with max users reached`() {
     val project = stubber.projects.new(userIdType = UserIdType.USERNAME, maxUsers = 2)
     stubber.users(project).default(idSuffix = "_1")
@@ -327,6 +353,7 @@ class UserServiceImplTest {
       birthday = null,
       company = null,
       languageTag = null,
+      signupCode = null,
     )
     stubGenerators()
 

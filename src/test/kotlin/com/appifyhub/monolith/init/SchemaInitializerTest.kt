@@ -135,6 +135,7 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
+          signupCode = null,
         ),
       )
       mock.updateUser(
@@ -204,6 +205,7 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
+          signupCode = null,
         ),
       )
       mock.updateUser(

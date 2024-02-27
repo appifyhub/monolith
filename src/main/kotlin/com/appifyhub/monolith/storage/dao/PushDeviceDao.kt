@@ -11,7 +11,7 @@ interface PushDeviceDao : CrudRepository<PushDeviceDbm, String> {
 
   fun findAllByOwner(owner: UserDbm): List<PushDeviceDbm>
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByOwner(owner: UserDbm)
 
 }

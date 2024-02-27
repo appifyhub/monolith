@@ -1,12 +1,10 @@
 package com.appifyhub.monolith.repository.user
 
 import assertk.all
-import assertk.assertFailure
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
-import assertk.assertions.messageContains
 import com.appifyhub.monolith.storage.dao.SignupCodeDao
 import com.appifyhub.monolith.storage.model.user.SignupCodeDbm
 import com.appifyhub.monolith.util.Stubs
@@ -65,53 +63,28 @@ class SignupCodeRepositoryImplTest {
     }
   }
 
+  @Test fun `fetching a code by id works`() {
+    signupCodeDao.stub {
+      onGeneric { findById(any()) } doReturn Optional.of(Stubs.signupCodeDbm)
+    }
+
+    assertThat(repository.fetchSignupCodeById(fakeCode))
+      .isEqualTo(Stubs.signupCode)
+  }
+
   @Test fun `fetching all codes by owner works`() {
     signupCodeDao.stub {
       onGeneric { findAllByOwner(any()) } doReturn listOf(Stubs.signupCodeDbm)
     }
 
-    assertThat(repository.fetchAllCodesByOwner(Stubs.user))
+    assertThat(repository.fetchAllSignupCodesByOwner(Stubs.user))
       .isEqualTo(listOf(Stubs.signupCode))
   }
 
-  @Test fun `marking code used fails when code not found`() {
-    signupCodeDao.stub {
-      onGeneric { findById(any()) } doReturn Optional.empty()
-    }
-
-    assertFailure { repository.markCodeUsed(fakeCode) }
-      .messageContains("Signup code not found")
-  }
-
-  @Test fun `marking code used fails when code already used`() {
-    val usedSignupCodeDbm = SignupCodeDbm(
-      code = fakeCode,
-      isUsed = true,
-      owner = Stubs.userDbm,
-      createdAt = timeProvider.currentDate,
-      usedAt = timeProvider.currentDate,
-    )
-    signupCodeDao.stub {
-      onGeneric { findById(any()) } doReturn Optional.of(usedSignupCodeDbm)
-    }
-
-    assertFailure { repository.markCodeUsed(fakeCode) }
-      .messageContains("Signup code already used")
-  }
-
-  @Test fun `marking code used works`() {
-    signupCodeDao.stub {
-      onGeneric { findById(any()) } doReturn Optional.of(Stubs.signupCodeDbm)
-    }
-
-    assertThat(repository.markCodeUsed(fakeCode))
+  @Test fun `saving a code works`() {
+    assertThat(repository.saveSignupCode(Stubs.signupCode))
       .isNotNull()
-      .isDataClassEqualTo(
-        Stubs.signupCode.copy(
-          isUsed = true,
-          usedAt = timeProvider.currentDate,
-        )
-      )
+      .isDataClassEqualTo(Stubs.signupCode)
   }
 
 }
