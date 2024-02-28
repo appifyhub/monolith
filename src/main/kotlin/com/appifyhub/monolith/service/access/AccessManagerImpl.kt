@@ -222,13 +222,16 @@ class AccessManagerImpl(
     )
   }
 
-  private fun User.isPrivilegedTo(privilege: Privilege, project: Project): Boolean =
-    when (privilege) {
-      // handle special cases first
-      Privilege.USER_SEARCH -> project.anyoneCanSearch || this.authority.ordinal >= privilege.level.ordinal
-      // not a special case
-      else -> this.authority.ordinal >= privilege.level.ordinal
-    }
+  private fun User.isPrivilegedTo(privilege: Privilege, project: Project): Boolean {
+    // first check the basic authorization level
+    val isAuthorizedByLevel = this.authority.ordinal >= privilege.level.ordinal
+    if (isAuthorizedByLevel) return true
+
+    // and then the special cases
+    if (privilege == Privilege.USER_SEARCH) return project.anyoneCanSearch
+
+    return false
+  }
 
   private fun User.isSelfAccessAllowed(privilege: Privilege, targetId: UserId): Boolean =
     when (privilege) {
@@ -242,10 +245,12 @@ class AccessManagerImpl(
       Privilege.USER_READ_TOKEN,
       Privilege.USER_READ_PUSH_DEVICE,
       Privilege.USER_READ_DATA,
+      Privilege.USER_READ_SIGNUP_CODE,
       Privilege.USER_WRITE_TOKEN,
       Privilege.USER_WRITE_DATA,
       Privilege.USER_WRITE_SIGNATURE,
       Privilege.USER_WRITE_PUSH_DEVICE,
+      Privilege.USER_WRITE_SIGNUP_CODE,
       Privilege.USER_DELETE_PUSH_DEVICE,
       Privilege.USER_DELETE,
       Privilege.MESSAGE_TEMPLATE_SEND,
@@ -254,6 +259,7 @@ class AccessManagerImpl(
       // invalid group for user
       Privilege.PROJECT_READ,
       Privilege.PROJECT_WRITE,
+      Privilege.PROJECT_READ_BASIC,
       -> error("Users should not ask for self-access on projects")
 
       // invalid group for user

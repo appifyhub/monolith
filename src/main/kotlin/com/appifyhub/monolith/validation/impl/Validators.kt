@@ -5,19 +5,20 @@ import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.repository.user.SignupCodeGenerator
 import com.appifyhub.monolith.util.ext.hasNoSpaces
 import com.appifyhub.monolith.util.ext.isNullOrNotBlank
 import com.appifyhub.monolith.validation.validatesAs
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN
+import org.apache.commons.codec.binary.Base64
+import org.slf4j.LoggerFactory
 import java.sql.Timestamp
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import java.util.regex.Pattern
 import java.util.regex.Pattern.CASE_INSENSITIVE
-import org.apache.commons.codec.binary.Base64
-import org.slf4j.LoggerFactory
 
 object Validators {
 
@@ -127,6 +128,11 @@ object Validators {
   }
   val MessageTemplate = NotBlank
   val PushDeviceToken = NoSpaces
+  val SignupCode = validatesAs<String>("SignupCode") { code ->
+    if (code.isNullOrBlank()) return@validatesAs false
+    if (code.length != 14) return@validatesAs false
+    code.split(SignupCodeGenerator.CODE_DELIMITER).all { it.length == 4 }
+  }
 
   // Integrations validators
 

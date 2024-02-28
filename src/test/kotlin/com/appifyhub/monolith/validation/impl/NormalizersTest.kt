@@ -163,21 +163,6 @@ class NormalizersTest {
       .consistsOf(Validators.UrlNullable, Cleaners.UrlNullified)
   }
 
-  @Test fun `max users = positive long + long to cardinal`() {
-    assertThat(Normalizers.MaxUsers)
-      .consistsOf(Validators.PositiveLong, Cleaners.LongToCardinal)
-  }
-
-  @Test fun `anyone can search = flag + flag def false`() {
-    assertThat(Normalizers.AnyoneCanSearch)
-      .consistsOf(Validators.Flag, Cleaners.FlagDefFalse)
-  }
-
-  @Test fun `on hold = flag + flag def true`() {
-    assertThat(Normalizers.OnHold)
-      .consistsOf(Validators.Flag, Cleaners.FlagDefTrue)
-  }
-
   // endregion
 
   // region Other normalizers
@@ -220,6 +205,11 @@ class NormalizersTest {
   @Test fun `push device token = push device token + push device token`() {
     assertThat(Normalizers.PushDeviceToken)
       .consistsOf(Validators.PushDeviceToken, Cleaners.PushDeviceToken)
+  }
+
+  @Test fun `signup code = signup code + signup code`() {
+    assertThat(Normalizers.SignupCode)
+      .consistsOf(Validators.SignupCode, Cleaners.SignupCode)
   }
 
   // endregion

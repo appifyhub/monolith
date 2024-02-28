@@ -21,6 +21,7 @@ object Endpoints {
   const val UNIVERSAL_USER_VERIFY = "/v1/universal/users/{universalId}/verify/{verificationToken}"
   const val UNIVERSAL_USER_PUSH_DEVICE = "/v1/universal/users/{universalId}/push-devices/{deviceId}"
   const val UNIVERSAL_USER_PUSH_DEVICES = "/v1/universal/users/{universalId}/push-devices"
+  const val UNIVERSAL_USER_SIGNUP_CODES = "/v1/universal/users/{universalId}/signup-codes"
 
   /* ******************** CREATORS ******************** */
 

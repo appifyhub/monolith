@@ -23,6 +23,7 @@ class DaoInjectionTest {
   @Autowired lateinit var schemaDao: SchemaDao
   @Autowired lateinit var tokenDetailsDao: TokenDetailsDao
   @Autowired lateinit var userDao: UserDao
+  @Autowired lateinit var signupCodeDao: SignupCodeDao
 
   @Test fun `DAO autowiring works`() {
     assertThat(geolocationDao).isNotNull()
@@ -33,6 +34,7 @@ class DaoInjectionTest {
     assertThat(schemaDao).isNotNull()
     assertThat(tokenDetailsDao).isNotNull()
     assertThat(userDao).isNotNull()
+    assertThat(signupCodeDao).isNotNull()
   }
 
 }

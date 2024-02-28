@@ -40,7 +40,7 @@ ij_css_value_alignment = do_not_align
 
 # noinspection EditorConfigKeyCorrectness
 [*.java]
-ktlint_disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site, multiline-if-else, spacing-between-declarations-with-annotations, annotation
+ktlint_disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site, multiline-if-else, spacing-between-declarations-with-annotations, annotation, no-blank-line-in-list, standard:no-blank-line-in-list
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false
@@ -507,7 +507,7 @@ ij_groovy_wrap_long_lines = false
 
 # noinspection EditorConfigKeyCorrectness
 [*{.kt,.kts}]
-ktlint_disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site, multiline-if-else, spacing-between-declarations-with-annotations, annotation
+ktlint_disabled_rules = no-blank-line-before-rbrace, import-ordering, trailing-comma-on-call-site, multiline-if-else, spacing-between-declarations-with-annotations, annotation, no-blank-line-in-list, standard:no-blank-line-in-list
 ij_kotlin_align_in_columns_case_branch = false
 ij_kotlin_align_multiline_binary_operation = false
 ij_kotlin_align_multiline_extends_list = false

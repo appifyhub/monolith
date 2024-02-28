@@ -19,10 +19,10 @@ interface MessageTemplateDao : CrudRepository<MessageTemplateDbm, Long> {
     languageTag: String,
   ): List<MessageTemplateDbm>
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByProject_ProjectId(projectId: Long)
 
-  @Transactional
+  @Transactional(rollbackFor = [Exception::class])
   fun deleteAllByProject_ProjectIdAndName(projectId: Long, name: String)
 
 }

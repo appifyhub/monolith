@@ -402,6 +402,11 @@ class CleanersTest {
       .isEqualTo(Cleaners.RemoveSpaces)
   }
 
+  @Test fun `signup code is removing spaces`() {
+    assertThat(Cleaners.SignupCode)
+      .isEqualTo(Cleaners.RemoveSpaces)
+  }
+
   // endregion
 
   // region Integrations cleaners

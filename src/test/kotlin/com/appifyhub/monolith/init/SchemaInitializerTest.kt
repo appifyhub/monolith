@@ -113,6 +113,8 @@ class SchemaInitializerTest {
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        requiresSignupCodes = false,
+        maxSignupCodesPerUser = Integer.MAX_VALUE,
         mailgunConfig = null,
         twilioConfig = null,
         firebaseConfig = null,
@@ -133,6 +135,7 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
+          signupCode = null,
         ),
       )
       mock.updateUser(
@@ -179,6 +182,8 @@ class SchemaInitializerTest {
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        requiresSignupCodes = false,
+        maxSignupCodesPerUser = Integer.MAX_VALUE,
         mailgunConfig = null,
         twilioConfig = null,
         firebaseConfig = null,
@@ -200,6 +205,7 @@ class SchemaInitializerTest {
           birthday = null,
           company = null,
           languageTag = Locale.US.toLanguageTag(),
+          signupCode = null,
         ),
       )
       mock.updateUser(

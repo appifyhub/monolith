@@ -121,6 +121,8 @@ class SchemaInitializer(
         anyoneCanSearch = false,
         onHold = false,
         languageTag = Locale.US.toLanguageTag(),
+        requiresSignupCodes = false,
+        maxSignupCodesPerUser = Integer.MAX_VALUE,
         mailgunConfig = mailgunConfig,
         twilioConfig = twilioConfig,
         firebaseConfig = firebaseConfig,
@@ -142,6 +144,7 @@ class SchemaInitializer(
         birthday = null,
         company = null,
         languageTag = Locale.US.toLanguageTag(),
+        signupCode = null,
       ),
     )
 

@@ -13,5 +13,6 @@ data class CreatorSignupRequest(
   @JsonProperty("name") val name: String,
   @JsonProperty("type") val type: String,
   @JsonProperty("birthday") val birthday: String? = null,
-  @JsonProperty("company") val company: OrganizationDto?,
+  @JsonProperty("company") val company: OrganizationDto? = null,
+  @JsonProperty("signup_code") val signupCode: String? = null,
 ) : Serializable
