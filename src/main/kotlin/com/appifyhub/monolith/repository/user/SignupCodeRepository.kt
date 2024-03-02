@@ -2,6 +2,7 @@ package com.appifyhub.monolith.repository.user
 
 import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.User
+import org.springframework.transaction.annotation.Transactional
 
 interface SignupCodeRepository {
 
@@ -12,5 +13,8 @@ interface SignupCodeRepository {
   @Throws fun fetchAllSignupCodesByOwner(owner: User): List<SignupCode>
 
   @Throws fun saveSignupCode(signupCode: SignupCode): SignupCode
+
+  @Transactional(rollbackFor = [Exception::class])
+  @Throws fun deleteAllByOwner(owner: User)
 
 }

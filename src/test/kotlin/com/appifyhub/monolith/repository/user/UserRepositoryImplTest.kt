@@ -38,6 +38,7 @@ class UserRepositoryImplTest {
   private val userDao = mock<UserDao>()
   private val tokenDetailsRepository = mock<TokenDetailsRepository>()
   private val pushDeviceRepository = mock<PushDeviceRepository>()
+  private val signupCodeRepository = mock<SignupCodeRepository>()
   private val springUserManager = mock<SpringSecurityUserManager>()
   private val passwordEncoder = PasswordEncoderFake()
   private val timeProvider = TimeProviderFake()
@@ -46,6 +47,7 @@ class UserRepositoryImplTest {
     userDao = userDao,
     tokenDetailsRepository = tokenDetailsRepository,
     pushDeviceRepository = pushDeviceRepository,
+    signupCodeRepository = signupCodeRepository,
     passwordEncoder = passwordEncoder,
     springSecurityUserManager = springUserManager,
     timeProvider = timeProvider,
