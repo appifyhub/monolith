@@ -25,6 +25,7 @@ class UserRepositoryImpl(
   private val userDao: UserDao,
   private val tokenDetailsRepository: TokenDetailsRepository,
   private val pushDeviceRepository: PushDeviceRepository,
+  private val signupCodeRepository: SignupCodeRepository,
   private val passwordEncoder: PasswordEncoder,
   private val springSecurityUserManager: SpringSecurityUserManager,
   private val timeProvider: TimeProvider,
@@ -102,14 +103,12 @@ class UserRepositoryImpl(
   override fun removeUserById(id: UserId) {
     log.debug("Removing user $id")
 
-    // cascade manually for now
-    val user = userDao.findById(id.toData()).get().toDomain()
-    val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
-    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
-    tokenDetailsRepository.removeTokensFor(user, project = null)
-    pushDeviceRepository.deleteAllDevicesByUser(user)
+    userDao
+      .findById(id.toData())
+      .get()
+      .toDomain()
+      .deleteCascadingDependants()
 
-    // finally remove
     userDao.deleteById(id.toData())
   }
 
@@ -117,35 +116,35 @@ class UserRepositoryImpl(
     log.debug("Removing user $universalId")
     val userId = UserId.fromUniversalFormat(universalId)
 
-    // cascade manually for now
-    val user = userDao.findById(userId.toData()).get().toDomain()
-    val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
-    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
-    tokenDetailsRepository.removeTokensFor(user, project = null)
-    pushDeviceRepository.deleteAllDevicesByUser(user)
+    userDao
+      .findById(userId.toData())
+      .get()
+      .toDomain()
+      .deleteCascadingDependants()
 
-    // finally remove
     userDao.deleteById(userId.toData())
   }
 
   override fun removeAllUsersByProjectId(projectId: Long) {
     log.debug("Removing all users from project $projectId")
 
-    // cascade manually for now
     userDao.findAllByProject_ProjectId(projectId)
       .map(UserDbm::toDomain)
-      .forEach { user ->
-        val tokens = tokenDetailsRepository.fetchAllValidTokens(user, project = null)
-        tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
-        tokenDetailsRepository.removeTokensFor(user, project = null)
-        pushDeviceRepository.deleteAllDevicesByUser(user)
-      }
+      .forEach { it.deleteCascadingDependants() }
 
-    // finally, remove the user
     userDao.deleteAllByProject_ProjectId(projectId)
   }
 
   // Helpers
+
+  private fun User.deleteCascadingDependants() {
+    // cascade manually for now
+    val tokens = tokenDetailsRepository.fetchAllValidTokens(this, project = null)
+    tokenDetailsRepository.blockAllTokens(tokens.map(TokenDetails::tokenValue)) // block in case of later error
+    tokenDetailsRepository.removeTokensFor(this, project = null)
+    pushDeviceRepository.deleteAllDevicesByUser(this)
+    signupCodeRepository.deleteAllByOwner(this)
+  }
 
   private fun User.updateVerificationToken(userIdType: UserIdType, oldUser: User? = null): User = when {
     needsNewEmailToken(userIdType, oldUser) -> copy(verificationToken = TokenGenerator.nextEmailToken)

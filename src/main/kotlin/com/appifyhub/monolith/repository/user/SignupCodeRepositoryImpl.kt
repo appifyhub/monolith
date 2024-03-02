@@ -51,4 +51,10 @@ class SignupCodeRepositoryImpl(
     return signupCodeDao.save(signupCode.toData()).toDomain()
   }
 
+  override fun deleteAllByOwner(owner: User) {
+    log.debug("Deleting all signup codes for user $owner")
+
+    signupCodeDao.deleteAllByOwner(owner.toData())
+  }
+
 }
