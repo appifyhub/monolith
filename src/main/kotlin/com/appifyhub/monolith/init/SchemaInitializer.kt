@@ -161,8 +161,8 @@ class SchemaInitializer(
 
     // prepare printable credentials
     val printableOwnerSignature = configuredSignature
-      ?.let { "<see \$env.CREATOR_OWNER_SECRET>" }
-      ?: rawOwnerSignature
+      ?.let { "\${env.CREATOR_OWNER_SECRET}" }
+      ?: "'$rawOwnerSignature'"
 
     // print credentials
     val margin = "\n".repeat(8)
@@ -179,7 +179,7 @@ class SchemaInitializer(
         Project ID     = ${project.id}
         User ID        = '${owner.id.userId}'
         Universal ID   = '${owner.id.toUniversalFormat()}'
-        User Signature = '$printableOwnerSignature'
+        User Signature = $printableOwnerSignature
         
         [[ SECRET SECTION END ]]
         $margin

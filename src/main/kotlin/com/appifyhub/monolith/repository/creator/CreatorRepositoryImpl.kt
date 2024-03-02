@@ -118,12 +118,9 @@ class CreatorRepositoryImpl(
   override fun removeProjectById(projectId: Long) {
     log.debug("Removing project $projectId")
 
-    // cascade manually for now
-    userRepository.removeAllUsersByProjectId(projectId)
-    messageTemplateRepository.deleteAllTemplatesByProjectId(projectId)
+    deleteCascadingDependants(projectId)
     creationDao.deleteAllByData_CreatedProjectId(projectId)
 
-    // remove the project itself
     projectDao.deleteById(projectId)
   }
 
@@ -136,15 +133,18 @@ class CreatorRepositoryImpl(
       projectId = creatorId.projectId,
     ).map { it.project.toDomain() }
 
-    // cascade manually for now
-    projects.forEach { project ->
-      userRepository.removeAllUsersByProjectId(project.id)
-      messageTemplateRepository.deleteAllTemplatesByProjectId(project.id)
-    }
+    projects.forEach { deleteCascadingDependants(it.id) }
     creationDao.deleteAllByData_CreatorUserIdAndData_CreatorProjectId(creatorId.userId, creatorId.projectId)
 
-    // remove the projects
     projectDao.deleteAll(projects.map(Project::toData))
+  }
+
+  // Helpers
+
+  private fun deleteCascadingDependants(projectId: Long) {
+    // cascade manually for now
+    userRepository.removeAllUsersByProjectId(projectId)
+    messageTemplateRepository.deleteAllTemplatesByProjectId(projectId)
   }
 
 }

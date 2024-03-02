@@ -7,6 +7,7 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import com.appifyhub.monolith.storage.dao.SignupCodeDao
 import com.appifyhub.monolith.storage.model.user.SignupCodeDbm
+import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import org.junit.jupiter.api.AfterEach
@@ -85,6 +86,19 @@ class SignupCodeRepositoryImplTest {
     assertThat(repository.saveSignupCode(Stubs.signupCode))
       .isNotNull()
       .isDataClassEqualTo(Stubs.signupCode)
+  }
+
+  @Test fun `deleting all codes by owner works`() {
+    repository.deleteAllByOwner(Stubs.user)
+
+    // data conversion loses some attributes from the foreign key user,
+    // so this is a workaround to test only what matters
+    val captor = argumentCaptor<UserDbm>()
+    verify(signupCodeDao).deleteAllByOwner(captor.capture())
+
+    assertThat(captor.firstValue)
+      .transform(transform = UserDbm::id)
+      .isEqualTo(Stubs.userDbm.id)
   }
 
 }
