@@ -6,8 +6,6 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.prop
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
 import org.junit.jupiter.api.Test
 import org.mockito.Answers.RETURNS_DEEP_STUBS
 import org.mockito.kotlin.mock
@@ -21,18 +19,37 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.authentication.InsufficientAuthenticationException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.server.ResponseStatusException
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 class GlobalExceptionHandlerTest {
 
   private val testMapper = jacksonObjectMapper()
   private val handler = GlobalExceptionHandler(testMapper)
 
-  @Test fun `handle pre-auth failure with commence`() {
+  @Test fun `handle pre-auth failure with entry commence`() {
     val request = mock<HttpServletRequest>()
     val response = mock<HttpServletResponse>(defaultAnswer = RETURNS_DEEP_STUBS)
     val exception: AuthenticationException = InsufficientAuthenticationException("Something failed")
 
     handler.commence(request, response, exception)
+
+    verifyNoMoreInteractions(request)
+    verify(response).status = HttpStatus.UNAUTHORIZED.value()
+    verify(response).contentType = MediaType.APPLICATION_JSON_VALUE
+    verify(response.outputStream).println(
+      testMapper.writeValueAsString(
+        SimpleResponse(message = "Unauthorized: ${exception.message}")
+      )
+    )
+  }
+
+  @Test fun `handle pre-auth failure with denied handle`() {
+    val request = mock<HttpServletRequest>()
+    val response = mock<HttpServletResponse>(defaultAnswer = RETURNS_DEEP_STUBS)
+    val exception = AccessDeniedException("Something failed")
+
+    handler.handle(request, response, exception)
 
     verifyNoMoreInteractions(request)
     verify(response).status = HttpStatus.UNAUTHORIZED.value()

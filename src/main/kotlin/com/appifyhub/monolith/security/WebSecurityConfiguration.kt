@@ -5,12 +5,14 @@ import com.appifyhub.monolith.errors.GlobalExceptionHandler
 import com.appifyhub.monolith.repository.user.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.stereotype.Component
 
 @Component
+@EnableWebSecurity
 class WebSecurityConfiguration(
   private val userRepository: UserRepository,
   private val exceptionHandler: GlobalExceptionHandler,
@@ -29,8 +31,8 @@ class WebSecurityConfiguration(
       .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
       .and()
       // set up no-auth endpoints
-      .authorizeRequests {
-        it.antMatchers(
+      .authorizeRequests { urlRegistry ->
+        urlRegistry.antMatchers(
           Endpoints.ERROR,
           Endpoints.FAVICON,
           Endpoints.FAVICON_DIR,
@@ -50,14 +52,15 @@ class WebSecurityConfiguration(
       // enable smart error handling
       .exceptionHandling()
       .authenticationEntryPoint(exceptionHandler)
-      .disable()
+      .accessDeniedHandler(exceptionHandler)
+      .and()
       // enable other basic HTTP features
       .headers()
       .frameOptions()
       .sameOrigin()
       .and()
       // enable JWT server
-      .oauth2ResourceServer { it.jwt() }
+      .oauth2ResourceServer { configurer -> configurer.jwt() }
   }
 
   @Bean

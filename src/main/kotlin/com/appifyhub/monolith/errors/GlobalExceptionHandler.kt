@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.AuthenticationEntryPoint
+import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.server.ResponseStatusException
@@ -24,7 +25,9 @@ import javax.servlet.http.HttpServletResponse
 @Order(Ordered.HIGHEST_PRECEDENCE)
 class GlobalExceptionHandler(
   private val jsonMapper: ObjectMapper,
-) : ResponseEntityExceptionHandler(), AuthenticationEntryPoint {
+) : ResponseEntityExceptionHandler(),
+  AuthenticationEntryPoint,
+  AccessDeniedHandler {
 
   private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -34,6 +37,18 @@ class GlobalExceptionHandler(
     authException: AuthenticationException,
   ) {
     val entity = handleThrowable(authException)
+    val entityJson = jsonMapper.writeValueAsString(entity.body)
+    response.status = entity.statusCodeValue
+    response.contentType = MediaType.APPLICATION_JSON_VALUE
+    response.outputStream.println(entityJson)
+  }
+
+  override fun handle(
+    request: HttpServletRequest,
+    response: HttpServletResponse,
+    accessDeniedException: AccessDeniedException,
+  ) {
+    val entity = handleThrowable(accessDeniedException)
     val entityJson = jsonMapper.writeValueAsString(entity.body)
     response.status = entity.statusCodeValue
     response.contentType = MediaType.APPLICATION_JSON_VALUE
