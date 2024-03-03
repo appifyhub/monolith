@@ -18,6 +18,7 @@ buildscript {
   }
 }
 
+val jacocoVersion = "0.8.11"
 plugins {
   val kotlinVersion = "1.8.10"
   kotlin("jvm") version kotlinVersion
@@ -30,6 +31,8 @@ plugins {
   id("org.springframework.boot") version "2.6.7"
   id("io.spring.dependency-management") version "1.0.11.RELEASE"
   id("com.github.breadmoirai.github-release") version "2.2.12"
+
+  id("jacoco")
 }
 
 repositories {
@@ -138,6 +141,10 @@ tasks {
     archiveFileName.set("$artifact.jar")
   }
 
+  named("githubRelease") {
+    dependsOn("bootJar")
+  }
+
   withType<KotlinCompile>().all {
     dependsOn("propertyGenerator")
 
@@ -162,10 +169,21 @@ tasks {
     // as per https://stackoverflow.com/a/39753210/2102748
     val desiredForks = Runtime.getRuntime()?.availableProcessors()?.div(2) ?: 1
     maxParallelForks = desiredForks.coerceAtLeast(1)
+
+    finalizedBy("jacocoTestReport")
   }
 
-  named("githubRelease") {
-    dependsOn("bootJar")
+  jacoco {
+    toolVersion = jacocoVersion
+  }
+
+  jacocoTestReport {
+    dependsOn("test") // makes sure tests are run before generating the report
+    reports {
+      xml.required.set(true) // XML report will be generated
+      html.required.set(true) // HTML report will be generated
+      csv.required.set(true) // CSV report will be generated
+    }
   }
 
 }

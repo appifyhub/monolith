@@ -45,6 +45,11 @@ jobs:
           BUILD_QUALITY: "GA"
         run: ./gradlew build
 
+      - name: Codacy Coverage Report
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh)
+
       - name: Build Docker image
         run: docker build . --file Dockerfile --tag service
 
