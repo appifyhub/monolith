@@ -1,0 +1,40 @@
+openapi: "3.1.0"
+
+info:
+  title: Sub-API
+  version: Inherited
+
+components:
+  schemas:
+
+    # response specs
+
+    DefaultErrorSpec:
+      type: object
+      description: Default error message
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/SimpleResponse"
+
+    # models
+
+    SimpleResponse:
+      type: object
+      description: A simple message response
+      properties:
+        message:
+          required: true
+          type: string
+          description: The text message
+          example: "This is a notice"
+
+    SettableRequest:
+      type: object
+      description: A value wrapper for a value
+      properties:
+        value:
+          required: false
+          type: object
+          description: The value to set, or no value to unset
+          example: "any"

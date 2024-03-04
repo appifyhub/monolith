@@ -1,0 +1,28 @@
+openapi: "3.1.0"
+
+info:
+  version: Latest
+  title: Appify Hub API
+  description: The full specification of the service's API.
+  logo:
+    url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
+    backgroundColor: "#070C0E"
+    altText: Appify Hub Logo
+  contact:
+    name: Team
+    url: https://www.appifyhub.com
+    email: contact@appifyhub.com
+  license:
+    name: MIT License
+    url: https://github.com/appifyhub/monolith/blob/main/LICENSE
+servers:
+  - url: https://api.appifyhub.com
+    description: Production environment
+  - url: http://staging.api.appifyhub.com
+    description: Staging environment
+  - url: http://localhost:8080
+    description: Your local environment
+
+paths:
+  /heartbeat:
+    $ref: "./heartbeat/api.yaml#/components/schemas/Endpoints"
