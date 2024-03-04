@@ -44,6 +44,7 @@ class WebSecurityConfiguration(
           Endpoints.CREATOR_AUTH,
           Endpoints.VERIFICATION,
           Endpoints.SIGNATURE_RESET,
+          Endpoints.DOCS,
         )
           .permitAll()
           .anyRequest()
