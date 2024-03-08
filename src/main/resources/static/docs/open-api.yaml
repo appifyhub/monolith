@@ -4,10 +4,6 @@ info:
   version: Latest
   title: Appify Hub API
   description: The full specification of the service's API.
-  logo:
-    url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
-    backgroundColor: "#070C0E"
-    altText: Appify Hub Logo
   contact:
     name: Team
     url: https://www.appifyhub.com
@@ -15,6 +11,10 @@ info:
   license:
     name: MIT License
     url: https://github.com/appifyhub/monolith/blob/main/LICENSE
+  x-logo:
+    url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
+    backgroundColor: "#070C0E"
+    altText: Appify Hub Logo
 servers:
   - url: https://api.appifyhub.com
     description: Production environment
@@ -24,5 +24,405 @@ servers:
     description: Your local environment
 
 paths:
+
+  # region Health
+
   /heartbeat:
-    $ref: "./heartbeat/api.yaml#/components/schemas/Endpoints"
+    get:
+      summary: Check the heartbeat
+      operationId: heartbeat
+      tags: [ Health ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HeartbeatResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Health
+
+  # region Auth
+
+  /v1/universal/auth:
+    post:
+      summary: Authenticate user
+      operationId: authenticateUser
+      tags: [ Auth ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentialsRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get the details of the current token
+      operationId: getCurrentToken
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenDetailsResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    put:
+      summary: Refresh the current token (get a new one)
+      operationId: refresh
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Invalidate the current token
+      operationId: unauthenticate
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: all
+          in: query
+          required: false
+          description: Whether to unauthenticate all of the user's tokens or not
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/auth/tokens:
+    get:
+      summary: Get all tokens
+      operationId: getAllTokens
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: valid
+          in: query
+          required: false
+          description: Whether to get only valid tokens or not
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TokenDetailsResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Invalidate tokens
+      operationId: unauthenticateTokens
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: token_ids
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/JWTEncodedToken"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Auth
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # region Health models
+
+    HeartbeatResponse:
+      type: object
+      description: A simple heartbeat response
+      required:
+        - beat_time
+        - version
+      properties:
+        beat_time:
+          type: string
+          format: date-time
+          description: The time the heartbeat was triggered (ISO 8601)
+          examples: [ "2022-12-24T14:35:05Z" ]
+        request_ip:
+          $ref: "#/components/schemas/IPAddress"
+        request_geo:
+          $ref: "#/components/schemas/Geolocation"
+        version:
+          type: string
+          description: The running version of the service
+          examples: [ "1.3.10.beta" ]
+
+    # endregion Health models
+
+    # region Common models
+
+    SimpleResponse:
+      type: object
+      description: Simple message response
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: The text message
+          examples: [ "This is a notice" ]
+
+    SettableRequest:
+      type: object
+      description: A value wrapper for a value
+      required:
+        - value
+      properties:
+        value:
+          type: object
+          description: The value to set, or no value to unset
+          examples: [ "any" ]
+
+    # endregion Common models
+
+    # region Auth models
+
+    ApiKeyRequest:
+      type: object
+      description: A request for an API key
+      properties:
+        origin:
+          $ref: "#/components/schemas/Origin"
+
+    CreatorCredentialsRequest:
+      type: object
+      description: A request with creator credentials
+      required:
+        - universal_id
+        - signature
+      properties:
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        signature:
+          $ref: "#/components/schemas/Signature"
+        origin:
+          $ref: "#/components/schemas/Origin"
+
+    TokenDetailsResponse:
+      type: object
+      description: The decoded details of a token
+      required:
+        - token_value
+        - user_id
+        - project_id
+        - universal_id
+        - created_at
+        - expires_at
+        - authority
+        - is_blocked
+        - is_static
+      properties:
+        token_value:
+          $ref: "#/components/schemas/JWTEncodedToken"
+        user_id:
+          $ref: "#/components/schemas/UserID"
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        expires_at:
+          type: string
+          format: yyyy-MM-dd HH:mm
+          description: The time the token expires (based on ISO 8601)
+          examples: [ "2022-12-24 14:35" ]
+        authority:
+          $ref: "#/components/schemas/Authority"
+        is_blocked:
+          type: boolean
+          description: Whether the token is blocked or not
+          examples: [ true ]
+        origin:
+          $ref: "#/components/schemas/Origin"
+        ip_address:
+          $ref: "#/components/schemas/IPAddress"
+        geo:
+          $ref: "#/components/schemas/Geolocation"
+        is_static:
+          type: boolean
+          description: Whether the token is static or not (i.e. API key)
+          examples: [ true ]
+
+    TokenResponse:
+      type: object
+      description: A response containing a token
+      required:
+        - token_value
+      properties:
+        token_value:
+          $ref: "#/components/schemas/JWTEncodedToken"
+
+    UserCredentialsRequest:
+      type: object
+      description: A request with user credentials
+      required:
+        - universal_id
+        - signature
+      properties:
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        signature:
+          $ref: "#/components/schemas/Signature"
+        origin:
+          $ref: "#/components/schemas/Origin"
+
+    # endregion Auth models
+
+    # region Properties
+
+    UserID:
+      type: string
+      description: A unique user identifier
+      examples: [ "user_1000" ]
+
+    ProjectID:
+      type: integer
+      description: A unique project identifier
+      examples: [ 30 ]
+
+    UniversalID:
+      type: string
+      format: "userId$projectId"
+      description: The universal ID of the object (user ID and project ID separated by a dollar sign)
+      examples: [ "user_1000$30" ]
+
+    CreatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was created (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UpdatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was last updated (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    IPAddress:
+      type: string
+      description: The approximate IP address
+      examples: [ "192.168.178.45" ]
+
+    Geolocation:
+      type: string
+      description: The approximate geographic location based on the IP address
+      examples: [ "Amsterdam, Netherlands" ]
+
+    Authority:
+      type: string
+      enum: [ DEFAULT, MODERATOR, ADMIN, OWNER ]
+      description: The authority level of the user
+      examples: [ "ADMIN" ]
+
+    JWTEncodedToken:
+      type: string
+      format: JWT
+      description: The value of the token
+      examples: [ "abcd.1234.ab12" ]
+
+    Origin:
+      type: string
+      description: The origin of the request
+      examples: [ "Samsung Galaxy S21" ]
+
+    Signature:
+      type: string
+      description: The secret signature of the user/creator, usually a plain-text password
+      examples: [ "!dr0ws5ap!" ]
+
+    # endregion Properties
