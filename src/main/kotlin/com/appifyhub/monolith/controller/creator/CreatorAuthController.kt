@@ -2,9 +2,9 @@ package com.appifyhub.monolith.controller.creator
 
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
-import com.appifyhub.monolith.network.auth.ApiKeyRequest
-import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenResponse
+import com.appifyhub.monolith.network.creator.user.ops.ApiKeyRequest
+import com.appifyhub.monolith.network.creator.user.ops.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.mapper.tokenResponseOf
 import com.appifyhub.monolith.service.auth.AuthService
 import org.slf4j.LoggerFactory
