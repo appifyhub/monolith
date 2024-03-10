@@ -247,6 +247,62 @@ paths:
 
   # endregion Projects
 
+  # region Users
+
+  /v1/creator/signup:
+    post:
+      summary: Sign up a new creator
+      operationId: addUser
+      tags: [ Users ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatorSignupRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatorResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/force-verify:
+    post:
+      summary: Verify a user without their explicit approval
+      operationId: forceVerifyUser
+      tags: [ Users ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserUniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Users
+
 components:
 
   securitySchemes:
@@ -521,15 +577,9 @@ components:
         firebase_config:
           $ref: "#/components/schemas/FirebaseConfigDto"
         created_at:
-          type: string
-          format: "yyyy-MM-dd HH:mm"
-          description: The time the project was created (based on ISO 8601)
-          examples: [ "2022-12-24 14:35" ]
+          $ref: "#/components/schemas/CreatedAt"
         updated_at:
-          type: string
-          format: "yyyy-MM-dd HH:mm"
-          description: The time the project was last updated (based on ISO 8601)
-          examples: [ "2022-12-24 14:35" ]
+          $ref: "#/components/schemas/UpdatedAt"
 
     ProjectStateResponse:
       type: object
@@ -645,6 +695,71 @@ components:
           description: The 2-letter ISO country code of the organization
           examples: [ "US" ]
 
+    CreatorResponse:
+      type: object
+      description: A user's details
+      required:
+        - user_id
+        - project_id
+        - universal_id
+        - type
+        - authority
+        - allows_spam
+        - contact_type
+        - created_at
+        - updated_at
+      properties:
+        user_id:
+          type: string
+          description: The creator's unique ID
+          examples: [ "creator_1000" ]
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        universal_id:
+          $ref: "#/components/schemas/CreatorUniversalID"
+        name:
+          type: string
+          description: The name of the creator
+          examples: [ "John Doe" ]
+        type:
+          type: string
+          enum: [ "PERSONAL", "ORGANIZATION" ]
+          description: The type of the creator
+          examples: [ "PERSONAL" ]
+        authority:
+          type: string
+          enum: [ "DEFAULT", "MODERATOR", "ADMIN", "OWNER" ]
+          description: The authority of the creator
+          examples: [ "DEFAULT" ]
+        allows_spam:
+          type: boolean
+          description: Whether the creator allows spam or not
+          examples: [ true ]
+        contact:
+          type: string
+          description: The contact of the creator
+          examples: [ "email@example.com", "+1234567890" ]
+        contact_type:
+          type: string
+          enum: [ "EMAIL", "PHONE", "CUSTOM" ]
+          description: The type of contact for this creator
+          examples: [ "PHONE" ]
+        birthday:
+          type: string
+          format: date
+          description: The birthday of the creator
+          examples: [ "1990-12-24" ]
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        language_tag:
+          type: string
+          description: The default language of the creator (locale represented as in IETF BCP 47)
+          examples: [ "en-US" ]
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
     TokenResponse:
       type: object
       description: A response containing a token
@@ -733,6 +848,12 @@ components:
       description: The universal ID of the object (creator ID and project ID separated by a dollar sign)
       examples: [ "creator_1000$30" ]
 
+    UserUniversalID:
+      type: string
+      format: "userId$projectId"
+      description: The universal ID of the object (user ID and project ID separated by a dollar sign)
+      examples: [ "user_1000$30" ]
+
     CreatorSignature:
       type: string
       description: The secret signature of the creator, usually a plain-text password
@@ -742,5 +863,17 @@ components:
       type: string
       description: The origin of the request
       examples: [ "Samsung Galaxy S21" ]
+
+    CreatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was created (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UpdatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was last updated (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
 
     # endregion Properties
