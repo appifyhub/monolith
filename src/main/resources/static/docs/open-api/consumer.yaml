@@ -2,8 +2,8 @@ openapi: "3.1.0"
 
 info:
   version: Latest
-  title: Appify Hub API
-  description: The full specification of the service's API.
+  title: Appify Hub's Consumer API
+  description: The full specification of the service's API used by the end-users.
   contact:
     name: Team
     url: https://www.appifyhub.com
@@ -53,7 +53,7 @@ paths:
   /v1/universal/auth:
     post:
       summary: Authenticate user
-      operationId: authenticateUser
+      operationId: authenticate
       tags: [ Auth ]
       requestBody:
         required: true
@@ -271,27 +271,6 @@ components:
 
     # region Auth models
 
-    ApiKeyRequest:
-      type: object
-      description: A request for an API key
-      properties:
-        origin:
-          $ref: "#/components/schemas/Origin"
-
-    CreatorCredentialsRequest:
-      type: object
-      description: A request with creator credentials
-      required:
-        - universal_id
-        - signature
-      properties:
-        universal_id:
-          $ref: "#/components/schemas/UniversalID"
-        signature:
-          $ref: "#/components/schemas/Signature"
-        origin:
-          $ref: "#/components/schemas/Origin"
-
     TokenDetailsResponse:
       type: object
       description: The decoded details of a token
@@ -328,7 +307,7 @@ components:
           description: Whether the token is blocked or not
           examples: [ true ]
         origin:
-          $ref: "#/components/schemas/Origin"
+          $ref: "#/components/schemas/RequestOrigin"
         ip_address:
           $ref: "#/components/schemas/IPAddress"
         geo:
@@ -357,9 +336,11 @@ components:
         universal_id:
           $ref: "#/components/schemas/UniversalID"
         signature:
-          $ref: "#/components/schemas/Signature"
+          type: string
+          description: The secret signature of the user, usually a plain-text password
+          examples: [ "!dr0ws5ap!" ]
         origin:
-          $ref: "#/components/schemas/Origin"
+          $ref: "#/components/schemas/RequestOrigin"
 
     # endregion Auth models
 
@@ -405,7 +386,7 @@ components:
 
     Authority:
       type: string
-      enum: [ DEFAULT, MODERATOR, ADMIN, OWNER ]
+      enum: [ "DEFAULT", "MODERATOR", "ADMIN", "OWNER" ]
       description: The authority level of the user
       examples: [ "ADMIN" ]
 
@@ -415,14 +396,9 @@ components:
       description: The value of the token
       examples: [ "abcd.1234.ab12" ]
 
-    Origin:
+    RequestOrigin:
       type: string
       description: The origin of the request
       examples: [ "Samsung Galaxy S21" ]
-
-    Signature:
-      type: string
-      description: The secret signature of the user/creator, usually a plain-text password
-      examples: [ "!dr0ws5ap!" ]
 
     # endregion Properties
