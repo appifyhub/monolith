@@ -81,6 +81,172 @@ paths:
 
   # endregion Auth
 
+  # region Projects
+
+  /v1/projects:
+    post:
+      summary: Creates a new project
+      operationId: addProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectCreateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get all projects
+      operationId: getProjects
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: creator_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CreatorUniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove all projects
+      operationId: removeProjectsByCreator
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: creator_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/CreatorUniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}:
+    get:
+      summary: Get a project
+      operationId: getProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    put:
+      summary: Update a project
+      operationId: updateProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove a project
+      operationId: removeProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Projects
+
 components:
 
   securitySchemes:
@@ -158,6 +324,44 @@ components:
           $ref: "#/components/schemas/TwilioConfigDto"
         firebase_config:
           $ref: "#/components/schemas/FirebaseConfigDto"
+
+    ProjectUpdateRequest:
+      type: object
+      description: >
+        A request to update a project.
+        Only the fields that are set will be updated.
+        For data types, check the [ProjectResponse](#/components/schemas/ProjectResponse).
+      properties:
+        type:
+          $ref: "#/components/schemas/SettableRequest"
+        status:
+          $ref: "#/components/schemas/SettableRequest"
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        description:
+          $ref: "#/components/schemas/SettableRequest"
+        logo_url:
+          $ref: "#/components/schemas/SettableRequest"
+        website_url:
+          $ref: "#/components/schemas/SettableRequest"
+        max_users:
+          $ref: "#/components/schemas/SettableRequest"
+        anyone_can_search:
+          $ref: "#/components/schemas/SettableRequest"
+        on_hold:
+          $ref: "#/components/schemas/SettableRequest"
+        language_tag:
+          $ref: "#/components/schemas/SettableRequest"
+        requires_signup_codes:
+          $ref: "#/components/schemas/SettableRequest"
+        max_signup_codes_per_user:
+          $ref: "#/components/schemas/SettableRequest"
+        mailgun_config:
+          $ref: "#/components/schemas/SettableRequest"
+        twilio_config:
+          $ref: "#/components/schemas/SettableRequest"
+        firebase_config:
+          $ref: "#/components/schemas/SettableRequest"
 
     # endregion Project Ops models
 
@@ -281,9 +485,7 @@ components:
         - updated_at
       properties:
         project_id:
-          type: integer
-          description: A unique identifier for this consumer project
-          examples: [ 30 ]
+          $ref: "#/components/schemas/ProjectID"
         type:
           $ref: "#/components/schemas/ProjectType"
         state:
@@ -458,6 +660,11 @@ components:
     # endregion User models
 
     # region Properties
+
+    ProjectID:
+      type: integer
+      description: A unique identifier for this consumer project
+      examples: [ 30 ]
 
     ProjectType:
       type: string
