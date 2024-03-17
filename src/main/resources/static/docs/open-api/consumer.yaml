@@ -344,7 +344,82 @@ components:
 
     # endregion Auth models
 
+    # region Messaging Ops Models
+
+    MessageSendRequest:
+      type: object
+      description: A request to send a message. Must contain either a template ID or a template name.
+      required:
+        - message_type
+      properties:
+        message_type:
+          type: string
+          enum: [ "EMAIL", "SMS", "PUSH" ]
+          description: The type of the message to send
+          examples: [ "EMAIL" ]
+        message_template_id:
+          type: integer
+          description: The ID of the message template to use
+          examples: [ 100 ]
+        message_template_name:
+          type: string
+          description: The (unique) name of the message template
+          examples: [ "template_welcome" ]
+
+    PushDeviceRequest:
+      type: object
+      description: A request containing the push device details
+      required:
+        - id
+        - type
+      properties:
+        id:
+          $ref: "#/components/schemas/PushDeviceID"
+        type:
+          $ref: "#/components/schemas/PushDeviceType"
+
+    # endregion Messaging Ops Models
+
+    # region Messaging models
+
+    PushDeviceResponse:
+      type: object
+      description: A response containing the push device details
+      required:
+        - id
+        - type
+      properties:
+        id:
+          $ref: "#/components/schemas/PushDeviceID"
+        type:
+          $ref: "#/components/schemas/PushDeviceType"
+
+    PushDevicesResponse:
+      type: object
+      description: A response containing device details of all push devices
+      required:
+        - devices
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/PushDeviceResponse"
+
+    # endregion Messaging models
+
     # region Properties
+
+    CreatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was created (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UpdatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was last updated (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
 
     UserID:
       type: string
@@ -361,18 +436,6 @@ components:
       format: "userId$projectId"
       description: The universal ID of the object (user ID and project ID separated by a dollar sign)
       examples: [ "user_1000$30" ]
-
-    CreatedAt:
-      type: string
-      format: "yyyy-MM-dd HH:mm"
-      description: The time the object was created (based on ISO 8601)
-      examples: [ "2022-12-24 14:35" ]
-
-    UpdatedAt:
-      type: string
-      format: "yyyy-MM-dd HH:mm"
-      description: The time the object was last updated (based on ISO 8601)
-      examples: [ "2022-12-24 14:35" ]
 
     IPAddress:
       type: string
@@ -400,5 +463,16 @@ components:
       type: string
       description: The origin of the request
       examples: [ "Samsung Galaxy S21" ]
+
+    PushDeviceID:
+      type: string
+      description: The unique identifier of the device (e.g. a Firebase token)
+      examples: [ "abcd1234" ]
+
+    PushDeviceType:
+      type: string
+      enum: [ "ANDROID", "IOS", "WEB" ]
+      description: The type of the device
+      examples: [ "ANDROID" ]
 
     # endregion Properties

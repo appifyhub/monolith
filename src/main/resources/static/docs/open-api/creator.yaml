@@ -384,9 +384,8 @@ components:
     ProjectUpdateRequest:
       type: object
       description: >
-        A request to update a project.
-        Only the fields that are set will be updated.
-        For data types, check the [ProjectResponse](#/components/schemas/ProjectResponse).
+        A request to update a project. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [ProjectResponse](#/components/schemas/ProjectResponse).
       properties:
         type:
           $ref: "#/components/schemas/SettableRequest"
@@ -774,7 +773,177 @@ components:
 
     # endregion User models
 
+    # region Messaging Ops Models
+
+    DetectVariablesRequest:
+      type: object
+      description: A request to detect variables in a string
+      required:
+        - content
+      properties:
+        content:
+          $ref: "#/components/schemas/MessageTemplateContent"
+
+    MessageInputsRequest:
+      type: object
+      description: Dynamic message inputs for variable replacement
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserUniversalID"
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+
+    MessageSendRequest:
+      type: object
+      description: A request to send a message. Must contain either a template ID or a template name.
+      required:
+        - message_type
+      properties:
+        message_type:
+          type: string
+          enum: [ "EMAIL", "SMS", "PUSH" ]
+          description: The type of the message to send
+          examples: [ "EMAIL" ]
+        message_template_id:
+          $ref: "#/components/schemas/MessageTemplateID"
+        message_template_name:
+          $ref: "#/components/schemas/MessageTemplateName"
+
+    MessageTemplateCreateRequest:
+      type: object
+      description: A request to create a message template
+      required:
+        - name
+        - language_tag
+        - title
+        - content
+        - is_html
+      properties:
+        name:
+          $ref: "#/components/schemas/MessageTemplateName"
+        language_tag:
+          $ref: "#/components/schemas/MessageTemplateLanguageTag"
+        title:
+          $ref: "#/components/schemas/MessageTemplateTitle"
+        content:
+          $ref: "#/components/schemas/MessageTemplateContent"
+        is_html:
+          $ref: "#/components/schemas/MessageTemplateIsHTML"
+
+    MessageTemplateUpdateRequest:
+      type: object
+      description: >
+        A request to update a message template. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [MessageTemplateCreateRequest](#/components/schemas/MessageTemplateCreateRequest).
+      properties:
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        language_tag:
+          $ref: "#/components/schemas/SettableRequest"
+        title:
+          $ref: "#/components/schemas/SettableRequest"
+        content:
+          $ref: "#/components/schemas/SettableRequest"
+        is_html:
+          $ref: "#/components/schemas/SettableRequest"
+
+    PushDeviceRequest:
+      type: object
+      description: A request containing the push device details
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the device (e.g. a Firebase token)
+          examples: [ "abcd1234" ]
+        type:
+          type: string
+          enum: [ "ANDROID", "IOS", "WEB" ]
+          description: The type of the device
+          examples: [ "ANDROID" ]
+
+    # endregion Messaging Ops Models
+
+    # region Messaging Models
+
+    MessageResponse:
+      type: object
+      description: A response containing the message details
+      required:
+        - template
+        - materialized
+      properties:
+        template:
+          $ref: "#/components/schemas/MessageTemplateResponse"
+        materialized:
+          type: string
+          description: The materialized message with all variables replaced
+          examples: [ "Hey John, your project Appify Hub is now active." ]
+
+    MessageTemplateResponse:
+      type: object
+      description: A response containing a message template
+      required:
+        - id
+        - name
+        - language_tag
+        - title
+        - content
+        - is_html
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "#/components/schemas/MessageTemplateID"
+        name:
+          $ref: "#/components/schemas/MessageTemplateName"
+        language_tag:
+          $ref: "#/components/schemas/MessageTemplateLanguageTag"
+        title:
+          $ref: "#/components/schemas/MessageTemplateTitle"
+        content:
+          $ref: "#/components/schemas/MessageTemplateContent"
+        is_html:
+          $ref: "#/components/schemas/MessageTemplateIsHTML"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
+    VariableResponse:
+      type: object
+      description: A response containing the variable details
+      required:
+        - code
+        - example
+      properties:
+        code:
+          type: string
+          enum: [ "user.name", "project.name", "user.code", "user.signature" ]
+          description: The code of the variable (text to replace in templates). Does not include the {{curly braces}}.
+          examples: [ "user.name" ]
+        example:
+          type: string
+          description: The example value of the variable
+          examples: [ "John Doe" ]
+
+    # endregion Messaging Models
+
     # region Properties
+
+    CreatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was created (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UpdatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was last updated (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
 
     ProjectID:
       type: integer
@@ -864,16 +1033,34 @@ components:
       description: The origin of the request
       examples: [ "Samsung Galaxy S21" ]
 
-    CreatedAt:
-      type: string
-      format: "yyyy-MM-dd HH:mm"
-      description: The time the object was created (based on ISO 8601)
-      examples: [ "2022-12-24 14:35" ]
+    MessageTemplateID:
+      type: integer
+      description: The ID of the message template to use
+      examples: [ 100 ]
 
-    UpdatedAt:
+    MessageTemplateName:
       type: string
-      format: "yyyy-MM-dd HH:mm"
-      description: The time the object was last updated (based on ISO 8601)
-      examples: [ "2022-12-24 14:35" ]
+      description: The (unique) name of the message template
+      examples: [ "template_welcome" ]
+
+    MessageTemplateLanguageTag:
+      type: string
+      description: The default language of the message template (locale represented as in IETF BCP 47)
+      examples: [ "en-US" ]
+
+    MessageTemplateTitle:
+      type: string
+      description: The title of the message template
+      examples: [ "Project created!" ]
+
+    MessageTemplateContent:
+      type: string
+      description: The template text content, including variables
+      examples: [ "Hey {{user.name}}, your project {{project.name}} is now active." ]
+
+    MessageTemplateIsHTML:
+      type: boolean
+      description: Whether the content is HTML or not
+      examples: [ false ]
 
     # endregion Properties
