@@ -10,8 +10,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.messaging.Variable
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
+import com.appifyhub.monolith.domain.creator.messaging.Variable
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateCreator
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.service.integrations.CommunicationsService.Type

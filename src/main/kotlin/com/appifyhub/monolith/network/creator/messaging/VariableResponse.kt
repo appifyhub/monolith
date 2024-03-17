@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.network.messaging
+package com.appifyhub.monolith.network.creator.messaging
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include

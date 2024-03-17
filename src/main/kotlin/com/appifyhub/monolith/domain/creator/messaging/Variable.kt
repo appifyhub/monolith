@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.messaging
+package com.appifyhub.monolith.domain.creator.messaging
 
 enum class Variable(
   val code: String,

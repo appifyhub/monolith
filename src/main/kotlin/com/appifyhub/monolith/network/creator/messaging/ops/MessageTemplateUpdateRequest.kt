@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.network.messaging.ops
+package com.appifyhub.monolith.network.creator.messaging.ops
 
 import com.appifyhub.monolith.network.common.SettableRequest
 import com.fasterxml.jackson.annotation.JsonInclude

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.messaging
+package com.appifyhub.monolith.domain.creator.messaging
 
 import java.util.Date
 

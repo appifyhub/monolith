@@ -2,7 +2,7 @@ package com.appifyhub.monolith.service.integrations
 
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
-import com.appifyhub.monolith.domain.messaging.Message
+import com.appifyhub.monolith.domain.creator.messaging.Message
 import com.appifyhub.monolith.domain.messaging.PushDevice
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
