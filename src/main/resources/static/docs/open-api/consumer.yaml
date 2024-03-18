@@ -208,6 +208,48 @@ paths:
 
   # endregion Auth
 
+  # region Messaging
+
+  /v1/projects/{projectId}/users/{universalId}/message:
+    post:
+      summary: Send a message to a user
+      operationId: sendMessage
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageSendRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Messaging
+
 components:
 
   securitySchemes:
