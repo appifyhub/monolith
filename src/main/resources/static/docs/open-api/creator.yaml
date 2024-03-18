@@ -31,6 +31,9 @@ paths:
     post:
       summary: Authenticate creator
       operationId: authenticate
+      description: >
+        Authenticates a creator using their credentials and returns a token.
+        This token can be used for all requests that require authentication.
       tags: [ Auth ]
       requestBody:
         required: true
@@ -56,6 +59,9 @@ paths:
     post:
       summary: Create an API key
       operationId: createApiKey
+      description: >
+        Creates a long-lived API key for the creator to use for external integrations.
+        This key can be used for all requests that require authentication.
       tags: [ Auth ]
       security:
         - BearerAuth: [ ]
@@ -302,6 +308,325 @@ paths:
                 $ref: "#/components/schemas/SimpleResponse"
 
   # endregion Users
+
+  # region Messaging
+
+  /v1/projects/{projectId}/messaging/template:
+    post:
+      summary: Add a new message template
+      operationId: addTemplate
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageTemplateCreateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/templates/{templateId}:
+    get:
+      summary: Get a message template
+      operationId: fetchTemplateById
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    put:
+      summary: Update a message template
+      operationId: updateTemplate
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageTemplateUpdateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove a message template
+      operationId: deleteTemplateById
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/template-search:
+    get:
+      summary: Search for message templates
+      operationId: searchTemplates
+      description: >
+        Search for message templates by name and language tag.
+        When any of the query parameters are omitted, the remaining ones are used as filtering.
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateName"
+        - name: language_tag
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateLanguageTag"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove message templates
+      operationId: deleteTemplates
+      description: >
+        Search for message templates by name and language tag.
+        When any of the query parameters are omitted, the remaining ones are used as filtering.
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateName"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/template-variables:
+    get:
+      summary: Get all allowed variables
+      operationId: getDefinedVariables
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariableResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    post:
+      summary: Detect variables in a string
+      operationId: detectVariables
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectVariablesRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariableResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/template-materialize:
+    post:
+      summary: Materialize a message template (replace variables)
+      operationId: materialize
+      description: >
+        Materializes a message template by replacing all variables with the given inputs.
+        If the template doesn't contain any variables, then the request body is not required.
+        A template can be located either by its ID or name.
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+        - name: name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateName"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInputsRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Messaging
 
 components:
 
