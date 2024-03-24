@@ -449,6 +449,290 @@ paths:
               schema:
                 $ref: "#/components/schemas/SimpleResponse"
 
+  /v1/projects/{projectId}/signup:
+    post:
+      summary: Sign up a new user
+      operationId: addUser
+      tags: [ User ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSignupRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}:
+    get:
+      summary: Get a user
+      operationId: getUser
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Delete a user
+      operationId: deleteUser
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/search:
+    get:
+      summary: Search the project's users
+      description: >
+        Search the users of the project by their name or contact information.
+        At least one of the search parameters is required to perform a search.
+      operationId: searchUsers
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: user_name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserName"
+        - name: user_contact
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserContact"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/authority:
+    put:
+      summary: Update a user's authority
+      operationId: updateAuthority
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateAuthorityRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/data:
+    put:
+      summary: Update a user's data
+      operationId: updateData
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDataRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/signature:
+    put:
+      summary: Update a user's signature
+      operationId: updateSignature
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateSignatureRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/verify/{verificationToken}:
+    put:
+      summary: Verify a user's signup token
+      operationId: verifyToken
+      tags: [ User ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: verificationToken
+          in: path
+          required: true
+          schema:
+            type: string
+            description: A unique verification token sent to the user on signup
+            examples: [ "abcd1234" ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/signature/reset:
+    put:
+      summary: Reset a user's signature
+      description: >
+        This will reset the user's signature to a new one.
+        The new signature will be sent to the user's contact channel.
+      operationId: resetSignature
+      tags: [ User ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
   # region User
 
 components:
