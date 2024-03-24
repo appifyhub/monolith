@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.messaging
+package com.appifyhub.monolith.domain.creator.messaging
 
 data class Message(
   val template: MessageTemplate,

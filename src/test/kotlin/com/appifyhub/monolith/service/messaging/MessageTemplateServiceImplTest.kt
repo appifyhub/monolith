@@ -11,11 +11,11 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.messaging.Message
-import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.Variable
-import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
-import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME
+import com.appifyhub.monolith.domain.creator.messaging.Message
+import com.appifyhub.monolith.domain.creator.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.creator.messaging.Variable
+import com.appifyhub.monolith.domain.creator.messaging.Variable.PROJECT_NAME
+import com.appifyhub.monolith.domain.creator.messaging.Variable.USER_NAME
 import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.ProjectCreated
 import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.UserAuthResetCompleted
 import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults.UserCreated

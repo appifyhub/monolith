@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.network.auth
+package com.appifyhub.monolith.network.creator.user.ops
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include

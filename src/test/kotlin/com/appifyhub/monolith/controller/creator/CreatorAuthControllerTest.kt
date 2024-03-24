@@ -8,8 +8,8 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_API_KEY
 import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_AUTH
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.network.auth.ApiKeyRequest
-import com.appifyhub.monolith.network.auth.CreatorCredentialsRequest
+import com.appifyhub.monolith.network.creator.user.ops.ApiKeyRequest
+import com.appifyhub.monolith.network.creator.user.ops.CreatorCredentialsRequest
 import com.appifyhub.monolith.network.auth.TokenResponse
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.util.Stubber
