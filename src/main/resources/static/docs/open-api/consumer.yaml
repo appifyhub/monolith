@@ -395,6 +395,62 @@ paths:
 
   # endregion Messaging
 
+  # region User
+
+  /v1/universal/users/{universalId}/signup-codes:
+    post:
+      summary: Create a signup code
+      operationId: createSignupCode
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupCodeResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get all signup codes
+      operationId: fetchAllSignupCodesForUser
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupCodesResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # region User
+
 components:
 
   securitySchemes:
