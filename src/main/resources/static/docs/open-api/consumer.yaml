@@ -531,7 +531,7 @@ components:
 
     # endregion Auth models
 
-    # region Messaging Ops Models
+    # region Messaging Ops models
 
     MessageSendRequest:
       type: object
@@ -565,7 +565,7 @@ components:
         type:
           $ref: "#/components/schemas/PushDeviceType"
 
-    # endregion Messaging Ops Models
+    # endregion Messaging Ops models
 
     # region Messaging models
 
@@ -594,6 +594,221 @@ components:
 
     # endregion Messaging models
 
+    # region User Ops models
+
+    OrganizationUpdaterDto:
+      type: object
+      description: >
+        A request to update the organization. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [OrganizationDto](#/components/schemas/OrganizationDto).
+      properties:
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        street:
+          $ref: "#/components/schemas/SettableRequest"
+        postcode:
+          $ref: "#/components/schemas/SettableRequest"
+        city:
+          $ref: "#/components/schemas/SettableRequest"
+        country_code:
+          $ref: "#/components/schemas/SettableRequest"
+
+    # this is not an API model in the code
+    OrganizationUpdaterSettable:
+      type: object
+      description: A value wrapper for the organization property
+      required:
+        - value
+      properties:
+        value:
+          $ref: "#/components/schemas/OrganizationUpdaterDto"
+
+    UserSignupRequest:
+      type: object
+      description: >
+        A request to sign up a new user.
+        Depending on the project configuration, user ID can be either auto-generated or required.
+      required:
+        - raw_signature
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserID"
+        raw_signature:
+          $ref: "#/components/schemas/UserSignature"
+        name:
+          $ref: "#/components/schemas/UserName"
+        type:
+          $ref: "#/components/schemas/UserType"
+        allows_spam:
+          $ref: "#/components/schemas/UserAllowsSpam"
+        contact:
+          $ref: "#/components/schemas/UserContact"
+        contact_type:
+          $ref: "#/components/schemas/UserContactType"
+        birthday:
+          $ref: "#/components/schemas/UserBirthday"
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        language_tag:
+          $ref: "#/components/schemas/UserLanguageTag"
+        signup_code:
+          $ref: "#/components/schemas/UserSignupCode"
+
+    UserUpdateAuthorityRequest:
+      type: object
+      description: A request to update a user's authority level
+      required:
+        - authority
+      properties:
+        authority:
+          $ref: "#/components/schemas/Authority"
+
+    UserUpdateDataRequest:
+      type: object
+      description: >
+        A request to update the user's data. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [UserSignupRequest](#/components/schemas/UserSignupRequest).
+      properties:
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        type:
+          $ref: "#/components/schemas/SettableRequest"
+        allows_spam:
+          $ref: "#/components/schemas/SettableRequest"
+        contact:
+          $ref: "#/components/schemas/SettableRequest"
+        contact_type:
+          $ref: "#/components/schemas/SettableRequest"
+        birthday:
+          $ref: "#/components/schemas/SettableRequest"
+        company:
+          $ref: "#/components/schemas/OrganizationUpdaterSettable"
+        language_tag:
+          $ref: "#/components/schemas/SettableRequest"
+
+    UserUpdateSignatureRequest:
+      type: object
+      description: A request to update a user's signature
+      required:
+        - raw_signature_old
+        - raw_signature_new
+      properties:
+        raw_signature_old:
+          $ref: "#/components/schemas/UserSignature"
+        raw_signature_new:
+          $ref: "#/components/schemas/UserSignature"
+
+    # endregion User Ops models
+
+    # region User models
+
+    OrganizationDto:
+      type: object
+      description: The organization's details
+      properties:
+        name:
+          type: string
+          description: The name of the organization
+          examples: [ "Appify Hub" ]
+        street:
+          type: string
+          description: The street of the organization
+          examples: [ "123 Main St" ]
+        postcode:
+          type: string
+          description: The postcode of the organization
+          examples: [ "12345" ]
+        city:
+          type: string
+          description: The city of the organization
+          examples: [ "New York" ]
+        country_code:
+          type: string
+          description: The 2-letter ISO country code of the organization
+          examples: [ "US" ]
+
+    SignupCodeResponse:
+      type: object
+      description: The response with a signup code
+      required:
+        - code
+        - is_used
+        - created_at
+      properties:
+        code:
+          $ref: "#/components/schemas/UserSignupCode"
+        is_used:
+          type: boolean
+          description: Whether the code is used or not
+          examples: [ true ]
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        used_at:
+          type: string
+          format: "yyyy-MM-dd HH:mm"
+          description: The time the code was used (based on ISO 8601)
+          examples: [ "2022-12-24 14:35" ]
+
+    SignupCodesResponse:
+      type: object
+      description: The response containing all signup codes
+      required:
+        - signup_codes
+        - max_signup_codes
+      properties:
+        signup_codes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignupCodeResponse"
+        max_signup_codes:
+          type: integer
+          description: The maximum number of signup codes allowed in this project
+          examples: [ 10 ]
+
+    UserResponse:
+      type: object
+      description: The response containing the user details
+      required:
+        - user_id
+        - project_id
+        - universal_id
+        - type
+        - authority
+        - allows_spam
+        - created_at
+        - updated_at
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserID"
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        name:
+          $ref: "#/components/schemas/UserName"
+        type:
+          $ref: "#/components/schemas/UserType"
+        authority:
+          $ref: "#/components/schemas/Authority"
+        allows_spam:
+          $ref: "#/components/schemas/UserAllowsSpam"
+        contact:
+          $ref: "#/components/schemas/UserContact"
+        contact_type:
+          $ref: "#/components/schemas/UserContactType"
+        birthday:
+          $ref: "#/components/schemas/UserBirthday"
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        language_tag:
+          $ref: "#/components/schemas/UserLanguageTag"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
+    # endregion User models
+
     # region Properties
 
     CreatedAt:
@@ -610,7 +825,9 @@ components:
 
     UserID:
       type: string
-      description: A unique user identifier
+      description: >
+        A unique user identifier within the project.
+        Depending on the project configuration, it can be differently formatted or even auto-generated.
       examples: [ "user_1000" ]
 
     ProjectID:
@@ -661,5 +878,53 @@ components:
       enum: [ "ANDROID", "IOS", "WEB" ]
       description: The type of the device
       examples: [ "ANDROID" ]
+
+    UserSignature:
+      type: string
+      description: The secret signature of the user, usually a plain-text password
+      examples: [ "!dr0ws5ap!" ]
+
+    UserName:
+      type: string
+      description: The name of the user
+      examples: [ "John Doe" ]
+
+    UserType:
+      type: string
+      enum: [ "PERSONAL", "ORGANIZATION" ]
+      description: The type of the creator
+      examples: [ "PERSONAL" ]
+
+    UserBirthday:
+      type: string
+      format: date
+      description: The birthday of the user
+      examples: [ "1990-12-24" ]
+
+    UserSignupCode:
+      type: string
+      description: The signup code to use for sign up this creator (usually required by default)
+      examples: [ "ABCD-1234-5678" ]
+
+    UserAllowsSpam:
+      type: boolean
+      description: Whether the user allows spam or not
+      examples: [ true ]
+
+    UserContact:
+      type: string
+      description: The contact channel for the user (depends on the contact type)
+      examples: [ "user_1000@example.com", "+1234567890" ]
+
+    UserContactType:
+      type: string
+      enum: [ "EMAIL", "PHONE", "CUSTOM" ]
+      description: The type of the contact channel
+      examples: [ "CUSTOM" ]
+
+    UserLanguageTag:
+      type: string
+      description: The default language of the user (locale represented as in IETF BCP 47)
+      examples: [ "en-US" ]
 
     # endregion Properties

@@ -1098,7 +1098,7 @@ components:
 
     # endregion User models
 
-    # region Messaging Ops Models
+    # region Messaging Ops models
 
     DetectVariablesRequest:
       type: object
@@ -1189,9 +1189,9 @@ components:
           description: The type of the device
           examples: [ "ANDROID" ]
 
-    # endregion Messaging Ops Models
+    # endregion Messaging Ops models
 
-    # region Messaging Models
+    # region Messaging models
 
     MessageResponse:
       type: object
@@ -1254,7 +1254,7 @@ components:
           description: The example value of the variable
           examples: [ "John Doe" ]
 
-    # endregion Messaging Models
+    # endregion Messaging models
 
     # region Properties
 
