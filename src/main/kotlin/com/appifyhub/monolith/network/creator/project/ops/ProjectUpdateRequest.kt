@@ -7,6 +7,7 @@ import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
 data class ProjectUpdateRequest(
@@ -25,4 +26,4 @@ data class ProjectUpdateRequest(
   @JsonProperty("mailgun_config") val mailgunConfig: SettableRequest<MailgunConfigDto?>? = null,
   @JsonProperty("twilio_config") val twilioConfig: SettableRequest<TwilioConfigDto?>? = null,
   @JsonProperty("firebase_config") val firebaseConfig: SettableRequest<FirebaseConfigDto?>? = null,
-)
+) : Serializable

@@ -118,7 +118,7 @@ class UserController(
   }
 
   @PutMapping(Endpoints.UNIVERSAL_USER_SIGNATURE)
-  fun updateData(
+  fun updateSignature(
     authentication: Authentication,
     @PathVariable universalId: String,
     @RequestBody request: UserUpdateSignatureRequest,

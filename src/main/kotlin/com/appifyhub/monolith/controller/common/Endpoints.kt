@@ -60,5 +60,6 @@ object Endpoints {
   const val SIGNUP_CREATORS = CREATOR_SIGNUP
   const val VERIFICATION = "/v1/universal/users/*/verify/*" // see UNIVERSAL_USER_VERIFY
   const val SIGNATURE_RESET = "/v1/universal/users/*/signature/reset" // see UNIVERSAL_USER_SIGNATURE_RESET
+  const val DOCS = "/docs/**"
 
 }
