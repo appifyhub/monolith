@@ -13,15 +13,12 @@ info:
     url: https://github.com/appifyhub/monolith/blob/main/LICENSE
   x-logo:
     url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
-    backgroundColor: "#070C0E"
     altText: Appify Hub Logo
 servers:
   - url: https://api.appifyhub.com
     description: Production environment
   - url: http://staging.api.appifyhub.com
     description: Staging environment
-  - url: http://localhost:8080
-    description: Your local environment
 
 paths:
 

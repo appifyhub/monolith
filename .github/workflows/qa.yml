@@ -36,11 +36,13 @@ jobs:
 
       - name: Run OpenAPI validation
         run: |
-          npm install -g @apidevtools/swagger-cli
-          echo "Validating Consumer API:"
-          swagger-cli validate src/main/resources/static/docs/open-api/consumer.yaml
-          echo "Validating Creator API:"
-          swagger-cli validate src/main/resources/static/docs/open-api/creator.yaml
+          npm install -g --force @redocly/cli
+          echo "Validating API docs..."
+          redocly lint \
+            --skip-rule=operation-4xx-response \
+            --skip-rule=security-defined \
+            --format=stylish \
+            src/main/resources/static/docs/open-api/*.yaml
 
       - name: Build and test service
         env:

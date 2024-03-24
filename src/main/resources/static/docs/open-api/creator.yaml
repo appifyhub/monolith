@@ -13,15 +13,12 @@ info:
     url: https://github.com/appifyhub/monolith/blob/main/LICENSE
   x-logo:
     url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
-    backgroundColor: "#070C0E"
     altText: Appify Hub Logo
 servers:
   - url: https://api.appifyhub.com
     description: Production environment
   - url: http://staging.api.appifyhub.com
     description: Staging environment
-  - url: http://localhost:8080
-    description: Your local environment
 
 paths:
 
@@ -1118,22 +1115,6 @@ components:
         project_id:
           $ref: "#/components/schemas/ProjectID"
 
-    MessageSendRequest:
-      type: object
-      description: A request to send a message. Must contain either a template ID or a template name.
-      required:
-        - message_type
-      properties:
-        message_type:
-          type: string
-          enum: [ "EMAIL", "SMS", "PUSH" ]
-          description: The type of the message to send
-          examples: [ "EMAIL" ]
-        message_template_id:
-          $ref: "#/components/schemas/MessageTemplateID"
-        message_template_name:
-          $ref: "#/components/schemas/MessageTemplateName"
-
     MessageTemplateCreateRequest:
       type: object
       description: A request to create a message template
@@ -1171,23 +1152,6 @@ components:
           $ref: "#/components/schemas/SettableRequest"
         is_html:
           $ref: "#/components/schemas/SettableRequest"
-
-    PushDeviceRequest:
-      type: object
-      description: A request containing the push device details
-      required:
-        - id
-        - type
-      properties:
-        id:
-          type: string
-          description: The unique identifier of the device (e.g. a Firebase token)
-          examples: [ "abcd1234" ]
-        type:
-          type: string
-          enum: [ "ANDROID", "IOS", "WEB" ]
-          description: The type of the device
-          examples: [ "ANDROID" ]
 
     # endregion Messaging Ops models
 
