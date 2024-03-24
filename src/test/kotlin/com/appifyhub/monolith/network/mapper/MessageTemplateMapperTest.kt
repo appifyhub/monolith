@@ -2,10 +2,10 @@ package com.appifyhub.monolith.network.mapper
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
-import com.appifyhub.monolith.domain.messaging.Variable
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
-import com.appifyhub.monolith.network.messaging.ops.MessageInputsRequest
-import com.appifyhub.monolith.network.messaging.ops.MessageTemplateUpdateRequest
+import com.appifyhub.monolith.domain.creator.messaging.Variable
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateUpdater
+import com.appifyhub.monolith.network.creator.messaging.ops.MessageInputsRequest
+import com.appifyhub.monolith.network.creator.messaging.ops.MessageTemplateUpdateRequest
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test

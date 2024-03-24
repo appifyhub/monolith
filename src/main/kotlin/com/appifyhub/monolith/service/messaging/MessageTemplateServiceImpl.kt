@@ -3,15 +3,15 @@ package com.appifyhub.monolith.service.messaging
 import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults as Defaults
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.messaging.Message
-import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.Variable
-import com.appifyhub.monolith.domain.messaging.Variable.PROJECT_NAME
-import com.appifyhub.monolith.domain.messaging.Variable.SIGNATURE
-import com.appifyhub.monolith.domain.messaging.Variable.USER_NAME
-import com.appifyhub.monolith.domain.messaging.Variable.VERIFICATION_CODE
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
+import com.appifyhub.monolith.domain.creator.messaging.Message
+import com.appifyhub.monolith.domain.creator.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.creator.messaging.Variable
+import com.appifyhub.monolith.domain.creator.messaging.Variable.PROJECT_NAME
+import com.appifyhub.monolith.domain.creator.messaging.Variable.SIGNATURE
+import com.appifyhub.monolith.domain.creator.messaging.Variable.USER_NAME
+import com.appifyhub.monolith.domain.creator.messaging.Variable.VERIFICATION_CODE
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateCreator
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.repository.messaging.MessageTemplateRepository
 import com.appifyhub.monolith.service.creator.CreatorService

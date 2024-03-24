@@ -1,0 +1,1267 @@
+openapi: "3.1.0"
+
+info:
+  version: Latest
+  title: Appify Hub's Consumer API
+  description: The full specification of the service's API used by the end-users.
+  contact:
+    name: Team
+    url: https://www.appifyhub.com
+    email: contact@appifyhub.com
+  license:
+    name: MIT License
+    url: https://github.com/appifyhub/monolith/blob/main/LICENSE
+  x-logo:
+    url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
+    altText: Appify Hub Logo
+servers:
+  - url: https://api.appifyhub.com
+    description: Production environment
+  - url: http://staging.api.appifyhub.com
+    description: Staging environment
+
+paths:
+
+  # region Health
+
+  /heartbeat:
+    get:
+      summary: Check the heartbeat
+      operationId: heartbeat
+      tags: [ Health ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HeartbeatResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Health
+
+  # region Auth
+
+  /v1/universal/auth:
+    post:
+      summary: Authenticate user
+      operationId: authenticate
+      tags: [ Auth ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserCredentialsRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get the details of the current token
+      operationId: getCurrentToken
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenDetailsResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    put:
+      summary: Refresh the current token (get a new one)
+      operationId: refresh
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Invalidate the current token
+      operationId: unauthenticate
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: all
+          in: query
+          required: false
+          description: Whether to unauthenticate all of the user's tokens or not
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/auth/tokens:
+    get:
+      summary: Get all tokens
+      operationId: getAllTokens
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: user_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: valid
+          in: query
+          required: false
+          description: Whether to get only valid tokens or not
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TokenDetailsResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Invalidate tokens
+      operationId: unauthenticateTokens
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: token_ids
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/JWTEncodedToken"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Auth
+
+  # region Messaging
+
+  /v1/projects/{projectId}/users/{universalId}/message:
+    post:
+      summary: Send a message to a user
+      operationId: sendMessage
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageSendRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/push-devices:
+    post:
+      summary: Add a push device
+      operationId: addPushDevice
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushDeviceRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushDeviceResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get all push devices
+      operationId: fetchAllPushDevicesForUser
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushDevicesResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove all push devices
+      operationId: removeAllPushDevicesForUser
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/push-devices/{deviceId}:
+    get:
+      summary: Get a push device
+      operationId: fetchPushDevice
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/PushDeviceID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PushDeviceResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove a push device
+      operationId: removePushDevice
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/PushDeviceID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Messaging
+
+  # region User
+
+  /v1/universal/users/{universalId}/signup-codes:
+    post:
+      summary: Create a signup code
+      operationId: createSignupCode
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupCodeResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get all signup codes
+      operationId: fetchAllSignupCodesForUser
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupCodesResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/signup:
+    post:
+      summary: Sign up a new user
+      operationId: addUser
+      tags: [ User ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserSignupRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}:
+    get:
+      summary: Get a user
+      operationId: getUser
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Delete a user
+      operationId: deleteUser
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/search:
+    get:
+      summary: Search the project's users
+      description: >
+        Search the users of the project by their name or contact information.
+        At least one of the search parameters is required to perform a search.
+      operationId: searchUsers
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: user_name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserName"
+        - name: user_contact
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/UserContact"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/authority:
+    put:
+      summary: Update a user's authority
+      operationId: updateAuthority
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateAuthorityRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/data:
+    put:
+      summary: Update a user's data
+      operationId: updateData
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateDataRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/signature:
+    put:
+      summary: Update a user's signature
+      operationId: updateSignature
+      tags: [ User ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdateSignatureRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/verify/{verificationToken}:
+    put:
+      summary: Verify a user's signup token
+      operationId: verifyToken
+      tags: [ User ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+        - name: verificationToken
+          in: path
+          required: true
+          schema:
+            type: string
+            description: A unique verification token sent to the user on signup
+            examples: [ "abcd1234" ]
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/signature/reset:
+    put:
+      summary: Reset a user's signature
+      description: >
+        This will reset the user's signature to a new one.
+        The new signature will be sent to the user's contact channel.
+      operationId: resetSignature
+      tags: [ User ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # region User
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # region Health models
+
+    HeartbeatResponse:
+      type: object
+      description: A simple heartbeat response
+      required:
+        - beat_time
+        - version
+      properties:
+        beat_time:
+          type: string
+          format: date-time
+          description: The time the heartbeat was triggered (ISO 8601)
+          examples: [ "2022-12-24T14:35:05Z" ]
+        request_ip:
+          $ref: "#/components/schemas/IPAddress"
+        request_geo:
+          $ref: "#/components/schemas/Geolocation"
+        version:
+          type: string
+          description: The running version of the service
+          examples: [ "1.3.10.beta" ]
+
+    # endregion Health models
+
+    # region Common models
+
+    SimpleResponse:
+      type: object
+      description: Simple message response
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: The text message
+          examples: [ "This is a notice" ]
+
+    SettableRequest:
+      type: object
+      description: A value wrapper for a value
+      required:
+        - value
+      properties:
+        value:
+          type: object
+          description: The value to set, or no value to unset
+          examples: [ "any" ]
+
+    # endregion Common models
+
+    # region Auth models
+
+    TokenDetailsResponse:
+      type: object
+      description: The decoded details of a token
+      required:
+        - token_value
+        - user_id
+        - project_id
+        - universal_id
+        - created_at
+        - expires_at
+        - authority
+        - is_blocked
+        - is_static
+      properties:
+        token_value:
+          $ref: "#/components/schemas/JWTEncodedToken"
+        user_id:
+          $ref: "#/components/schemas/UserID"
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        expires_at:
+          type: string
+          format: yyyy-MM-dd HH:mm
+          description: The time the token expires (based on ISO 8601)
+          examples: [ "2022-12-24 14:35" ]
+        authority:
+          $ref: "#/components/schemas/Authority"
+        is_blocked:
+          type: boolean
+          description: Whether the token is blocked or not
+          examples: [ true ]
+        origin:
+          $ref: "#/components/schemas/RequestOrigin"
+        ip_address:
+          $ref: "#/components/schemas/IPAddress"
+        geo:
+          $ref: "#/components/schemas/Geolocation"
+        is_static:
+          type: boolean
+          description: Whether the token is static or not (i.e. API key)
+          examples: [ true ]
+
+    TokenResponse:
+      type: object
+      description: A response containing a token
+      required:
+        - token_value
+      properties:
+        token_value:
+          $ref: "#/components/schemas/JWTEncodedToken"
+
+    UserCredentialsRequest:
+      type: object
+      description: A request with user credentials
+      required:
+        - universal_id
+        - signature
+      properties:
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        signature:
+          type: string
+          description: The secret signature of the user, usually a plain-text password
+          examples: [ "!dr0ws5ap!" ]
+        origin:
+          $ref: "#/components/schemas/RequestOrigin"
+
+    # endregion Auth models
+
+    # region Messaging Ops models
+
+    MessageSendRequest:
+      type: object
+      description: A request to send a message. Must contain either a template ID or a template name.
+      required:
+        - message_type
+      properties:
+        message_type:
+          type: string
+          enum: [ "EMAIL", "SMS", "PUSH" ]
+          description: The type of the message to send
+          examples: [ "EMAIL" ]
+        message_template_id:
+          type: integer
+          description: The ID of the message template to use
+          examples: [ 100 ]
+        message_template_name:
+          type: string
+          description: The (unique) name of the message template
+          examples: [ "template_welcome" ]
+
+    PushDeviceRequest:
+      type: object
+      description: A request containing the push device details
+      required:
+        - id
+        - type
+      properties:
+        id:
+          $ref: "#/components/schemas/PushDeviceID"
+        type:
+          $ref: "#/components/schemas/PushDeviceType"
+
+    # endregion Messaging Ops models
+
+    # region Messaging models
+
+    PushDeviceResponse:
+      type: object
+      description: A response containing the push device details
+      required:
+        - id
+        - type
+      properties:
+        id:
+          $ref: "#/components/schemas/PushDeviceID"
+        type:
+          $ref: "#/components/schemas/PushDeviceType"
+
+    PushDevicesResponse:
+      type: object
+      description: A response containing device details of all push devices
+      required:
+        - devices
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/PushDeviceResponse"
+
+    # endregion Messaging models
+
+    # region User Ops models
+
+    OrganizationUpdaterDto:
+      type: object
+      description: >
+        A request to update the organization. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [OrganizationDto](#/components/schemas/OrganizationDto).
+      properties:
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        street:
+          $ref: "#/components/schemas/SettableRequest"
+        postcode:
+          $ref: "#/components/schemas/SettableRequest"
+        city:
+          $ref: "#/components/schemas/SettableRequest"
+        country_code:
+          $ref: "#/components/schemas/SettableRequest"
+
+    # this is not an API model in the code
+    OrganizationUpdaterSettable:
+      type: object
+      description: A value wrapper for the organization property
+      required:
+        - value
+      properties:
+        value:
+          $ref: "#/components/schemas/OrganizationUpdaterDto"
+
+    UserSignupRequest:
+      type: object
+      description: >
+        A request to sign up a new user.
+        Depending on the project configuration, user ID can be either auto-generated or required.
+      required:
+        - raw_signature
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserID"
+        raw_signature:
+          $ref: "#/components/schemas/UserSignature"
+        name:
+          $ref: "#/components/schemas/UserName"
+        type:
+          $ref: "#/components/schemas/UserType"
+        allows_spam:
+          $ref: "#/components/schemas/UserAllowsSpam"
+        contact:
+          $ref: "#/components/schemas/UserContact"
+        contact_type:
+          $ref: "#/components/schemas/UserContactType"
+        birthday:
+          $ref: "#/components/schemas/UserBirthday"
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        language_tag:
+          $ref: "#/components/schemas/UserLanguageTag"
+        signup_code:
+          $ref: "#/components/schemas/UserSignupCode"
+
+    UserUpdateAuthorityRequest:
+      type: object
+      description: A request to update a user's authority level
+      required:
+        - authority
+      properties:
+        authority:
+          $ref: "#/components/schemas/Authority"
+
+    UserUpdateDataRequest:
+      type: object
+      description: >
+        A request to update the user's data. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [UserSignupRequest](#/components/schemas/UserSignupRequest).
+      properties:
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        type:
+          $ref: "#/components/schemas/SettableRequest"
+        allows_spam:
+          $ref: "#/components/schemas/SettableRequest"
+        contact:
+          $ref: "#/components/schemas/SettableRequest"
+        contact_type:
+          $ref: "#/components/schemas/SettableRequest"
+        birthday:
+          $ref: "#/components/schemas/SettableRequest"
+        company:
+          $ref: "#/components/schemas/OrganizationUpdaterSettable"
+        language_tag:
+          $ref: "#/components/schemas/SettableRequest"
+
+    UserUpdateSignatureRequest:
+      type: object
+      description: A request to update a user's signature
+      required:
+        - raw_signature_old
+        - raw_signature_new
+      properties:
+        raw_signature_old:
+          $ref: "#/components/schemas/UserSignature"
+        raw_signature_new:
+          $ref: "#/components/schemas/UserSignature"
+
+    # endregion User Ops models
+
+    # region User models
+
+    OrganizationDto:
+      type: object
+      description: The organization's details
+      properties:
+        name:
+          type: string
+          description: The name of the organization
+          examples: [ "Appify Hub" ]
+        street:
+          type: string
+          description: The street of the organization
+          examples: [ "123 Main St" ]
+        postcode:
+          type: string
+          description: The postcode of the organization
+          examples: [ "12345" ]
+        city:
+          type: string
+          description: The city of the organization
+          examples: [ "New York" ]
+        country_code:
+          type: string
+          description: The 2-letter ISO country code of the organization
+          examples: [ "US" ]
+
+    SignupCodeResponse:
+      type: object
+      description: The response with a signup code
+      required:
+        - code
+        - is_used
+        - created_at
+      properties:
+        code:
+          $ref: "#/components/schemas/UserSignupCode"
+        is_used:
+          type: boolean
+          description: Whether the code is used or not
+          examples: [ true ]
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        used_at:
+          type: string
+          format: "yyyy-MM-dd HH:mm"
+          description: The time the code was used (based on ISO 8601)
+          examples: [ "2022-12-24 14:35" ]
+
+    SignupCodesResponse:
+      type: object
+      description: The response containing all signup codes
+      required:
+        - signup_codes
+        - max_signup_codes
+      properties:
+        signup_codes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SignupCodeResponse"
+        max_signup_codes:
+          type: integer
+          description: The maximum number of signup codes allowed in this project
+          examples: [ 10 ]
+
+    UserResponse:
+      type: object
+      description: The response containing the user details
+      required:
+        - user_id
+        - project_id
+        - universal_id
+        - type
+        - authority
+        - allows_spam
+        - created_at
+        - updated_at
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserID"
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        universal_id:
+          $ref: "#/components/schemas/UniversalID"
+        name:
+          $ref: "#/components/schemas/UserName"
+        type:
+          $ref: "#/components/schemas/UserType"
+        authority:
+          $ref: "#/components/schemas/Authority"
+        allows_spam:
+          $ref: "#/components/schemas/UserAllowsSpam"
+        contact:
+          $ref: "#/components/schemas/UserContact"
+        contact_type:
+          $ref: "#/components/schemas/UserContactType"
+        birthday:
+          $ref: "#/components/schemas/UserBirthday"
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        language_tag:
+          $ref: "#/components/schemas/UserLanguageTag"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
+    # endregion User models
+
+    # region Properties
+
+    CreatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was created (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UpdatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was last updated (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UserID:
+      type: string
+      description: >
+        A unique user identifier within the project.
+        Depending on the project configuration, it can be differently formatted or even auto-generated.
+      examples: [ "user_1000" ]
+
+    ProjectID:
+      type: integer
+      description: A unique project identifier
+      examples: [ 30 ]
+
+    UniversalID:
+      type: string
+      format: "userId$projectId"
+      description: The universal ID of the object (user ID and project ID separated by a dollar sign)
+      examples: [ "user_1000$30" ]
+
+    IPAddress:
+      type: string
+      description: The approximate IP address
+      examples: [ "192.168.178.45" ]
+
+    Geolocation:
+      type: string
+      description: The approximate geographic location based on the IP address
+      examples: [ "Amsterdam, Netherlands" ]
+
+    Authority:
+      type: string
+      enum: [ "DEFAULT", "MODERATOR", "ADMIN", "OWNER" ]
+      description: The authority level of the user
+      examples: [ "ADMIN" ]
+
+    JWTEncodedToken:
+      type: string
+      format: JWT
+      description: The value of the token
+      examples: [ "abcd.1234.ab12" ]
+
+    RequestOrigin:
+      type: string
+      description: The origin of the request
+      examples: [ "Samsung Galaxy S21" ]
+
+    PushDeviceID:
+      type: string
+      description: The unique identifier of the device (e.g. a Firebase token)
+      examples: [ "abcd1234" ]
+
+    PushDeviceType:
+      type: string
+      enum: [ "ANDROID", "IOS", "WEB" ]
+      description: The type of the device
+      examples: [ "ANDROID" ]
+
+    UserSignature:
+      type: string
+      description: The secret signature of the user, usually a plain-text password
+      examples: [ "!dr0ws5ap!" ]
+
+    UserName:
+      type: string
+      description: The name of the user
+      examples: [ "John Doe" ]
+
+    UserType:
+      type: string
+      enum: [ "PERSONAL", "ORGANIZATION" ]
+      description: The type of the creator
+      examples: [ "PERSONAL" ]
+
+    UserBirthday:
+      type: string
+      format: date
+      description: The birthday of the user
+      examples: [ "1990-12-24" ]
+
+    UserSignupCode:
+      type: string
+      description: The signup code to use for sign up this creator (usually required by default)
+      examples: [ "ABCD-1234-5678" ]
+
+    UserAllowsSpam:
+      type: boolean
+      description: Whether the user allows spam or not
+      examples: [ true ]
+
+    UserContact:
+      type: string
+      description: The contact channel for the user (depends on the contact type)
+      examples: [ "user_1000@example.com", "+1234567890" ]
+
+    UserContactType:
+      type: string
+      enum: [ "EMAIL", "PHONE", "CUSTOM" ]
+      description: The type of the contact channel
+      examples: [ "CUSTOM" ]
+
+    UserLanguageTag:
+      type: string
+      description: The default language of the user (locale represented as in IETF BCP 47)
+      examples: [ "en-US" ]
+
+    # endregion Properties

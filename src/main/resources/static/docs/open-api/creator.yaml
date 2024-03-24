@@ -1,0 +1,1355 @@
+openapi: "3.1.0"
+
+info:
+  version: Latest
+  title: Appify Hub's Creator API
+  description: The full specification of the service's API used by the project administrators.
+  contact:
+    name: Team
+    url: https://www.appifyhub.com
+    email: contact@appifyhub.com
+  license:
+    name: MIT License
+    url: https://github.com/appifyhub/monolith/blob/main/LICENSE
+  x-logo:
+    url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
+    altText: Appify Hub Logo
+servers:
+  - url: https://api.appifyhub.com
+    description: Production environment
+  - url: http://staging.api.appifyhub.com
+    description: Staging environment
+
+paths:
+
+  # region Auth
+
+  /v1/creator/auth:
+    post:
+      summary: Authenticate creator
+      operationId: authenticate
+      description: >
+        Authenticates a creator using their credentials and returns a token.
+        This token can be used for all requests that require authentication.
+      tags: [ Auth ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatorCredentialsRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/creator/apikey:
+    post:
+      summary: Create an API key
+      operationId: createApiKey
+      description: >
+        Creates a long-lived API key for the creator to use for external integrations.
+        This key can be used for all requests that require authentication.
+      tags: [ Auth ]
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Auth
+
+  # region Projects
+
+  /v1/projects:
+    post:
+      summary: Creates a new project
+      operationId: addProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectCreateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    get:
+      summary: Get all projects
+      operationId: getProjects
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: creator_id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CreatorUniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove all projects
+      operationId: removeProjectsByCreator
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: creator_id
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/CreatorUniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}:
+    get:
+      summary: Get a project
+      operationId: getProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    put:
+      summary: Update a project
+      operationId: updateProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove a project
+      operationId: removeProject
+      tags: [ Projects ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Projects
+
+  # region Users
+
+  /v1/creator/signup:
+    post:
+      summary: Sign up a new creator
+      operationId: addUser
+      tags: [ Users ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatorSignupRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreatorResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/universal/users/{universalId}/force-verify:
+    post:
+      summary: Verify a user without their explicit approval
+      operationId: forceVerifyUser
+      tags: [ Users ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: universalId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserUniversalID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Users
+
+  # region Messaging
+
+  /v1/projects/{projectId}/messaging/template:
+    post:
+      summary: Add a new message template
+      operationId: addTemplate
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageTemplateCreateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/templates/{templateId}:
+    get:
+      summary: Get a message template
+      operationId: fetchTemplateById
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    put:
+      summary: Update a message template
+      operationId: updateTemplate
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageTemplateUpdateRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove a message template
+      operationId: deleteTemplateById
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: templateId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/template-search:
+    get:
+      summary: Search for message templates
+      operationId: searchTemplates
+      description: >
+        Search for message templates by name and language tag.
+        When any of the query parameters are omitted, the remaining ones are used as filtering.
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateName"
+        - name: language_tag
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateLanguageTag"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageTemplateResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    delete:
+      summary: Remove message templates
+      operationId: deleteTemplates
+      description: >
+        Search for message templates by name and language tag.
+        When any of the query parameters are omitted, the remaining ones are used as filtering.
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateName"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/template-variables:
+    get:
+      summary: Get all allowed variables
+      operationId: getDefinedVariables
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariableResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+    post:
+      summary: Detect variables in a string
+      operationId: detectVariables
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DetectVariablesRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VariableResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  /v1/projects/{projectId}/messaging/template-materialize:
+    post:
+      summary: Materialize a message template (replace variables)
+      operationId: materialize
+      description: >
+        Materializes a message template by replacing all variables with the given inputs.
+        If the template doesn't contain any variables, then the request body is not required.
+        A template can be located either by its ID or name.
+      tags: [ Messaging ]
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/ProjectID"
+        - name: id
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateID"
+        - name: name
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/MessageTemplateName"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInputsRequest"
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleResponse"
+
+  # endregion Messaging
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # region Common models
+
+    SimpleResponse:
+      type: object
+      description: Simple message response
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: The text message
+          examples: [ "This is a notice" ]
+
+    SettableRequest:
+      type: object
+      description: A value wrapper for a value
+      required:
+        - value
+      properties:
+        value:
+          type: object
+          description: The value to set, or no value to unset
+          examples: [ "any" ]
+
+    # endregion Common models
+
+    # region Project Ops models
+
+    ProjectCreateRequest:
+      type: object
+      description: A request to create a new project
+      required:
+        - type
+        - user_id_type
+        - owner_universal_id
+        - name
+      properties:
+        type:
+          $ref: "#/components/schemas/ProjectType"
+        user_id_type:
+          $ref: "#/components/schemas/ProjectUserIDType"
+        owner_universal_id:
+          $ref: "#/components/schemas/CreatorUniversalID"
+        name:
+          $ref: "#/components/schemas/ProjectName"
+        description:
+          $ref: "#/components/schemas/ProjectDescription"
+        logo_url:
+          $ref: "#/components/schemas/ProjectLogoURL"
+        website_url:
+          $ref: "#/components/schemas/ProjectWebsiteURL"
+        language_tag:
+          $ref: "#/components/schemas/ProjectLanguageTag"
+        max_users:
+          $ref: "#/components/schemas/ProjectMaxUsers"
+        anyone_can_search:
+          $ref: "#/components/schemas/ProjectAnyoneCanSearch"
+        requires_signup_codes:
+          $ref: "#/components/schemas/ProjectRequiresSignupCodes"
+        max_signup_codes_per_user:
+          $ref: "#/components/schemas/ProjectMaxSignupCodesPerUser"
+        mailgun_config:
+          $ref: "#/components/schemas/MailgunConfigDto"
+        twilio_config:
+          $ref: "#/components/schemas/TwilioConfigDto"
+        firebase_config:
+          $ref: "#/components/schemas/FirebaseConfigDto"
+
+    ProjectUpdateRequest:
+      type: object
+      description: >
+        A request to update a project. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [ProjectResponse](#/components/schemas/ProjectResponse).
+      properties:
+        type:
+          $ref: "#/components/schemas/SettableRequest"
+        status:
+          $ref: "#/components/schemas/SettableRequest"
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        description:
+          $ref: "#/components/schemas/SettableRequest"
+        logo_url:
+          $ref: "#/components/schemas/SettableRequest"
+        website_url:
+          $ref: "#/components/schemas/SettableRequest"
+        max_users:
+          $ref: "#/components/schemas/SettableRequest"
+        anyone_can_search:
+          $ref: "#/components/schemas/SettableRequest"
+        on_hold:
+          $ref: "#/components/schemas/SettableRequest"
+        language_tag:
+          $ref: "#/components/schemas/SettableRequest"
+        requires_signup_codes:
+          $ref: "#/components/schemas/SettableRequest"
+        max_signup_codes_per_user:
+          $ref: "#/components/schemas/SettableRequest"
+        mailgun_config:
+          $ref: "#/components/schemas/SettableRequest"
+        twilio_config:
+          $ref: "#/components/schemas/SettableRequest"
+        firebase_config:
+          $ref: "#/components/schemas/SettableRequest"
+
+    # endregion Project Ops models
+
+    # region Project models
+
+    ProjectFeatureResponse:
+      type: object
+      description: Details about the project's features
+      required:
+        - name
+        - is_required
+      properties:
+        name:
+          type: string
+          enum: [ "BASIC", "USERS", "EMAILS", "SMS", "PUSH" ]
+          description: The name of the feature
+          examples: [ "EMAILS" ]
+        is_required:
+          type: boolean
+          description: Whether the feature is required for the project to run or not
+          examples: [ true ]
+
+    MailgunConfigDto:
+      type: object
+      description: Mailgun account configuration, primarily used for emails
+      required:
+        - api_key
+        - domain
+        - sender_name
+        - sender_email
+      properties:
+        api_key:
+          type: string
+          description: An active API key
+          examples: [ "key-1234567890" ]
+        domain:
+          type: string
+          description: A verified domain
+          examples: [ "appifyhub.com" ]
+        sender_name:
+          type: string
+          description: The name of the default sender
+          examples: [ "Appify Hub" ]
+        sender_email:
+          type: string
+          description: The email of the default sender
+          examples: [ "no-reply@appifyhub.com" ]
+
+    TwilioConfigDto:
+      type: object
+      description: Twilio account configuration, primarily used for SMS
+      required:
+        - account_sid
+        - auth_token
+        - messaging_service_id
+        - max_price_per_message
+        - max_retry_attempts
+        - default_sender_name
+        - default_sender_number
+      properties:
+        account_sid:
+          type: string
+          description: An active account SID
+          examples: [ "AC1234567890" ]
+        auth_token:
+          type: string
+          description: A valid auth token
+          examples: [ "auth-1234567890" ]
+        messaging_service_id:
+          type: string
+          description: A valid Messaging Service ID
+          examples: [ "MS1234567890" ]
+        max_price_per_message:
+          type: integer
+          description: The maximum price per message (in USD)
+          examples: [ 1 ]
+        max_retry_attempts:
+          type: integer
+          description: The maximum retry attempts on message sending
+          examples: [ 3 ]
+        default_sender_name:
+          type: string
+          description: The name of the default sender. Set to blank to clear
+          examples: [ "APPIFY" ]
+        default_sender_number:
+          type: string
+          description: The phone number of the default sender
+          examples: [ "+1234567890" ]
+
+    FirebaseConfigDto:
+      type: object
+      description: Firebase account configuration, primarily used for push notifications
+      required:
+        - project_name
+        - service_account_key_json_base64
+      properties:
+        project_name:
+          type: string
+          description: The name of the Firebase project
+          examples: [ "appify-hub" ]
+        service_account_key_json_base64:
+          type: string
+          description: The base64-encoded JSON representing the service account key
+          examples: [ "AiOiJKV1QiLCJhbGciOiJSUzI1NiJ9yJpc3MiOiJodHL2FwcGlm" ]
+
+    ProjectResponse:
+      type: object
+      description: Operational details of a consumer project
+      required:
+        - project_id
+        - type
+        - state
+        - user_id_type
+        - name
+        - max_users
+        - anyone_can_search
+        - on_hold
+        - requires_signup_codes
+        - max_signup_codes_per_user
+        - created_at
+        - updated_at
+      properties:
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        type:
+          $ref: "#/components/schemas/ProjectType"
+        state:
+          $ref: "#/components/schemas/ProjectStateResponse"
+        user_id_type:
+          $ref: "#/components/schemas/ProjectUserIDType"
+        name:
+          $ref: "#/components/schemas/ProjectName"
+        description:
+          $ref: "#/components/schemas/ProjectDescription"
+        logo_url:
+          $ref: "#/components/schemas/ProjectLogoURL"
+        website_url:
+          $ref: "#/components/schemas/ProjectWebsiteURL"
+        language_tag:
+          $ref: "#/components/schemas/ProjectLanguageTag"
+        max_users:
+          $ref: "#/components/schemas/ProjectMaxUsers"
+        anyone_can_search:
+          $ref: "#/components/schemas/ProjectAnyoneCanSearch"
+        on_hold:
+          type: boolean
+          description: Whether the consumer project is on hold or not, preventing any actions if true
+          examples: [ false ]
+        requires_signup_codes:
+          $ref: "#/components/schemas/ProjectRequiresSignupCodes"
+        max_signup_codes_per_user:
+          $ref: "#/components/schemas/ProjectMaxSignupCodesPerUser"
+        mailgun_config:
+          $ref: "#/components/schemas/MailgunConfigDto"
+        twilio_config:
+          $ref: "#/components/schemas/TwilioConfigDto"
+        firebase_config:
+          $ref: "#/components/schemas/FirebaseConfigDto"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
+    ProjectStateResponse:
+      type: object
+      description: A representation of the project's current state
+      required:
+        - status
+        - usable_features
+        - unusable_features
+      properties:
+        status:
+          type: string
+          enum: [ "REVIEW", "ACTIVE", "BLOCKED", "SUSPENDED" ]
+          description: The status of the project
+          examples: [ "ACTIVE" ]
+        usable_features:
+          type: array
+          description: The usable features of the project
+          items:
+            $ref: "#/components/schemas/ProjectFeatureResponse"
+        unusable_features:
+          type: array
+          description: The unusable features of the project
+          items:
+            $ref: "#/components/schemas/ProjectFeatureResponse"
+
+    # endregion Project models
+
+    # region User Ops models
+
+    ApiKeyRequest:
+      type: object
+      description: A request for an API key
+      properties:
+        origin:
+          $ref: "#/components/schemas/RequestOrigin"
+
+    CreatorCredentialsRequest:
+      type: object
+      description: A request with creator credentials
+      required:
+        - universal_id
+        - signature
+      properties:
+        universal_id:
+          $ref: "#/components/schemas/CreatorUniversalID"
+        signature:
+          $ref: "#/components/schemas/CreatorSignature"
+        origin:
+          $ref: "#/components/schemas/RequestOrigin"
+
+    CreatorSignupRequest:
+      type: object
+      description: A request to sign up a new creator
+      required:
+        - user_id
+        - raw_signature
+        - name
+        - type
+      properties:
+        user_id:
+          type: string
+          description: The email of the creator
+          examples: [ "user_1000@example.com" ]
+        raw_signature:
+          $ref: "#/components/schemas/CreatorSignature"
+        name:
+          type: string
+          description: The name of the creator
+          examples: [ "John Doe" ]
+        type:
+          type: string
+          enum: [ "PERSONAL", "ORGANIZATION" ]
+          description: The type of the creator
+          examples: [ "PERSONAL" ]
+        birthday:
+          type: string
+          format: date
+          description: The birthday of the creator
+          examples: [ "1990-12-24" ]
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        signup_code:
+          type: string
+          description: The signup code to use for sign up this creator (usually required by default)
+          examples: [ "ABCD-1234-5678" ]
+
+    # endregion User Ops models
+
+    # region User models
+
+    OrganizationDto:
+      type: object
+      description: The organization's details
+      properties:
+        name:
+          type: string
+          description: The name of the organization
+          examples: [ "Appify Hub" ]
+        street:
+          type: string
+          description: The street of the organization
+          examples: [ "123 Main St" ]
+        postcode:
+          type: string
+          description: The postcode of the organization
+          examples: [ "12345" ]
+        city:
+          type: string
+          description: The city of the organization
+          examples: [ "New York" ]
+        country_code:
+          type: string
+          description: The 2-letter ISO country code of the organization
+          examples: [ "US" ]
+
+    CreatorResponse:
+      type: object
+      description: A user's details
+      required:
+        - user_id
+        - project_id
+        - universal_id
+        - type
+        - authority
+        - allows_spam
+        - contact_type
+        - created_at
+        - updated_at
+      properties:
+        user_id:
+          type: string
+          description: The creator's unique ID
+          examples: [ "creator_1000" ]
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+        universal_id:
+          $ref: "#/components/schemas/CreatorUniversalID"
+        name:
+          type: string
+          description: The name of the creator
+          examples: [ "John Doe" ]
+        type:
+          type: string
+          enum: [ "PERSONAL", "ORGANIZATION" ]
+          description: The type of the creator
+          examples: [ "PERSONAL" ]
+        authority:
+          type: string
+          enum: [ "DEFAULT", "MODERATOR", "ADMIN", "OWNER" ]
+          description: The authority of the creator
+          examples: [ "DEFAULT" ]
+        allows_spam:
+          type: boolean
+          description: Whether the creator allows spam or not
+          examples: [ true ]
+        contact:
+          type: string
+          description: The contact of the creator
+          examples: [ "email@example.com", "+1234567890" ]
+        contact_type:
+          type: string
+          enum: [ "EMAIL", "PHONE", "CUSTOM" ]
+          description: The type of contact for this creator
+          examples: [ "PHONE" ]
+        birthday:
+          type: string
+          format: date
+          description: The birthday of the creator
+          examples: [ "1990-12-24" ]
+        company:
+          $ref: "#/components/schemas/OrganizationDto"
+        language_tag:
+          type: string
+          description: The default language of the creator (locale represented as in IETF BCP 47)
+          examples: [ "en-US" ]
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
+    TokenResponse:
+      type: object
+      description: A response containing a token
+      required:
+        - token_value
+      properties:
+        token_value:
+          type: string
+          format: JWT
+          description: The value of the token
+          examples: [ "abcd.1234.ab12" ]
+
+    # endregion User models
+
+    # region Messaging Ops models
+
+    DetectVariablesRequest:
+      type: object
+      description: A request to detect variables in a string
+      required:
+        - content
+      properties:
+        content:
+          $ref: "#/components/schemas/MessageTemplateContent"
+
+    MessageInputsRequest:
+      type: object
+      description: Dynamic message inputs for variable replacement
+      properties:
+        user_id:
+          $ref: "#/components/schemas/UserUniversalID"
+        project_id:
+          $ref: "#/components/schemas/ProjectID"
+
+    MessageTemplateCreateRequest:
+      type: object
+      description: A request to create a message template
+      required:
+        - name
+        - language_tag
+        - title
+        - content
+        - is_html
+      properties:
+        name:
+          $ref: "#/components/schemas/MessageTemplateName"
+        language_tag:
+          $ref: "#/components/schemas/MessageTemplateLanguageTag"
+        title:
+          $ref: "#/components/schemas/MessageTemplateTitle"
+        content:
+          $ref: "#/components/schemas/MessageTemplateContent"
+        is_html:
+          $ref: "#/components/schemas/MessageTemplateIsHTML"
+
+    MessageTemplateUpdateRequest:
+      type: object
+      description: >
+        A request to update a message template. Only the fields that are explicitly set will be updated.
+        For expected data types, check the [MessageTemplateCreateRequest](#/components/schemas/MessageTemplateCreateRequest).
+      properties:
+        name:
+          $ref: "#/components/schemas/SettableRequest"
+        language_tag:
+          $ref: "#/components/schemas/SettableRequest"
+        title:
+          $ref: "#/components/schemas/SettableRequest"
+        content:
+          $ref: "#/components/schemas/SettableRequest"
+        is_html:
+          $ref: "#/components/schemas/SettableRequest"
+
+    # endregion Messaging Ops models
+
+    # region Messaging models
+
+    MessageResponse:
+      type: object
+      description: A response containing the message details
+      required:
+        - template
+        - materialized
+      properties:
+        template:
+          $ref: "#/components/schemas/MessageTemplateResponse"
+        materialized:
+          type: string
+          description: The materialized message with all variables replaced
+          examples: [ "Hey John, your project Appify Hub is now active." ]
+
+    MessageTemplateResponse:
+      type: object
+      description: A response containing a message template
+      required:
+        - id
+        - name
+        - language_tag
+        - title
+        - content
+        - is_html
+        - created_at
+        - updated_at
+      properties:
+        id:
+          $ref: "#/components/schemas/MessageTemplateID"
+        name:
+          $ref: "#/components/schemas/MessageTemplateName"
+        language_tag:
+          $ref: "#/components/schemas/MessageTemplateLanguageTag"
+        title:
+          $ref: "#/components/schemas/MessageTemplateTitle"
+        content:
+          $ref: "#/components/schemas/MessageTemplateContent"
+        is_html:
+          $ref: "#/components/schemas/MessageTemplateIsHTML"
+        created_at:
+          $ref: "#/components/schemas/CreatedAt"
+        updated_at:
+          $ref: "#/components/schemas/UpdatedAt"
+
+    VariableResponse:
+      type: object
+      description: A response containing the variable details
+      required:
+        - code
+        - example
+      properties:
+        code:
+          type: string
+          enum: [ "user.name", "project.name", "user.code", "user.signature" ]
+          description: The code of the variable (text to replace in templates). Does not include the {{curly braces}}.
+          examples: [ "user.name" ]
+        example:
+          type: string
+          description: The example value of the variable
+          examples: [ "John Doe" ]
+
+    # endregion Messaging models
+
+    # region Properties
+
+    CreatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was created (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    UpdatedAt:
+      type: string
+      format: "yyyy-MM-dd HH:mm"
+      description: The time the object was last updated (based on ISO 8601)
+      examples: [ "2022-12-24 14:35" ]
+
+    ProjectID:
+      type: integer
+      description: A unique identifier for this consumer project
+      examples: [ 30 ]
+
+    ProjectType:
+      type: string
+      enum: [ "OPENSOURCE", "COMMERCIAL", "FREE" ]
+      description: The type of this consumer project
+      examples: [ "OPENSOURCE" ]
+
+    ProjectName:
+      type: string
+      description: The name of this consumer project
+      examples: [ "Appify Hub" ]
+
+    ProjectDescription:
+      type: string
+      description: A short description of this consumer project
+      examples: [ "The best platform to bring your ideas to life" ]
+
+    ProjectLogoURL:
+      type: string
+      format: uri
+      description: The URL to this consumer project's logo
+      examples: [ "https://appifyhub.com/logo.png" ]
+
+    ProjectWebsiteURL:
+      type: string
+      format: uri
+      description: The URL to this consumer project's website
+      examples: [ "https://appifyhub.com" ]
+
+    ProjectLanguageTag:
+      type: string
+      description: The default language of the project (locale represented as in IETF BCP 47)
+      examples: [ "en-US" ]
+
+    ProjectMaxUsers:
+      type: integer
+      description: The maximum number of users allowed in the project
+      examples: [ 100 ]
+
+    ProjectAnyoneCanSearch:
+      type: boolean
+      description: Whether any user can search for any other user or not in the project
+      examples: [ true ]
+
+    ProjectRequiresSignupCodes:
+      type: boolean
+      description: Whether this consumer project requires signup codes from users or not
+      examples: [ true ]
+
+    ProjectMaxSignupCodesPerUser:
+      type: integer
+      description: The maximum number of signup codes that each user of this consumer project can create
+      examples: [ 5 ]
+
+    ProjectUserIDType:
+      type: string
+      enum: [ "USERNAME", "EMAIL", "PHONE", "RANDOM", "CUSTOM" ]
+      description: >
+        The type of the user ID used by this consumer project (mainly important for validation).
+        Use "RANDOM" to generate a new user ID on signup, and "CUSTOM" to use an own/custom user ID.
+      examples: [ "EMAIL" ]
+
+    CreatorUniversalID:
+      type: string
+      format: "creatorId$projectId"
+      description: The universal ID of the object (creator ID and project ID separated by a dollar sign)
+      examples: [ "creator_1000$30" ]
+
+    UserUniversalID:
+      type: string
+      format: "userId$projectId"
+      description: The universal ID of the object (user ID and project ID separated by a dollar sign)
+      examples: [ "user_1000$30" ]
+
+    CreatorSignature:
+      type: string
+      description: The secret signature of the creator, usually a plain-text password
+      examples: [ "!dr0ws5ap!" ]
+
+    RequestOrigin:
+      type: string
+      description: The origin of the request
+      examples: [ "Samsung Galaxy S21" ]
+
+    MessageTemplateID:
+      type: integer
+      description: The ID of the message template to use
+      examples: [ 100 ]
+
+    MessageTemplateName:
+      type: string
+      description: The (unique) name of the message template
+      examples: [ "template_welcome" ]
+
+    MessageTemplateLanguageTag:
+      type: string
+      description: The default language of the message template (locale represented as in IETF BCP 47)
+      examples: [ "en-US" ]
+
+    MessageTemplateTitle:
+      type: string
+      description: The title of the message template
+      examples: [ "Project created!" ]
+
+    MessageTemplateContent:
+      type: string
+      description: The template text content, including variables
+      examples: [ "Hey {{user.name}}, your project {{project.name}} is now active." ]
+
+    MessageTemplateIsHTML:
+      type: boolean
+      description: Whether the content is HTML or not
+      examples: [ false ]
+
+    # endregion Properties

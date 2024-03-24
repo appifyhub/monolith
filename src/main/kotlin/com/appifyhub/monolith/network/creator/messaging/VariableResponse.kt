@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.network.auth
+package com.appifyhub.monolith.network.creator.messaging
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import java.io.Serializable
 
 @JsonInclude(Include.NON_NULL)
-data class ApiKeyRequest(
-  @JsonProperty("origin") val origin: String? = null,
+data class VariableResponse(
+  @JsonProperty("code") val code: String,
+  @JsonProperty("example") val example: String,
 ) : Serializable

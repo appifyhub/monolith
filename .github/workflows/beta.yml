@@ -35,6 +35,22 @@ jobs:
       - name: Run KtLint
         run: ./gradlew ktlintCheck
 
+      - name: Run OpenAPI validation
+        run: |
+          npm install -g --force @redocly/cli
+          echo "Validating API docs..."
+          redocly lint \
+            --skip-rule=operation-4xx-response \
+            --skip-rule=security-defined \
+            --format=stylish \
+            src/main/resources/static/docs/open-api/*.yaml
+          redocly stats \
+            --format=stylish \
+            src/main/resources/static/docs/open-api/consumer.yaml
+          redocly stats \
+            --format=stylish \
+            src/main/resources/static/docs/open-api/creator.yaml
+
       - name: Pull latest IP Geolocation data
         env:
           IP_2_LOCATION_TOKEN: ${{ secrets.IP_2_LOCATION_TOKEN }}

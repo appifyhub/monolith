@@ -2,9 +2,9 @@ package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.common.applySettable
 import com.appifyhub.monolith.domain.common.stubProject
-import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
+import com.appifyhub.monolith.domain.creator.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateCreator
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.util.TimeProvider
 

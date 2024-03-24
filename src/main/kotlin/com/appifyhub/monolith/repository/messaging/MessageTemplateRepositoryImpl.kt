@@ -3,9 +3,9 @@ package com.appifyhub.monolith.repository.messaging
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.domain.messaging.MessageTemplate
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateCreator
-import com.appifyhub.monolith.domain.messaging.ops.MessageTemplateUpdater
+import com.appifyhub.monolith.domain.creator.messaging.MessageTemplate
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateCreator
+import com.appifyhub.monolith.domain.creator.messaging.ops.MessageTemplateUpdater
 import com.appifyhub.monolith.storage.dao.MessageTemplateDao
 import com.appifyhub.monolith.storage.model.messaging.MessageTemplateDbm
 import com.appifyhub.monolith.util.TimeProvider

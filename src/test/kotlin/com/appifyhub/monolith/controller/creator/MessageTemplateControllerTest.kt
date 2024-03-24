@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.controller.messaging
+package com.appifyhub.monolith.controller.creator
 
 import assertk.all
 import assertk.assertThat
@@ -10,14 +10,14 @@ import assertk.assertions.isGreaterThan
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.messaging.Variable
+import com.appifyhub.monolith.domain.creator.messaging.Variable
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
-import com.appifyhub.monolith.network.messaging.MessageResponse
-import com.appifyhub.monolith.network.messaging.MessageTemplateResponse
-import com.appifyhub.monolith.network.messaging.VariableResponse
-import com.appifyhub.monolith.network.messaging.ops.DetectVariablesRequest
-import com.appifyhub.monolith.network.messaging.ops.MessageInputsRequest
+import com.appifyhub.monolith.network.creator.messaging.MessageResponse
+import com.appifyhub.monolith.network.creator.messaging.MessageTemplateResponse
+import com.appifyhub.monolith.network.creator.messaging.VariableResponse
+import com.appifyhub.monolith.network.creator.messaging.ops.DetectVariablesRequest
+import com.appifyhub.monolith.network.creator.messaging.ops.MessageInputsRequest
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
