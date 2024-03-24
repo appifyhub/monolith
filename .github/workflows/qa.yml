@@ -43,6 +43,12 @@ jobs:
             --skip-rule=security-defined \
             --format=stylish \
             src/main/resources/static/docs/open-api/*.yaml
+          redocly stats \
+            --format=stylish \
+            src/main/resources/static/docs/open-api/consumer.yaml
+          redocly stats \
+            --format=stylish \
+            src/main/resources/static/docs/open-api/creator.yaml
 
       - name: Build and test service
         env:
