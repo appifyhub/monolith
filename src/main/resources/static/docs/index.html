@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+            name="description"
+            content="Explore Appify Hub's API documentation to seamlessly integrate with our apps. Start building apps today."
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Cousine:ital,wght@0,400;0,700;1,400;1,700&family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+            rel="stylesheet"
+    />
+    <title>API Docs · Appify Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, sans-serif;
+            color: white;
+            background: linear-gradient(to bottom right, #00060b, #032020) fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: start;
+            justify-content: center;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        p, h1, h2 {
+            background: linear-gradient(to bottom right, #76d1db, #ffffff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h1 {
+            font-family: 'Lexend', 'Helvetica Neue', Helvetica, sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 10rem 3rem 5rem 3rem;
+        }
+
+        h2 {
+            font-family: 'Lexend', 'Helvetica Neue', Helvetica, sans-serif;
+            font-size: 2rem;
+            font-weight: 300;
+            margin: 4rem;
+        }
+
+        p {
+            max-width: 1000px;
+            margin: 3rem 4rem;
+            font-size: 1.3rem;
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        h1 .logo {
+            display: inline-block;
+            width: 3.5rem;
+            height: 3.5rem;
+            margin-right: 0.3rem;
+            vertical-align: middle;
+            margin-bottom: 0.5rem;
+        }
+
+        p .emphasized {
+            font-weight: 400;
+            color: #34deaf !important;
+            background: radial-gradient(#00fff2, #176d87);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .cta-container {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+        }
+
+        .cta {
+            display: inline-block;
+            min-width: 18rem;
+            min-height: 18rem;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2rem;
+            margin: 2rem;
+            border: none;
+            color: white;
+            background: transparent;
+            border-radius: 1.5rem;
+            font-family: 'Lexend', 'Helvetica Neue', Helvetica, sans-serif;
+            font-size: 1.4rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: box-shadow 0.7s, scale 0.3s;
+            box-shadow: /* @formatter:off */
+                0 0 0.2rem #00fff240, /* Outer glow */
+                inset 0 0 2rem #1fcde040; /* Inner glow */
+            /* @formatter:on */
+        }
+
+        .cta:active {
+            scale: 0.98;
+        }
+
+        .cta:hover, .cta:focus {
+            scale: 1.01;
+        }
+
+        .cta.green {
+            box-shadow: /* @formatter:off */
+                0 0 0.2rem #00FFF240, /* Outer glow */
+                inset 0 0 2rem #00FFF240; /* Inner glow */
+            /* @formatter:on */
+        }
+
+        .cta.green:hover, .cta.green:focus {
+            scale: 1.01;
+            box-shadow: /* @formatter:off */
+                0 0 1rem #00FFF2F0, /* Outer glow */
+                inset 0 0 9rem #00FFF2F0; /* Inner glow */
+            /* @formatter:on */
+        }
+
+        .cta.blue {
+            box-shadow: /* @formatter:off */
+                0 0 0.2rem #12A2FF82, /* Outer glow */
+                inset 0 0 2rem #12A2FF82; /* Inner glow */
+            /* @formatter:on */
+        }
+
+        .cta.blue:hover, .cta.blue:focus {
+            scale: 1.01;
+            box-shadow: /* @formatter:off */
+                0 0 1rem #12ABFFF0, /* Outer glow */
+                inset 0 0 9rem #12ABFFF0; /* Inner glow */
+            /* @formatter:on */
+        }
+
+        .cta .icon {
+            display: block;
+            font-size: 2rem;
+            margin: 1rem;
+        }
+
+        @media (max-width: 700px) {
+            h1 {
+                font-size: 2.5rem;
+                margin: 5rem 1rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+                margin: 2rem 1rem;
+            }
+
+            p {
+                font-size: 1.2rem;
+                margin: 2rem 1rem;
+            }
+
+            h1 .logo {
+                display: block;
+                width: 4.5rem;
+                height: 4.5rem;
+                margin: 1rem auto;
+            }
+
+            .cta-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .cta {
+                padding: 0.8rem 1.6rem;
+                font-size: 1.2rem;
+                min-width: 10rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="gradient-text">
+    <h1>
+        <img
+                src="https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true"
+                alt="Appify Hub Logo"
+                class="logo"
+        />
+        Discover the API Docs
+    </h1>
+    <p>
+        <strong>Appify Hub</strong> provides two APIs:
+        the <span class="emphasized">Consumer</span> API and the <span class="emphasized">Creator</span> API.
+    </p>
+    <p>
+        The Creator API is exclusive to creators and can manage apps, projects, and configurations.<br/>
+        To sign up to Appify Hub and set up your project, you can get started with the Creator API.<br/>
+        <span class="emphasized">Note</span>: Creators must still use the Consumer API for basic functions.
+    </p>
+    <h2>Which API are you interested in?</h2>
+    <div class="cta-container">
+        <button class="cta blue" onclick="window.location.href='creator.html';">
+            <span class="icon">🧑‍💻</span>
+            Creator API
+        </button>
+        <button class="cta green" onclick="window.location.href='consumer.html';">
+            <span class="icon">☎️</span>
+            Consumer API
+        </button>
+    </div>
+</div>
+</body>
+
+</html>
