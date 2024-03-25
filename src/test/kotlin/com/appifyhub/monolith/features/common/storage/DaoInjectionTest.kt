@@ -9,7 +9,7 @@ import com.appifyhub.monolith.features.creator.storage.MessageTemplateDao
 import com.appifyhub.monolith.features.creator.storage.ProjectCreationDao
 import com.appifyhub.monolith.features.creator.storage.ProjectDao
 import com.appifyhub.monolith.features.user.storage.PushDeviceDao
-import com.appifyhub.monolith.storage.dao.SchemaDao
+import com.appifyhub.monolith.features.init.storage.SchemaDao
 import com.appifyhub.monolith.features.user.storage.SignupCodeDao
 import com.appifyhub.monolith.features.user.storage.UserDao
 import org.junit.jupiter.api.Test

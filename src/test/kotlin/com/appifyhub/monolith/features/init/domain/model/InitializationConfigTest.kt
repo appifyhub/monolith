@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.init
+package com.appifyhub.monolith.features.init.domain.model
 
 import assertk.all
 import assertk.assertThat
@@ -16,12 +16,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension
 @ExtendWith(SpringExtension::class)
 @ActiveProfiles(TestAppifyHubApplication.PROFILE)
 @SpringBootTest(classes = [TestAppifyHubApplication::class])
-class CreatorProjectConfigTest {
+class InitializationConfigTest {
 
-  @Autowired lateinit var creatorProjectConfig: CreatorProjectConfig
+  @Autowired lateinit var initializationConfig: InitializationConfig
 
-  @Test fun `creator project config is autowired`() {
-    assertThat(creatorProjectConfig)
+  @Test fun `initialization config is autowired`() {
+    assertThat(initializationConfig)
       .all {
         isNotNull()
 

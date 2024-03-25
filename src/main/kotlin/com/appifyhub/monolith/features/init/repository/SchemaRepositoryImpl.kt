@@ -1,9 +1,9 @@
-package com.appifyhub.monolith.repository.schema
+package com.appifyhub.monolith.features.init.repository
 
-import com.appifyhub.monolith.domain.mapper.toData
-import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.domain.schema.Schema
-import com.appifyhub.monolith.storage.dao.SchemaDao
+import com.appifyhub.monolith.features.init.domain.model.Schema
+import com.appifyhub.monolith.features.init.domain.toData
+import com.appifyhub.monolith.features.init.domain.toDomain
+import com.appifyhub.monolith.features.init.storage.SchemaDao
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 

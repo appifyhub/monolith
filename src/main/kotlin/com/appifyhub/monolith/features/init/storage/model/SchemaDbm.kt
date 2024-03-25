@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.storage.model.schema
+package com.appifyhub.monolith.features.init.storage.model
 
 import java.io.Serializable
 import javax.persistence.Column

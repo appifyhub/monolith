@@ -1,10 +1,10 @@
-package com.appifyhub.monolith.init
+package com.appifyhub.monolith.features.init.domain.model
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class CreatorProjectConfig {
+class InitializationConfig {
 
   // Owner data
 

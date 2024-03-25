@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.repository.schema
+package com.appifyhub.monolith.features.init.repository
 
 import assertk.all
 import assertk.assertFailure
@@ -8,10 +8,9 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.storage.dao.SchemaDao
-import com.appifyhub.monolith.storage.model.schema.SchemaDbm
+import com.appifyhub.monolith.features.init.storage.SchemaDao
+import com.appifyhub.monolith.features.init.storage.model.SchemaDbm
 import com.appifyhub.monolith.util.Stubs
-import java.util.Optional
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
@@ -20,6 +19,7 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
+import java.util.Optional
 
 class SchemaRepositoryImplTest {
 

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.schema
+package com.appifyhub.monolith.features.init.domain.model
 
 data class Schema(
   val version: Long,

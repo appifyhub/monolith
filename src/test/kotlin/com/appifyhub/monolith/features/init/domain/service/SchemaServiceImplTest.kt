@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.service.schema
+package com.appifyhub.monolith.features.init.domain.service
 
 import assertk.all
 import assertk.assertFailure
@@ -9,7 +9,7 @@ import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.schema.Schema
+import com.appifyhub.monolith.features.init.domain.model.Schema
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired

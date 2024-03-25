@@ -17,7 +17,7 @@ import com.appifyhub.monolith.features.user.domain.model.PushDevice
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplateCreator
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplateUpdater
-import com.appifyhub.monolith.domain.schema.Schema
+import com.appifyhub.monolith.features.init.domain.model.Schema
 import com.appifyhub.monolith.features.user.domain.model.Organization
 import com.appifyhub.monolith.features.user.domain.model.SignupCode
 import com.appifyhub.monolith.features.user.domain.model.User
@@ -69,7 +69,7 @@ import com.appifyhub.monolith.features.creator.storage.model.ProjectCreationKeyD
 import com.appifyhub.monolith.features.creator.storage.model.ProjectDbm
 import com.appifyhub.monolith.features.creator.storage.model.MessageTemplateDbm
 import com.appifyhub.monolith.features.user.storage.model.PushDeviceDbm
-import com.appifyhub.monolith.storage.model.schema.SchemaDbm
+import com.appifyhub.monolith.features.init.storage.model.SchemaDbm
 import com.appifyhub.monolith.features.user.storage.model.OrganizationDbm
 import com.appifyhub.monolith.features.user.storage.model.SignupCodeDbm
 import com.appifyhub.monolith.features.user.storage.model.UserDbm

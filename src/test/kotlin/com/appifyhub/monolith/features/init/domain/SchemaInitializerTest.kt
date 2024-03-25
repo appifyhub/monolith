@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.init
+package com.appifyhub.monolith.features.init.domain
 
 import assertk.assertFailure
 import assertk.assertThat
@@ -7,14 +7,15 @@ import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
-import com.appifyhub.monolith.features.user.domain.model.User
-import com.appifyhub.monolith.features.user.domain.model.UserId
-import com.appifyhub.monolith.features.user.domain.model.UserCreator
-import com.appifyhub.monolith.features.user.domain.model.UserUpdater
-import com.appifyhub.monolith.features.creator.repository.SignatureGenerator
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService
-import com.appifyhub.monolith.service.schema.SchemaService
+import com.appifyhub.monolith.features.creator.repository.SignatureGenerator
+import com.appifyhub.monolith.features.init.domain.model.InitializationConfig
+import com.appifyhub.monolith.features.init.domain.service.SchemaService
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserCreator
+import com.appifyhub.monolith.features.user.domain.model.UserId
+import com.appifyhub.monolith.features.user.domain.model.UserUpdater
 import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.AfterEach
@@ -231,7 +232,7 @@ class SchemaInitializerTest {
     userService = userService,
     schemaService = schemaService,
     messageTemplateService = messageTemplateService,
-    creatorConfig = CreatorProjectConfig().apply {
+    creatorConfig = InitializationConfig().apply {
       this.ownerName = superCreatorName
       this.ownerSignature = superCreatorSignature
       this.ownerEmail = superCreatorEmail

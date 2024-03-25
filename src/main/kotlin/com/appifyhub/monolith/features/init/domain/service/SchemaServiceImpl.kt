@@ -1,7 +1,7 @@
-package com.appifyhub.monolith.service.schema
+package com.appifyhub.monolith.features.init.domain.service
 
-import com.appifyhub.monolith.domain.schema.Schema
-import com.appifyhub.monolith.repository.schema.SchemaRepository
+import com.appifyhub.monolith.features.init.domain.model.Schema
+import com.appifyhub.monolith.features.init.repository.SchemaRepository
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory

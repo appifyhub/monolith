@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.init
+package com.appifyhub.monolith.features.init.domain
 
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
@@ -6,16 +6,17 @@ import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
-import com.appifyhub.monolith.domain.schema.Schema
-import com.appifyhub.monolith.features.user.domain.model.User
-import com.appifyhub.monolith.features.user.domain.model.UserCreator
-import com.appifyhub.monolith.features.user.domain.model.UserUpdater
-import com.appifyhub.monolith.init.SchemaInitializer.Seed.INITIAL
-import com.appifyhub.monolith.features.creator.repository.SignatureGenerator
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService.Companion.DEFAULT_MAX_USERS
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService
-import com.appifyhub.monolith.service.schema.SchemaService
+import com.appifyhub.monolith.features.creator.repository.SignatureGenerator
+import com.appifyhub.monolith.features.init.domain.SchemaInitializer.Seed.INITIAL
+import com.appifyhub.monolith.features.init.domain.model.InitializationConfig
+import com.appifyhub.monolith.features.init.domain.model.Schema
+import com.appifyhub.monolith.features.init.domain.service.SchemaService
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserCreator
+import com.appifyhub.monolith.features.user.domain.model.UserUpdater
 import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.silent
@@ -32,7 +33,7 @@ class SchemaInitializer(
   private val userService: UserService,
   private val schemaService: SchemaService,
   private val messageTemplateService: MessageTemplateService,
-  private val creatorConfig: CreatorProjectConfig,
+  private val creatorConfig: InitializationConfig,
 ) : ApplicationRunner {
 
   private enum class Seed(val version: Long) { INITIAL(1L) }

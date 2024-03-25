@@ -1,7 +1,7 @@
-package com.appifyhub.monolith.domain.mapper
+package com.appifyhub.monolith.features.init.domain
 
-import com.appifyhub.monolith.domain.schema.Schema
-import com.appifyhub.monolith.storage.model.schema.SchemaDbm
+import com.appifyhub.monolith.features.init.domain.model.Schema
+import com.appifyhub.monolith.features.init.storage.model.SchemaDbm
 
 fun SchemaDbm.toDomain(): Schema = Schema(
   version = version,
