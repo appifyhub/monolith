@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.errors
 
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.core.Ordered
