@@ -8,7 +8,7 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isGreaterThan
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.features.creator.api.model.messaging.DetectVariablesRequest
 import com.appifyhub.monolith.features.creator.api.model.messaging.MessageInputsRequest
 import com.appifyhub.monolith.features.creator.api.model.messaging.MessageResponse
@@ -17,7 +17,7 @@ import com.appifyhub.monolith.features.creator.api.model.messaging.VariableRespo
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

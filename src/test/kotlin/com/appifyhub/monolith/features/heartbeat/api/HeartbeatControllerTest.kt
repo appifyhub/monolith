@@ -5,7 +5,7 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.HEARTBEAT
+import com.appifyhub.monolith.features.common.api.Endpoints.HEARTBEAT
 import com.appifyhub.monolith.features.heartbeat.api.model.HeartbeatResponse
 import com.appifyhub.monolith.features.user.api.DateTimeMapper
 import com.appifyhub.monolith.util.TimeProviderFake

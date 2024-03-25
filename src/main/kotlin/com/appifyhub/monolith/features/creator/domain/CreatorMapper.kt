@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.domain
 
-import com.appifyhub.monolith.domain.common.applySettable
+import com.appifyhub.monolith.features.common.domain.model.applySettable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater

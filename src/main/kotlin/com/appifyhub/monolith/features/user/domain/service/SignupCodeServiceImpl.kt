@@ -8,7 +8,7 @@ import com.appifyhub.monolith.features.user.repository.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwPreconditionFailed
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

@@ -13,10 +13,10 @@ import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseCo
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService.Companion.DEFAULT_MAX_USERS
-import com.appifyhub.monolith.network.mapper.mapToDomainNonNull
-import com.appifyhub.monolith.network.mapper.mapToDomainNullable
-import com.appifyhub.monolith.network.mapper.toDomainNonNull
-import com.appifyhub.monolith.network.mapper.toDomainNullable
+import com.appifyhub.monolith.features.common.api.mapToDomainNonNull
+import com.appifyhub.monolith.features.common.api.mapToDomainNullable
+import com.appifyhub.monolith.features.common.api.toDomainNonNull
+import com.appifyhub.monolith.features.common.api.toDomainNullable
 
 fun MailgunConfigDto.toDomain(): MailgunConfig = MailgunConfig(
   apiKey = apiKey,

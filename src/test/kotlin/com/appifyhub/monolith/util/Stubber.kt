@@ -2,7 +2,7 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.auth.domain.toTokenDetails

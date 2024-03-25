@@ -1,17 +1,17 @@
-package com.appifyhub.monolith.domain.common
+package com.appifyhub.monolith.features.common.domain
 
 import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService.Companion.DEFAULT_MAX_USERS
 import com.appifyhub.monolith.features.user.domain.model.Organization
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.domain.model.UserId
-import com.appifyhub.monolith.features.creator.domain.service.CreatorService.Companion.DEFAULT_MAX_USERS
 import java.util.Date
 import java.util.Locale
 
 /*
  * Why this? (you may ask)
  *
- * Well... Spring's ORM is not very nice to complex object relations,
+ * Well... Spring's ORM is not very nice for complex object relations,
  * so these are some hacks that needed to be done in order to reduce
  * relational complexity. "Needed" might be a strong word.
  *

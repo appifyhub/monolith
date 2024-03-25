@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.domain.model
 
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status
 import com.appifyhub.monolith.features.creator.domain.model.Project.Type
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig

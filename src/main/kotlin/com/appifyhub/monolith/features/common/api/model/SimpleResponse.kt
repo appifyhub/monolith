@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.network.common
+package com.appifyhub.monolith.features.common.api.model
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include

@@ -5,8 +5,8 @@ import assertk.assertThat
 import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.api.Endpoints
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status.REVIEW
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater
@@ -14,7 +14,7 @@ import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunCon
 import com.appifyhub.monolith.features.creator.domain.service.CommunicationsService.Type.PUSH
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

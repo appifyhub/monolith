@@ -3,7 +3,7 @@ package com.appifyhub.monolith.features.creator.domain
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater
 import com.appifyhub.monolith.util.Stubs

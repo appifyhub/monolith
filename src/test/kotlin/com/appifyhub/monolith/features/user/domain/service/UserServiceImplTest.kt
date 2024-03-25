@@ -12,7 +12,7 @@ import assertk.assertions.isGreaterThan
 import assertk.assertions.isInstanceOf
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.eventbus.UserAuthResetCompleted
 import com.appifyhub.monolith.eventbus.UserCreated
 import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType

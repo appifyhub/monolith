@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.user.domain
 
-import com.appifyhub.monolith.domain.common.stubProject
+import com.appifyhub.monolith.features.common.domain.stubProject
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.toData
 import com.appifyhub.monolith.features.user.domain.model.Organization

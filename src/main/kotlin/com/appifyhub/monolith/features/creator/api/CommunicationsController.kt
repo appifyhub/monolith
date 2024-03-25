@@ -1,13 +1,13 @@
 package com.appifyhub.monolith.features.creator.api
 
-import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.features.creator.domain.service.CommunicationsService
 import com.appifyhub.monolith.features.creator.domain.service.CommunicationsService.Type
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.features.user.api.model.MessageSendRequest
 import com.appifyhub.monolith.util.extension.throwPreconditionFailed
 import org.slf4j.LoggerFactory

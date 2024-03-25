@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.domain.model.messaging
 
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 
 data class MessageTemplateUpdater(
   val id: Long,

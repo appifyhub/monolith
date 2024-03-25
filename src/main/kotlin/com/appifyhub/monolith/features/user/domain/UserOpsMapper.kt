@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.user.domain
 
-import com.appifyhub.monolith.domain.common.applySettable
+import com.appifyhub.monolith.features.common.domain.model.applySettable
 import com.appifyhub.monolith.features.user.domain.model.Organization
 import com.appifyhub.monolith.features.user.domain.model.OrganizationUpdater
 import com.appifyhub.monolith.features.user.domain.model.User

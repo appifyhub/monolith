@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.api
 
-import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
@@ -15,7 +15,7 @@ import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTem
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService.Inputs
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.util.extension.throwNormalization
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication

@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.creator.domain
 
-import com.appifyhub.monolith.domain.common.applySettable
-import com.appifyhub.monolith.domain.common.stubProject
+import com.appifyhub.monolith.features.common.domain.model.applySettable
+import com.appifyhub.monolith.features.common.domain.stubProject
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplate
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplateCreator
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplateUpdater

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.validation
+package com.appifyhub.monolith.features.common.validation
 
 interface Validator<in T> {
 

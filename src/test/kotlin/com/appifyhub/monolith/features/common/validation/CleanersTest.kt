@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.validation.impl
+package com.appifyhub.monolith.features.common.validation
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo

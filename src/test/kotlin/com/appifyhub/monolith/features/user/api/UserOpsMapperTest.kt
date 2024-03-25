@@ -2,7 +2,7 @@ package com.appifyhub.monolith.features.user.api
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.user.api.model.UserSignupRequest
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.domain.model.UserCreator

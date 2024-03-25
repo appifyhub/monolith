@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.features.user.domain.service
 
-import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.common.mapValueNonNull
-import com.appifyhub.monolith.domain.common.mapValueNullable
+import com.appifyhub.monolith.features.common.domain.model.Settable
+import com.appifyhub.monolith.features.common.domain.model.mapValueNonNull
+import com.appifyhub.monolith.features.common.domain.model.mapValueNullable
 import com.appifyhub.monolith.eventbus.EventPublisher
 import com.appifyhub.monolith.eventbus.UserAuthResetCompleted
 import com.appifyhub.monolith.eventbus.UserCreated
@@ -19,7 +19,7 @@ import com.appifyhub.monolith.features.user.repository.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwPreconditionFailed
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

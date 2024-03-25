@@ -1,7 +1,7 @@
-package com.appifyhub.monolith.network.mapper
+package com.appifyhub.monolith.features.common.api
 
-import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.features.common.api.model.SettableRequest
+import com.appifyhub.monolith.features.common.domain.model.Settable
 
 fun <T : Any?> SettableRequest<T?>?.toDomainNullable(): Settable<T?>? = this?.let { Settable(it.value) }
 

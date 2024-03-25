@@ -10,7 +10,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Message
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplate
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable

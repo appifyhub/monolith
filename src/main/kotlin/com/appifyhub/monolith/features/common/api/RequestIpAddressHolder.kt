@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.controller.common
+package com.appifyhub.monolith.features.common.api
 
 import org.slf4j.LoggerFactory
 import org.springframework.web.context.request.RequestContextHolder

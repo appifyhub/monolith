@@ -10,8 +10,8 @@ import assertk.assertions.isNotEmpty
 import assertk.assertions.isNotEqualTo
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.USER_AUTH
-import com.appifyhub.monolith.controller.common.Endpoints.USER_TOKENS
+import com.appifyhub.monolith.features.common.api.Endpoints.USER_AUTH
+import com.appifyhub.monolith.features.common.api.Endpoints.USER_TOKENS
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.domain.model.User.Authority.DEFAULT
@@ -19,7 +19,7 @@ import com.appifyhub.monolith.features.user.domain.model.User.Authority.OWNER
 import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
 import com.appifyhub.monolith.features.auth.api.model.UserCredentialsRequest
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

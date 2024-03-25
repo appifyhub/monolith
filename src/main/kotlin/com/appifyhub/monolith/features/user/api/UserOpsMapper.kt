@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.user.api
 
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.user.api.model.OrganizationUpdaterDto
 import com.appifyhub.monolith.features.user.api.model.UserSignupRequest
 import com.appifyhub.monolith.features.user.api.model.UserUpdateAuthorityRequest
@@ -13,10 +13,10 @@ import com.appifyhub.monolith.features.user.domain.model.User.Type.PERSONAL
 import com.appifyhub.monolith.features.user.domain.model.UserCreator
 import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.user.domain.model.UserUpdater
-import com.appifyhub.monolith.network.mapper.mapToDomainNonNull
-import com.appifyhub.monolith.network.mapper.mapToDomainNullable
-import com.appifyhub.monolith.network.mapper.toDomainNonNull
-import com.appifyhub.monolith.network.mapper.toDomainNullable
+import com.appifyhub.monolith.features.common.api.mapToDomainNonNull
+import com.appifyhub.monolith.features.common.api.mapToDomainNullable
+import com.appifyhub.monolith.features.common.api.toDomainNonNull
+import com.appifyhub.monolith.features.common.api.toDomainNullable
 
 fun UserSignupRequest.toDomain(
   projectId: Long,

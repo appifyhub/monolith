@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.init.domain
 
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
@@ -20,7 +20,7 @@ import com.appifyhub.monolith.features.user.domain.model.UserUpdater
 import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.silent
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner

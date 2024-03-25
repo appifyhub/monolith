@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.controller.common
+package com.appifyhub.monolith.features.common.api
 
 object Endpoints {
 

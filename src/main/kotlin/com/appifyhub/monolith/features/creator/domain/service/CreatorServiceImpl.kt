@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.creator.domain.service
 
-import com.appifyhub.monolith.domain.common.mapValueNonNull
-import com.appifyhub.monolith.domain.common.mapValueNullable
+import com.appifyhub.monolith.features.common.domain.model.mapValueNonNull
+import com.appifyhub.monolith.features.common.domain.model.mapValueNullable
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.eventbus.EventPublisher
@@ -14,7 +14,7 @@ import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.silent
 import com.appifyhub.monolith.util.extension.throwLocked
 import com.appifyhub.monolith.util.extension.throwNotFound
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

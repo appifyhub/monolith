@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.heartbeat.api
 
-import com.appifyhub.monolith.controller.common.Endpoints
-import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
+import com.appifyhub.monolith.features.common.api.Endpoints
+import com.appifyhub.monolith.features.common.api.RequestIpAddressHolder
 import com.appifyhub.monolith.features.geo.domain.mergeToString
 import com.appifyhub.monolith.features.geo.repository.GeolocationRepository
 import com.appifyhub.monolith.features.heartbeat.api.model.HeartbeatResponse

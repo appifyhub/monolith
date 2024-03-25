@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.user.api
 
-import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege

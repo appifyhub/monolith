@@ -13,7 +13,7 @@ import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTem
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplateUpdater
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService.Inputs
-import com.appifyhub.monolith.network.mapper.toDomainNonNull
+import com.appifyhub.monolith.features.common.api.toDomainNonNull
 import com.appifyhub.monolith.features.user.api.DateTimeMapper
 
 fun Variable.toNetwork() = VariableResponse(

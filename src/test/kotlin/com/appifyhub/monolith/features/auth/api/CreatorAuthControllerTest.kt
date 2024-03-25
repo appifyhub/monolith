@@ -5,11 +5,11 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotEmpty
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_API_KEY
-import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_AUTH
+import com.appifyhub.monolith.features.common.api.Endpoints.CREATOR_API_KEY
+import com.appifyhub.monolith.features.common.api.Endpoints.CREATOR_AUTH
 import com.appifyhub.monolith.features.user.domain.model.User.Authority.OWNER
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.features.creator.api.model.user.ApiKeyRequest
 import com.appifyhub.monolith.features.creator.api.model.user.CreatorCredentialsRequest
 import com.appifyhub.monolith.util.Stubber

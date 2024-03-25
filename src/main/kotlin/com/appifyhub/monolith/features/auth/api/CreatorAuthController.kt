@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.auth.api
 
-import com.appifyhub.monolith.controller.common.Endpoints
-import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
+import com.appifyhub.monolith.features.common.api.Endpoints
+import com.appifyhub.monolith.features.common.api.RequestIpAddressHolder
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
 import com.appifyhub.monolith.features.auth.domain.service.AuthService
 import com.appifyhub.monolith.features.creator.api.model.user.ApiKeyRequest

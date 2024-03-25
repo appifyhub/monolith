@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.user.repository.util
 
-import com.appifyhub.monolith.domain.common.stubProject
+import com.appifyhub.monolith.features.common.domain.stubProject
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.domain.model.UserId

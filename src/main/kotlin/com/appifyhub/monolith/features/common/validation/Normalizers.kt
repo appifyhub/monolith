@@ -1,11 +1,4 @@
-package com.appifyhub.monolith.validation.impl
-
-import com.appifyhub.monolith.util.TimeProvider
-import com.appifyhub.monolith.validation.normalizesNonNull
-import com.appifyhub.monolith.validation.normalizesNullable
-import java.util.Date
-
-typealias BDay = Pair<Date?, TimeProvider>
+package com.appifyhub.monolith.features.common.validation
 
 object Normalizers {
 

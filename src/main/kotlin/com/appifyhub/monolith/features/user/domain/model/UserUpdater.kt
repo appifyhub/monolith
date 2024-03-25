@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.user.domain.model
 
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.user.domain.model.User.Authority
 import com.appifyhub.monolith.features.user.domain.model.User.ContactType
 import com.appifyhub.monolith.features.user.domain.model.User.Type

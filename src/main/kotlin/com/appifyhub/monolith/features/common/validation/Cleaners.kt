@@ -1,14 +1,16 @@
-package com.appifyhub.monolith.validation.impl
+package com.appifyhub.monolith.features.common.validation
 
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
 import com.appifyhub.monolith.features.user.domain.model.Organization
 import com.appifyhub.monolith.features.user.domain.model.UserId
+import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.extension.takeIfNotBlank
-import com.appifyhub.monolith.validation.cleansToNonNull
-import com.appifyhub.monolith.validation.cleansToNullable
+import java.util.Date
 import java.util.Locale
+
+typealias BDay = Pair<Date?, TimeProvider>
 
 object Cleaners {
 

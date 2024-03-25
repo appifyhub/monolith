@@ -12,8 +12,8 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.isNotNull
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.common.mapValueNullable
+import com.appifyhub.monolith.features.common.domain.model.Settable
+import com.appifyhub.monolith.features.common.domain.model.mapValueNullable
 import com.appifyhub.monolith.eventbus.ProjectCreated
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.repository.CreatorRepository

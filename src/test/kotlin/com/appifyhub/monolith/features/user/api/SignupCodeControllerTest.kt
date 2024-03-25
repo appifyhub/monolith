@@ -5,13 +5,13 @@ import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.controller.common.Endpoints
+import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status.REVIEW
 import com.appifyhub.monolith.features.user.api.model.SignupCodeResponse
 import com.appifyhub.monolith.features.user.api.model.SignupCodesResponse
 import com.appifyhub.monolith.features.user.domain.service.SignupCodeService
 import com.appifyhub.monolith.features.user.repository.util.SignupCodeGenerator
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

@@ -2,7 +2,7 @@ package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.model.TokenCreator
-import com.appifyhub.monolith.domain.common.Settable
+import com.appifyhub.monolith.features.common.domain.model.Settable
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater
@@ -29,7 +29,7 @@ import com.appifyhub.monolith.features.creator.api.model.user.CreatorCredentials
 import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
 import com.appifyhub.monolith.features.auth.api.model.UserCredentialsRequest
-import com.appifyhub.monolith.network.common.SettableRequest
+import com.appifyhub.monolith.features.common.api.model.SettableRequest
 import com.appifyhub.monolith.features.creator.api.model.ProjectFeatureResponse
 import com.appifyhub.monolith.features.creator.api.model.ProjectResponse
 import com.appifyhub.monolith.features.creator.api.model.ProjectStateResponse

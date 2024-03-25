@@ -13,7 +13,7 @@ import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwNotVerified
 import com.appifyhub.monolith.util.extension.throwUnauthorized
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.security.crypto.password.PasswordEncoder

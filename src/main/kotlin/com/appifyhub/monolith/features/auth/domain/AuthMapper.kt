@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.auth.domain
 
-import com.appifyhub.monolith.domain.common.stubUser
+import com.appifyhub.monolith.features.common.domain.stubUser
 import com.appifyhub.monolith.features.user.domain.toData
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.domain.model.UserId

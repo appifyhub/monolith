@@ -21,7 +21,7 @@ import com.appifyhub.monolith.util.extension.throwLocked
 import com.appifyhub.monolith.util.extension.throwNotVerified
 import com.appifyhub.monolith.util.extension.throwPreconditionFailed
 import com.appifyhub.monolith.util.extension.throwUnauthorized
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Component

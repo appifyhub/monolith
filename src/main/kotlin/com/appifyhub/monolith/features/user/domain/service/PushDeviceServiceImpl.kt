@@ -4,7 +4,7 @@ import com.appifyhub.monolith.features.user.domain.model.PushDevice
 import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.user.repository.PushDeviceRepository
 import com.appifyhub.monolith.util.extension.requireValid
-import com.appifyhub.monolith.validation.impl.Normalizers
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

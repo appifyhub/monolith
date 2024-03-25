@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.auth.api
 
-import com.appifyhub.monolith.controller.common.Endpoints
-import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
+import com.appifyhub.monolith.features.common.api.Endpoints
+import com.appifyhub.monolith.features.common.api.RequestIpAddressHolder
 import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
@@ -10,7 +10,7 @@ import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.service.AuthService
-import com.appifyhub.monolith.network.common.SimpleResponse
+import com.appifyhub.monolith.features.common.api.model.SimpleResponse
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping

@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.common
+package com.appifyhub.monolith.features.common.domain.model
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
