@@ -4,14 +4,14 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectCreateRequest
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.creator.CreatorService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication

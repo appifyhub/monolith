@@ -4,12 +4,12 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.messaging.ops.MessageSendRequest
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Feature
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.integrations.CommunicationsService
 import com.appifyhub.monolith.service.integrations.CommunicationsService.Type
-import com.appifyhub.monolith.util.ext.throwPreconditionFailed
+import com.appifyhub.monolith.util.extension.throwPreconditionFailed
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PathVariable

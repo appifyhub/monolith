@@ -21,7 +21,7 @@ import com.appifyhub.monolith.util.EventBusFake
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import com.appifyhub.monolith.util.ext.truncateTo
+import com.appifyhub.monolith.util.extension.truncateTo
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

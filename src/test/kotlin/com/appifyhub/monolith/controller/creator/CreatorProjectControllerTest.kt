@@ -11,12 +11,12 @@ import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.network.common.SettableRequest
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
 import com.appifyhub.monolith.network.creator.project.ops.ProjectUpdateRequest
 import com.appifyhub.monolith.network.mapper.toNetwork
-import com.appifyhub.monolith.service.access.AccessManager
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

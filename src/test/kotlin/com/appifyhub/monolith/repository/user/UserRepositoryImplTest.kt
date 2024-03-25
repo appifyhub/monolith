@@ -13,7 +13,7 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.features.auth.repository.TokenDetailsRepository
 import com.appifyhub.monolith.repository.messaging.PushDeviceRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm

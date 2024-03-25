@@ -3,9 +3,9 @@ package com.appifyhub.monolith.service.integrations.push
 import com.google.firebase.messaging.Message as FirebaseMessage
 import com.google.firebase.messaging.Notification as FirebaseNotification
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.util.ext.silent
-import com.appifyhub.monolith.util.ext.throwPreconditionFailed
-import com.appifyhub.monolith.util.ext.throwUnauthorized
+import com.appifyhub.monolith.util.extension.silent
+import com.appifyhub.monolith.util.extension.throwPreconditionFailed
+import com.appifyhub.monolith.util.extension.throwUnauthorized
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions

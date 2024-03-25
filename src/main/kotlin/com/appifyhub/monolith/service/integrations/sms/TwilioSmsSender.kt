@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.service.integrations.sms
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.util.ext.throwUnauthorized
+import com.appifyhub.monolith.util.extension.throwUnauthorized
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

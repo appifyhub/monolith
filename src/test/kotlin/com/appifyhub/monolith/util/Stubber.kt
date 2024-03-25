@@ -1,11 +1,11 @@
 package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.auth.TokenDetails
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
-import com.appifyhub.monolith.domain.mapper.toTokenDetails
+import com.appifyhub.monolith.features.auth.domain.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
@@ -15,14 +15,14 @@ import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
-import com.appifyhub.monolith.repository.auth.AuthRepository
-import com.appifyhub.monolith.repository.auth.TokenDetailsRepository
+import com.appifyhub.monolith.features.auth.repository.AuthRepository
+import com.appifyhub.monolith.features.auth.repository.TokenDetailsRepository
 import com.appifyhub.monolith.repository.creator.CreatorRepository
 import com.appifyhub.monolith.repository.user.UserRepository
-import com.appifyhub.monolith.security.JwtHelper
-import com.appifyhub.monolith.security.JwtHelper.Claims
-import com.appifyhub.monolith.util.ext.silent
-import com.appifyhub.monolith.util.ext.takeIfNotBlank
+import com.appifyhub.monolith.features.auth.domain.security.JwtHelper
+import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims
+import com.appifyhub.monolith.util.extension.silent
+import com.appifyhub.monolith.util.extension.takeIfNotBlank
 import com.auth0.jwt.JWT
 import org.springframework.context.annotation.Profile
 import org.springframework.security.oauth2.jwt.Jwt

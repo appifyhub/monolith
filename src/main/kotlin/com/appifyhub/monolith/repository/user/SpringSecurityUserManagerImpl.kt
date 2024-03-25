@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.repository.user
 
-import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.common.stubProject
+import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.mapper.toSecurityUser

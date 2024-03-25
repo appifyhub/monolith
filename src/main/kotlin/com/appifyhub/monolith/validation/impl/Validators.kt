@@ -6,8 +6,8 @@ import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.user.SignupCodeGenerator
-import com.appifyhub.monolith.util.ext.hasNoSpaces
-import com.appifyhub.monolith.util.ext.isNullOrNotBlank
+import com.appifyhub.monolith.util.extension.hasNoSpaces
+import com.appifyhub.monolith.util.extension.isNullOrNotBlank
 import com.appifyhub.monolith.validation.validatesAs
 import com.google.i18n.phonenumbers.PhoneNumberUtil
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber.CountryCodeSource.FROM_NUMBER_WITH_PLUS_SIGN

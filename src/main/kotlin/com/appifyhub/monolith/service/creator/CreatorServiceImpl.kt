@@ -10,10 +10,10 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.eventbus.EventPublisher
 import com.appifyhub.monolith.eventbus.ProjectCreated
 import com.appifyhub.monolith.repository.creator.CreatorRepository
-import com.appifyhub.monolith.util.ext.requireValid
-import com.appifyhub.monolith.util.ext.silent
-import com.appifyhub.monolith.util.ext.throwLocked
-import com.appifyhub.monolith.util.ext.throwNotFound
+import com.appifyhub.monolith.util.extension.requireValid
+import com.appifyhub.monolith.util.extension.silent
+import com.appifyhub.monolith.util.extension.throwLocked
+import com.appifyhub.monolith.util.extension.throwNotFound
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.util
 
-import com.appifyhub.monolith.domain.auth.TokenDetails
-import com.appifyhub.monolith.domain.auth.ops.TokenCreator
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
+import com.appifyhub.monolith.features.auth.domain.model.TokenCreator
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
@@ -26,9 +26,9 @@ import com.appifyhub.monolith.domain.user.ops.OrganizationUpdater
 import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.network.creator.user.ops.CreatorCredentialsRequest
-import com.appifyhub.monolith.network.auth.TokenDetailsResponse
-import com.appifyhub.monolith.network.auth.TokenResponse
-import com.appifyhub.monolith.network.auth.UserCredentialsRequest
+import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
+import com.appifyhub.monolith.features.auth.api.model.TokenResponse
+import com.appifyhub.monolith.features.auth.api.model.UserCredentialsRequest
 import com.appifyhub.monolith.network.common.SettableRequest
 import com.appifyhub.monolith.network.creator.project.ProjectFeatureResponse
 import com.appifyhub.monolith.network.creator.project.ProjectResponse
@@ -58,12 +58,12 @@ import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
-import com.appifyhub.monolith.security.JwtClaims
-import com.appifyhub.monolith.security.JwtHelper.Claims
-import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.features.auth.domain.security.JwtClaims
+import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
 import com.appifyhub.monolith.service.integrations.CommunicationsService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
-import com.appifyhub.monolith.storage.model.auth.TokenDetailsDbm
+import com.appifyhub.monolith.features.auth.storage.model.TokenDetailsDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectCreationKeyDbm
 import com.appifyhub.monolith.storage.model.creator.ProjectDbm

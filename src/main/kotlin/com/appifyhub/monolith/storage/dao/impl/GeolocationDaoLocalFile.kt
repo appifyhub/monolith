@@ -3,13 +3,13 @@ package com.appifyhub.monolith.storage.dao.impl
 import com.appifyhub.monolith.domain.geo.Geolocation
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.storage.dao.GeolocationDao
-import com.appifyhub.monolith.util.ext.takeIfNotBlank
+import com.appifyhub.monolith.util.extension.takeIfNotBlank
 import com.ip2location.IP2Location
-import javax.annotation.PostConstruct
-import javax.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import javax.annotation.PostConstruct
+import javax.annotation.PreDestroy
 
 private const val CLASSPATH_LOCATIONS_FILE = "ip2location/IP2Location.bin"
 

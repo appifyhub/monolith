@@ -23,7 +23,7 @@ import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
-import com.appifyhub.monolith.util.ext.truncateTo
+import com.appifyhub.monolith.util.extension.truncateTo
 import java.time.temporal.ChronoUnit
 import java.util.Locale
 import org.junit.jupiter.api.AfterEach

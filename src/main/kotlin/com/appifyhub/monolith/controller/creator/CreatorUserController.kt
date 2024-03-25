@@ -4,13 +4,13 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.creator.user.ops.CreatorSignupRequest
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.UserResponse
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.user.UserService
 import org.slf4j.LoggerFactory

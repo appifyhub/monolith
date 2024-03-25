@@ -17,8 +17,8 @@ import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_M
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.schema.SchemaService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.ext.requireValid
-import com.appifyhub.monolith.util.ext.silent
+import com.appifyhub.monolith.util.extension.requireValid
+import com.appifyhub.monolith.util.extension.silent
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments

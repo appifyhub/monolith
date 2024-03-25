@@ -5,6 +5,9 @@ import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
+import com.appifyhub.monolith.features.auth.domain.service.AuthService
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
@@ -13,11 +16,8 @@ import com.appifyhub.monolith.network.user.ops.UserSignupRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateDataRequest
 import com.appifyhub.monolith.network.user.ops.UserUpdateSignatureRequest
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
-import com.appifyhub.monolith.service.auth.AuthService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.ext.throwNotFound
+import com.appifyhub.monolith.util.extension.throwNotFound
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping

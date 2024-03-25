@@ -23,7 +23,7 @@ import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.user.DateTimeMapper
 import com.appifyhub.monolith.network.user.UserResponse
 import com.appifyhub.monolith.network.user.ops.UserUpdateAuthorityRequest
-import com.appifyhub.monolith.service.auth.AuthService
+import com.appifyhub.monolith.features.auth.domain.service.AuthService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

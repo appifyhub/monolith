@@ -16,8 +16,8 @@ import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.service.messaging.PushDeviceService
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.ext.requireValid
-import com.appifyhub.monolith.util.ext.throwNotFound
+import com.appifyhub.monolith.util.extension.requireValid
+import com.appifyhub.monolith.util.extension.throwNotFound
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

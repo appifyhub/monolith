@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.service.integrations.email
 
 import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.util.ext.throwUnauthorized
+import com.appifyhub.monolith.util.extension.throwUnauthorized
 import java.net.URI
 import java.nio.charset.Charset
 import org.springframework.boot.web.client.RestTemplateBuilder

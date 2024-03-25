@@ -17,10 +17,10 @@ import com.appifyhub.monolith.repository.messaging.MessageTemplateRepository
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
 import com.appifyhub.monolith.service.user.UserService
-import com.appifyhub.monolith.util.ext.requireValid
-import com.appifyhub.monolith.util.ext.throwNormalization
-import com.appifyhub.monolith.util.ext.throwNotFound
-import com.appifyhub.monolith.util.ext.throwPreconditionFailed
+import com.appifyhub.monolith.util.extension.requireValid
+import com.appifyhub.monolith.util.extension.throwNormalization
+import com.appifyhub.monolith.util.extension.throwNotFound
+import com.appifyhub.monolith.util.extension.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import java.util.Locale
 import org.slf4j.LoggerFactory

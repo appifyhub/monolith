@@ -5,7 +5,7 @@ import com.appifyhub.monolith.domain.integrations.MailgunConfig
 import com.appifyhub.monolith.domain.integrations.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.util.ext.takeIfNotBlank
+import com.appifyhub.monolith.util.extension.takeIfNotBlank
 import com.appifyhub.monolith.validation.cleansToNonNull
 import com.appifyhub.monolith.validation.cleansToNullable
 import java.util.Locale

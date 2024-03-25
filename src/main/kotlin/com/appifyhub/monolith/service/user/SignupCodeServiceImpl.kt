@@ -6,8 +6,8 @@ import com.appifyhub.monolith.repository.user.SignupCodeRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.service.creator.CreatorService
 import com.appifyhub.monolith.util.TimeProvider
-import com.appifyhub.monolith.util.ext.requireValid
-import com.appifyhub.monolith.util.ext.throwPreconditionFailed
+import com.appifyhub.monolith.util.extension.requireValid
+import com.appifyhub.monolith.util.extension.throwPreconditionFailed
 import com.appifyhub.monolith.validation.impl.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

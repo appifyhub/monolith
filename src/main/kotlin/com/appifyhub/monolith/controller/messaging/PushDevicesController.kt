@@ -2,15 +2,15 @@ package com.appifyhub.monolith.controller.messaging
 
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toDomain
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.messaging.PushDeviceResponse
 import com.appifyhub.monolith.network.messaging.PushDevicesResponse
 import com.appifyhub.monolith.network.messaging.ops.PushDeviceRequest
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Feature
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.messaging.PushDeviceService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication

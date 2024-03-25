@@ -2,7 +2,7 @@ package com.appifyhub.monolith.network.mapper
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
-import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
 

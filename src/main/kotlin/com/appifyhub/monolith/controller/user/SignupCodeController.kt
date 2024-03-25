@@ -3,12 +3,12 @@ package com.appifyhub.monolith.controller.user
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.SignupCodeResponse
 import com.appifyhub.monolith.network.user.SignupCodesResponse
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Feature
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
 import com.appifyhub.monolith.service.user.SignupCodeService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication

@@ -12,7 +12,7 @@ import com.appifyhub.monolith.network.integrations.FirebaseConfigDto
 import com.appifyhub.monolith.network.integrations.MailgunConfigDto
 import com.appifyhub.monolith.network.integrations.TwilioConfigDto
 import com.appifyhub.monolith.network.user.DateTimeMapper
-import com.appifyhub.monolith.service.access.AccessManager.Feature
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
 
 fun Feature.toNetwork(): ProjectFeatureResponse = ProjectFeatureResponse(
   name = name,

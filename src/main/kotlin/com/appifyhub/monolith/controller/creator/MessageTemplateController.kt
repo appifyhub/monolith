@@ -4,9 +4,9 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.creator.messaging.MessageTemplate
 import com.appifyhub.monolith.domain.creator.messaging.Variable
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager
+import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.network.common.SimpleResponse
-import com.appifyhub.monolith.network.mapper.toDomain
-import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.creator.messaging.MessageResponse
 import com.appifyhub.monolith.network.creator.messaging.MessageTemplateResponse
 import com.appifyhub.monolith.network.creator.messaging.VariableResponse
@@ -14,11 +14,11 @@ import com.appifyhub.monolith.network.creator.messaging.ops.DetectVariablesReque
 import com.appifyhub.monolith.network.creator.messaging.ops.MessageInputsRequest
 import com.appifyhub.monolith.network.creator.messaging.ops.MessageTemplateCreateRequest
 import com.appifyhub.monolith.network.creator.messaging.ops.MessageTemplateUpdateRequest
-import com.appifyhub.monolith.service.access.AccessManager
-import com.appifyhub.monolith.service.access.AccessManager.Privilege
+import com.appifyhub.monolith.network.mapper.toDomain
+import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.service.messaging.MessageTemplateService
 import com.appifyhub.monolith.service.messaging.MessageTemplateService.Inputs
-import com.appifyhub.monolith.util.ext.throwNormalization
+import com.appifyhub.monolith.util.extension.throwNormalization
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -84,6 +84,7 @@ class MessageTemplateController(
     return when {
       templateName != null && templateLanguageTag != null ->
         templateService.fetchTemplatesByNameAndLanguage(projectId, templateName, templateLanguageTag)
+
       templateName != null -> templateService.fetchTemplatesByName(projectId, templateName)
       else -> templateService.fetchTemplatesByProjectId(projectId)
     }.map(MessageTemplate::toNetwork)

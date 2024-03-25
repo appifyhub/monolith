@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.domain.integrations
 
-import com.appifyhub.monolith.util.ext.takeIfNotBlank
+import com.appifyhub.monolith.util.extension.takeIfNotBlank
 
 data class TwilioConfig(
   val accountSid: String,
