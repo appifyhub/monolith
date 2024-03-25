@@ -4,7 +4,7 @@ import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.repository.user.SignupCodeRepository
 import com.appifyhub.monolith.repository.user.UserRepository
-import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwPreconditionFailed

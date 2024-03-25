@@ -6,7 +6,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints
-import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.features.creator.domain.model.Project.Status.REVIEW
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.mapper.toNetwork
 import com.appifyhub.monolith.network.user.DateTimeMapper

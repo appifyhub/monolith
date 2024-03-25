@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.features.auth.repository
 
-import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
-import com.appifyhub.monolith.domain.creator.Project
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
+import com.appifyhub.monolith.features.creator.domain.model.Project
 
 interface TokenDetailsRepository {
 

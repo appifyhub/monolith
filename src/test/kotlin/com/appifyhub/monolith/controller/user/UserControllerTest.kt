@@ -16,7 +16,7 @@ import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_DATA
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATURE
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_SIGNATURE_RESET
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_VERIFY
-import com.appifyhub.monolith.domain.creator.Project.Status.REVIEW
+import com.appifyhub.monolith.features.creator.domain.model.Project.Status.REVIEW
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.network.common.SimpleResponse

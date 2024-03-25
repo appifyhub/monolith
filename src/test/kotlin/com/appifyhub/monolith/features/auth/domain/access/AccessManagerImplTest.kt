@@ -8,9 +8,9 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.Project.Status
-import com.appifyhub.monolith.domain.creator.setup.ProjectState
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.creator.domain.model.Project.Status
+import com.appifyhub.monolith.features.creator.domain.model.ProjectState
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT

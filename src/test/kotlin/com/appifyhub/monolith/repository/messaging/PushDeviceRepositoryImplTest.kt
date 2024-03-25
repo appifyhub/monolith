@@ -6,7 +6,7 @@ import assertk.assertions.hasSize
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.storage.dao.PushDeviceDao
-import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
+import com.appifyhub.monolith.features.creator.storage.model.PushDeviceDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.BeforeEach

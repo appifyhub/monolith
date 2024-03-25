@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.features.auth.domain.service
 
-import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import org.springframework.security.core.Authentication
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 

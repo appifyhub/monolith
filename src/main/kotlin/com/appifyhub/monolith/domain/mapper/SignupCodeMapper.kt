@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.domain.mapper
 
-import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.domain.user.SignupCode
 import com.appifyhub.monolith.storage.model.user.SignupCodeDbm
 

@@ -3,7 +3,7 @@ package com.appifyhub.monolith.service.user
 import com.appifyhub.monolith.domain.common.Settable
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
+import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.ContactType
 import com.appifyhub.monolith.domain.user.UserId
@@ -13,9 +13,9 @@ import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.eventbus.EventPublisher
 import com.appifyhub.monolith.eventbus.UserAuthResetCompleted
 import com.appifyhub.monolith.eventbus.UserCreated
-import com.appifyhub.monolith.repository.creator.SignatureGenerator
+import com.appifyhub.monolith.features.creator.repository.SignatureGenerator
 import com.appifyhub.monolith.repository.user.UserRepository
-import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwPreconditionFailed

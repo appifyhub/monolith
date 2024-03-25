@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.features.auth.api
 
-import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.network.user.DateTimeMapper
 
 fun tokenResponseOf(tokenValue: String): TokenResponse = TokenResponse(tokenValue)

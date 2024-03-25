@@ -1,11 +1,10 @@
 package com.appifyhub.monolith.features.auth.domain
 
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.domain.common.stubUser
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.security.JwtClaims
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.AUTHORITIES
@@ -19,9 +18,10 @@ import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.ORI
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.UNIVERSAL_ID
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.VALUE
 import com.appifyhub.monolith.features.auth.storage.model.TokenDetailsDbm
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import org.springframework.security.core.GrantedAuthority
 import java.util.Date
 import java.util.concurrent.TimeUnit
-import org.springframework.security.core.GrantedAuthority
 
 fun TokenDetailsDbm.toDomain(
   jwtHelper: JwtHelper,

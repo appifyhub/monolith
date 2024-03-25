@@ -1,8 +1,5 @@
 package com.appifyhub.monolith.features.auth.domain.access
 
-import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
@@ -12,8 +9,11 @@ import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature.
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature.SMS
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature.USERS
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
+import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.service.AuthService
-import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.creator.domain.model.ProjectState
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.service.user.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.silent

@@ -4,9 +4,9 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isTrue
-import com.appifyhub.monolith.domain.integrations.FirebaseConfig
-import com.appifyhub.monolith.domain.integrations.MailgunConfig
-import com.appifyhub.monolith.domain.integrations.TwilioConfig
+import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
+import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
+import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.util.Stubs

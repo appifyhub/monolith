@@ -1,10 +1,11 @@
 package com.appifyhub.monolith.domain.mapper
 
 import com.appifyhub.monolith.domain.common.stubProject
-import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.creator.domain.toData
 import com.appifyhub.monolith.storage.model.user.OrganizationDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import com.appifyhub.monolith.storage.model.user.UserIdDbm

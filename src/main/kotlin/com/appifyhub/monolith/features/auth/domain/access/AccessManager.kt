@@ -1,7 +1,5 @@
 package com.appifyhub.monolith.features.auth.domain.access
 
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.setup.ProjectState
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
@@ -9,6 +7,8 @@ import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER
 import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.creator.domain.model.ProjectState
 import org.springframework.security.core.Authentication
 
 interface AccessManager {

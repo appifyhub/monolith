@@ -4,8 +4,8 @@ import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
 import com.appifyhub.monolith.domain.messaging.PushDevice
 import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.features.creator.storage.model.PushDeviceDbm
 import com.appifyhub.monolith.storage.dao.PushDeviceDao
-import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 

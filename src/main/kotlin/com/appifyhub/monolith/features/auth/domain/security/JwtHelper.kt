@@ -5,11 +5,11 @@ import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.VAL
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.stereotype.Component
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
 import java.util.Base64
 import java.util.Date
-import org.springframework.stereotype.Component
 
 typealias JwtClaims = Map<String, *>
 

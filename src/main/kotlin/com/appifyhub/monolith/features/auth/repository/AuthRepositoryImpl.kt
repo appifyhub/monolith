@@ -6,8 +6,6 @@ import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.features.auth.domain.model.TokenCreator
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
-import com.appifyhub.monolith.features.auth.domain.toTokenDetails
-import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.AUTHORITIES
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.AUTHORITY_DELIMITER
@@ -18,6 +16,8 @@ import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.ORI
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.PROJECT_ID
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.UNIVERSAL_ID
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.USER_ID
+import com.appifyhub.monolith.features.auth.domain.toTokenDetails
+import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

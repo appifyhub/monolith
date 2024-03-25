@@ -1,6 +1,5 @@
 package com.appifyhub.monolith.repository.user
 
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
 import com.appifyhub.monolith.domain.mapper.applyTo
 import com.appifyhub.monolith.domain.mapper.toData
 import com.appifyhub.monolith.domain.mapper.toDomain
@@ -12,6 +11,7 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.repository.TokenDetailsRepository
+import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType
 import com.appifyhub.monolith.repository.messaging.PushDeviceRepository
 import com.appifyhub.monolith.storage.dao.UserDao
 import com.appifyhub.monolith.storage.model.user.UserDbm

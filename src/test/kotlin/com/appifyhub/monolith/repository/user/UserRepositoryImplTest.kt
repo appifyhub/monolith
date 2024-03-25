@@ -10,7 +10,7 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
+import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType
 import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.features.auth.repository.TokenDetailsRepository

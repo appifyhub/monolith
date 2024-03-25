@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.domain.common
 
-import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.domain.user.Organization
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.service.creator.CreatorService.Companion.DEFAULT_MAX_USERS
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService.Companion.DEFAULT_MAX_USERS
 import java.util.Date
 import java.util.Locale
 

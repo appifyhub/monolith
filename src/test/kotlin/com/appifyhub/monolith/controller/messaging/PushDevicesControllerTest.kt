@@ -9,12 +9,12 @@ import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectUpdater
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater
 import com.appifyhub.monolith.network.common.SimpleResponse
 import com.appifyhub.monolith.network.messaging.PushDeviceResponse
 import com.appifyhub.monolith.network.messaging.PushDevicesResponse
-import com.appifyhub.monolith.service.creator.CreatorService
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.service.messaging.PushDeviceService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs

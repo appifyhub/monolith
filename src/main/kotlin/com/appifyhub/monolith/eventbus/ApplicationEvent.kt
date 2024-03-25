@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.eventbus
 
-import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.domain.user.User
 
 sealed interface ApplicationEvent<out P> {

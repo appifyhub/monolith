@@ -12,7 +12,7 @@ import assertk.assertions.isTrue
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.USER_AUTH
 import com.appifyhub.monolith.controller.common.Endpoints.USER_TOKENS
-import com.appifyhub.monolith.domain.creator.Project.Status
+import com.appifyhub.monolith.features.creator.domain.model.Project.Status
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
 import com.appifyhub.monolith.domain.user.User.Authority.OWNER

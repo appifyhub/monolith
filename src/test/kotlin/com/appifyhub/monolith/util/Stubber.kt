@@ -3,8 +3,8 @@ package com.appifyhub.monolith.util
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.creator.ops.ProjectCreator
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.auth.domain.toTokenDetails
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
@@ -17,7 +17,7 @@ import com.appifyhub.monolith.domain.user.UserId
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.features.auth.repository.AuthRepository
 import com.appifyhub.monolith.features.auth.repository.TokenDetailsRepository
-import com.appifyhub.monolith.repository.creator.CreatorRepository
+import com.appifyhub.monolith.features.creator.repository.CreatorRepository
 import com.appifyhub.monolith.repository.user.UserRepository
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims

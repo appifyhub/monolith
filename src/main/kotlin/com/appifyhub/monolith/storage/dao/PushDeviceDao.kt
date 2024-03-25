@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.storage.dao
 
-import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
+import com.appifyhub.monolith.features.creator.storage.model.PushDeviceDbm
 import com.appifyhub.monolith.storage.model.user.UserDbm
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.rest.core.annotation.RepositoryRestResource

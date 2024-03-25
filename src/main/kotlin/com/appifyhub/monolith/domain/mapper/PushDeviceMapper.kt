@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.domain.mapper
 
-import com.appifyhub.monolith.domain.creator.Project
+import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.domain.messaging.PushDevice
-import com.appifyhub.monolith.storage.model.messaging.PushDeviceDbm
+import com.appifyhub.monolith.features.creator.storage.model.PushDeviceDbm
 
 fun PushDeviceDbm.toDomain(): PushDevice = PushDevice(
   deviceId = deviceId,

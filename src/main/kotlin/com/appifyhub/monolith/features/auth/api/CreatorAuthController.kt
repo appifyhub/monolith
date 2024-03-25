@@ -4,8 +4,8 @@ import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
 import com.appifyhub.monolith.features.auth.domain.service.AuthService
-import com.appifyhub.monolith.network.creator.user.ops.ApiKeyRequest
-import com.appifyhub.monolith.network.creator.user.ops.CreatorCredentialsRequest
+import com.appifyhub.monolith.features.creator.api.model.user.ApiKeyRequest
+import com.appifyhub.monolith.features.creator.api.model.user.CreatorCredentialsRequest
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PostMapping

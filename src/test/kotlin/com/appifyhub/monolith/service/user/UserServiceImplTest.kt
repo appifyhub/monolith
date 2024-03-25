@@ -13,7 +13,7 @@ import assertk.assertions.isInstanceOf
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.creator.Project.UserIdType
+import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType
 import com.appifyhub.monolith.domain.user.User
 import com.appifyhub.monolith.domain.user.User.Authority
 import com.appifyhub.monolith.domain.user.User.ContactType
@@ -23,7 +23,7 @@ import com.appifyhub.monolith.domain.user.ops.UserCreator
 import com.appifyhub.monolith.domain.user.ops.UserUpdater
 import com.appifyhub.monolith.eventbus.UserAuthResetCompleted
 import com.appifyhub.monolith.eventbus.UserCreated
-import com.appifyhub.monolith.repository.creator.SignatureGenerator
+import com.appifyhub.monolith.features.creator.repository.SignatureGenerator
 import com.appifyhub.monolith.repository.user.TokenGenerator
 import com.appifyhub.monolith.repository.user.UserIdGenerator
 import com.appifyhub.monolith.util.EventBusFake
