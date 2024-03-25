@@ -1,8 +1,8 @@
 package com.appifyhub.monolith.eventbus
 
-import com.appifyhub.monolith.service.creator.CreatorService
-import com.appifyhub.monolith.service.integrations.CommunicationsService
-import com.appifyhub.monolith.service.messaging.MessageTemplateDefaults
+import com.appifyhub.monolith.features.creator.domain.service.CreatorService
+import com.appifyhub.monolith.features.creator.domain.service.CommunicationsService
+import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateDefaults
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

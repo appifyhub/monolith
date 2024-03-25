@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.eventbus
 
-import com.appifyhub.monolith.domain.creator.Project
-import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.features.creator.domain.model.Project
+import com.appifyhub.monolith.features.user.domain.model.User
 
 sealed interface ApplicationEvent<out P> {
   val ownerProject: Project

@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.util
 
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.network.user.DateTimeMapper
+import com.appifyhub.monolith.features.user.api.DateTimeMapper
 import java.time.Duration
 import java.time.Instant
 import java.util.Calendar
