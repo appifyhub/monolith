@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.creator.domain.service
 
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 
 interface CommunicationsService {
 

@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.storage.model
 
-import com.appifyhub.monolith.storage.model.user.UserDbm
+import com.appifyhub.monolith.features.user.storage.model.UserDbm
 import java.io.Serializable
 import javax.persistence.EmbeddedId
 import javax.persistence.Entity

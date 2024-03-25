@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.features.creator.api
 
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.ops.UserCreator
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserCreator
 import com.appifyhub.monolith.features.creator.api.model.user.CreatorSignupRequest
-import com.appifyhub.monolith.network.mapper.toDomain
-import com.appifyhub.monolith.network.user.DateTimeMapper
+import com.appifyhub.monolith.features.user.api.toDomain
+import com.appifyhub.monolith.features.user.api.DateTimeMapper
 import java.util.Locale
 
 fun CreatorSignupRequest.toDomain(

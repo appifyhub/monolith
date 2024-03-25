@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.auth.storage
 
 import com.appifyhub.monolith.features.auth.storage.model.TokenDetailsDbm
-import com.appifyhub.monolith.storage.model.user.UserDbm
+import com.appifyhub.monolith.features.user.storage.model.UserDbm
 import org.springframework.data.repository.CrudRepository
 import org.springframework.data.rest.core.annotation.RepositoryRestResource
 import org.springframework.transaction.annotation.Transactional

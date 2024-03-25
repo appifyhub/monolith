@@ -8,10 +8,10 @@ import assertk.assertions.isFalse
 import assertk.assertions.isTrue
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.model.TokenCreator
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.network.user.DateTimeMapper
-import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
+import com.appifyhub.monolith.features.user.api.DateTimeMapper
+import com.appifyhub.monolith.features.user.repository.UserRepository
 import com.appifyhub.monolith.features.auth.domain.security.JwtClaims
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims

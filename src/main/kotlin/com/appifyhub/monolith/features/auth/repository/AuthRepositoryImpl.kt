@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.features.auth.repository
 
 import com.appifyhub.monolith.domain.common.stubProject
-import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.toDomain
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.model.TokenCreator
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper
@@ -17,7 +17,7 @@ import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.PRO
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.UNIVERSAL_ID
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper.Claims.USER_ID
 import com.appifyhub.monolith.features.auth.domain.toTokenDetails
-import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.features.user.repository.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

@@ -2,8 +2,8 @@ package com.appifyhub.monolith.features.creator.domain.service
 
 import com.appifyhub.monolith.domain.common.mapValueNonNull
 import com.appifyhub.monolith.domain.common.mapValueNullable
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.eventbus.EventPublisher
 import com.appifyhub.monolith.eventbus.ProjectCreated
 import com.appifyhub.monolith.features.creator.domain.model.Project

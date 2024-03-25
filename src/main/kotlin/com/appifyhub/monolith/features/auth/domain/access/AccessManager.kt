@@ -1,12 +1,12 @@
 package com.appifyhub.monolith.features.auth.domain.access
 
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.Authority
-import com.appifyhub.monolith.domain.user.User.Authority.ADMIN
-import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
-import com.appifyhub.monolith.domain.user.User.Authority.MODERATOR
-import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.User.Authority
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.ADMIN
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.DEFAULT
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.MODERATOR
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.OWNER
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectState
 import org.springframework.security.core.Authentication

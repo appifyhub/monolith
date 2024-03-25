@@ -3,9 +3,9 @@ package com.appifyhub.monolith.validation.impl
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
-import com.appifyhub.monolith.domain.user.Organization
-import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.repository.user.SignupCodeGenerator
+import com.appifyhub.monolith.features.user.domain.model.Organization
+import com.appifyhub.monolith.features.user.domain.model.UserId
+import com.appifyhub.monolith.features.user.repository.util.SignupCodeGenerator
 import com.appifyhub.monolith.util.extension.hasNoSpaces
 import com.appifyhub.monolith.util.extension.isNullOrNotBlank
 import com.appifyhub.monolith.validation.validatesAs

@@ -9,7 +9,7 @@ import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECT
 import com.appifyhub.monolith.controller.common.Endpoints.PROJECTS
-import com.appifyhub.monolith.domain.user.User.Authority.OWNER
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.OWNER
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.creator.api.model.ProjectResponse
 import com.appifyhub.monolith.features.creator.api.model.ProjectUpdateRequest

@@ -13,9 +13,9 @@ import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.USER_AUTH
 import com.appifyhub.monolith.controller.common.Endpoints.USER_TOKENS
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.Authority.DEFAULT
-import com.appifyhub.monolith.domain.user.User.Authority.OWNER
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.DEFAULT
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.OWNER
 import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
 import com.appifyhub.monolith.features.auth.api.model.UserCredentialsRequest

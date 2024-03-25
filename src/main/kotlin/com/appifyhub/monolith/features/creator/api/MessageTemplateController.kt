@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.creator.api
 
 import com.appifyhub.monolith.controller.common.Endpoints
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.features.creator.api.model.messaging.DetectVariablesRequest

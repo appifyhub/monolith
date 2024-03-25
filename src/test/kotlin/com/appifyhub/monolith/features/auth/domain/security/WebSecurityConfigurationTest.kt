@@ -3,7 +3,7 @@ package com.appifyhub.monolith.features.auth.domain.security
 import assertk.assertThat
 import assertk.assertions.isEqualTo
 import com.appifyhub.monolith.errors.GlobalExceptionHandler
-import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.features.user.repository.UserRepository
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 

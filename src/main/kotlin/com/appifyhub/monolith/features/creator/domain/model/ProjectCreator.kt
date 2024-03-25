@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.domain.model
 
-import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status
 import com.appifyhub.monolith.features.creator.domain.model.Project.Type
 import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType

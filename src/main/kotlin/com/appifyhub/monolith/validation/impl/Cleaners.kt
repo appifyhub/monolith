@@ -3,8 +3,8 @@ package com.appifyhub.monolith.validation.impl
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
-import com.appifyhub.monolith.domain.user.Organization
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.Organization
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.util.extension.takeIfNotBlank
 import com.appifyhub.monolith.validation.cleansToNonNull
 import com.appifyhub.monolith.validation.cleansToNullable

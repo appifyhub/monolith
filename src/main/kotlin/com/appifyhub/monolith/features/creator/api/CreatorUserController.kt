@@ -2,16 +2,16 @@ package com.appifyhub.monolith.features.creator.api
 
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.domain.common.Settable
-import com.appifyhub.monolith.domain.user.UserId
-import com.appifyhub.monolith.domain.user.ops.UserUpdater
+import com.appifyhub.monolith.features.user.domain.model.UserId
+import com.appifyhub.monolith.features.user.domain.model.UserUpdater
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Privilege
 import com.appifyhub.monolith.features.creator.api.model.user.CreatorSignupRequest
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.network.common.SimpleResponse
-import com.appifyhub.monolith.network.mapper.toNetwork
-import com.appifyhub.monolith.network.user.UserResponse
-import com.appifyhub.monolith.service.user.UserService
+import com.appifyhub.monolith.features.user.api.toNetwork
+import com.appifyhub.monolith.features.user.api.model.UserResponse
+import com.appifyhub.monolith.features.user.domain.service.UserService
 import org.slf4j.LoggerFactory
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PathVariable

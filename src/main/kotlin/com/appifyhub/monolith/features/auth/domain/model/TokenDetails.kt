@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.auth.domain.model
 
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import java.util.Date
 
 data class TokenDetails(

@@ -8,12 +8,12 @@ import assertk.assertions.isNull
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.controller.common.Endpoints.CREATOR_SIGNUP
 import com.appifyhub.monolith.controller.common.Endpoints.UNIVERSAL_USER_FORCE_VERIFY
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.model.Project.Status.REVIEW
 import com.appifyhub.monolith.network.common.SimpleResponse
-import com.appifyhub.monolith.network.user.DateTimeMapper
-import com.appifyhub.monolith.network.user.UserResponse
+import com.appifyhub.monolith.features.user.api.DateTimeMapper
+import com.appifyhub.monolith.features.user.api.model.UserResponse
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake

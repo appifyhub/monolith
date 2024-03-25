@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.api.model.user
 
-import com.appifyhub.monolith.network.user.OrganizationDto
+import com.appifyhub.monolith.features.user.api.model.OrganizationDto
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.JsonProperty

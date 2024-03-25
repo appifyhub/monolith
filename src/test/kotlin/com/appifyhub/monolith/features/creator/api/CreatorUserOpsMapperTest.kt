@@ -2,8 +2,8 @@ package com.appifyhub.monolith.features.creator.api
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.network.user.DateTimeMapper
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.api.DateTimeMapper
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
 

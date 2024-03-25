@@ -3,13 +3,13 @@ package com.appifyhub.monolith.features.creator.repository
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
-import com.appifyhub.monolith.domain.user.User.Authority.OWNER
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User.Authority.OWNER
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater
 import com.appifyhub.monolith.features.creator.storage.ProjectCreationDao
 import com.appifyhub.monolith.features.creator.storage.ProjectDao
 import com.appifyhub.monolith.features.creator.storage.model.ProjectDbm
-import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.features.user.repository.UserRepository
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import org.junit.jupiter.api.AfterEach

@@ -2,7 +2,7 @@ package com.appifyhub.monolith.features.auth.domain.security
 
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.errors.GlobalExceptionHandler
-import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.features.user.repository.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity

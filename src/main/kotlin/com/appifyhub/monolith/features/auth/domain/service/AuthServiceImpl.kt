@@ -1,15 +1,15 @@
 package com.appifyhub.monolith.features.auth.domain.service
 
 import com.appifyhub.monolith.features.geo.domain.mergeToString
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.Authority
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.User.Authority
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.model.TokenCreator
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.repository.AuthRepository
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService
 import com.appifyhub.monolith.features.geo.repository.GeolocationRepository
-import com.appifyhub.monolith.service.user.UserService
+import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwNotVerified
 import com.appifyhub.monolith.util.extension.throwUnauthorized

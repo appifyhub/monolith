@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.auth.domain.access
 
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature.BASIC
 import com.appifyhub.monolith.features.auth.domain.access.AccessManager.Feature.EMAILS
@@ -14,7 +14,7 @@ import com.appifyhub.monolith.features.auth.domain.service.AuthService
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectState
 import com.appifyhub.monolith.features.creator.domain.service.CreatorService
-import com.appifyhub.monolith.service.user.UserService
+import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.silent
 import com.appifyhub.monolith.util.extension.throwLocked

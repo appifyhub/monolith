@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.features.creator.domain.service
 
-import com.appifyhub.monolith.domain.messaging.PushDevice
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.ContactType
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.PushDevice
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.User.ContactType
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.Project.UserIdType
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Message
@@ -12,8 +12,8 @@ import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateSer
 import com.appifyhub.monolith.features.creator.integrations.email.EmailSender
 import com.appifyhub.monolith.features.creator.integrations.push.PushSender
 import com.appifyhub.monolith.features.creator.integrations.sms.SmsSender
-import com.appifyhub.monolith.service.messaging.PushDeviceService
-import com.appifyhub.monolith.service.user.UserService
+import com.appifyhub.monolith.features.user.domain.service.PushDeviceService
+import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwNotFound
 import com.appifyhub.monolith.validation.impl.Normalizers

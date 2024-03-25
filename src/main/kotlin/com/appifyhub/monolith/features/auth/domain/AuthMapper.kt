@@ -1,9 +1,9 @@
 package com.appifyhub.monolith.features.auth.domain
 
 import com.appifyhub.monolith.domain.common.stubUser
-import com.appifyhub.monolith.domain.mapper.toData
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.toData
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.domain.model.TokenDetails
 import com.appifyhub.monolith.features.auth.domain.security.JwtClaims
 import com.appifyhub.monolith.features.auth.domain.security.JwtHelper

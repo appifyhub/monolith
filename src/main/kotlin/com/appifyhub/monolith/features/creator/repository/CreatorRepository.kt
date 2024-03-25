@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.creator.repository
 
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater

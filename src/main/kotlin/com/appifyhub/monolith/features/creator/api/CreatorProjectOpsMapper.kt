@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.api
 
-import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.creator.api.model.ProjectCreateRequest
 import com.appifyhub.monolith.features.creator.api.model.ProjectUpdateRequest
 import com.appifyhub.monolith.features.creator.api.model.messaging.FirebaseConfigDto

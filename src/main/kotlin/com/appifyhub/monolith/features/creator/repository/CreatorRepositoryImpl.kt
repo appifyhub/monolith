@@ -1,10 +1,10 @@
 package com.appifyhub.monolith.features.creator.repository
 
-import com.appifyhub.monolith.domain.mapper.toData
-import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.domain.user.User
-import com.appifyhub.monolith.domain.user.User.Authority
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.toData
+import com.appifyhub.monolith.features.user.domain.toDomain
+import com.appifyhub.monolith.features.user.domain.model.User
+import com.appifyhub.monolith.features.user.domain.model.User.Authority
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.applyTo
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
@@ -17,7 +17,7 @@ import com.appifyhub.monolith.features.creator.storage.ProjectDao
 import com.appifyhub.monolith.features.creator.storage.model.ProjectCreationDbm
 import com.appifyhub.monolith.features.creator.storage.model.ProjectCreationKeyDbm
 import com.appifyhub.monolith.features.creator.storage.model.ProjectDbm
-import com.appifyhub.monolith.repository.user.UserRepository
+import com.appifyhub.monolith.features.user.repository.UserRepository
 import com.appifyhub.monolith.util.TimeProvider
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository

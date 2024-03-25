@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.creator.domain.service
 
 import com.appifyhub.monolith.domain.common.mapValueNonNull
-import com.appifyhub.monolith.domain.user.User
+import com.appifyhub.monolith.features.user.domain.model.User
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Message
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplate
@@ -10,7 +10,7 @@ import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTem
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService.Inputs
 import com.appifyhub.monolith.features.creator.repository.MessageTemplateRepository
-import com.appifyhub.monolith.service.user.UserService
+import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.throwNormalization
 import com.appifyhub.monolith.util.extension.throwNotFound

@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.creator.api
 
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.api.model.messaging.MessageInputsRequest
 import com.appifyhub.monolith.features.creator.api.model.messaging.MessageResponse
 import com.appifyhub.monolith.features.creator.api.model.messaging.MessageTemplateCreateRequest
@@ -14,7 +14,7 @@ import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTem
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
 import com.appifyhub.monolith.features.creator.domain.service.MessageTemplateService.Inputs
 import com.appifyhub.monolith.network.mapper.toDomainNonNull
-import com.appifyhub.monolith.network.user.DateTimeMapper
+import com.appifyhub.monolith.features.user.api.DateTimeMapper
 
 fun Variable.toNetwork() = VariableResponse(
   code = code,

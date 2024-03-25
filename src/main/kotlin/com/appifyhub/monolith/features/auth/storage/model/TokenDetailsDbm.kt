@@ -1,6 +1,6 @@
 package com.appifyhub.monolith.features.auth.storage.model
 
-import com.appifyhub.monolith.storage.model.user.UserDbm
+import com.appifyhub.monolith.features.user.storage.model.UserDbm
 import java.io.Serializable
 import javax.persistence.Column
 import javax.persistence.Entity

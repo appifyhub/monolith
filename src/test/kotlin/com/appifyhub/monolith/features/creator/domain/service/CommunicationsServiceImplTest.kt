@@ -9,8 +9,8 @@ import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.messageContains
 import com.appifyhub.monolith.TestAppifyHubApplication
-import com.appifyhub.monolith.domain.user.User.ContactType
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.User.ContactType
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MessageTemplateCreator
 import com.appifyhub.monolith.features.creator.domain.model.messaging.Variable
@@ -21,7 +21,7 @@ import com.appifyhub.monolith.features.creator.integrations.push.LogPushSender
 import com.appifyhub.monolith.features.creator.integrations.push.LogPushSender.SentPush
 import com.appifyhub.monolith.features.creator.integrations.sms.LogSmsSender
 import com.appifyhub.monolith.features.creator.integrations.sms.LogSmsSender.SentSms
-import com.appifyhub.monolith.service.messaging.PushDeviceService
+import com.appifyhub.monolith.features.user.domain.service.PushDeviceService
 import com.appifyhub.monolith.util.Stubber
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test

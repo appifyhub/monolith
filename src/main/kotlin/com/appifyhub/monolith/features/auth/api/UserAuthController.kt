@@ -2,7 +2,7 @@ package com.appifyhub.monolith.features.auth.api
 
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.features.auth.api.model.TokenDetailsResponse
 import com.appifyhub.monolith.features.auth.api.model.TokenResponse
 import com.appifyhub.monolith.features.auth.api.model.UserCredentialsRequest

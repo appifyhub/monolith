@@ -7,8 +7,8 @@ import assertk.assertions.isTrue
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig
-import com.appifyhub.monolith.domain.user.Organization
-import com.appifyhub.monolith.domain.user.UserId
+import com.appifyhub.monolith.features.user.domain.model.Organization
+import com.appifyhub.monolith.features.user.domain.model.UserId
 import com.appifyhub.monolith.util.Stubs
 import com.appifyhub.monolith.util.TimeProviderFake
 import org.junit.jupiter.api.Test
