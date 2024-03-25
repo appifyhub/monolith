@@ -1,7 +1,7 @@
-package com.appifyhub.monolith.repository.geo
+package com.appifyhub.monolith.features.geo.repository
 
-import com.appifyhub.monolith.domain.geo.Geolocation
-import com.appifyhub.monolith.storage.dao.GeolocationDao
+import com.appifyhub.monolith.features.geo.domain.model.Geolocation
+import com.appifyhub.monolith.features.geo.storage.GeolocationDao
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Repository
 

@@ -7,7 +7,7 @@ import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.ProjectUpdater
 import com.appifyhub.monolith.features.creator.domain.model.ProjectState
-import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.features.geo.domain.model.Geolocation
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.MailgunConfig
 import com.appifyhub.monolith.features.creator.domain.model.messaging.TwilioConfig

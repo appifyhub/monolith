@@ -1,11 +1,11 @@
-package com.appifyhub.monolith.domain.mapper
+package com.appifyhub.monolith.features.geo.domain
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
-import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.features.geo.domain.model.Geolocation
 import com.appifyhub.monolith.util.Stubs
 import com.ip2location.IPResult
 import org.junit.jupiter.api.Test

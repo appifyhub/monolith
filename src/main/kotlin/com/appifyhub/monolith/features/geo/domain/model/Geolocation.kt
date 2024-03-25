@@ -1,4 +1,4 @@
-package com.appifyhub.monolith.domain.geo
+package com.appifyhub.monolith.features.geo.domain.model
 
 data class Geolocation(
   val countryCode: String?,

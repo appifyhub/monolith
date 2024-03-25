@@ -1,6 +1,6 @@
-package com.appifyhub.monolith.domain.mapper
+package com.appifyhub.monolith.features.geo.domain
 
-import com.appifyhub.monolith.domain.geo.Geolocation
+import com.appifyhub.monolith.features.geo.domain.model.Geolocation
 import com.ip2location.IPResult
 
 private const val MISSING_PROP = "-"

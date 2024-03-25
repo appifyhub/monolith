@@ -2,9 +2,9 @@ package com.appifyhub.monolith.controller.heartbeat
 
 import com.appifyhub.monolith.controller.common.Endpoints
 import com.appifyhub.monolith.controller.common.RequestIpAddressHolder
-import com.appifyhub.monolith.domain.mapper.mergeToString
+import com.appifyhub.monolith.features.geo.domain.mergeToString
 import com.appifyhub.monolith.network.heartbeat.HeartbeatResponse
-import com.appifyhub.monolith.repository.geo.GeolocationRepository
+import com.appifyhub.monolith.features.geo.repository.GeolocationRepository
 import com.appifyhub.monolith.util.TimeProvider
 import com.appifyhub.monolith.util.meta.BuildMetadata
 import org.slf4j.LoggerFactory

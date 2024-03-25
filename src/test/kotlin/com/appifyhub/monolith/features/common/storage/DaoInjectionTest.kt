@@ -4,7 +4,7 @@ import assertk.assertThat
 import assertk.assertions.isNotNull
 import com.appifyhub.monolith.TestAppifyHubApplication
 import com.appifyhub.monolith.features.auth.storage.TokenDetailsDao
-import com.appifyhub.monolith.storage.dao.GeolocationDao
+import com.appifyhub.monolith.features.geo.storage.GeolocationDao
 import com.appifyhub.monolith.features.creator.storage.MessageTemplateDao
 import com.appifyhub.monolith.features.creator.storage.ProjectCreationDao
 import com.appifyhub.monolith.features.creator.storage.ProjectDao

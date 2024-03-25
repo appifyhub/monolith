@@ -1,8 +1,7 @@
-package com.appifyhub.monolith.storage.dao.impl
+package com.appifyhub.monolith.features.geo.storage
 
-import com.appifyhub.monolith.domain.geo.Geolocation
-import com.appifyhub.monolith.domain.mapper.toDomain
-import com.appifyhub.monolith.storage.dao.GeolocationDao
+import com.appifyhub.monolith.features.geo.domain.model.Geolocation
+import com.appifyhub.monolith.features.geo.domain.toDomain
 import com.appifyhub.monolith.util.extension.takeIfNotBlank
 import com.ip2location.IP2Location
 import org.slf4j.LoggerFactory

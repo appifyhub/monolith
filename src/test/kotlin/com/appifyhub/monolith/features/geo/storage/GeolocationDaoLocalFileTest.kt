@@ -6,9 +6,7 @@ import assertk.assertThat
 import assertk.assertions.hasClass
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.messageContains
-import com.appifyhub.monolith.domain.geo.Geolocation
-import com.appifyhub.monolith.storage.dao.GeolocationDao
-import com.appifyhub.monolith.storage.dao.impl.GeolocationDaoLocalFile
+import com.appifyhub.monolith.features.geo.domain.model.Geolocation
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

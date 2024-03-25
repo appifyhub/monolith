@@ -1,10 +1,10 @@
-package com.appifyhub.monolith.repository.geo
+package com.appifyhub.monolith.features.geo.repository
 
 import assertk.assertThat
 import assertk.assertions.isDataClassEqualTo
 import assertk.assertions.isNotNull
 import assertk.assertions.isNull
-import com.appifyhub.monolith.storage.dao.GeolocationDao
+import com.appifyhub.monolith.features.geo.storage.GeolocationDao
 import com.appifyhub.monolith.util.Stubs
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
