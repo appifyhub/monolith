@@ -7,6 +7,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - uses: actions/checkout@v2
         with:
@@ -54,6 +55,48 @@ jobs:
         env:
           BUILD_QUALITY: "PR"
         run: ./gradlew build
+
+      - name: Generate SDK
+        run: |
+          # Prepare the variables
+          VERSION=$(scripts/prop.sh version)
+          ROOT_DIR=$(pwd)
+          SPECS_DIR=$(pwd)/src/main/resources/static/docs/open-api
+          # Run the process for each spec
+          for SPEC in creator consumer; do
+            # Prepare the output directory
+            OUTPUT_DIR=$(pwd)/build/libs/sdk/$SPEC
+            rm -rf $OUTPUT_DIR
+            mkdir -p $OUTPUT_DIR
+            # Run the generator
+            docker run --rm \
+              -v $SPECS_DIR:/specs:ro \
+              -v $OUTPUT_DIR:/output:rw \
+              openapitools/openapi-generator-cli generate \
+                -i /specs/$SPEC.yaml \
+                -g python \
+                -o /output \
+                --enable-post-process-file \
+                --additional-properties=identifierNamingConvention=snake_case,packageName=appifyhub,packageVersion=${VERSION}
+            # Run the tests
+            cd $OUTPUT_DIR
+            pip install -r requirements.txt
+            pip install pytest
+            pytest
+            cd $ROOT_DIR
+            # Copy the SDK to the main directory
+            cp -r $OUTPUT_DIR $ROOT_DIR/sdk/$SPEC
+          done
+          # Publish as a commit
+          git config user.name 'GitHub Action'
+          git config user.email 'action@github.com'
+          git add sdk
+          if git diff --staged --quiet; then
+            echo "No changes detected in SDK docs."
+          else
+            git commit -m "Update SDK docs [skip ci]"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
 
       - name: Codacy Coverage Report
         env:

@@ -129,7 +129,7 @@ tasks {
             # suppress inspection "UnusedProperty" for whole file
 
             version=$version
-            quality=${Env.get("BUILD_QUALITY", default = "Debug").toLowerCase()}
+            quality=${Env.get("BUILD_QUALITY", default = "Debug").lowercase()}
           """.trimIndent(),
           Charsets.UTF_8,
         )
@@ -211,10 +211,10 @@ githubRelease {
     "Debug" -> {
       val formatter = DateTimeFormat.forPattern("yyyy_MM_dd_HH_mm_ss").withZoneUTC()
       val timestamp = Instant.now().toString(formatter)
-      "v$version.${quality.toLowerCase()}.$timestamp"
+      "v$version.${quality.lowercase()}.$timestamp"
     }
 
-    else -> "v$version.${quality.toLowerCase()}"
+    else -> "v$version.${quality.lowercase()}"
   }
 
   token(writeToken)
@@ -265,7 +265,7 @@ githubRelease {
 
   releaseAssets(
     arrayOf(
-      file("${project.buildDir}/libs/$artifact.jar"),
+      file("${project.layout.buildDirectory.asFile.get()}/libs/$artifact.jar"),
     ),
   )
 }
