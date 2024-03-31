@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - uses: actions/checkout@v2
         with:
@@ -57,6 +56,7 @@ jobs:
         run: ./gradlew build
 
       - name: Generate SDK
+        if: "!contains(github.event.head_commit.message, 'skip ci')"
         run: |
           # Prepare the variables
           VERSION=$(scripts/prop.sh version)
@@ -64,6 +64,7 @@ jobs:
           SPECS_DIR=$(pwd)/src/main/resources/static/docs/open-api
           # Run the process for each spec
           for SPEC in creator consumer; do
+            echo "Running SDK generation for $SPEC..."
             # Prepare the output directory
             OUTPUT_DIR=$(pwd)/build/libs/sdk/$SPEC
             rm -rf $OUTPUT_DIR
@@ -85,7 +86,10 @@ jobs:
             pytest
             cd $ROOT_DIR
             # Copy the SDK to the main directory
-            cp -r $OUTPUT_DIR $ROOT_DIR/sdk/$SPEC
+            SDK_DIR=$ROOT_DIR/sdk/$SPEC
+            rm -rf $SDK_DIR
+            mkdir -p $SDK_DIR
+            cp -r $OUTPUT_DIR $SDK_DIR
           done
           # Publish as a commit
           git config user.name 'GitHub Action'
