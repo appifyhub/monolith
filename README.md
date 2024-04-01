@@ -9,6 +9,9 @@
 
 See:
 
+- [Website](https://appifyhub.com)
+- [API Docs](https://api.appifyhub.com/docs/index.html)
 - [How to run using Docker Compose](./docker)
-- [License](LICENSE)
-- [How to contribute](CONTRIBUTING.md)
+- [License](./LICENSE)
+- [How to contribute](./CONTRIBUTING.md)
+- [SDK](./sdk)
