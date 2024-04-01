@@ -1,10 +1,10 @@
+# remove sdk/consumer/.openapi-generator/* files from tracking but keep them locally # Created by 
+https://www.toptal.com/developers/gitignore/api/java,linux,macos,kotlin,python,windows,java-web,intellij+all,intellij+iml,gradle 
+# Edit at 
+https://www.toptal.com/developers/gitignore?templates=java,linux,macos,kotlin,python,windows,java-web,intellij+all,intellij+iml,gradle
 
-# Created by https://www.toptal.com/developers/gitignore/api/java,linux,macos,kotlin,python,windows,java-web,intellij+all,intellij+iml,gradle
-# Edit at https://www.toptal.com/developers/gitignore?templates=java,linux,macos,kotlin,python,windows,java-web,intellij+all,intellij+iml,gradle
-
-### Intellij+all ###
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+### Intellij+all ### # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android 
+Studio, WebStorm and Rider # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -417,3 +417,4 @@ gradle-app.setting
 **/release.keystore.info
 **/generated.properties
 openapitools.json
+sdk/*/.openapi-generator/*
