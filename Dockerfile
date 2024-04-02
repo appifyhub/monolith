@@ -24,4 +24,11 @@ WORKDIR /
 
 EXPOSE 8080
 
-ENTRYPOINT [ "java", "-jar", "/monolith.jar" ]
+ENTRYPOINT [ \
+  "java", \
+  "-XX:+UseSerialGC", \
+  "-XX:MaxRAM=265m", \
+  "-Xss256k", \
+  "-jar", \
+  "/monolith.jar" \
+]
