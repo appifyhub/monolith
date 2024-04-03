@@ -61,3 +61,42 @@ app:
 logging:
   level:
     root: ${LOGGING_LEVEL:INFO}
+
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        # match with below list of endpoints
+        include: "info,beans,flyway,health,liquibase,metrics,mappings,prometheus,cors"
+  endpoint:
+    info:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    beans:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    flyway:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    health:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    liquibase:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    metrics:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    mappings:
+      enabled: true
+      cache:
+        time-to-live: "1m"
+    prometheus:
+      enabled: true

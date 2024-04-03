@@ -1,7 +1,7 @@
 package com.appifyhub.monolith.features.auth.domain.security
 
-import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.errors.GlobalExceptionHandler
+import com.appifyhub.monolith.features.common.api.Endpoints
 import com.appifyhub.monolith.features.user.repository.UserRepository
 import org.springframework.context.annotation.Bean
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
@@ -45,6 +45,7 @@ class WebSecurityConfiguration(
           Endpoints.VERIFICATION,
           Endpoints.SIGNATURE_RESET,
           Endpoints.DOCS,
+          Endpoints.ACTUATOR,
         )
           .permitAll()
           .anyRequest()
