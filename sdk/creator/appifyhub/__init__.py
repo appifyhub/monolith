@@ -15,7 +15,7 @@
 """  # noqa: E501
 
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
 
 # import apis into sdk package
 from appifyhub.api.auth_api import AuthApi
