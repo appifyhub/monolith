@@ -29,7 +29,7 @@ plugins {
   kotlin("kapt") version kotlinVersion
 
   id("org.springframework.boot") version "2.6.7"
-  id("io.spring.dependency-management") version "1.0.11.RELEASE"
+  id("io.spring.dependency-management") version "1.1.0"
   id("com.github.breadmoirai.github-release") version "2.2.12"
 
   id("jacoco")
@@ -72,6 +72,10 @@ dependencies {
   implementation("com.ip2location:ip2location-java:8.+")
   implementation("com.googlecode.libphonenumber:libphonenumber:8.+")
   implementation("com.google.firebase:firebase-admin:9.1.1")
+
+  // monitoring
+  implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("io.micrometer:micrometer-registry-prometheus")
 
   // annotation processors
   kapt("org.springframework.boot:spring-boot-configuration-processor")
