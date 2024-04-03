@@ -1,6 +1,7 @@
 package com.appifyhub.monolith.features.init.domain
 
 import com.appifyhub.monolith.features.common.domain.model.Settable
+import com.appifyhub.monolith.features.common.validation.Normalizers
 import com.appifyhub.monolith.features.creator.domain.model.Project
 import com.appifyhub.monolith.features.creator.domain.model.ProjectCreator
 import com.appifyhub.monolith.features.creator.domain.model.messaging.FirebaseConfig
@@ -20,7 +21,6 @@ import com.appifyhub.monolith.features.user.domain.model.UserUpdater
 import com.appifyhub.monolith.features.user.domain.service.UserService
 import com.appifyhub.monolith.util.extension.requireValid
 import com.appifyhub.monolith.util.extension.silent
-import com.appifyhub.monolith.features.common.validation.Normalizers
 import org.slf4j.LoggerFactory
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
@@ -33,7 +33,7 @@ class SchemaInitializer(
   private val userService: UserService,
   private val schemaService: SchemaService,
   private val messageTemplateService: MessageTemplateService,
-  private val creatorConfig: InitializationConfig,
+  private val initializationConfig: InitializationConfig,
 ) : ApplicationRunner {
 
   private enum class Seed(val version: Long) { INITIAL(1L) }
@@ -66,43 +66,43 @@ class SchemaInitializer(
     log.debug("Seeding initial database")
 
     // validate configuration
-    val configuredSignature = Normalizers.RawSignatureNullified.run(creatorConfig.ownerSignature)
+    val configuredSignature = Normalizers.RawSignatureNullified.run(initializationConfig.ownerSignature)
       .requireValid { "Owner Signature" }
-    val ownerName = Normalizers.Name.run(creatorConfig.ownerName)
+    val ownerName = Normalizers.Name.run(initializationConfig.ownerName)
       .requireValid { "Owner Name" }
-    val ownerEmail = Normalizers.Email.run(creatorConfig.ownerEmail)
+    val ownerEmail = Normalizers.Email.run(initializationConfig.ownerEmail)
       .requireValid { "Owner Email" }
-    val creatorProjectName = Normalizers.ProjectName.run(creatorConfig.projectName)
+    val creatorProjectName = Normalizers.ProjectName.run(initializationConfig.projectName)
       .requireValid { "Project Name" }
     val rawOwnerSignature = configuredSignature ?: SignatureGenerator.nextSignature
     val mailgunConfig = silent {
       Normalizers.MailgunConfigData.run(
         MailgunConfig(
-          apiKey = creatorConfig.mailgunApiKey,
-          domain = creatorConfig.mailgunDomain,
-          senderName = creatorConfig.mailgunSenderName,
-          senderEmail = creatorConfig.mailgunSenderEmail,
+          apiKey = initializationConfig.mailgunApiKey,
+          domain = initializationConfig.mailgunDomain,
+          senderName = initializationConfig.mailgunSenderName,
+          senderEmail = initializationConfig.mailgunSenderEmail,
         ),
       ).requireValid { "Mailgun Config" }
     }
     val twilioConfig = silent {
       Normalizers.TwilioConfigData.run(
         TwilioConfig(
-          accountSid = creatorConfig.twilioAccountSid,
-          authToken = creatorConfig.twilioAuthToken,
-          messagingServiceId = creatorConfig.twilioMessagingServiceId,
-          maxPricePerMessage = creatorConfig.twilioMaxPricePerMessage.toInt(),
-          maxRetryAttempts = creatorConfig.twilioMaxRetryAttempts.toInt(),
-          defaultSenderName = creatorConfig.twilioDefaultSenderName,
-          defaultSenderNumber = creatorConfig.twilioDefaultSenderNumber,
+          accountSid = initializationConfig.twilioAccountSid,
+          authToken = initializationConfig.twilioAuthToken,
+          messagingServiceId = initializationConfig.twilioMessagingServiceId,
+          maxPricePerMessage = initializationConfig.twilioMaxPricePerMessage.toInt(),
+          maxRetryAttempts = initializationConfig.twilioMaxRetryAttempts.toInt(),
+          defaultSenderName = initializationConfig.twilioDefaultSenderName,
+          defaultSenderNumber = initializationConfig.twilioDefaultSenderNumber,
         ),
       ).requireValid { "Twilio Config" }
     }
     val firebaseConfig = silent {
       Normalizers.FirebaseConfigData.run(
         FirebaseConfig(
-          projectName = creatorConfig.firebaseProjectName,
-          serviceAccountKeyJsonBase64 = creatorConfig.firebaseServiceAccountKeyBase64,
+          projectName = initializationConfig.firebaseProjectName,
+          serviceAccountKeyJsonBase64 = initializationConfig.firebaseServiceAccountKeyBase64,
         ),
       ).requireValid { "Firebase Config" }
     }

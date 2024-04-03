@@ -232,7 +232,7 @@ class SchemaInitializerTest {
     userService = userService,
     schemaService = schemaService,
     messageTemplateService = messageTemplateService,
-    creatorConfig = InitializationConfig().apply {
+    initializationConfig = InitializationConfig().apply {
       this.ownerName = superCreatorName
       this.ownerSignature = superCreatorSignature
       this.ownerEmail = superCreatorEmail
