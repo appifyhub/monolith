@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "appifyhub"
-version = "1.0.2"
+version = "1.1.0"
 description = "Appify Hub's Creator API"
 authors = ["Team <contact@appifyhub.com>"]
 license = "MIT License"
