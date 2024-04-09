@@ -15,6 +15,11 @@ jobs:
 
       - name: Print build name
         run: echo "$GITHUB_ACTOR is building '$GITHUB_REPOSITORY' (commit $GITHUB_SHA)"
+      
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 10
 
       - name: Cache dependencies
         uses: actions/cache@v2
