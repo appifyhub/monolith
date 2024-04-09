@@ -12,3 +12,30 @@ spring:
 logging:
   level:
     root: ${LOGGING_LEVEL:DEBUG}
+
+otel:
+  metric:
+    export:
+      interval: 5m # longer because it fails by default
+  experimental:
+    exporter:
+      otlp:
+        retry:
+          enabled: false
+  instrumentation:
+    annotations:
+      enabled: false
+    spring-web:
+      enabled: false
+    spring-webflux:
+      enabled: false
+    spring-webmvc:
+      enabled: false
+    log4j-appender:
+      enabled: false
+    logback-appender:
+      enabled: false
+    micrometer:
+      enabled: false
+    kafka:
+      enabled: false
