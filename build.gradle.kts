@@ -173,7 +173,8 @@ tasks {
     }
 
     minHeapSize = "512m"
-    maxHeapSize = "1024m"
+    maxHeapSize = "2048m"
+    forkEvery = 64
 
     // as per https://stackoverflow.com/a/39753210/2102748
     val desiredForks = Runtime.getRuntime()?.availableProcessors()?.div(2) ?: 1
