@@ -41,6 +41,11 @@ repositories {
 
 @Suppress("GradlePackageUpdate")
 dependencies {
+  // BOM dependencies
+  implementation(platform("io.opentelemetry:opentelemetry-bom:1.36.0"))
+  implementation(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:2.2.+"))
+  testImplementation(platform("org.junit:junit-bom:5+"))
+
   // as per https://spring.io/blog/2021/12/10/log4j2-vulnerability-and-spring-boot
   extra["slf4j.version"] = "2.+"
 
@@ -76,6 +81,7 @@ dependencies {
   // monitoring
   implementation("org.springframework.boot:spring-boot-starter-actuator")
   implementation("io.micrometer:micrometer-registry-prometheus")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
 
   // annotation processors
   kapt("org.springframework.boot:spring-boot-configuration-processor")
@@ -91,7 +97,6 @@ dependencies {
   testAnnotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
   // tests
-  testImplementation(platform("org.junit:junit-bom:5+"))
   testImplementation("org.junit.jupiter:junit-jupiter")
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.springframework.security:spring-security-test")
@@ -168,7 +173,8 @@ tasks {
     }
 
     minHeapSize = "512m"
-    maxHeapSize = "1024m"
+    maxHeapSize = "2048m"
+    forkEvery = 64
 
     // as per https://stackoverflow.com/a/39753210/2102748
     val desiredForks = Runtime.getRuntime()?.availableProcessors()?.div(2) ?: 1
