@@ -24,7 +24,7 @@ print(ProjectFeatureResponse.to_json())
 # convert the object into a dict
 project_feature_response_dict = project_feature_response_instance.to_dict()
 # create an instance of ProjectFeatureResponse from a dict
-project_feature_response_form_dict = project_feature_response.from_dict(project_feature_response_dict)
+project_feature_response_from_dict = ProjectFeatureResponse.from_dict(project_feature_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

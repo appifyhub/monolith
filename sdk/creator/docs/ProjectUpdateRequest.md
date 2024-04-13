@@ -37,7 +37,7 @@ print(ProjectUpdateRequest.to_json())
 # convert the object into a dict
 project_update_request_dict = project_update_request_instance.to_dict()
 # create an instance of ProjectUpdateRequest from a dict
-project_update_request_form_dict = project_update_request.from_dict(project_update_request_dict)
+project_update_request_from_dict = ProjectUpdateRequest.from_dict(project_update_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
