@@ -1,5 +1,13 @@
-![Codacy grade](https://img.shields.io/codacy/grade/631f1219784b4b068469dcb4a1950aec?logo=codacy&label=Quality&color=51C92A)
-![Codacy coverage](https://img.shields.io/codacy/coverage/631f1219784b4b068469dcb4a1950aec?logo=codacy&label=Coverage&color=51C92A)
+![License](https://img.shields.io/github/license/appifyhub/monolith?logo=github&logoColor=white&label=License&color=FA3080)
+![Date](https://img.shields.io/github/release-date/appifyhub/monolith?display_date=published_at&logo=docker&logoColor=white&label=Released&color=FA3080)
+![Release](https://img.shields.io/github/v/release/appifyhub/monolith?sort=semver&display_name=release&logo=github&logoColor=white&label=Latest&color=FA3080)  
+![Code](https://img.shields.io/github/repo-size/appifyhub/monolith?logo=github&logoColor=white&label=Sources&color=FAFA20)
+![Image](https://img.shields.io/docker/image-size/appifyhub/service?sort=semver&logo=docker&logoColor=white&label=Image&color=FAFA20)  
+![Build](https://img.shields.io/github/actions/workflow/status/appifyhub/monolith/release.yml?branch=release&logo=github&logoColor=white&label=Build)
+![Quality](https://img.shields.io/codacy/grade/631f1219784b4b068469dcb4a1950aec?logo=codacy&logoColor=white&label=Quality&color=51C92A)
+![Coverage](https://img.shields.io/codacy/coverage/631f1219784b4b068469dcb4a1950aec?logo=codacy&logoColor=white&label=Coverage&color=51C92A)  
+![Issues](https://img.shields.io/github/issues-closed/appifyhub/monolith?logo=github&logoColor=white&label=Issues&color=blue)
+![PRs](https://img.shields.io/github/issues-pr-closed/appifyhub/monolith?logo=github&logoColor=white&label=PRs&color=blue)
 
 # Monolith · The AppifyHub's Backbone
 
@@ -7,7 +15,8 @@
 
 This repository contains the **complete** codebase of the [AppifyHub](https://appifyhub.com)'s monolith backend service.
 
-The service covers for the majority of everyday, user-facing features, such as: authentication, user management, email and messaging, access management, and other.  
+The service covers for the majority of everyday, user-facing features, such as: authentication, user management, email and messaging, access management, and other.
+
 See the rest of this document for a developer's overview and information on how to use it yourself.
 
 ### Access points
