@@ -24,7 +24,7 @@ print(PushDeviceResponse.to_json())
 # convert the object into a dict
 push_device_response_dict = push_device_response_instance.to_dict()
 # create an instance of PushDeviceResponse from a dict
-push_device_response_form_dict = push_device_response.from_dict(push_device_response_dict)
+push_device_response_from_dict = PushDeviceResponse.from_dict(push_device_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

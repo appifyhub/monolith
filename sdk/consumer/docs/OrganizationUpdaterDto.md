@@ -27,7 +27,7 @@ print(OrganizationUpdaterDto.to_json())
 # convert the object into a dict
 organization_updater_dto_dict = organization_updater_dto_instance.to_dict()
 # create an instance of OrganizationUpdaterDto from a dict
-organization_updater_dto_form_dict = organization_updater_dto.from_dict(organization_updater_dto_dict)
+organization_updater_dto_from_dict = OrganizationUpdaterDto.from_dict(organization_updater_dto_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

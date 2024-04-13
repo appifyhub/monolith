@@ -24,7 +24,7 @@ print(UserUpdateSignatureRequest.to_json())
 # convert the object into a dict
 user_update_signature_request_dict = user_update_signature_request_instance.to_dict()
 # create an instance of UserUpdateSignatureRequest from a dict
-user_update_signature_request_form_dict = user_update_signature_request.from_dict(user_update_signature_request_dict)
+user_update_signature_request_from_dict = UserUpdateSignatureRequest.from_dict(user_update_signature_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

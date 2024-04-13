@@ -25,7 +25,7 @@ print(MessageSendRequest.to_json())
 # convert the object into a dict
 message_send_request_dict = message_send_request_instance.to_dict()
 # create an instance of MessageSendRequest from a dict
-message_send_request_form_dict = message_send_request.from_dict(message_send_request_dict)
+message_send_request_from_dict = MessageSendRequest.from_dict(message_send_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

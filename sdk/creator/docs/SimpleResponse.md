@@ -23,7 +23,7 @@ print(SimpleResponse.to_json())
 # convert the object into a dict
 simple_response_dict = simple_response_instance.to_dict()
 # create an instance of SimpleResponse from a dict
-simple_response_form_dict = simple_response.from_dict(simple_response_dict)
+simple_response_from_dict = SimpleResponse.from_dict(simple_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

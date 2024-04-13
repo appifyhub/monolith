@@ -33,7 +33,7 @@ print(UserSignupRequest.to_json())
 # convert the object into a dict
 user_signup_request_dict = user_signup_request_instance.to_dict()
 # create an instance of UserSignupRequest from a dict
-user_signup_request_form_dict = user_signup_request.from_dict(user_signup_request_dict)
+user_signup_request_from_dict = UserSignupRequest.from_dict(user_signup_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
