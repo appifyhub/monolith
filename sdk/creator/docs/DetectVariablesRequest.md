@@ -23,7 +23,7 @@ print(DetectVariablesRequest.to_json())
 # convert the object into a dict
 detect_variables_request_dict = detect_variables_request_instance.to_dict()
 # create an instance of DetectVariablesRequest from a dict
-detect_variables_request_form_dict = detect_variables_request.from_dict(detect_variables_request_dict)
+detect_variables_request_from_dict = DetectVariablesRequest.from_dict(detect_variables_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

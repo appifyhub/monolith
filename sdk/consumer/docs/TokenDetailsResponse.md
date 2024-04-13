@@ -34,7 +34,7 @@ print(TokenDetailsResponse.to_json())
 # convert the object into a dict
 token_details_response_dict = token_details_response_instance.to_dict()
 # create an instance of TokenDetailsResponse from a dict
-token_details_response_form_dict = token_details_response.from_dict(token_details_response_dict)
+token_details_response_from_dict = TokenDetailsResponse.from_dict(token_details_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

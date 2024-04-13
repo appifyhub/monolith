@@ -24,7 +24,7 @@ print(MessageInputsRequest.to_json())
 # convert the object into a dict
 message_inputs_request_dict = message_inputs_request_instance.to_dict()
 # create an instance of MessageInputsRequest from a dict
-message_inputs_request_form_dict = message_inputs_request.from_dict(message_inputs_request_dict)
+message_inputs_request_from_dict = MessageInputsRequest.from_dict(message_inputs_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
