@@ -36,7 +36,7 @@ print(CreatorResponse.to_json())
 # convert the object into a dict
 creator_response_dict = creator_response_instance.to_dict()
 # create an instance of CreatorResponse from a dict
-creator_response_form_dict = creator_response.from_dict(creator_response_dict)
+creator_response_from_dict = CreatorResponse.from_dict(creator_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

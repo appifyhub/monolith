@@ -27,7 +27,7 @@ print(MessageTemplateCreateRequest.to_json())
 # convert the object into a dict
 message_template_create_request_dict = message_template_create_request_instance.to_dict()
 # create an instance of MessageTemplateCreateRequest from a dict
-message_template_create_request_form_dict = message_template_create_request.from_dict(message_template_create_request_dict)
+message_template_create_request_from_dict = MessageTemplateCreateRequest.from_dict(message_template_create_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

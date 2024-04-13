@@ -25,7 +25,7 @@ print(CreatorCredentialsRequest.to_json())
 # convert the object into a dict
 creator_credentials_request_dict = creator_credentials_request_instance.to_dict()
 # create an instance of CreatorCredentialsRequest from a dict
-creator_credentials_request_form_dict = creator_credentials_request.from_dict(creator_credentials_request_dict)
+creator_credentials_request_from_dict = CreatorCredentialsRequest.from_dict(creator_credentials_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
