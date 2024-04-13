@@ -26,7 +26,7 @@ print(SignupCodeResponse.to_json())
 # convert the object into a dict
 signup_code_response_dict = signup_code_response_instance.to_dict()
 # create an instance of SignupCodeResponse from a dict
-signup_code_response_form_dict = signup_code_response.from_dict(signup_code_response_dict)
+signup_code_response_from_dict = SignupCodeResponse.from_dict(signup_code_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

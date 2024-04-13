@@ -29,7 +29,7 @@ print(TwilioConfigDto.to_json())
 # convert the object into a dict
 twilio_config_dto_dict = twilio_config_dto_instance.to_dict()
 # create an instance of TwilioConfigDto from a dict
-twilio_config_dto_form_dict = twilio_config_dto.from_dict(twilio_config_dto_dict)
+twilio_config_dto_from_dict = TwilioConfigDto.from_dict(twilio_config_dto_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

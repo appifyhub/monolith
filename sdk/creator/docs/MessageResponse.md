@@ -24,7 +24,7 @@ print(MessageResponse.to_json())
 # convert the object into a dict
 message_response_dict = message_response_instance.to_dict()
 # create an instance of MessageResponse from a dict
-message_response_form_dict = message_response.from_dict(message_response_dict)
+message_response_from_dict = MessageResponse.from_dict(message_response_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

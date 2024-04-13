@@ -23,7 +23,7 @@ print(SettableRequest.to_json())
 # convert the object into a dict
 settable_request_dict = settable_request_instance.to_dict()
 # create an instance of SettableRequest from a dict
-settable_request_form_dict = settable_request.from_dict(settable_request_dict)
+settable_request_from_dict = SettableRequest.from_dict(settable_request_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
