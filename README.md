@@ -50,7 +50,7 @@ You can find the SDK and its documentation here:
 
 ## ⚠️ Before you continue…
 
-If you plan on contributing to this project in any way, please read and acknowledge the [Contributing guide](./CONTRIBUTING) first.
+If you plan on contributing to this project in any way, please read and acknowledge the [Contributing guide](./CONTRIBUTING.md) first.
 
 Please also take note of the [License](./LICENSE) and check the [Project Website](https://appifyhub.com) for general information.
 
