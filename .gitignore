@@ -418,3 +418,4 @@ gradle-app.setting
 **/generated.properties
 openapitools.json
 sdk/*/.openapi-generator/*
+**/.vscode/*
