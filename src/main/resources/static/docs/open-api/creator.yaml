@@ -2,7 +2,7 @@ openapi: "3.1.0"
 
 info:
   version: Latest
-  title: Appify Hub's Creator API
+  title: Creator API · Appify Hub
   description: The full specification of the service's API used by the project administrators.
   contact:
     name: Team
@@ -12,7 +12,7 @@ info:
     name: MIT License
     url: https://github.com/appifyhub/monolith/blob/main/LICENSE
   x-logo:
-    url: https://github.com/appifyhub/graphics/blob/main/resources/logo.png?raw=true
+    url: images/logo-text-white-small.png
     altText: Appify Hub Logo
 servers:
   - url: https://api.appifyhub.com
