@@ -3,17 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta
-            name="description"
-            content="Explore Appify Hub's API documentation to seamlessly integrate with our apps. Start building apps today."
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <meta name="description"
+        content="Explore Appify Hub's API documentation to seamlessly integrate with our apps. Start building apps today." />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-            href="https://fonts.googleapis.com/css2?family=Cousine:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
-            rel="stylesheet"
-    />
+        href="https://fonts.googleapis.com/css2?family=Cousine:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&family=Lexend:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet" />
     <title>API Docs · Appify Hub</title>
     <style>
         * {
@@ -25,7 +22,7 @@
         body {
             font-family: 'Noto Sans', 'Helvetica Neue', Helvetica, sans-serif;
             color: white;
-            background: linear-gradient(to bottom right, #00060b, #032020) fixed;
+            background: linear-gradient(110deg, #000000, #031d22);
             background-size: cover;
             min-height: 100vh;
             display: flex;
@@ -35,17 +32,10 @@
             word-wrap: break-word;
         }
 
-        p, h1, h2 {
-            background: linear-gradient(to bottom right, #76d1db, #ffffff);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
         h1 {
             font-family: 'Lexend', 'Helvetica Neue', Helvetica, sans-serif;
             font-size: 3.5rem;
-            font-weight: 700;
+            font-weight: 400;
             margin: 10rem 3rem 5rem 3rem;
         }
 
@@ -54,11 +44,12 @@
             font-size: 2rem;
             font-weight: 300;
             margin: 4rem;
+            color: #cffff7;
         }
 
         p {
             max-width: 1000px;
-            margin: 3rem 4rem;
+            margin: 2rem 4rem;
             font-size: 1.3rem;
             font-weight: 300;
             line-height: 1.6;
@@ -74,12 +65,51 @@
         }
 
         p .emphasized {
-            font-weight: 400;
-            color: #34deaf !important;
-            background: radial-gradient(#00fff2, #176d87);
+            font-weight: 700;
+            color: #5cf4c9 !important;
+            background: -webkit-linear-gradient(300deg,
+                    #5cf4c980,
+                    #62e7ff,
+                    #5cf4c9,
+                    #92d7dc,
+                    #5cf4c980);
             background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+
+            background-position: 0 0;
+            background-size: 300% auto;
+            -webkit-animation: gradient_move 15s ease infinite;
+            animation: gradient_move 15s ease infinite;
+            transition: all 0.7s;
+        }
+
+        @-webkit-keyframes gradient_move {
+            0% {
+                background-position: 0% 92%;
+            }
+
+            50% {
+                background-position: 100% 9%;
+            }
+
+            100% {
+                background-position: 0% 92%;
+            }
+        }
+
+        @keyframes gradient_move {
+            0% {
+                background-position: 0% 92%;
+            }
+
+            50% {
+                background-position: 100% 9%;
+            }
+
+            100% {
+                background-position: 0% 92%;
+            }
         }
 
         .cta-container {
@@ -105,9 +135,12 @@
             font-weight: 400;
             cursor: pointer;
             transition: box-shadow 0.7s, scale 0.3s;
-            box-shadow: /* @formatter:off */
-                0 0 0.2rem #00fff240, /* Outer glow */
-                inset 0 0 2rem #1fcde040; /* Inner glow */
+            box-shadow:
+                /* @formatter:off */
+                0 0 0.2rem #00fff240,
+                /* Outer glow */
+                inset 0 0 2rem #1fcde040;
+            /* Inner glow */
             /* @formatter:on */
         }
 
@@ -115,37 +148,52 @@
             scale: 0.98;
         }
 
-        .cta:hover, .cta:focus {
+        .cta:hover,
+        .cta:focus {
             scale: 1.01;
         }
 
         .cta.green {
-            box-shadow: /* @formatter:off */
-                0 0 0.2rem #00FFF240, /* Outer glow */
-                inset 0 0 2rem #00FFF240; /* Inner glow */
+            box-shadow:
+                /* @formatter:off */
+                0 0 0.2rem #00FFF240,
+                /* Outer glow */
+                inset 0 0 2rem #00FFF240;
+            /* Inner glow */
             /* @formatter:on */
         }
 
-        .cta.green:hover, .cta.green:focus {
+        .cta.green:hover,
+        .cta.green:focus {
             scale: 1.01;
-            box-shadow: /* @formatter:off */
-                0 0 1rem #00FFF2F0, /* Outer glow */
-                inset 0 0 9rem #00FFF2F0; /* Inner glow */
+            box-shadow:
+                /* @formatter:off */
+                0 0 1rem #00FFF2F0,
+                /* Outer glow */
+                inset 0 0 9rem #00FFF2F0;
+            /* Inner glow */
             /* @formatter:on */
         }
 
         .cta.blue {
-            box-shadow: /* @formatter:off */
-                0 0 0.2rem #12A2FF82, /* Outer glow */
-                inset 0 0 2rem #12A2FF82; /* Inner glow */
+            box-shadow:
+                /* @formatter:off */
+                0 0 0.2rem #12A2FF82,
+                /* Outer glow */
+                inset 0 0 2rem #12A2FF82;
+            /* Inner glow */
             /* @formatter:on */
         }
 
-        .cta.blue:hover, .cta.blue:focus {
+        .cta.blue:hover,
+        .cta.blue:focus {
             scale: 1.01;
-            box-shadow: /* @formatter:off */
-                0 0 1rem #12ABFFF0, /* Outer glow */
-                inset 0 0 9rem #12ABFFF0; /* Inner glow */
+            box-shadow:
+                /* @formatter:off */
+                0 0 1rem #12ABFFF0,
+                /* Outer glow */
+                inset 0 0 9rem #12ABFFF0;
+            /* Inner glow */
             /* @formatter:on */
         }
 
@@ -193,36 +241,35 @@
 </head>
 
 <body>
-<div class="gradient-text">
-    <h1>
-        <img
-                src="images/logo-square-small.png"
-                alt="Appify Hub Logo"
-                class="logo"
-        />
-        Discover the API Docs
-    </h1>
-    <p>
-        <strong>Appify Hub</strong> provides two APIs:
-        the <span class="emphasized">Consumer</span> API and the <span class="emphasized">Creator</span> API.
-    </p>
-    <p>
-        The Creator API is exclusive to creators and can manage apps, projects, and configurations.<br/>
-        To sign up to Appify Hub and set up your project, you can get started with the Creator API.<br/>
-        <span class="emphasized">Note</span>: Creators must still use the Consumer API for basic functions.
-    </p>
-    <h2>Which API are you interested in?</h2>
-    <div class="cta-container">
-        <button class="cta blue" onclick="window.location.href='creator.html';">
-            <span class="icon">🧑‍💻</span>
-            Creator API
-        </button>
-        <button class="cta green" onclick="window.location.href='consumer.html';">
-            <span class="icon">☎️</span>
-            Consumer API
-        </button>
+    <div class="gradient-text">
+        <h1>
+            <img src="images/logo-square-small.png" alt="Appify Hub Logo" class="logo" />
+            Discover the API Docs
+        </h1>
+        <p>
+            Appify Hub provides two APIs:
+            the <span class="emphasized">Consumer</span> API and
+            the <span class="emphasized">Creator</span> API.
+        </p>
+        <p>
+            The Creator API is exclusive to creators and can manage apps, projects, and configurations.<br />
+            To sign up to Appify Hub and set up your project, you can get started with the Creator API.
+        </p>
+        <p>
+            <span class="emphasized">Note</span>: Creators still use the Consumer API for basic functionality.
+        </p>
+        <h2>Which API would you like to explore first?</h2>
+        <div class="cta-container">
+            <button class="cta blue" onclick="window.location.href='creator.html';">
+                <span class="icon">🧑‍💻</span>
+                Creator API
+            </button>
+            <button class="cta green" onclick="window.location.href='consumer.html';">
+                <span class="icon">☎️</span>
+                Consumer API
+            </button>
+        </div>
     </div>
-</div>
 </body>
 
 </html>
