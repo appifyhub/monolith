@@ -1,24 +1,52 @@
----
-name: Planned work
-about: Document some planned work
-title: "[Planned Work] "
-labels: Enhancement, Feature
-assignees: ''
+name: Planned Work
+description: Documented work that was planned ahead
+title: "[Planned] "
+labels: ["Enhancement", "Feature"]
+assignees: []
 
----
+body:
+  - type: markdown
+    attributes:
+      value: "## Summary"
+  - type: textarea
+    id: summary
+    attributes:
+      label: "Provide a brief summary of the planned work"
+      description: "Summarize the key points of the planned work here"
+      placeholder: "Implement a new feature to improve user interface scalability…"
+    validations:
+      required: true
 
-## Summary
+  - type: markdown
+    attributes:
+      value: "### Overview"
+  - type: textarea
+    id: overview
+    attributes:
+      label: "Detailed overview"
+      description: "Describe in detail how this work should be achieved"
+      placeholder: "Outline the approach and methods to be used…"
+    validations:
+      required: true
 
-We need to ...
+  - type: markdown
+    attributes:
+      value: "### Acceptance Criteria"
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: "List the acceptance criteria"
+      description: "Specify what criteria must be met for this work to be considered complete"
+      placeholder: "- Criterion 1\n- Criterion 2\n- Criterion 3\n…"
+    validations:
+      required: true
 
-## Overview
-
-It should be achieved by ...
-
-## Acceptance Criteria
-
-  - It should work like this ...
-
-### Additional Notes
-
-  - Don't forget to ...
+  - type: markdown
+    attributes:
+      value: "#### Additional Notes"
+  - type: textarea
+    id: additional-notes
+    attributes:
+      label: "Include any additional notes (optional)"
+      description: "Any other comments or important information not captured above"
+      placeholder: "Notes on dependencies, possible issues, etc."
