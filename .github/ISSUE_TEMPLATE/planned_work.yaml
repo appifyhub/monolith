@@ -1,6 +1,6 @@
 name: Planned Work
 description: Documented work that was planned ahead
-title: "[Planned] "
+title: "[Planned] Title Here"
 labels: ["Enhancement", "Feature"]
 
 body:
