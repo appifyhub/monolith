@@ -2,7 +2,6 @@ name: Planned Work
 description: Documented work that was planned ahead
 title: "[Planned] "
 labels: ["Enhancement", "Feature"]
-assignees: []
 
 body:
   - type: markdown
