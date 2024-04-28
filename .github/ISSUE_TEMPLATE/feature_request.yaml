@@ -1,7 +1,7 @@
 name: Feature Request
 description: Suggest an idea for this project
-title: "[Request] Title Here"
-labels: ["Enhancement", "Feature", "Question"]
+title: "Feature Request Title Here"
+labels: ["Enhancement", "Feature", "Request"]
 
 body:
   - type: markdown
