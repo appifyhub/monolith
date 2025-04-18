@@ -15,10 +15,10 @@ info:
     url: images/logo-text-white-small.png
     altText: Appify Hub Logo
 servers:
-  - url: https://api.appifyhub.com
-    description: Production environment
-  - url: http://staging.api.appifyhub.com
-    description: Staging environment
+  - url: https://api.cloud.appifyhub.com
+    description: Live environment
+  - url: http://staging.api.cloud.appifyhub.com
+    description: Pre-live environment
 
 paths:
 
@@ -777,7 +777,7 @@ components:
         domain:
           type: string
           description: A verified domain
-          examples: [ "appifyhub.com" ]
+          examples: [ "www.appifyhub.com" ]
         sender_name:
           type: string
           description: The name of the default sender
@@ -1259,13 +1259,13 @@ components:
       type: string
       format: uri
       description: The URL to this consumer project's logo
-      examples: [ "https://appifyhub.com/logo.png" ]
+      examples: [ "https://www.appifyhub.com/logo.png" ]
 
     ProjectWebsiteURL:
       type: string
       format: uri
       description: The URL to this consumer project's website
-      examples: [ "https://appifyhub.com" ]
+      examples: [ "https://wwww.appifyhub.com" ]
 
     ProjectLanguageTag:
       type: string
