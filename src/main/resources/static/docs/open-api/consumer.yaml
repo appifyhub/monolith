@@ -15,10 +15,10 @@ info:
     url: images/logo-text-white-small.png
     altText: Appify Hub Logo
 servers:
-  - url: https://api.appifyhub.com
-    description: Production environment
-  - url: http://staging.api.appifyhub.com
-    description: Staging environment
+  - url: https://api.cloud.appifyhub.com
+    description: Live environment
+  - url: http://staging.api.cloud.appifyhub.com
+    description: Pre-live environment
 
 paths:
 

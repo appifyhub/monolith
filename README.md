@@ -13,7 +13,7 @@
 
 ## About the project
 
-This repository contains the **complete** codebase of the [AppifyHub](https://appifyhub.com)'s monolith backend service.
+This repository contains the **complete** codebase of the [AppifyHub](https://www.appifyhub.com)'s monolith backend service.
 
 The service covers for the majority of everyday, user-facing features, such as: authentication, user management, email and messaging, access management, and other.
 
@@ -23,20 +23,20 @@ See the rest of this document for a developer's overview and information on how 
 
 This service runs as an API in two official places:
 
-  - [AppifyHub API](https://api.appifyhub.com)
-  - [_Staging_ AppifyHub API](http://staging.api.appifyhub.com) (no SSL)
+  - [AppifyHub API](https://api.cloud.appifyhub.com) (Live)
+  - [_Staging_ AppifyHub API](http://staging.api.cloud.appifyhub.com) (Pre-Live)
 
 The related API docs are located nearby too:
 
-  - [API Docs](https://api.appifyhub.com/docs/index.html)
-  - [_Staging_ API Docs](http://staging.api.appifyhub.com/docs/index.html) (no SSL)
+  - [API Docs](https://api.cloud.appifyhub.com/docs/index.html) (Live)
+  - [_Staging_ API Docs](http://staging.api.cloud.appifyhub.com/docs/index.html) (Pre-Live)
 
 The OpenAPI YAMLs are in the same place:
 
-  - [OpenAPI YAML for **Creators**](https://api.appifyhub.com/docs/open-api/creator.yaml)
-  - [OpenAPI YAML for **Consumers**](https://api.appifyhub.com/docs/open-api/consumer.yaml)
-  - [_Staging_ OpenAPI YAML for **Creators**](http://staging.api.appifyhub.com/docs/open-api/creator.yaml) (no SSL)
-  - [_Staging_ OpenAPI YAML for **Consumers**](http://staging.api.appifyhub.com/docs/open-api/consumer.yaml) (no SSL)
+  - [OpenAPI YAML for **Creators**](https://api.cloud.appifyhub.com/docs/open-api/creator.yaml) (Live)
+  - [OpenAPI YAML for **Consumers**](https://api.cloud.appifyhub.com/docs/open-api/consumer.yaml) (Live)
+  - [_Staging_ OpenAPI YAML for **Creators**](http://staging.api.cloud.appifyhub.com/docs/open-api/creator.yaml) (Pre-Live)
+  - [_Staging_ OpenAPI YAML for **Consumers**](http://staging.api.cloud.appifyhub.com/docs/open-api/consumer.yaml) (Pre-Live)
 
 ### AppifyHub SDK
 
@@ -52,7 +52,7 @@ You can find the SDK and its documentation here:
 
 If you plan on contributing to this project in any way, please read and acknowledge the [Contributing guide](./CONTRIBUTING.md) first.
 
-Please also take note of the [License](./LICENSE) and check the [Project Website](https://appifyhub.com) for general information.
+Please also take note of the [License](./LICENSE) and check the [Project Website](https://www.appifyhub.com) for general information.
 
 ## Developer's Overview
 
