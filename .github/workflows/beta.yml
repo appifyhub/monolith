@@ -15,7 +15,7 @@ jobs:
 
       - name: Print build name
         run: echo "$GITHUB_ACTOR is building '$GITHUB_REPOSITORY' (commit $GITHUB_SHA)"
-      
+
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -134,22 +134,3 @@ jobs:
           JOB="[${GITHUB_RUN_ID}](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
           NOTIFICATION="Build ${JOB} complete for ${GITHUB_SHA}.${NL}${NL}${CODE_BLOCK}${NL}"
           gh pr comment "$PR_NUMBER" -b "$NOTIFICATION"
-
-      - name: Deploy to staging
-        env:
-          DEPLOY_API: ${{ secrets.DEPLOY_API }}
-          DEPLOY_APP: ${{ secrets.DEPLOY_APP }}
-          DEPLOY_ARGS: ${{ secrets.DEPLOY_ARGS }}
-          DEPLOY_SPACE_STG: ${{ secrets.DEPLOY_SPACE_STG }}
-          DEPLOY_AUTH_STG: ${{ secrets.DEPLOY_AUTH_STG }}
-          DEPLOY_MODE: ${{ secrets.DEPLOY_MODE }}
-          DEPLOY_SPEC: ${{ secrets.DEPLOY_SPEC }}
-          DEPLOY_TAGS: ${{ secrets.DEPLOY_TAGS }}
-        run: |
-          CMD="${DEPLOY_SPEC}$(date +'%s')${DEPLOY_TAGS}"
-          URL_STG="${DEPLOY_API}/${DEPLOY_SPACE_STG}/deployments/${DEPLOY_APP}?${DEPLOY_ARGS}"
-          curl -s --location --request PATCH "${URL_STG}" --insecure \
-          --header "${DEPLOY_MODE}" \
-          --header "${DEPLOY_AUTH_STG}" \
-          --data-raw "${CMD}" \
-          > /dev/null
