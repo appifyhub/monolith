@@ -7,6 +7,19 @@
         <option name="name" value="CREATOR_OWNER_SECRET" />
         <option name="value" value="12345678!!!!!!!!abcdefgh" />
       </param>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="OTEL_SDK_DISABLED" />
+        <option name="value" value="true" />
+      </param>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="management.endpoint.env.keys-to-sanitize" />
+      </param>
+      <param>
+        <option name="enabled" value="true" />
+        <option name="name" value="management.endpoint.env.additional-keys-to-sanitize" />
+      </param>
     </additionalParameters>
     <module name="AppifyHub_Service.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.appifyhub.monolith.AppifyHubApplication" />
