@@ -1,3 +1,7 @@
+## DEPRECATED
+
+Please use [Supabase](https://supabase.com) as the new version of this product.
+
 ![License](https://img.shields.io/github/license/appifyhub/monolith?logo=github&logoColor=white&label=License&color=FA3080)
 ![Date](https://img.shields.io/github/release-date/appifyhub/monolith?display_date=published_at&logo=docker&logoColor=white&label=Released&color=FA3080)
 ![Release](https://img.shields.io/github/v/release/appifyhub/monolith?sort=semver&display_name=release&logo=github&logoColor=white&label=Latest&color=FA3080)  
